@@ -32,7 +32,9 @@ import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
 import useMediaQuery from "@/components/mixer/session/useMediaQuery";
 
 export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent, libraryTracks = [] }) {
-  const { state: djSession, setQueue, rejectDeckLoad, requestDeckLoad, requestTransport } = useDJSession();
+  const { state: djSession, scope, setQueue, rejectDeckLoad, requestDeckLoad, requestTransport } = useDJSession();
+  // Only a clocked-in DJ may remove tracks from their persona-tailored playlist.
+  const canDelete = !!scope?.operatorId && scope.operatorId !== "anonymous";
   const deckLoadRequest = djSession.pendingCommand;
   // ─── State hydration ───
   const [storageScope, setStorageScope] = useState(readMixerStorageScope);
@@ -426,6 +428,25 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
     emitTelemetry("ARCHIVE_TOGGLE", { songId, archived: !songs.find((s) => s.id === songId)?.archivedFlag });
   }, [songs]);
 
+  // Remove a track from the active (persona) playlist. Only the clocked-in DJ
+  // may do this — the SongCard disables the button and prompts to clock in
+  // when canDelete is false. The song is dropped from the local store only if
+  // no other profile still references it.
+  const handleDelete = useCallback((songId) => {
+    if (!activeProfile) return;
+    setProfiles((prev) => prev.map((p) =>
+      p.id === activeProfile.id ? { ...p, songIds: p.songIds.filter((id) => id !== songId) } : p
+    ));
+    setSongs((prev) => {
+      const usedElsewhere = profiles.some((p) => p.id !== activeProfile.id && p.songIds.includes(songId));
+      return usedElsewhere ? prev : prev.filter((s) => s.id !== songId);
+    });
+    if (playingSongId === songId) setPlayingSongId(null);
+    if (selectedSongId === songId) setSelectedSongId(null);
+    emitTelemetry("SONG_DELETE", { songId, profileId: activeProfile.id });
+    toast.success("Track removed from playlist");
+  }, [activeProfile, profiles, playingSongId, selectedSongId]);
+
   const handleUnarchive = useCallback((songId) => {
     setSongs((prev) => prev.map((s) => (s.id === songId ? { ...s, archivedFlag: false } : s)));
     emitTelemetry("ARCHIVE_TOGGLE", { songId, archived: false });
@@ -661,6 +682,8 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
             onFavorite={handleFavorite}
             onArchive={handleArchive}
             onEdit={(song) => { setEditingSong(song); setDialogMode(DialogMode.editSong); }}
+            onDelete={handleDelete}
+            canDelete={canDelete}
             onSelectSong={setSelectedSongId}
             onFocusZone={setFocusZone}
           />

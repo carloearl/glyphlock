@@ -2,7 +2,7 @@
  * SongCard - Individual track display with actions
  */
 import React from "react";
-import { Star, Archive, Play, SkipForward, ExternalLink, Copy, Pencil } from "lucide-react";
+import { Star, Archive, Play, SkipForward, ExternalLink, Copy, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import VibeBadge from "@/components/mixer/VibeBadge";
@@ -24,6 +24,8 @@ export default function SongCard({
   onFavorite,
   onArchive,
   onEdit,
+  onDelete,
+  canDelete = false,
   dragHandleProps,
 }) {
   const eColor = energyColor(song.energyLevel);
@@ -106,6 +108,16 @@ export default function SongCard({
         </Button>
         <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onEdit} title="Edit">
           <Pencil className="w-3.5 h-3.5 text-slate-500" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7"
+          disabled={!canDelete}
+          onClick={canDelete ? onDelete : () => toast.error("Clock in to delete tracks from your persona playlist")}
+          title={canDelete ? "Remove from this playlist" : "Clock in to delete"}
+        >
+          <Trash2 className={`w-3.5 h-3.5 ${canDelete ? "text-rose-400 hover:text-rose-300" : "text-slate-600"}`} />
         </Button>
         {hasPlayableSource && (
           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={openLink} title="Open link">

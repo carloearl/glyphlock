@@ -22,6 +22,8 @@ export default function SongDeck({
   onFavorite,
   onArchive,
   onEdit,
+  onDelete,
+  canDelete = false,
   onSelectSong,
   onFocusZone,
 }) {
@@ -106,6 +108,8 @@ export default function SongDeck({
                             onFavorite={() => onFavorite(song.id)}
                             onArchive={() => onArchive(song.id)}
                             onEdit={() => onEdit(song)}
+                            onDelete={() => onDelete(song.id)}
+                            canDelete={canDelete}
                             dragHandleProps={prov.dragHandleProps}
                           />
                         </div>
