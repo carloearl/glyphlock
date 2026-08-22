@@ -11,26 +11,45 @@ async function invokeAnonymous(name, body) {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(20_000),
   });
   const text = await response.text();
   let data = null;
   try { data = JSON.parse(text); } catch { data = { raw: text }; }
-  return { status: response.status, data };
+  return { status: response.status, data, text };
 }
 
 const terminalAdmin = await invokeAnonymous('manageVenueTerminal', { action: 'list' });
-assert.equal(terminalAdmin.status, 401, `manageVenueTerminal anonymous status ${terminalAdmin.status}: ${JSON.stringify(terminalAdmin.data)}`);
+assert.equal(terminalAdmin.status, 401, `manageVenueTerminal anonymous status ${terminalAdmin.status}: ${terminalAdmin.text.slice(0, 240)}`);
 assert.match(String(terminalAdmin.data?.error || ''), /Authentication required/i);
+assert.doesNotMatch(terminalAdmin.text, /terminal_id|venue_id|trusted|provisioned_by/i, 'Anonymous terminal denial leaked terminal metadata.');
 
-const playlistAdmin = await invokeAnonymous('manageEntertainerPlaylist', { action: 'capability' });
-assert.equal(playlistAdmin.status, 401, `manageEntertainerPlaylist anonymous status ${playlistAdmin.status}: ${JSON.stringify(playlistAdmin.data)}`);
-assert.match(String(playlistAdmin.data?.error || ''), /Authentication required/i);
+const djGateway = await invokeAnonymous('nupsDJGateway', { action: 'probePlaylistPermission', venue_id: 'dream_palace' });
+assert.equal(djGateway.status, 403, `nupsDJGateway anonymous status ${djGateway.status}: ${djGateway.text.slice(0, 240)}`);
+assert.match(String(djGateway.data?.error || ''), /Authorized DJ|manager identity|required/i);
+assert.doesNotMatch(djGateway.text, /playlist_id|ordered_tracks|entertainer_id/i, 'Anonymous DJ denial leaked playlist data.');
 
 const unknownId = `BATCH16-UNKNOWN-${Date.now()}`;
-const publicMode = await invokeAnonymous('nupsClockIn', { action: 'getPublicMode', terminal_id: unknownId });
-assert.equal(publicMode.status, 409, `Unknown terminal status ${publicMode.status}: ${JSON.stringify(publicMode.data)}`);
+const publicMode = await invokeAnonymous('nupsClockInV2', { action: 'getPublicMode', terminal_id: unknownId });
+assert.equal(publicMode.status, 409, `Unknown terminal status ${publicMode.status}: ${publicMode.text.slice(0, 240)}`);
 assert.match(String(publicMode.data?.error || ''), /Trusted terminal venue is not configured/i);
+assert.equal(publicMode.data?.terminal_state, 'unknown');
 assert.equal(publicMode.data?.venue, undefined, 'Unknown terminal response must not disclose a venue.');
 assert.equal(publicMode.data?.payment_provider, undefined, 'Unknown terminal response must not disclose payment configuration.');
 
-console.log('[check:nups-batch16-runtime-boundaries] passed: terminal and playlist admin endpoints require auth; unknown pre-auth terminals fail closed.');
+const unknownClockIn = await invokeAnonymous('nupsClockInV2', { action: 'clockIn', pin: '0000', terminal_id: unknownId });
+assert.equal(unknownClockIn.status, 409, `Unknown terminal clock-in status ${unknownClockIn.status}: ${unknownClockIn.text.slice(0, 240)}`);
+assert.equal(unknownClockIn.data?.code, 'TRUSTED_TERMINAL_REQUIRED');
+assert.doesNotMatch(unknownClockIn.text, /kiosk_session|shift_id|clocked_in_at/i, 'Unknown terminal issued a staff session.');
+
+const retiredNks1 = await invokeAnonymous('nupsClockIn', { action: 'retirementStatus' });
+assert.equal(retiredNks1.status, 410, `Retired NKS1 endpoint must return 410; got ${retiredNks1.status}: ${retiredNks1.text.slice(0, 240)}`);
+assert.equal(retiredNks1.data?.code, 'NKS1_ENDPOINT_RETIRED');
+assert.doesNotMatch(retiredNks1.text, /venue|payment_provider|kiosk_session|shift_id/i, 'Retired NKS1 endpoint leaked operational data.');
+
+const retiredPlaylist = await invokeAnonymous('manageEntertainerPlaylist', { action: 'capability' });
+assert.equal(retiredPlaylist.status, 410, `Retired playlist endpoint must return 410; got ${retiredPlaylist.status}: ${retiredPlaylist.text.slice(0, 240)}`);
+assert.equal(retiredPlaylist.data?.code, 'PLAYLIST_ENDPOINT_RETIRED');
+assert.doesNotMatch(retiredPlaylist.text, /playlist_id|ordered_tracks|entertainer_id|venue_id/i, 'Retired playlist endpoint leaked operational data.');
+
+console.log('[check:nups-batch16-runtime-boundaries] passed: admin endpoints deny anonymous access, unknown NKS2 terminals fail closed, and both retired endpoints return 410 Gone.');
