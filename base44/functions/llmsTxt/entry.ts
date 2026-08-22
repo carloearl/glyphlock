@@ -1,7 +1,6 @@
 /**
  * llms.txt endpoint — canonical AI/LLM discovery index for glyphlock.io
- * Claims-safe. No quantum, patent, "first binding", "revolutionary",
- * banking-grade, instant payout, or production-API claims.
+ * Claims-safe (retired strings enumerated in scripts/check-seo-metadata.mjs).
  * NUPS = Nexus Unified POS System. URLs use actual route casing.
  */
 
