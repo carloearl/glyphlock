@@ -26,6 +26,8 @@ export function drawBackground(g, W, H, t, frame, theme, mode, particles) {
 /* ─────────────── Spectrum visuals ─────────────── */
 
 export function drawVisual(g, W, H, t, frame, theme, mode, intensity) {
+  // Bail on zero/non-finite canvas dims so gradient radii can never go NaN.
+  if (!(W > 0) || !(H > 0) || !isFinite(W) || !isFinite(H)) return;
   const [c1, c2, c3] = theme.colors;
   const bands = frame.bands || [];
   const gain = intensity;

@@ -422,6 +422,9 @@ export const BG_PAINTERS = {
 };
 
 export function paintBackground(g, W, H, t, frame, theme, mode, particles) {
+  // Bail on zero/non-finite canvas dims — painters derive radii from W/H and
+  // would otherwise feed NaN into createRadialGradient (e.g. `x % (W*1.6)`).
+  if (!(W > 0) || !(H > 0) || !isFinite(W) || !isFinite(H)) return;
   const painter = BG_PAINTERS[mode];
   if (painter) painter(g, W, H, t, frame, theme, particles);
 }
