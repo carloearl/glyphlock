@@ -160,8 +160,9 @@ export default function SecurityTools() {
   return (
     <>
       <SEOHead
-        title="Developer Tools & Analysis | GlyphLock"
-        description="AI-powered utilities for code, blockchain, images, and system verification. Built for venues and developers who need real solutions."
+        title="GlyphLock Developer Tools | Code, Images, QR & Records"
+        description="Explore supported tools for code review, image and QR workflows, record inspection, site analysis, and venue operations with documented outputs."
+        keywords="GlyphLock developer tools, code review, image tools, QR tools, record inspection, site analysis, venue operations"
         url="/security-tools"
       />
 
