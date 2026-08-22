@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CloudUpload, Download, RefreshCw, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 import {
   loadCheckedInEntertainers,
   loadEntertainerPlaylist,
@@ -14,23 +15,29 @@ import {
 } from "@/lib/nups/entertainerPlaylists";
 
 export default function EntertainerPlaylistDock({ activeProfileName, profileSongs = [], onLoadPlaylist }) {
+  const activeVenue = useActiveVenue();
+  const venueId = activeVenue?.venue_id || activeVenue?.id || null;
   const [roster, setRoster] = useState([]);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState(null);
 
   const refresh = useCallback(async () => {
+    if (!venueId) {
+      setRoster([]);
+      return;
+    }
     setLoading(true);
     try {
-      const list = await loadCheckedInEntertainers();
+      const list = await loadCheckedInEntertainers(venueId);
       const withPlaylists = await Promise.all(list.map(async (person) => {
-        const playlist = await loadEntertainerPlaylist(person.entertainerId);
+        const playlist = await loadEntertainerPlaylist(person.entertainerId, venueId);
         return { ...person, trackCount: playlist?.ordered_tracks?.length || 0, playlistName: playlist?.name || "" };
       }));
       setRoster(withPlaylists);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [venueId]);
 
   useEffect(() => { refresh(); }, [refresh]);
 
@@ -45,6 +52,7 @@ export default function EntertainerPlaylistDock({ activeProfileName, profileSong
         entertainerId: person.entertainerId,
         name: activeProfileName || `${person.name} playlist`,
         songs: profileSongs,
+        venueId,
       });
       toast.success(`Saved ${profileSongs.length} tracks to ${person.name}`);
       await refresh();
@@ -58,7 +66,7 @@ export default function EntertainerPlaylistDock({ activeProfileName, profileSong
   const handleLoad = async (person) => {
     setBusyId(person.entertainerId);
     try {
-      const playlist = await loadEntertainerPlaylist(person.entertainerId);
+      const playlist = await loadEntertainerPlaylist(person.entertainerId, venueId);
       const songData = playlistToSongData(playlist);
       if (!songData.length) {
         toast.error(`${person.name} has no saved playlist yet`);
@@ -87,7 +95,7 @@ export default function EntertainerPlaylistDock({ activeProfileName, profileSong
       <div className="overflow-y-auto max-h-56 p-2 space-y-1">
         {!loading && roster.length === 0 && (
           <p className="text-[11px] text-slate-500 text-center py-4">
-            No entertainers checked in.<br />Playlists appear here at check-in.
+            {venueId ? <>No entertainers checked in.<br />Playlists appear here at check-in.</> : <>Select an active venue to use entertainer playlists.</>}
           </p>
         )}
         {roster.map((person) => (
