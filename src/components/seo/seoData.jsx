@@ -1,30 +1,43 @@
 export const SEO_DATA = {
   // --- CORE PAGES ---
   "Home": {
-    title: "GlyphLock | Custom Software, NUPS, AI & Verification Workflows",
-    description: "GlyphLock LLC builds custom software, NUPS venue operations, QR and verification workflows, AI-assisted tools, image systems, governance tooling, and operational integrations.",
-    keywords: ["GlyphLock", "custom software", "NUPS", "venue operations", "QR verification", "AI workflows", "systems integration", "GlyphBot", "Image Lab"],
+    title: "GlyphLock | Evidence Infrastructure, NUPS & Secure Workflows",
+    description: "GlyphLock connects secure image carriers, QR verification, AI-assisted tools, NUPS venue operations, financial records, governance, and authorized integrations.",
+    keywords: ["GlyphLock", "evidence infrastructure", "NUPS", "secure QR", "interactive images", "GlyphBot", "automated DJ", "venue operations software", "identity verification workflows", "financial recordkeeping", "API integration", "governance"],
     h1: "Build. Verify. Operate.",
     url: "/",
-    ogTitle: "GlyphLock | Build. Verify. Operate.",
-    ogDescription: "Custom software, NUPS venue operations, QR verification, AI-assisted workflows, and connected operating systems.",
+    ogTitle: "GlyphLock | Evidence Infrastructure for Connected Operations",
+    ogDescription: "Secure carriers, assisted intelligence, venue operations, value records, integrations, and governance connected through one evidence architecture.",
     schemaType: "Organization",
     priority: 1.0,
     changefreq: "daily",
-    internalLinks: ["/master-covenant", "/pricing", "/consultation", "/security-tools"]
+    internalLinks: ["/about", "/SecureQRStudio", "/GlyphBot", "/NUPSLanding", "/Services", "/Consultation"]
   },
   "About": {
-    title: "About GlyphLock | From Images to Verifiable Operations",
-    description: "Discover how GlyphLock connects concealed-image data, 91 QR payloads, GlyphBot, NUPS, GlyphBucks, ledgers, governance, and OHIP through one evidence architecture.",
-    keywords: ["GlyphLock", "evidence infrastructure", "evidence architecture", "concealed image data", "LSB steganography", "secure QR", "91 QR payloads", "interactive images", "GlyphBot", "AI site builder", "automated DJ", "NUPS", "venue operations software", "GlyphBucks", "closed-loop stored value", "operational ledgers", "OpenTimestamps", "Master Covenant", "Oracle PartnerNetwork", "OHIP integration", "Dream Palace", "Carlo Rene Earl", "El Mirage Arizona"],
+    title: "About GlyphLock | Evidence Infrastructure & NUPS",
+    description: "Explore GlyphLock’s evidence architecture across secure image carriers, 91 QR payloads, GlyphBot, automated DJ, NUPS, GlyphBucks, APIs, governance, and leadership.",
+    keywords: ["GlyphLock", "evidence infrastructure", "provenance architecture", "secure image carriers", "concealed image data", "LSB steganography", "interactive images", "Secure QR Studio", "QR code SDK", "91 QR payload types", "GlyphBot", "automated DJ", "NUPS", "Nexus Unified POS System", "venue operations software", "identity verification workflows", "digital contracts", "GlyphBucks", "closed-loop value ledger", "reconciliation software", "API integration", "SDK integration", "OHIP integration", "hospitality interoperability", "audit trails", "human-governed AI", "Carlo Rene Earl", "Jacub Lough", "Collin Vanderginst", "El Mirage Arizona"],
     h1: "What If an Image Could Carry Proof?",
     url: "/about",
-    ogTitle: "It Started With an Image. Now Every Layer Can Prove Its Work.",
-    ogDescription: "Explore the complete GlyphLock architecture: image carriers, Secure QR, GlyphBot, NUPS, GlyphBucks, ledgers, governance, timestamp evidence, hardware, and authorized integrations.",
+    ogTitle: "From Image Carriers to Verifiable Operations | GlyphLock",
+    ogDescription: "See how Secure QR, interactive and concealed-image systems, GlyphBot, automated DJ, NUPS, value records, integrations, governance, and leadership fit together.",
     schemaType: "AboutPage",
     priority: 0.9,
     changefreq: "weekly",
-    internalLinks: ["/SecureQRStudio", "/ImageLab", "/GlyphBot", "/GlyphBotMixer", "/NUPSLanding", "/GlyphLockFinancialPage", "/GovernanceHub", "/SecurityOperationsCenter", "/SDKDocs", "/consultation"]
+    internalLinks: ["/SecureQRStudio", "/ImageLab", "/InteractiveImageStudio", "/GlyphBot", "/GlyphBotMixer", "/NUPSLanding", "/GlyphLockFinancial", "/GovernanceHub", "/SecurityOperationsCenter", "/SDKDocs", "/AboutCarlo", "/Consultation"]
+  },
+  "AboutCarlo": {
+    title: "Carlo Rene Earl | GlyphLock Founder & Product Architect",
+    description: "Meet Carlo Rene Earl, GlyphLock’s founder and product architect, whose music, DJ, venue, security, and operations experience shaped the company’s evidence systems.",
+    keywords: ["Carlo Rene Earl", "GlyphLock founder", "GlyphLock product architect", "Arizona technology founder", "evidence infrastructure", "secure image carriers", "Secure QR Studio", "NUPS architecture", "venue operations technology", "nightclub DJ technology", "creative systems", "El Mirage Arizona"],
+    h1: "Carlo Rene Earl — Founder and Product Architect",
+    url: "/about-carlo",
+    ogTitle: "Carlo Rene Earl — Founder and Product Architect of GlyphLock",
+    ogDescription: "The founder story behind GlyphLock’s image carriers, Secure QR, GlyphBot, NUPS, value records, integrations, and governed evidence architecture.",
+    schemaType: "ProfilePage",
+    priority: 0.8,
+    changefreq: "monthly",
+    internalLinks: ["/about", "/SecureQRStudio", "/ImageLab", "/NUPSLanding", "/GovernanceHub", "/Consultation"]
   },
   "Pricing": {
     title: "Enterprise Security Plans | GlyphLock LLC",
@@ -338,17 +351,17 @@ export const SEO_DATA = {
     internalLinks: ["/site-builder", "/security-operations-center"]
   },
   "DreamTeam": {
-    title: "Leadership Team | GlyphLock LLC",
-    description: "Meet the GlyphLock Security leadership team building enterprise post-quantum cybersecurity architecture and AI governance frameworks.",
-    keywords: ["GlyphLock team", "cybersecurity leadership", "enterprise security founders"],
-    h1: "GlyphLock Security Leadership",
+    title: "GlyphLock Leadership | Carlo Earl, Jacub Lough & Collin Vanderginst",
+    description: "Meet GlyphLock’s leadership team: Carlo Rene Earl across product and venue operations, Jacub Lough across finance and strategy, and Collin Vanderginst across engineering and systems.",
+    keywords: ["GlyphLock leadership", "Carlo Rene Earl", "Jacub Lough", "Collin Vanderginst", "technology leadership", "venue operations leadership", "financial strategy", "systems engineering", "evidence infrastructure"],
+    h1: "Three Disciplines. Direct Responsibility.",
     url: "/dream-team",
-    ogTitle: "Leadership Team | GlyphLock LLC",
-    ogDescription: "The team building enterprise post-quantum security architecture.",
+    ogTitle: "Meet the GlyphLock Leadership Team",
+    ogDescription: "Product and venue operations, finance and commercial strategy, and systems engineering united behind GlyphLock’s evidence infrastructure.",
     schemaType: "AboutPage",
     priority: 0.7,
     changefreq: "monthly",
-    internalLinks: ["/about", "/partners"]
+    internalLinks: ["/about#leadership", "/AboutCarlo", "/Partners"]
   },
   "NISTChallenge": {
     title: "NIST Post-Quantum Standards Alignment | GlyphLock LLC",
@@ -436,13 +449,13 @@ export const SEO_DATA = {
 
 export const getSeoData = (pageName) => {
   return SEO_DATA[pageName] || {
-    title: "GlyphLock | Custom Software & Operations Systems",
-    description: "GlyphLock LLC builds custom software, NUPS venue operations, QR verification, AI-assisted workflows, image tools, governance tooling, and systems integrations.",
-    keywords: ["GlyphLock", "custom software", "NUPS", "QR verification", "AI workflows", "systems integration"],
+    title: "GlyphLock | Evidence Infrastructure & Connected Operations",
+    description: "GlyphLock connects secure carriers, assisted intelligence, venue operations, financial records, integrations, and governance through one evidence architecture.",
+    keywords: ["GlyphLock", "evidence infrastructure", "NUPS", "secure QR", "GlyphBot", "venue operations software", "API integration", "governance"],
     h1: "GlyphLock Platform",
     url: "/",
-    ogTitle: "GlyphLock LLC",
-    ogDescription: "Custom software, NUPS venue operations, QR verification, AI-assisted workflows, and connected operating systems.",
+    ogTitle: "GlyphLock LLC | Evidence Infrastructure",
+    ogDescription: "Secure carriers, assisted intelligence, venue operations, value records, integrations, and governance connected through one architecture.",
     schemaType: "WebSite",
     priority: 0.5,
     internalLinks: []
