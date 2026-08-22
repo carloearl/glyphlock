@@ -96,11 +96,15 @@ Deno.serve(async (req) => {
 
     const requestedVenueId = String(body.venue_id || "").trim();
     const globalRole = GLOBAL_ROLES.has(operator.role);
-    let venueId = String(operator?.venue_id || "").trim() || null;
+    const boundVenueId = String(operator?.venue_id || "").trim() || null;
+    // Global roles (PLATFORM_ADMIN / SOVEREIGN) may target any active venue the
+    // client selects. Bound roles (DJ / VENUE_MANAGER) are pinned to their own
+    // venue — a client-supplied venue_id that conflicts is ignored (not a 403)
+    // so a stale localStorage active-venue on the operator's device never
+    // breaks playlist access. The server still enforces the bound venue, so
+    // a bound operator cannot read or write another venue's data.
+    let venueId = boundVenueId;
     if (globalRole && requestedVenueId) venueId = requestedVenueId;
-    if (!globalRole && requestedVenueId && venueId !== requestedVenueId) {
-      return Response.json({ error: "DJ operation is bound to another venue." }, { status: 403 });
-    }
     if (VENUE_REQUIRED_ACTIONS.has(action) && !venueId) {
       return Response.json({ error: "Active venue is required for playlist operations." }, { status: 400 });
     }
