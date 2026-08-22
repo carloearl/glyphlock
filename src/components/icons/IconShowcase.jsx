@@ -82,7 +82,7 @@ export default function IconShowcase() {
           <FeatureCard
             icon="blockchain"
             title="Blockchain Proof"
-            description="Immutable verification using quantum-resistant cryptography."
+            description="Traceable verification using hashes, timestamps, and recorded provenance context."
             action={
               <Button className="w-full bg-gradient-to-r from-purple-600 to-pink-600">
                 Verify
