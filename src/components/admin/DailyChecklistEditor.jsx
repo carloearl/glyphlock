@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Save, AlertCircle, CheckCircle2, Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { writeEntity } from '@/lib/nups/writeEntity';
 
 function uid() {
   return `q_${Math.random().toString(36).slice(2, 9)}`;
@@ -69,20 +70,47 @@ export default function DailyChecklistEditor({ venueId, user }) {
     setSaving(true);
     setMsg(null);
     try {
-      const items = (config.items || []).map((it, idx) => ({ ...it, order: idx, id: it.id || uid() }));
+      if (!venueId) throw new Error('Select an active venue before saving the checklist.');
+      if (!user?.email) throw new Error('Authenticated actor is required.');
+
+      const recordVenueId = config.id ? String(config.venue_id || '').trim() : String(venueId).trim();
+      if (!recordVenueId) throw new Error('Checklist venue could not be resolved.');
+      if (config.id && recordVenueId !== String(venueId).trim()) {
+        throw new Error('Checklist belongs to another venue. Reload the correct venue before editing.');
+      }
+
+      const items = (config.items || []).map((it, idx) => ({
+        id: it.id || uid(),
+        label: String(it.label || '').trim(),
+        required: it.required !== false,
+        order: idx,
+      }));
+      if (items.some((item) => !item.label)) throw new Error('Every checklist item must have a label.');
+
       const payload = {
-        ...config,
+        venue_id: recordVenueId,
         items,
-        venue_id: venueId,
+        active: config.active !== false,
+        notes: config.notes || '',
         last_edited_by: user.email,
         last_edited_at: new Date().toISOString(),
       };
-      if (config.id) {
-        await base44.entities.DailyChecklistConfig.update(config.id, payload);
-      } else {
-        const created = await base44.entities.DailyChecklistConfig.create(payload);
-        setConfig(c => ({ ...c, id: created.id }));
-      }
+      const result = await writeEntity({
+        entity: 'DailyChecklistConfig',
+        operation: config.id ? 'update' : 'create',
+        id: config.id || undefined,
+        data: payload,
+        actor: {
+          email: user.email,
+          id: user.id,
+          role: user._highestRole || user.role || 'External',
+        },
+        venue_id: recordVenueId,
+        intent: config.id ? 'DAILY_CHECKLIST_CONFIG_UPDATE' : 'DAILY_CHECKLIST_CONFIG_CREATE',
+      });
+      if (!result?.ok) throw new Error(result?.block_reason || 'Checklist write was rejected.');
+      const saved = result.value;
+      setConfig((current) => ({ ...current, ...payload, ...(saved || {}), id: saved?.id || current.id }));
       setMsg({ kind: 'ok', text: 'Checklist saved.' });
     } catch (e) {
       setMsg({ kind: 'err', text: e.message });
