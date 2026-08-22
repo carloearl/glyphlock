@@ -496,7 +496,10 @@ Deno.serve(async (req) => {
       : ((await E.Venue.filter({ venue_id: nupsUser.venue_id, status: 'active' }, null, 1).catch(() => []))?.[0]
         || await E.Venue.get(nupsUser.venue_id).catch(() => null));
     if (!assignedVenue || assignedVenue.status === 'inactive') return genericAuthFailure('venue_scope_denied');
-    if (terminalVenueId && nupsUser.venue_id !== terminalVenueId && nupsUser.venue_id !== DEMO_VENUE_ID) return genericAuthFailure('terminal_venue_mismatch');
+    if (terminalVenueId && nupsUser.venue_id !== terminalVenueId && nupsUser.venue_id !== DEMO_VENUE_ID) {
+      await logTerminalBoundary('TERMINAL_VENUE_MISMATCH', `User venue ${nupsUser.venue_id} does not match terminal venue ${terminalVenueId}`);
+      return genericAuthFailure('terminal_venue_mismatch');
+    }
     const ws = WORKSPACE_BY_ROLE[nupsUser.role];
     if (!ws) return genericAuthFailure('workspace_not_assigned');
     await logAttempt('pin_auth', true, 'authenticated');
