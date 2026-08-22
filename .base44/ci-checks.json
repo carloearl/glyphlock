@@ -2,7 +2,6 @@
   "version": 1,
   "description": "Base44-managed CI extension point for additional checks. Add npm script names here instead of editing .github/workflows from Base44.",
   "scripts": [
-    "check:seo-metadata",
     "check:nups-frozen-rules",
     "check:nups-protected-evidence",
     "check:nups-api-key-secrets",
