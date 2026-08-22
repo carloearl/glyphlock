@@ -25,7 +25,7 @@ function extractVideoId(url) {
 // what the on-screen slider shows and what mute/unmute must preserve. Mixing the
 // two silences the deck: writing the crossfaded value back as the base volume
 // collapses to 0 as soon as the crossfader moves or mute is toggled.
-const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVolume = 1, muted, onVolumeChange, onEnded, onDropSong, onDropExternalSong, onPlaybackError, autoPlay = true }, ref) {
+const PlayerDeck = forwardRef(function PlayerDeck({ song, label, deckId, volume, baseVolume = 1, muted, onVolumeChange, onEnded, onDropSong, onDropExternalSong, onPlaybackError, onProviderState, autoPlay = true }, ref) {
   const [dragOver, setDragOver] = useState(false);
   const [audioEl, setAudioEl] = useState(null);
   const [fxOpen, setFxOpen] = useState(false);
@@ -160,6 +160,7 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVol
           muted={muted}
           onEnded={onEnded}
           onError={onPlaybackError}
+          onHealth={(event) => onProviderState?.({ ...event, deck: deckId })}
         />
       ) : isUpload ? (
         <div className="flex flex-col">
@@ -205,7 +206,20 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, volume, baseVol
               autoPlay={autoPlay}
               externalVolume={volume}
               onEnded={onEnded}
-              onAudioElement={setAudioEl}
+              onAudioElement={(element) => {
+                setAudioEl(element);
+                if (element) onProviderState?.({
+                  deck: deckId,
+                  source: "direct",
+                  sourceId: song.id,
+                  providerState: "READY",
+                  position: element.currentTime || 0,
+                  duration: Number.isFinite(element.duration) ? element.duration : 0,
+                  effectiveVolume: volume,
+                  muted,
+                  visibility: document.visibilityState,
+                });
+              }}
               onError={onPlaybackError}
             />
           </div>
