@@ -293,65 +293,81 @@ The APIKey entity persists `secret_key_hash`, public key, environment, status, p
 
 ---
 
-## NUPS-0013 — Trusted venue terminal registry is not provisioned on physical devices
+## NUPS-0013 — Physical venue devices require one-time commissioning
 
 **Severity:** HIGH  
 **Invariant:** INV-05 / INV-07  
-**Status:** OPEN — REAL DEVICE APPROVAL PENDING
+**Status:** CONTROL COMPLETE — REAL DEVICE COMMISSIONING PENDING
 
 ### Expected
-Every production kiosk/station that needs pre-authentication venue context has an admin-provisioned, active, trusted `VenueTerminal` record. Unknown, inactive, untrusted, revoked or unbound terminal IDs fail closed.
+Every production kiosk/station that needs pre-authentication venue context has an admin-approved `VenueTerminal` record whose exact device ID is assigned to the correct venue with `status = active` and `trusted = true`. Unknown, inactive, untrusted, revoked or unbound device IDs fail closed before PIN verification.
 
-### Batch 16 implementation
-Batch 16 added the authenticated `manageVenueTerminal` backend and mounted `TerminalManagementEditor` in Venue Admin Settings. Authorized managers can list, provision, edit, activate, deactivate and revoke terminals without hard-deleting security history. Browser-generated IDs remain untrusted until an authorized manager explicitly approves them. Provisioning, trust changes and revocation produce explicit `SystemAuditLog` events.
+### Batch 16 resolution
+Batch 16 completed the terminal trust control:
 
-The supported application path now uses `nupsClockInV2` and NKS2 sessions. All frontend and backend callers were cut over. The NUPSUser PIN lookup index was migrated from `pin_lookup` to `pin_lookup_v2`, and the legacy field was removed from schema and records so the stale NKS1 implementation cannot authenticate ordinary staff PINs.
+- `manageVenueTerminal` is the only terminal-administration write boundary;
+- administration requires an authenticated owner, venue manager, platform administrator or sovereign identity;
+- cross-venue administration is denied for non-global roles;
+- pending registration is distinct from approval;
+- `Approve This Device` / `Approve & Activate` records explicit server-side trust;
+- deactivation removes trust without deleting history;
+- revocation is preserved and cannot be silently reversed through the normal manager workflow;
+- registration, approval, trust changes, deactivation and revocation create security audit events;
+- the duplicate terminal-management panel was removed;
+- the kiosk explains an unapproved device, displays its non-secret ID, and permits an approval re-check without treating the condition as a bad PIN;
+- the legacy TimeClock now sends the canonical device ID;
+- `VenuePaymentConfig.terminal_id` no longer confers device trust. `VenueTerminal` is the sole pre-authentication device-to-venue boundary.
+
+### Meaning of “approved”
+A browser or terminal stores a stable, non-secret ID such as `NUPS-TERM-<uuid>`. Approval means an authorized manager has matched that exact ID to the physical station and venue, then caused the server to store:
+
+```text
+VenueTerminal.terminal_id = exact device ID
+VenueTerminal.venue_id    = selected venue
+VenueTerminal.status      = active
+VenueTerminal.trusted     = true
+```
+
+Merely opening NUPS, copying an ID or knowing an employee PIN grants no terminal trust.
 
 ### Runtime evidence
-A clearly marked synthetic SANDBOX terminal was used to prove:
+Batch 16 proves:
 
-- trusted active terminal → public mode succeeds
-- unknown terminal → 409 fail-closed
-- inactive terminal → 403
-- untrusted terminal → 403
-- revoked terminal → 403
-- PIN authentication from an unknown terminal is blocked before PIN verification
-- anonymous stale-shift sweep on NKS2 is denied
+- trusted active terminal → public mode succeeds;
+- unknown terminal → HTTP 409 and no venue/payment disclosure;
+- inactive terminal → HTTP 403;
+- untrusted terminal → HTTP 403;
+- revoked terminal → HTTP 403;
+- unknown-terminal clock-in is blocked before PIN verification;
+- anonymous terminal administration is denied;
+- anonymous stale-shift sweep on NKS2 is denied.
 
-The synthetic record is permanently revoked and cannot establish venue trust. The deployed terminal-management endpoint also rejects anonymous access.
+The synthetic verification terminal remains permanently revoked and untrusted.
 
-### Remaining resolution
-No real physical terminal is currently registered as active and trusted. Provision the actual door, clock, DJ, manager, scanner, VIP and kiosk device IDs through the new owner/admin UI. After all deployed stations are represented in `VenueTerminal`, remove the temporary `VenuePaymentConfig.terminal_id` compatibility fallback.
+### Operational commissioning remaining
+No real physical venue terminal has been falsely registered from this engineering environment. The exact ID is generated and stored in each physical browser/device, so each real front-door, clock, DJ, manager, scanner, VIP and kiosk station must be commissioned once from that device or by copying its displayed ID into **Venue Admin Settings → Terminals**. This is an installation action, not unfinished Batch 16 code.
 
 ---
 
-## NUPS-0014 — Retired NKS1 function remains registered until explicit deployment
+## NUPS-0014 — Legacy NKS1 clock-in endpoint retirement
 
 **Severity:** HIGH  
 **Invariant:** Security / operational availability boundary  
-**Status:** OPEN — PLATFORM FUNCTION RETIREMENT DEPLOYMENT REQUIRED
+**Status:** RESOLVED — DEPLOYED 410 TOMBSTONE VERIFIED
 
-### Expected
-The legacy `nupsClockIn` resource returns an explicit HTTP 410 tombstone. All supported authentication and session traffic uses `nupsClockInV2`, `pin_lookup_v2`, and NKS2 tokens.
+### Resolution
+All supported authentication and session traffic uses `nupsClockInV2`, `pin_lookup_v2` and NKS2 tokens. Every supported caller of `nupsClockIn` was removed, populated PIN lookup indexes were migrated, the legacy schema field was removed, and the old function was replaced by a non-operational tombstone.
 
-### Observed
-Batch 16 removed every supported frontend/backend invocation of `nupsClockIn`, migrated all populated PIN lookup values to `pin_lookup_v2`, removed the legacy field from the NUPSUser schema, and placed a 410 tombstone at `base44/functions/nupsClockIn/entry.ts`.
-
-The Base44 preview runtime continues serving the previously registered NKS1 implementation until an explicit function deployment occurs. A deployed probe still received the old `Unknown action` response, and the historical anonymous `sweepStale` action remained reachable. Ordinary staff PIN authentication is contained because the lookup field used by NKS1 no longer exists in schema or records, and the runtime probe confirms the old route does not issue an ordinary PIN session.
-
-### Risk
-The old resource cannot resolve ordinary staff PINs after the index migration, but its stale public maintenance and mode endpoints remain remotely addressable until the platform resource is replaced. This is avoidable legacy attack surface and operational ambiguity.
-
-### Required resolution
-During an explicitly authorized Base44 function deployment, deploy the repository tombstone for `nupsClockIn`. Verify:
+### Deployed evidence
+The permanent runtime probe now verifies:
 
 ```text
-any action → HTTP 410
+nupsClockIn(any action) → HTTP 410
 code = NKS1_ENDPOINT_RETIRED
 no venue/payment/session/shift data returned
 ```
 
-Then keep the permanent runtime assertion in CI and close this issue. Production publishing was explicitly prohibited during Batch 16, so this deployment was not forced from the current run.
+The old anonymous maintenance and public-mode behavior is no longer available through NKS1. CI retains both source-level and deployed-runtime assertions so the endpoint cannot quietly grow operational logic again, humanity’s traditional method of resurrecting retired systems.
 
 ---
 
