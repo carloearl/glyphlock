@@ -9,7 +9,7 @@ export default function SecurityDocs() {
     {
       icon: Shield,
       title: "Encryption Standards",
-      description: "AES-256 encryption for data at rest and TLS 1.3 for data in transit. Cryptographic operations are structured to align with NIST standards and quantum-resistant algorithms.",
+      description: "Documented encryption controls use supported platform and provider capabilities. Exact algorithms, key handling, and transport settings depend on the deployed service and configuration.",
       badge: "AES-256"
     },
     {
@@ -27,8 +27,8 @@ export default function SecurityDocs() {
     {
       icon: FileText,
       title: "Compliance",
-      description: "GDPR aligned, CCPA ready, and structured to support ISO 27001 alignment. Regular third-party security audits and penetration testing.",
-      badge: "GDPR Aligned"
+      description: "Privacy and security frameworks are treated as scope-dependent references and design targets. Certification or independent attestation is claimed only when specifically documented.",
+      badge: "Scope Dependent"
     }
   ];
 
