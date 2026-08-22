@@ -99,7 +99,7 @@ export default function ClubTV() {
             : "absolute inset-0 h-px w-px overflow-hidden opacity-0 pointer-events-none"
           }>
             <YouTubePlayer
-              key={videoId /* keep source audio live while visuals are showing */}
+              key={videoId /* stable muted visual source; booth owns audible playback */}
               videoId={videoId}
               autoPlay
               volume={0}
