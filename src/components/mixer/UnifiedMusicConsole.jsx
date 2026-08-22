@@ -149,6 +149,7 @@ function UnifiedMusicConsoleInner() {
   const handlePlaybackEvent = useCallback((event) => {
     if (!event) return;
     setPlayHistory((previous) => [...previous, event].slice(-20));
+    if (event.type === "pause") return;
 
     // Only entity-backed tracks enter persistent learning analytics. Local-only
     // scratch tracks still work in the mixer but cannot poison Track analytics
