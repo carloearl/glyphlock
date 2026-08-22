@@ -15,6 +15,7 @@ import { uploadProtectedEvidence } from "@/lib/nups/protectedEvidence";
 import ContractorAgreementBlock from "./ContractorAgreementBlock";
 import { ENTERTAINER_CLICKWRAP } from "@/constants/entertainerClickwrap";
 import { generateUniquePin } from "@/lib/nups/entertainerPin";
+import PersonAutofill from "@/components/nups/PersonAutofill";
 
 /**
  * EntertainerIdOnboardPanel — onboard an adult entertainer's credential.
@@ -47,6 +48,23 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const status = licenseStatus({ license_expiration: form.license_expiration });
+
+  const autofillPerson = (p) => {
+    if (!p) return;
+    setForm((f) => ({
+      ...f,
+      legal_name: p.full_name || f.legal_name,
+      stage_name: f.stage_name || p.stage_name || p.full_name || "",
+      phone: p.phone || f.phone,
+      date_of_birth: p.dob || f.date_of_birth,
+      license_state: p.license_state || f.license_state,
+      license_number_last4: p.license_last4 || f.license_number_last4,
+      license_expiration: p.id_expiration || f.license_expiration,
+      id_type: p.id_type || f.id_type,
+    }));
+    setScanned(true);
+    toast.success(`Autofilled from ${p.source}`);
+  };
 
   useHardwareScanner((raw) => {
     const parsed = parseAAMVA(raw);
@@ -200,6 +218,8 @@ export default function EntertainerIdOnboardPanel({ venueId, user, existing = []
             </Badge>
           )}
         </div>
+
+        <PersonAutofill venueId={venueId} onPick={autofillPerson} label="Autofill from existing person" />
 
         {issuedPin && (
           <div className="rounded-lg border border-emerald-500/40 bg-emerald-950/30 p-3 flex items-center justify-between gap-3">
