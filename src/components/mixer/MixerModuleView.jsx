@@ -31,7 +31,7 @@ import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
 import useMediaQuery from "@/components/mixer/session/useMediaQuery";
 
 export default function MixerModuleView({ autoDj = false, automationPlan = null, onPlaybackEvent, libraryTracks = [] }) {
-  const { state: djSession, setQueue, rejectDeckLoad } = useDJSession();
+  const { state: djSession, setQueue, rejectDeckLoad, requestDeckLoad } = useDJSession();
   const deckLoadRequest = djSession.pendingCommand;
   // ─── State hydration ───
   const [songs, setSongs] = useState(() => loadSongs());
@@ -216,6 +216,16 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
       at: Date.now(),
     });
   }, [onPlaybackEvent]);
+
+  const handleLibraryDeckLoad = useCallback((song, targetDeck) => {
+    if (!song?.id) return;
+    requestDeckLoad({
+      requestId: `library-${Date.now()}-${targetDeck}-${Math.random().toString(36).slice(2, 6)}`,
+      targetDeck,
+      song,
+      entityTrackId: song._entityTrackId || null,
+    });
+  }, [requestDeckLoad]);
 
   // Queue one or many library tracks into the active playlist (profile).
   // With no profile yet, a "House Playlist" is created automatically so
@@ -647,6 +657,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
                   onPlay={handleLibraryPlay}
                   onQueue={handleQueueSongs}
                   onQueueAll={handleQueueSongs}
+                  onLoadDeck={handleLibraryDeckLoad}
                 />
               ) : rightTab === "search" ? (
                 <MusicSearchPanel
