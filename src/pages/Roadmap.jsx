@@ -78,7 +78,7 @@ const lanes = [
       ['Enterprise SDK and integration packaging', 'planned'],
       ['Expanded identity and hardware integration options', 'planned'],
       ['Internationalization and deployment-region support', 'planned'],
-      ['Post-quantum migration experiments aligned to applicable standards', 'planned'],
+      ['Cryptographic migration experiments aligned to applicable standards', 'planned'],
     ],
   },
 ];
