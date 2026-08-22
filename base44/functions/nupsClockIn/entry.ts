@@ -59,22 +59,63 @@ Deno.serve(async (req) => {
     const rawTerminalId = String(body.terminal_id || req.headers.get('x-nups-terminal-id') || 'unidentified');
     const terminalId = rawTerminalId.replace(/[^A-Za-z0-9._:-]/g, '').slice(0, 120) || 'unidentified';
     const throttleResourceId = `pin_auth:${terminalId !== 'unidentified' ? terminalId : ip}`;
-    const trustedTerminal = terminalId !== 'unidentified'
-      ? ((await E.VenueTerminal.filter({ terminal_id: terminalId, status: 'active', trusted: true }, '-created_date', 1).catch(() => []))?.[0] || null)
+    const terminalRecord = terminalId !== 'unidentified'
+      ? ((await E.VenueTerminal.filter({ terminal_id: terminalId }, '-created_date', 1).catch(() => []))?.[0] || null)
       : null;
-    const legacyPaymentTerminal = !trustedTerminal && terminalId !== 'unidentified'
+    const trustedTerminal = terminalRecord && terminalRecord.status === 'active' && terminalRecord.trusted === true
+      ? terminalRecord
+      : null;
+    // Compatibility is allowed only when no VenueTerminal record exists at all.
+    // An explicit inactive/revoked/untrusted record must never fall through to a
+    // payment-terminal binding and accidentally regain trust.
+    const legacyPaymentTerminal = !terminalRecord && terminalId !== 'unidentified'
       ? ((await E.VenuePaymentConfig.filter({ terminal_id: terminalId, active: true }, '-created_date', 1).catch(() => []))?.[0] || null)
       : null;
-    // Batch 15 migration compatibility: VenueTerminal is canonical. Existing payment-terminal bindings remain accepted
-    // until explicitly provisioned into VenueTerminal so deployed kiosks fail closed rather than breaking mid-migration.
     const terminalVenueId = String(trustedTerminal?.venue_id || legacyPaymentTerminal?.venue_id || '').trim() || null;
     const terminalBindingSource = trustedTerminal ? 'venue_terminal' : legacyPaymentTerminal ? 'legacy_payment_terminal' : null;
+    const terminalState = trustedTerminal
+      ? 'trusted_active'
+      : terminalRecord?.status === 'revoked'
+        ? 'revoked'
+        : terminalRecord?.status === 'inactive'
+          ? 'inactive'
+          : terminalRecord && terminalRecord.trusted !== true
+            ? 'untrusted'
+            : legacyPaymentTerminal
+              ? 'legacy_payment_terminal'
+              : 'unknown';
+    const logTerminalBoundary = async (eventType, reason, severity = 'high') => {
+      await E.SystemAuditLog.create({
+        event_type: eventType,
+        description: `${reason} terminal=${terminalId}`,
+        actor_email: 'preauth-terminal',
+        resource_id: terminalId,
+        status: 'security_action',
+        severity,
+        metadata: {
+          terminal_id: terminalId,
+          terminal_state: terminalState,
+          terminal_venue_id: terminalRecord?.venue_id || legacyPaymentTerminal?.venue_id || null,
+          binding_source: terminalBindingSource,
+          ip_address: ip,
+        },
+      }).catch(() => null);
+    };
 
     // Safe pre-authentication mode indicator. This exposes no roster, secret,
     // credential or payment identifier; it only lets the public kiosk display
     // the authoritative operating boundary before a PIN is entered.
     if (action === 'getPublicMode') {
-      if (!terminalVenueId) return Response.json({ error: 'Trusted terminal venue is not configured.' }, { status: 409 });
+      if (!terminalVenueId) {
+        const eventType = terminalState === 'unknown' ? 'UNKNOWN_TERMINAL_BLOCKED' : 'TERMINAL_ACCESS_BLOCKED';
+        await logTerminalBoundary(eventType, `Pre-auth venue resolution blocked: ${terminalState}`);
+        return Response.json({
+          error: terminalState === 'unknown'
+            ? 'Trusted terminal venue is not configured.'
+            : `Terminal is ${terminalState} and cannot establish venue trust.`,
+          terminal_state: terminalState,
+        }, { status: terminalState === 'unknown' ? 409 : 403 });
+      }
       const venues = (await E.Venue.filter({ venue_id: terminalVenueId, status: 'active' }, null, 1).catch(() => [])) || [];
       const venueRecordId = venues?.[0]?.id || null;
       const rateRows = venueRecordId
