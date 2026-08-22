@@ -6,14 +6,14 @@ export default function StructuredData({ type = "Organization", data = {} }) {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "GlyphLock LLC",
-      "description": "AI-powered cybersecurity platform with quantum-resistant encryption, visual cryptography, blockchain security, and enterprise POS systems",
+      "description": "GlyphLock connects secure image carriers, structured QR workflows, governed AI assistance, NUPS venue operations, value records, integrations, and governance through one evidence architecture.",
       "url": window.location.origin,
       "logo": "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
       "foundingDate": "2025-05",
       "founders": [{
         "@type": "Person",
         "name": "Carlo Rene Earl",
-        "jobTitle": "Founder & Chief Operations Officer"
+        "jobTitle": "Founder, Chief Executive Officer & Product Architect"
       }],
       "address": {
         "@type": "PostalAddress",
@@ -32,7 +32,7 @@ export default function StructuredData({ type = "Organization", data = {} }) {
         window.location.origin + "/about",
         window.location.origin + "/partners"
       ],
-      "keywords": "cybersecurity, quantum-resistant encryption, AI security, visual cryptography, QR code security, blockchain verification, enterprise security, POS systems, threat detection, IP protection"
+      "keywords": "GlyphLock, evidence infrastructure, secure image carriers, LSB image carrier, Secure QR Studio, 91 QR payload types, GlyphBot, automated DJ, NUPS, venue operations, GlyphBucks, API integration, SDK integration, governance"
     };
 
     const structuredData = type === "Organization" ? defaultOrgData : data;
