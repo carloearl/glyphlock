@@ -220,6 +220,17 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, deckId, volume,
                   visibility: document.visibilityState,
                 });
               }}
+              onPlayStateChange={(playing) => onProviderState?.({
+                deck: deckId,
+                source: "direct",
+                sourceId: song.id,
+                providerState: playing ? "PLAYING" : "PAUSED",
+                position: audioEl?.currentTime || 0,
+                duration: Number.isFinite(audioEl?.duration) ? audioEl.duration : 0,
+                effectiveVolume: volume,
+                muted,
+                visibility: document.visibilityState,
+              })}
               onError={onPlaybackError}
             />
           </div>
