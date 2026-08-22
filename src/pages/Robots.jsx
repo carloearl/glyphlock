@@ -57,7 +57,7 @@ export default function Robots() {
             <span className="text-green-400 font-semibold">Production Ready</span>
           </div>
           <p className="text-gray-400 text-sm mt-1">
-            robots.txt is served via backend function at <code className="text-cyan-300">https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/robotsTxt</code>
+            robots.txt is served via backend function at <code className="text-cyan-300">https://app.base44.com/api/apps/697a087fb354faebb72df54b/robotsTxt</code>
           </p>
         </div>
 
@@ -72,7 +72,7 @@ export default function Robots() {
 
         <div className="mt-6 flex flex-wrap gap-4">
           <a 
-            href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/robotsTxt" 
+            href="https://app.base44.com/api/apps/697a087fb354faebb72df54b/robotsTxt" 
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg text-sm transition-colors flex items-center gap-2"
@@ -81,7 +81,7 @@ export default function Robots() {
             View Raw robots.txt
           </a>
           <a 
-            href="https://app.base44.com/api/apps/U5jDzdts3bd4p19I5hID/sitemap" 
+            href="https://app.base44.com/api/apps/697a087fb354faebb72df54b/sitemap" 
             target="_blank"
             rel="noopener noreferrer"
             className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm transition-colors flex items-center gap-2"
