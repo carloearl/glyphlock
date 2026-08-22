@@ -24,7 +24,10 @@
     "check:nups-live-venue-boundaries": "node scripts/check-nups-live-venue-boundaries.mjs",
     "check:nups-sensitive-reads": "node scripts/check-nups-sensitive-read-boundaries.mjs",
     "check:nups-anonymous-protected-evidence": "node scripts/check-nups-anonymous-protected-evidence.mjs",
-    "check:nups-batch15": "node scripts/check-nups-batch15.mjs"
+    "check:nups-batch15": "node scripts/check-nups-batch15.mjs",
+    "check:nups-batch16-operational": "node scripts/check-nups-batch16-operational.mjs",
+    "check:nups-batch16-runtime": "node scripts/check-nups-batch16-runtime.mjs",
+    "check:nups-batch16": "node scripts/check-nups-batch16.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.43",

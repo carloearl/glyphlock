@@ -634,8 +634,8 @@ export default function AgentBrainPanel() {
               </HoverTooltip>
             </div>
             <p className="text-xs text-blue-300/50 mt-2">
-              <span className="hidden md:inline">📎 Attach files • Manual-only mode • no auto-fix execution</span>
-              <span className="md:hidden">📎 Attach • Manual-only</span>
+              <span className="hidden md:inline">📎 Attach files • Agent scans, reads, and reports • code changes need your approval</span>
+               <span className="md:hidden">📎 Attach • Agent ready</span>
             </p>
           </div>
         </CardContent>
