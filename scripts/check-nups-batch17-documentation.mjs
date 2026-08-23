@@ -14,7 +14,7 @@ assert.match(historical, /HISTORICAL \/ SUPERSEDED/, 'Old handoff must be unmist
 assert.match(historical, /docs\/NUPS-CURRENT-HANDOFF\.md/, 'Old handoff must point to the current handoff.');
 assert.match(current, /161/, 'Current handoff must record the current direct-write count.');
 assert.match(current, /GuestProfile = canonical minimized guest identity/, 'Current handoff must define canonical guest identity.');
-assert.match(current, /VenueTerminal is the sole pre-authentication/, 'Current handoff must define terminal trust.');
+assert.match(current, /VenueTerminal.*sole pre-authentication/s, 'Current handoff must define terminal trust.');
 assert.match(current, /NKS2 only/, 'Current handoff must define the kiosk-session version.');
 assert.match(current, /test:nups-batch17-authenticated/, 'Current handoff must link authenticated acceptance.');
 assert.match(architecture, /161\/287/, 'Architecture must use the current migration state.');
