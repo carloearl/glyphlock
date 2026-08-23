@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
 import UploadZone from "./UploadZone";
 import ToolbarPanel from "./ToolbarPanel";
 import CanvasPanel from "./CanvasPanel";
@@ -24,13 +25,15 @@ export default function EditorTab({ user, onFinalizeSuccess }) {
       
       const uploadResult = await base44.integrations.Core.UploadFile({ file });
       
-      const image = await base44.entities.InteractiveImage.create({
-        name: file.name,
-        fileUrl: uploadResult.file_url,
-        width: 0,
-        height: 0,
-        status: 'draft',
-        ownerEmail: user.email
+      const image = await glyphlockWrite('interactive_image_create', {
+        image: {
+          name: file.name,
+          fileUrl: uploadResult.file_url,
+          source: 'uploaded',
+          width: 0,
+          height: 0,
+        },
+        intent: 'studio_upload_interactive_image',
       });
       
       dispatch({ 
@@ -76,14 +79,12 @@ export default function EditorTab({ user, onFinalizeSuccess }) {
     if (!imageId) return;
 
     try {
-      const response = await base44.functions.invoke('saveImageHotspots', {
-        imageId,
-        hotspots
+      await glyphlockWrite('interactive_image_update', {
+        id: imageId,
+        hotspots,
+        intent: 'studio_save_image_hotspots',
       });
-
-      if (response.data.success) {
-        return true;
-      }
+      return true;
     } catch (error) {
       console.error("Save error:", error);
       throw error;
@@ -97,21 +98,20 @@ export default function EditorTab({ user, onFinalizeSuccess }) {
       dispatch({ type: "FINALIZE_START" });
       await handleSaveHotspots();
 
-      const response = await base44.functions.invoke('finalizeInteractiveImage', {
-        imageId
+      const result = await glyphlockWrite('interactive_image_finalize', {
+        id: imageId,
+        intent: 'studio_finalize_interactive_image',
       });
 
-      if (response.data.success) {
-        dispatch({ 
-          type: "FINALIZE_SUCCESS", 
-          logId: response.data.logId,
-          hash: response.data.hash,
-          imageFileHash: response.data.imageFileHash,
-          createdAt: response.data.createdAt
-        });
-        onFinalizeSuccess();
-        return response.data;
-      }
+      dispatch({ 
+        type: "FINALIZE_SUCCESS", 
+        logId: null,
+        hash: result.hash,
+        imageFileHash: result.imageFileHash,
+        createdAt: new Date().toISOString()
+      });
+      onFinalizeSuccess();
+      return result;
     } catch (error) {
       console.error("Finalize error:", error);
       dispatch({ type: "FINALIZE_ERROR", error: error.message });
