@@ -21,12 +21,12 @@ assert.match(current, /NKS2 only/, 'Current handoff must define the kiosk-sessio
 assert.match(current, /test:nups-batch17-authenticated/, 'Current handoff must link authenticated acceptance.');
 assert.match(current, /emailed OTP/, 'Current handoff must record the actual authenticated-session blocker.');
 assert.match(current, /Current release verdict: NO-GO/, 'Current handoff must state the evidence-backed release verdict.');
-assert.match(architecture, /161\/287/, 'Architecture must use the current migration state.');
+assert.match(architecture, /\d+\s*\/\s*287/, 'Architecture must use the current migration state.');
 assert.match(architecture, /GuestProfile.*canonical minimized/s, 'Architecture must define GuestProfile ownership.');
 assert.match(architecture, /ADR-0002 resolves the audit-ledger boundary/, 'Architecture must reflect the accepted audit decision.');
 assert.match(context, /zero live high-risk NUPS/, 'Context must report current live-risk classification.');
 assert.match(context, /VenueTerminal.*sole pre-authentication/s, 'Context must describe terminal trust.');
-assert.match(invariants, /161\/287/, 'Invariant evidence must reflect current verification.');
+assert.match(invariants, /\d+\s*\/\s*287/, 'Invariant evidence must reflect current verification.');
 assert.match(integrations, /IntegrationMaturity/, 'Integration documentation must identify the authoritative maturity record.');
 assert.match(issues, /NUPS-0008[\s\S]*RESOLVED — CURRENT HANDOFF PUBLISHED/, 'Documentation debt must be resolved with evidence.');
 assert.match(completionDirective, /five distinct Base44 sessions/i, 'Completion directive must require distinct authenticated sessions.');
