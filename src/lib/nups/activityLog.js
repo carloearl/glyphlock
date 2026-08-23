@@ -54,6 +54,7 @@ async function resolveMode(venue_id) {
  * @param {object} [opts.before_value]
  * @param {object} [opts.after_value]
  * @param {string} [opts.venue_id]
+ * @param {'REAL'|'DEMO'|'SANDBOX'} [opts.mode] - Gateway-resolved ledger mode
  * @param {string} [opts.notes]
  * @param {object} [opts.actor]            - Override actor (gateway pre-validated; default = live session)
  *
@@ -91,7 +92,10 @@ export async function logActivity(opts = {}) {
       if (opts.action_type !== 'LOGIN') return null;
     }
 
-    const mode = await resolveMode(opts.venue_id);
+    const suppliedMode = String(opts.mode || '').toUpperCase();
+    const mode = ['REAL', 'DEMO', 'SANDBOX'].includes(suppliedMode)
+      ? suppliedMode
+      : await resolveMode(opts.venue_id);
 
     const record = {
       log_id: uuid(),
