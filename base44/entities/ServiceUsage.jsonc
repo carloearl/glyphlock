@@ -35,6 +35,22 @@
     "session_id": {
       "type": "string",
       "description": "Browser session identifier for anonymous users"
+    },
+    "subject_key": {
+      "type": "string",
+      "description": "Server-derived authenticated or anonymous subject key. Client user identifiers are not authoritative."
+    },
+    "request_id": {
+      "type": "string",
+      "description": "Idempotency key for one usage check."
+    },
+    "first_used_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_used_at": {
+      "type": "string",
+      "format": "date-time"
     }
   },
   "required": [
