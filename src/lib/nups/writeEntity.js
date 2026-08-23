@@ -307,6 +307,29 @@ async function writeEntityInternal({
 
   const mode = await resolveMode(requestContext?.mode, venue_id);
   const tier = 'TIER_1_OBSERVE';
+  const deleteBeforeSnapshot = operation === 'delete' && data && typeof data === 'object'
+    && String(data.id || '') === String(id || '')
+    ? { ...data }
+    : null;
+
+  // A delete without the exact pre-delete row would make audit replay
+  // impossible. Reject it before touching the business record.
+  if (operation === 'delete' && !deleteBeforeSnapshot) {
+    const audit_id = await audit({
+      entity_name: entity,
+      operation,
+      actor_id: actorId,
+      actor_role: role,
+      fields_changed: fieldsOf(data),
+      mode,
+      tier,
+      result: 'blocked',
+      block_reason: 'delete_requires_complete_before_snapshot',
+      venue_id: venue_id || null,
+      notes: intent || null,
+    }, identityContext);
+    return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: 'delete_requires_complete_before_snapshot' };
+  }
   const isFinancial = FINANCIAL_ENTITIES.has(entity);
   const sovereign = isActorSovereign(actor);
 
@@ -502,9 +525,10 @@ async function writeEntityInternal({
     await logActivity({
       action_type,
       entity_affected: `${entity}${id ? ':' + id : ''}`,
-      before_value: null,
+      before_value: deleteBeforeSnapshot,
       after_value: operation === 'delete' ? null : (Array.isArray(data) ? { bulk_count: data.length } : data),
       venue_id: venue_id || null,
+      mode,
       actor: { email: verifiedActorEmail, role },
       notes: intent || `gateway:${operation}`,
     });
