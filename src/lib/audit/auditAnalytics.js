@@ -139,15 +139,29 @@ export function analyzeAuditLogs(logs = [], { systemMode = "REAL" } = {}) {
     });
   }
 
-  // A5 — mode mismatch
-  const mismatched = logs.filter((l) => l.mode && l.mode !== systemMode);
+  // A5 — internally inconsistent mode evidence. Historical DEMO/SANDBOX
+  // entries are valid even while the system is currently REAL; only flag a
+  // row when its own snapshot/intent contradicts the logged mode.
+  const validModes = new Set(["REAL", "DEMO", "SANDBOX"]);
+  const expectedMode = (l) => {
+    const snapshotMode = String(l.before_value?.mode || l.after_value?.mode || "").toUpperCase();
+    if (validModes.has(snapshotMode)) return snapshotMode;
+    if (/PURGE_DEMO|DEMO[_:-]/i.test(String(l.notes || ""))) return "DEMO";
+    if (/SANDBOX[_:-]/i.test(String(l.notes || ""))) return "SANDBOX";
+    return null;
+  };
+  const mismatched = logs.filter((l) => {
+    const expected = expectedMode(l);
+    return expected && validModes.has(String(l.mode || "").toUpperCase())
+      && String(l.mode).toUpperCase() !== expected;
+  });
   if (mismatched.length) {
     findings.push({
       code: "A5",
       severity: "low",
-      title: `Mode mismatch (system = ${systemMode})`,
+      title: "Mode evidence mismatch",
       count: mismatched.length,
-      description: "Log entries written under a different mode than current system mode.",
+      description: `A row's snapshot or operation intent contradicts its logged mode (current system: ${systemMode}).`,
       sample: mismatched.slice(0, 3),
     });
   }
@@ -168,7 +182,7 @@ export function analyzeAuditLogs(logs = [], { systemMode = "REAL" } = {}) {
       prior24h: prior24h.length,
       delta,
       deltaPct,
-      critical: logs.filter((l) => CRITICAL_ACTIONS.has(l.action_type)).length,
+      highImpactActions: logs.filter((l) => CRITICAL_ACTIONS.has(l.action_type)).length,
     },
     actionBreakdown,
     topActors,
