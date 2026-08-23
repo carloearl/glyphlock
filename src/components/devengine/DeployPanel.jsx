@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import HoverTooltip from '@/components/ui/HoverTooltip';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 
 export default function DeployPanel() {
   const [changeSets, setChangeSets] = useState([]);
@@ -40,7 +41,7 @@ export default function DeployPanel() {
   const loadChangeSets = async () => {
     try {
       const sets = await base44.entities.AgentChangeSet.list('-created_date', 50);
-      setChangeSets(sets || []);
+      setChangeSets((sets || []).filter((item) => item.archived !== true));
     } catch (error) {
       console.error('Failed to load change sets:', error);
       toast.error('Failed to load change sets');
@@ -62,17 +63,21 @@ export default function DeployPanel() {
   };
 
   const handleDelete = async (changeSetId) => {
-    if (!confirm('Delete this change set permanently?')) return;
+    if (!confirm('Archive this change set? Its approval and deployment evidence will be retained.')) return;
     
     try {
-      await base44.entities.AgentChangeSet.delete(changeSetId);
-      toast.success('Change set deleted');
+      await glyphlockWrite('archive_agent_change_set', {
+        id: changeSetId,
+        reason: 'Archived from Deploy Center',
+        intent: 'deploy_center_archive_change_set',
+      });
+      toast.success('Change set archived');
       await loadChangeSets();
       if (selectedChangeSet?.id === changeSetId) {
         setSelectedChangeSet(null);
       }
     } catch (error) {
-      toast.error('Delete failed');
+      toast.error(error?.message || 'Archive failed');
     }
   };
 
@@ -380,7 +385,7 @@ export default function DeployPanel() {
                     className="w-full border-slate-600 text-slate-400 hover:bg-slate-800"
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
+                    Archive
                   </Button>
                 </div>
               </>
