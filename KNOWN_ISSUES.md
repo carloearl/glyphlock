@@ -229,7 +229,11 @@ Batch 17 installed `npm run test:nups-batch17-authenticated`, which requires fiv
 Distinct deployed authenticated sessions remain the exact missing proof.
 
 ### Batch 17 acceptance status
-The repository now includes `test:nups-batch17-authenticated`, a secret-safe manual harness that requires distinct real Base44 sessions and synthetic protected evidence. At Batch 17 start, the connected environment did not expose the complete manager/door/ordinary-staff/second-venue session matrix, so no authenticated result has been fabricated. This issue remains open until the harness passes and the exact same signed URL is rejected after expiry.
+The repository includes a secret-safe authenticated harness requiring five distinct Base44 sessions and synthetic evidence. Batch 17 registered five disposable plus-address Base44 users, created matching DEMO/SANDBOX `NUPSUser` role bindings, and created a clearly isolated Venue B sandbox configuration without repurposing any employee or customer account.
+
+Base44 still required each disposable user to complete the emailed one-time verification code before password login. The automation safety boundary did not permit submitting those one-time codes, so no bearer session was created and no authenticated result was inferred. The five NUPS identities were suspended, their demo window was closed, and the synthetic Venue B and its rate configuration were disabled. No credential was committed or retained in the sandbox.
+
+This issue remains open until the five-session harness passes and the exact same signed URL succeeds before expiry and is rejected afterward.
 
 ---
 
@@ -284,7 +288,9 @@ docs/runbooks/NUPS-BATCH17-AUTHENTICATED-ACCEPTANCE.md
 Run the token-driven test with five distinct authenticated users to prove authorized retrieval, wrong-role denial, wrong-venue denial, authenticated signed-URL use, and expiry. Anonymous denial is already proven. Do not re-enable raw archived media viewing until those authenticated tests pass.
 
 ### Batch 17 acceptance harness
-`docs/runbooks/NUPS-BATCH17-AUTHENTICATED-ACCEPTANCE.md` and `npm run test:nups-batch17-authenticated` define the required same-venue allow, door-limited allow, wrong-role denial, wrong-venue denial, global-role behavior, 120-second expiry and sanitized audit reconciliation. The issue remains open until those tests execute with distinct authenticated sessions.
+`docs/runbooks/NUPS-BATCH17-AUTHENTICATED-ACCEPTANCE.md` and the token-only authenticated runner define the required same-venue allow, door-limited allow, wrong-role denial, wrong-venue denial, global-role behavior, 120-second expiry and sanitized audit reconciliation.
+
+Five disposable test accounts and matching NUPS identities were prepared, but Base44 blocked password login until the emailed OTP was completed. Because that human verification step could not be automated safely, every synthetic NUPS identity was suspended and the synthetic Venue B was disabled. The issue remains open until the runner executes with five verified, distinct authenticated sessions.
 
 ---
 
@@ -363,7 +369,7 @@ Batch 16 proves:
 The synthetic verification terminal remains permanently revoked and untrusted.
 
 ### Operational commissioning remaining
-No real physical venue terminal has been falsely registered from this engineering environment. The exact ID is generated and stored in each physical browser/device, so each real front-door, clock, DJ, manager, scanner, VIP and kiosk station must be commissioned once from that device or by copying its displayed ID into **Venue Admin Settings → Terminals**. This is an installation action, not unfinished Batch 16 code.
+No real physical venue terminal has been falsely registered from this engineering environment. Batch 17 confirmed that the only synthetic terminal remains revoked and untrusted. The exact ID is generated and stored in each physical browser/device, so each real front-door, clock, DJ, manager, scanner, VIP and kiosk station must be commissioned once from that device or by copying its displayed ID into **Venue Admin Settings → Terminals**. This is an installation action, not unfinished engineering code.
 
 ---
 
