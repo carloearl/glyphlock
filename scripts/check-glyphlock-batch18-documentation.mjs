@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import { execFileSync } from 'node:child_process';
 
 const snapshot = JSON.parse(execFileSync('node', ['scripts/check-nups-write-gateway.mjs', '--snapshot'], { encoding: 'utf8' }));
-const countPattern = new RegExp(`${snapshot.total}\\s*\\/\\s*287`);
+const snapshotTotal = Object.values(snapshot.files || {}).reduce((sum, entry) => sum + Number(entry?.total || 0), 0);
+assert.equal(Number.isInteger(snapshotTotal) && snapshotTotal > 0, true, 'Write-gateway snapshot did not contain a valid positive file-total sum.');
+const countPattern = new RegExp(`${snapshotTotal}\\s*\\/\\s*287`);
 const architecture = fs.readFileSync('ARCHITECTURE.md', 'utf8');
 const context = fs.readFileSync('CONTEXT.md', 'utf8');
 const handoff = fs.readFileSync('docs/NUPS-CURRENT-HANDOFF.md', 'utf8');
@@ -26,4 +28,4 @@ assert.match(workaround, /Preferred workaround: browser-session console/, 'Compl
 assert.match(handoff, /NO-GO/, 'Current handoff must preserve the release NO-GO until physical and authenticated acceptance passes.');
 assert.doesNotMatch(verification, /Release verdict:\s*(?:GO|CONDITIONAL GO)/, 'Batch 18 documentation must not silently promote the production release.');
 
-console.log(`[check:glyphlock-batch18-documentation] PASS — Layer 3 state records ${snapshot.total}/287, 41 governed migrations, zero live business bypasses, and the unchanged Batch 17 NO-GO release boundary.`);
+console.log(`[check:glyphlock-batch18-documentation] PASS — Layer 3 state records ${snapshotTotal}/287, 41 governed migrations, zero live business bypasses, and the unchanged Batch 17 NO-GO release boundary.`);
