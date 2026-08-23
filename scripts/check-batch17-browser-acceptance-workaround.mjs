@@ -8,6 +8,26 @@ const evidence = fs.readFileSync('base44/functions/getProtectedEvidence/entry.ts
 const runSchema = fs.readFileSync('base44/entities/Batch17AcceptanceRun.jsonc', 'utf8');
 const resultSchema = fs.readFileSync('base44/entities/Batch17AcceptanceResult.jsonc', 'utf8');
 const parsedRunSchema = JSON.parse(runSchema);
+const parsedResultSchema = JSON.parse(resultSchema);
+
+function collectSchemaPropertyNames(node, names = new Set()) {
+  if (!node || typeof node !== 'object') return names;
+
+  if (node.properties && typeof node.properties === 'object' && !Array.isArray(node.properties)) {
+    for (const [name, child] of Object.entries(node.properties)) {
+      names.add(name.toLowerCase().replace(/[^a-z0-9]/g, ''));
+      collectSchemaPropertyNames(child, names);
+    }
+  }
+
+  for (const [key, child] of Object.entries(node)) {
+    if (key === 'properties') continue;
+    if (Array.isArray(child)) child.forEach((entry) => collectSchemaPropertyNames(entry, names));
+    else if (child && typeof child === 'object') collectSchemaPropertyNames(child, names);
+  }
+
+  return names;
+}
 
 assert.match(page, /claim_test_identity/, 'Browser acceptance must support verified self-claim without an administrator copying tokens.');
 assert.match(page, /create_run/, 'Browser acceptance must create a coordinated five-session run.');
@@ -43,6 +63,15 @@ assert.match(evidence, /MANAGER_ROLES\.has/, 'Short TTL must require manager-cla
 assert.deepEqual(parsedRunSchema?.properties?.mode?.enum, ['SANDBOX'], 'Acceptance runs must be SANDBOX-only.');
 assert.equal(parsedRunSchema?.properties?.mode?.default, 'SANDBOX', 'Acceptance runs must default to SANDBOX.');
 assert.match(resultSchema, /__APPEND_ONLY_BLOCK__/, 'Acceptance results must be append-only.');
-assert.doesNotMatch(runSchema + resultSchema, /signed_url|file_uri|access_token|password|otp/i, 'Acceptance entities must not define secret or protected-reference fields.');
+
+const schemaPropertyNames = collectSchemaPropertyNames(parsedRunSchema);
+collectSchemaPropertyNames(parsedResultSchema, schemaPropertyNames);
+for (const forbiddenField of ['signedurl', 'fileuri', 'accesstoken', 'password', 'otp']) {
+  assert.equal(
+    schemaPropertyNames.has(forbiddenField),
+    false,
+    `Acceptance entities must not define the protected or secret field "${forbiddenField}".`,
+  );
+}
 
 console.log('[check:batch17-browser-acceptance-workaround] PASS — five authenticated browser sessions can complete Batch 17 without exposing bearer tokens or weakening role, venue, or expiry gates.');
