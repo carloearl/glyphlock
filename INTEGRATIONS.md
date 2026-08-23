@@ -1,6 +1,6 @@
 # NUPS / GlyphLock INTEGRATIONS — Layer 3 Domain State
 
-**Mapped:** 2026-08-20  
+**Mapped:** 2026-08-22  
 **Canonical app:** Base44 `697a087fb354faebb72df54b`
 
 ## Maturity vocabulary
@@ -39,7 +39,9 @@ Never infer a higher state from a lower state. Stored credentials alone mean **c
 
 ### Other Base44 OAuth connectors
 
-At mapping time the Base44 connector catalog reports the following relevant connectors as **not connected**: Gmail, Google Sheets, Google Docs, Google Calendar, QuickBooks, Square, Supabase, GitHub API connector, Docusign, Slack, Microsoft 365 connectors, and others.
+Runtime connector inventory on 2026-08-22 confirms exactly three active Base44 OAuth connectors: Google Drive, Google Analytics, and Notion. Relevant connectors still **not connected** include Gmail, Google Sheets, Google Docs, Google Calendar, QuickBooks, Square, Supabase, the Base44 GitHub API connector, Docusign, Slack, Microsoft 365 connectors, and others.
+
+The separate ChatGPT/GitHub capability used for repository inspection is not evidence that the Base44 app-level GitHub OAuth connector is connected.
 
 This does not mean the app lacks custom/API integrations for those services; it means the Base44 OAuth connector itself is not connected.
 
@@ -128,15 +130,36 @@ Do not describe the export workflow as a connected QuickBooks API integration.
 
 Because the Google Drive connector is active/authenticated, NUPS/GlyphLock functions that use the connector have an available authorization substrate. Each actual export path must still prove request success and returned file/reference before being labeled E2E verified.
 
+## Protected private-file storage
+
+Batch 17 exercised the Base44 private-file substrate with synthetic text only.
+
+- `UploadPrivateFile` accepted a real multipart `File` payload: **request succeeded**
+- a generated signed URL denied anonymous access immediately: **response validated for anonymous denial**
+- anonymous `getProtectedEvidence` remains HTTP 401: **response validated**
+- the role/classification/venue policy matrix passes: **response logic validated statically/executably**
+- authenticated signed retrieval and expiry: **not yet end-to-end verified** because five distinct authenticated sessions are not available to the sandbox
+
+The token-driven acceptance runner is `npm run test:nups-batch17-authenticated`. It must not be promoted to PASS until real runtime tokens are supplied.
+
+## GitHub source and CI
+
+- Canonical source repository: `carloearl/glyphlock`, branch `main`
+- Source synchronization from Base44 remote development: **request succeeded / response validated** through current commits
+- GitHub Actions result must be verified per ending commit before claiming CI E2E
+- Base44 app-level GitHub OAuth connector: **not connected**
+
+Do not conflate repository access through an external connected capability with an in-app OAuth connector.
+
 ## Hardware
 
-NUPS models hardware through `VenueHardware` and browser/backend workflows for scanners, printers, terminals, and related station devices.
+NUPS models hardware through `VenueHardware`, `VenueTerminal`, and browser/backend workflows for scanners, printers, terminals, and related station devices.
 
-Configured hardware inventory is not equivalent to physical connectivity. Hardware maturity should be tracked per venue/device as:
+The software terminal boundary is **response validated** for trusted-active, unknown, inactive, untrusted, and revoked synthetic states. Physical hardware maturity remains per venue/device:
 
-`configured → browser/device detected → request succeeded → output/input validated → E2E workflow verified`
+`configured → browser/device detected → exact device ID approved → request succeeded → output/input validated → E2E workflow verified`
 
-No blanket E2E hardware claim was made during this mapping run.
+No real physical venue terminal has been marked E2E from the cloud sandbox. Each device requires one-time commissioning from its own browser.
 
 ## Updating this file
 
