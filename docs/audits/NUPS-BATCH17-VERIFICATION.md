@@ -4,7 +4,7 @@
 **Authority:** GlyphLock Engineering Protocol v5 / DACO  
 **Recorded:** 2026-08-23T05:51:13+00:00  
 **Starting commit:** `b02ffa44d49615d1f8fb21f627ae6a1bc33dfbf5`  
-**Current ending candidate:** `0a34564c7c380ba22b5ba6cd3bee0c31d38381fc`
+**Pre-checkpoint repository head:** `0a34564c7c380ba22b5ba6cd3bee0c31d38381fc`
 
 ## Executive result
 
