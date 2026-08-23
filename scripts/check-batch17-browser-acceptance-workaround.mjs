@@ -7,6 +7,7 @@ const backend = fs.readFileSync('base44/functions/batch17Acceptance/entry.ts', '
 const evidence = fs.readFileSync('base44/functions/getProtectedEvidence/entry.ts', 'utf8');
 const runSchema = fs.readFileSync('base44/entities/Batch17AcceptanceRun.jsonc', 'utf8');
 const resultSchema = fs.readFileSync('base44/entities/Batch17AcceptanceResult.jsonc', 'utf8');
+const parsedRunSchema = JSON.parse(runSchema);
 
 assert.match(page, /claim_test_identity/, 'Browser acceptance must support verified self-claim without an administrator copying tokens.');
 assert.match(page, /create_run/, 'Browser acceptance must create a coordinated five-session run.');
@@ -39,7 +40,8 @@ assert.match(evidence, /requestedTestTtl < 5 \|\| requestedTestTtl > 15/, 'Test 
 assert.match(evidence, /evidence\.mode === 'SANDBOX'/, 'Short TTL must be restricted to SANDBOX evidence.');
 assert.match(evidence, /evidence\.subject_entity === 'Batch17SyntheticEvidence'/, 'Short TTL must be restricted to Batch 17 synthetic evidence.');
 assert.match(evidence, /MANAGER_ROLES\.has/, 'Short TTL must require manager-class authorization.');
-assert.match(runSchema, /"mode": \{ "type": "string", "enum": \["SANDBOX"\]/, 'Acceptance runs must be SANDBOX-only.');
+assert.deepEqual(parsedRunSchema?.properties?.mode?.enum, ['SANDBOX'], 'Acceptance runs must be SANDBOX-only.');
+assert.equal(parsedRunSchema?.properties?.mode?.default, 'SANDBOX', 'Acceptance runs must default to SANDBOX.');
 assert.match(resultSchema, /__APPEND_ONLY_BLOCK__/, 'Acceptance results must be append-only.');
 assert.doesNotMatch(runSchema + resultSchema, /signed_url|file_uri|access_token|password|otp/i, 'Acceptance entities must not define secret or protected-reference fields.');
 
