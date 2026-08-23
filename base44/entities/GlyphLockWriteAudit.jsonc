@@ -1,0 +1,127 @@
+{
+  "name": "GlyphLockWriteAudit",
+  "type": "object",
+  "description": "Append-only decision and outcome evidence for governed non-NUPS GlyphLock business mutations. Stores safe hashes and field names, never private content or credentials.",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string"
+    },
+    "record_id": {
+      "type": "string"
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "create",
+        "update",
+        "archive",
+        "delete_cache",
+        "access",
+        "reconcile"
+      ]
+    },
+    "actor_email": {
+      "type": "string"
+    },
+    "actor_role": {
+      "type": "string"
+    },
+    "scope_type": {
+      "type": "string",
+      "enum": [
+        "USER_PRIVATE",
+        "PUBLIC_INTAKE",
+        "PLATFORM_ADMIN",
+        "PARTNER",
+        "CONTENT_OWNER",
+        "GOVERNANCE",
+        "GLOBAL_SYSTEM"
+      ]
+    },
+    "owner_ref": {
+      "type": "string"
+    },
+    "intent": {
+      "type": "string"
+    },
+    "fields_changed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "before_hash": {
+      "type": "string"
+    },
+    "after_hash": {
+      "type": "string"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "allowed",
+        "blocked",
+        "failed"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "low"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "event_id",
+    "action",
+    "entity_name",
+    "operation",
+    "actor_email",
+    "scope_type",
+    "result",
+    "created_at"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "__GATEWAY_ONLY__"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}
