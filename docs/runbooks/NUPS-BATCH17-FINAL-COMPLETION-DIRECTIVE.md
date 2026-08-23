@@ -11,10 +11,16 @@ Use this directive only after the five disposable Base44 test accounts have comp
 
 Complete the remaining human-authenticated and physical acceptance evidence for Batch 17. Do not redesign the application, lower guards, create REAL financial activity, or publish production.
 
+## Preferred workaround: browser-session console
+
+The preferred path avoids exporting bearer tokens. After each disposable account completes Base44 email verification, open `/NUPSBatch17Acceptance` in five separate browser profiles, sign each profile in normally, and run only the role-specific case assigned to that authenticated session. The backend derives the expected role/venue/classification decision, reconciles the matching security audit, waits through the real signed-link lifetime for the expiry case, and stores only sanitized append-only evidence.
+
+Do not copy passwords, OTPs, bearer tokens, signed URLs, private file URIs or protected content into chat, shell history, screenshots, committed files or browser storage. The token-driven CLI harness remains a secondary controlled option when an approved ephemeral secret manager can supply the five sessions without exposing them.
+
 ## Required starting state
 
 1. `npm run check:nups-batch17` passes.
-2. Direct-write count remains `161/287`, with zero live high-risk and zero live-medium NUPS bypasses.
+2. Direct-write count remains `120 / 287`, with zero live high-risk, zero live-medium NUPS, and zero classified live GlyphLock business bypasses.
 3. NKS1 and the duplicate playlist endpoint return HTTP 410.
 4. The five Batch 17 test identities are disposable DEMO/SANDBOX accounts, not real employees or customers.
 5. `B17_SANDBOX_VENUE` is used only as isolated Venue B test context.
