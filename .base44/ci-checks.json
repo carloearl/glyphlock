@@ -22,6 +22,7 @@
     "check:nups-batch17-documentation",
     "check:nups-batch17-auth-runner",
     "check:nups-batch17-runtime",
-    "check:nups-public-runtime-boundaries"
+    "check:nups-public-runtime-boundaries",
+    "check:nups-audit-integrity"
   ]
 }
