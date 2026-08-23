@@ -177,11 +177,14 @@ assert.doesNotMatch(gateway, /metadata:\s*\{[^}]*?(?:file_uri|signed_url|passwor
 
 // Scorecard. Count direct writes using the same syntax as the Tier-2 guard.
 const allWritePattern = /\bbase44\.entities\.([A-Za-z_$][\w$]*)\.(create|update|delete|bulkCreate)\s*\(/g;
+const dynamicWritePattern = /\bbase44\.entities\[([^\]\n]+)\]\.(create|update|delete|bulkCreate)\s*\(/g;
 let totalWrites = 0;
 for (const file of walk(path.join(ROOT, 'src'))) {
   const source = fs.readFileSync(file, 'utf8');
   allWritePattern.lastIndex = 0;
+  dynamicWritePattern.lastIndex = 0;
   while (allWritePattern.exec(source) !== null) totalWrites += 1;
+  while (dynamicWritePattern.exec(source) !== null) totalWrites += 1;
 }
 assert.equal(totalWrites, 120, `Batch 18 expected 120 grandfathered frontend writes, found ${totalWrites}. Reclassify before changing this contract.`);
 
