@@ -132,7 +132,7 @@ writeEntity()
 
 Canonical gateway: `src/lib/nups/writeEntity.js`.
 
-Current migration reality: direct frontend entity writes still exist and are grandfathered by `config/nups-direct-write-legacy-manifest.json`. Batch 16 reduced the inventory to **161/287** with no new bypasses. The classified remainder contains **0 live high-risk NUPS** and **0 live-medium NUPS** business mutations; retained calls are security/domain/telemetry evidence, general GlyphLock persistence outside NUPS, demo/seed/sandbox/legacy code, or canonical gateway internals. App-wide universal-gateway completion remains controlled migration debt, but the live NUPS operational-write objective is complete.
+Current migration reality: direct frontend entity writes still exist and are grandfathered by `config/nups-direct-write-legacy-manifest.json`. Batches 9–18 reduced the inventory to **120 / 287** with no new bypasses. The classified remainder contains **0 live high-risk NUPS**, **0 live-medium NUPS**, and **0 live GlyphLock business** bypasses. Retained calls are explicit security/domain/telemetry evidence, controlled demo/seed/sandbox utilities, legacy/unmounted compatibility, or canonical gateway/audit internals. Live operational migration is complete while the retained classified inventory remains under monotonic CI guard.
 
 ## 7. Identity architecture
 
@@ -305,18 +305,22 @@ Repository controls include:
 
 The Base44 CI extension runs the current configured checks from `.base44/ci-checks.json`; GitHub workflow governance remains controlled separately per `AGENTS.md`. Aggregate commands are `npm run check:nups-batch16` and `npm run check:nups-batch17`.
 
-## 15. Current verified operational state — Batches 16–17
+## 15. Current verified operational state — Batches 16–18
 
-The original 287-call frontend direct-write inventory is now **161/287**. The remainder is classified, not one undifferentiated risk queue:
+The original 287-call frontend direct-write inventory is now **120 / 287**. The remainder is classified, not one undifferentiated risk queue:
 
 ```text
-live high-risk NUPS                 0
-live-medium NUPS                    0
-security/admin audit              33
-domain events                     12
-operational telemetry             13
-general GlyphLock live writes     41
-demo/seed/sandbox/legacy/internal 62
+live high-risk NUPS          0
+live-medium NUPS             0
+live GlyphLock business      0
+security/admin audit        33
+domain events               12
+operational telemetry       13
+demo                        16
+seed                        15
+sandbox                      7
+legacy/unmounted             9
+gateway/audit internals     15
 ```
 
 Current guest ownership is explicit:
@@ -345,10 +349,10 @@ Current authoritative handoff: `docs/NUPS-CURRENT-HANDOFF.md`.
 
 
 
-## 15. Batch 18 app-wide write governance
+## 16. App-wide GlyphLock write governance — Batch 18
 
-The app-wide business-write boundary is `base44/functions/writeGlyphLockRecord/entry.ts`, with schema-derived entity policies in the same function package and the frontend client at `src/lib/glyphlock/glyphlockWrite.js`.
+The app-wide business-write boundary is `base44/functions/glyphlockWriteGateway/entry.ts`, invoked by `src/lib/glyphlock/glyphlockWriteGateway.js`. It exposes an explicit server action allow-list rather than accepting a client-selected entity or actor identity.
 
-Batch 18 migrated 41 live non-NUPS business writes. Current controlled direct-write state: **undefined/287**. The governed boundary separates platform administration, public intake, self-owned content, partner-scoped content, and owner/admin creative assets rather than applying venue semantics to unrelated records.
+Batch 18 migrated 41 live non-NUPS business writes. Current controlled direct-write state: **120 / 287**. The boundary separates `GOVERNANCE`, `PLATFORM_ADMIN`, `PUBLIC_INTAKE`, `USER_PRIVATE`, `CONTENT_OWNER`, `PARTNER`, and `GLOBAL_SYSTEM` scope families instead of applying venue semantics to unrelated records.
 
-Destructive governance and audit actions write append-only retention evidence to `GlyphLockWriteArchive`. Public contact follow-up uses a 15-minute, one-time, hash-stored `PublicMutationGrant`; the capability remains memory-only in the browser. Security and protected-reference fields are removed from mutation data and audit metadata.
+Governance and finalized evidence archive or supersede rather than disappearing. Public intake receives server-controlled privileged fields and rate limits. Private chat/preferences remain caller scoped. Creative records require owner/admin authority. Partner documents and assets remain partner/tier scoped. Service usage is server-derived and idempotent. `GlyphLockWriteAudit` is append-only and records actor, scope, operation, safe before/after hashes and filtered metadata without private content or secrets.
