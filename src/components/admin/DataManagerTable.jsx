@@ -37,7 +37,9 @@ export default function DataManagerTable({ entityName, fields }) {
       entity: entityName,
       operation: "delete",
       id: record.id,
-      data: { venue_id: venueId, is_demo: record?.is_demo === true, mode: recordMode },
+      // The governed gateway requires the complete pre-delete record so the
+      // append-only audit trail can replay exactly what was removed.
+      data: { ...record, venue_id: venueId, is_demo: record?.is_demo === true, mode: recordMode },
       actor: { email: me?.email, id: me?.id, role: me?._highestRole || me?.role || "admin" },
       venue_id: venueId,
       requestContext: recordMode ? { mode: recordMode } : undefined,
