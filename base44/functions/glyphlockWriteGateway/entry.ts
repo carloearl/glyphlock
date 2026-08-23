@@ -611,6 +611,63 @@ Deno.serve(async (req) => {
         await E.QrPreview.delete(before.id); value = { deleted: true, id: before.id };
         audit = { ...audit, entity_name: 'QrPreview', record_id: before.id, operation: 'delete_cache', scope_type: 'USER_PRIVATE', owner_ref: before.user_id, before: { code_id: before.code_id, vaulted: false }, fields_changed: [], metadata: { deleted_cache: true } };
       }
+    } else if (action === 'partner_document_list') {
+      requireUser(user);
+      const partner = await resolvePartner(E, user);
+      if (!partner && !isAdmin(user, nups)) throw new HttpError(403, 'PARTNER_REQUIRED', 'Active partner account required.');
+      const partnerId = partner?.id || 'platform-admin';
+      const [documents, accessRows] = await Promise.all([
+        E.PartnerDocument.list('-created_date', 500),
+        E.PartnerDocumentAccess.filter({ partner_id: partnerId }, '-last_action_at', 500).catch(() => []),
+      ]);
+      const accessByDocument = new Map((accessRows || []).map((row: any) => [row.document_id, row]));
+      value = (documents || [])
+        .filter((document: any) => isAdmin(user, nups) || !document.partner_id || document.partner_id === partnerId)
+        .map((document: any) => {
+          const access = accessByDocument.get(document.id);
+          return {
+            id: document.id,
+            document_name: document.document_name,
+            document_type: document.document_type,
+            description: document.description,
+            partner_id: document.partner_id || null,
+            is_confidential: Boolean(document.is_confidential),
+            requires_signature: Boolean(document.requires_signature),
+            signed: Boolean(document.signed),
+            signed_date: document.signed_date || null,
+            expiry_date: document.expiry_date || null,
+            version: document.version || '1.0',
+            viewed: access?.viewed === true,
+            viewed_date: access?.viewed_at || null,
+            created_date: document.created_date,
+          };
+        });
+      audit = { ...audit, entity_name: 'PartnerDocument', record_id: `catalog:${partnerId}`, operation: 'access', scope_type: 'PARTNER', owner_ref: partnerId, after: { record_count: value.length }, fields_changed: [], metadata: { partner_id: partnerId, record_count: value.length } };
+    } else if (action === 'marketing_asset_list') {
+      requireUser(user);
+      const partner = await resolvePartner(E, user);
+      if (!partner && !isAdmin(user, nups)) throw new HttpError(403, 'PARTNER_REQUIRED', 'Active partner account required.');
+      const partnerId = partner?.id || 'platform-admin';
+      const tier = partner?.tier || 'admin';
+      const assets = await E.MarketingAsset.list('-created_date', 500);
+      value = (assets || [])
+        .filter((asset: any) => asset.is_active !== false)
+        .filter((asset: any) => isAdmin(user, nups) || !Array.isArray(asset.partner_tier_access) || asset.partner_tier_access.length === 0 || asset.partner_tier_access.includes(tier))
+        .map((asset: any) => ({
+          id: asset.id,
+          asset_name: asset.asset_name,
+          asset_type: asset.asset_type,
+          description: asset.description,
+          thumbnail_url: asset.thumbnail_url,
+          file_size: asset.file_size,
+          file_format: asset.file_format,
+          partner_tier_access: asset.partner_tier_access || [],
+          download_count: Number(asset.download_count || 0),
+          is_active: asset.is_active !== false,
+          tags: asset.tags || [],
+          created_date: asset.created_date,
+        }));
+      audit = { ...audit, entity_name: 'MarketingAsset', record_id: `catalog:${partnerId}`, operation: 'access', scope_type: 'PARTNER', owner_ref: partnerId, after: { record_count: value.length }, fields_changed: [], metadata: { partner_id: partnerId, record_count: value.length } };
     } else if (action === 'partner_document_access') {
       requireUser(user);
       const partner = await resolvePartner(E, user);
