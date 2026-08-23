@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 import { toast } from 'sonner';
 
 const MAX_PREVIEWS = 10;
@@ -23,7 +24,7 @@ export function useQrPreviewStorage(userId) {
     try {
       setLoading(true);
       const data = await base44.entities.QrPreview.filter(
-        { user_id: userId, vaulted: false },
+        { user_id: userId, vaulted: false, archived: { $ne: true } },
         'created_date',
         MAX_PREVIEWS + 5
       );
@@ -49,7 +50,7 @@ export function useQrPreviewStorage(userId) {
     try {
       // Check current count
       const currentPreviews = await base44.entities.QrPreview.filter(
-        { user_id: userId, vaulted: false },
+        { user_id: userId, vaulted: false, archived: { $ne: true } },
         'created_date'
       );
 
@@ -141,7 +142,7 @@ export function useQrPreviewStorage(userId) {
 
     try {
       const data = await base44.entities.QrPreview.filter(
-        { user_id: userId, vaulted: true },
+        { user_id: userId, vaulted: true, archived: { $ne: true } },
         '-vault_date'
       );
       return data || [];
