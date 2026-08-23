@@ -149,7 +149,7 @@ The gateway currently provides:
 - observational `AuditEvent` emission
 - user-facing `ActivityLog` mirroring
 
-The repository is under a Tier-2-style migration guard: direct frontend writes are grandfathered by `config/nups-direct-write-legacy-manifest.json`, and CI prevents the count/signature set from increasing. The current state is **161/287** with zero new bypasses, zero live high-risk NUPS business bypasses, and zero live-medium NUPS business bypasses. The retained calls are classified rather than erased for numerical theater.
+The repository is under a Tier-2-style migration guard: direct frontend writes are grandfathered by `config/nups-direct-write-legacy-manifest.json`, and CI prevents the count/signature set from increasing. The current state is **120 / 287** with zero new bypasses, zero live high-risk NUPS business bypasses, zero live-medium NUPS business bypasses, and zero classified live GlyphLock business bypasses. The retained calls are explicit security/domain/telemetry evidence, controlled non-production utilities, compatibility code, or gateway/audit internals.
 
 ## CI / verification controls
 
@@ -173,9 +173,9 @@ Relevant scripts:
 - `npm run check:nups-batch16`
 - `npm run check:nups-batch17`
 
-Verified on 2026-08-22:
+Verified on 2026-08-23:
 
-- write-gateway guard passed: 161/287 grandfathered writes, no new bypasses
+- write-gateway guard passed: 120 / 287 grandfathered writes, no new bypasses
 - frozen financial/contractor rules passed
 - mode/isolation checks passed
 - protected-evidence policy and anonymous denial passed
@@ -188,7 +188,7 @@ These checks prove their stated policies. Distinct authenticated protected-evide
 
 ## Current operating context — 2026-08-22
 
-Batches 9–16 completed the risk-prioritized NUPS write migration and security hardening program. The live NUPS operational queue is now zero high-risk and zero medium-risk direct frontend business writes. The raw remaining count is 161/287 because the combined GlyphLock application retains explicit security/domain events, operational telemetry, non-NUPS product writes, controlled demo/seed utilities, legacy compatibility and gateway internals.
+Batches 9–18 completed the risk-prioritized NUPS migration and the remaining app-wide GlyphLock business-write migration. The live NUPS queue is zero high-risk and zero medium-risk direct frontend business writes, and the classified live non-NUPS GlyphLock business queue is also zero. The raw remaining count is 120 / 287 because the combined application retains explicit security/domain events, operational telemetry, controlled demo/seed/sandbox utilities, legacy compatibility and gateway/audit internals.
 
 Key current boundaries:
 
@@ -210,10 +210,12 @@ Current handoff: `docs/NUPS-CURRENT-HANDOFF.md`.
 
 ## Batch 18 current persistence state
 
-- Controlled direct-write inventory: **undefined/287**.
+- Controlled direct-write inventory: **120 / 287**.
 - Live high-risk NUPS business bypasses: **0**.
 - Live-medium NUPS business bypasses: **0**.
 - Classified live GlyphLock business bypasses outside NUPS: **0**.
-- Forty-one app-wide business calls now use `writeGlyphLockRecord` through `glyphlockWrite`.
+- Forty-one app-wide business calls now use the server-governed `glyphlockWriteGateway` through `glyphlockWrite`.
+- Scope families are explicit: `GOVERNANCE`, `PLATFORM_ADMIN`, `PUBLIC_INTAKE`, `USER_PRIVATE`, `CONTENT_OWNER`, `PARTNER`, and `GLOBAL_SYSTEM`.
 - Public consultation/contact intake is allow-listed and rate-limited; private chat/preferences are caller-owned; creative assets are owner/admin scoped; partner records are partner/admin scoped; usage metering is server governed.
-- The retained direct calls are evidence, telemetry, non-live utilities, compatibility paths, or gateway internals.
+- Governance and finalized evidence archive or supersede instead of disappearing.
+- The retained direct calls are security/domain evidence, telemetry, non-live utilities, compatibility paths, or gateway/audit internals.
