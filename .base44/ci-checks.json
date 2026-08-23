@@ -16,6 +16,10 @@
     "check:nups-batch16-runtime",
     "test:dj",
     "check:nups-dj-continuity",
-    "check:seo-metadata"
+    "check:seo-metadata",
+    "check:nups-integration-maturity",
+    "check:nups-batch17-documentation",
+    "check:nups-batch17-auth-runner",
+    "check:nups-batch17-runtime"
   ]
 }
