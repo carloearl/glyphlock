@@ -43,11 +43,15 @@ assert.doesNotMatch(
   /console\.(?:log|error)\([^)]*(?:process\.env\.B17_|tokens(?:\.|\[)|signedUrl\b|fileUri\b|file_uri\b|signed_url\b)/is,
   'Authenticated harness may print an actual credential variable or protected reference.',
 );
-assert.match(authHarness, /waitMs = \(Number\(expiryCandidate\.expires_in\) \+ 8\) \* 1000/, 'Harness must wait beyond the real signed-URL expiry.');
+assert.match(authHarness, /setTimeout\(resolve, \(expiresIn \+ 4\) \* 1000\)/, 'Harness must wait beyond the real signed-URL expiry.');
 assert.match(authHarness, /wrong_venue_manager_deny/, 'Wrong-venue authenticated test is missing.');
 assert.match(authHarness, /door_tax_deny/, 'Door tax denial test is missing.');
 assert.match(authHarness, /ordinary_staff_contract_deny/, 'Ordinary-staff contract denial test is missing.');
-assert.match(authHarness, /getBatch17AcceptanceEvidence/, 'Authenticated audit reconciliation is missing.');
+assert.match(
+  authHarness,
+  /SystemAuditLog\.filter|functions\.invoke\(['"]getBatch17AcceptanceEvidence['"]/, 
+  'Authenticated audit reconciliation is missing.',
+);
 assert.doesNotMatch(authHarness, /localStorage|sessionStorage|writeFile|\.env/, 'Authenticated harness must not persist credentials.');
 assert.match(authRunbook, /synthetic/i, 'Authenticated runbook does not require synthetic evidence.');
 assert.match(identityMatrix, /No existing employee or customer account was repurposed/, 'Test identity safety decision is missing.');
