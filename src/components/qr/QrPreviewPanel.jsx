@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Download, Eye, Shield, Clock, FileImage, RefreshCw, Archive, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 import QrSecurityBadge from './QrSecurityBadge';
 import CanvasQrRenderer from './CanvasQrRenderer';
 
@@ -53,7 +54,8 @@ export default function QrPreviewPanel({
       const existing = await base44.entities.QrPreview.filter({
         user_id: currentUser.email,
         code_id: qrAssetDraft.id,
-        vaulted: true
+        vaulted: true,
+        archived: { $ne: true }
       });
 
       if (existing.length > 0) {
@@ -62,21 +64,21 @@ export default function QrPreviewPanel({
         return;
       }
 
-      // Create vault entry
-      await base44.entities.QrPreview.create({
-        user_id: currentUser.email,
-        code_id: qrAssetDraft.id,
-        payload: qrAssetDraft.payload || qrPayload,
-        payload_type: qrType || 'url',
-        image_data_url: qrDataUrlRef.current || qrDataUrl,
-        customization: customization,
-        size: size || 512,
-        error_correction: errorCorrectionLevel || 'H',
-        risk_score: qrAssetDraft.riskScore || 0,
-        risk_flags: qrAssetDraft.riskFlags || [],
-        immutable_hash: qrAssetDraft.immutableHash,
-        vaulted: true,
-        vault_date: new Date().toISOString()
+      await glyphlockWrite('qr_preview_save', {
+        preview: {
+          code_id: qrAssetDraft.id,
+          payload: qrAssetDraft.payload || qrPayload,
+          payload_type: qrType || 'url',
+          image_data_url: qrDataUrlRef.current || qrDataUrl,
+          customization,
+          size: size || 512,
+          error_correction: errorCorrectionLevel || 'H',
+          risk_score: qrAssetDraft.riskScore || 0,
+          risk_flags: qrAssetDraft.riskFlags || [],
+          immutable_hash: qrAssetDraft.immutableHash,
+          vaulted: true,
+        },
+        intent: 'save_qr_preview_to_vault',
       });
 
       toast.success('Saved to your Vault!');
