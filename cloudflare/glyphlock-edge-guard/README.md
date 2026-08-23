@@ -35,7 +35,7 @@ npx wrangler deploy --dry-run
 
 1. Let the pull-request workflow run credential-free source and route-pattern tests. Pull-request code never receives a Cloudflare token.
 2. Merge only after NUPS CI, the credential-free Cloudflare validation, and security review pass.
-3. From trusted `main`, manually run **Cloudflare Edge Guard Preflight**. Its credentialed job checks protected source hashes before executing.
+3. The merge to trusted `main` automatically runs **Cloudflare Edge Guard Preflight**; it can also be manually dispatched from `main`. Its credentialed job checks protected source hashes before executing.
 4. Confirm the token can read the active `glyphlock.io` zone, proxied apex DNS, Worker scripts/routes, Page Rules, rulesets, and selected cache settings.
 5. Stop if any route pattern that covers the apex or any `glyphlock-edge-guard` script already exists. Scheme-qualified and leading-wildcard patterns are included.
 6. Add and review a separate deployment workflow only after the sanitized inventory reports `safe_to_deploy=true`. Never put an API token in source, workflow output, artifacts, or chat.
