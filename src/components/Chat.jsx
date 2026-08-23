@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
+import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
 import { MessageCircle, X, Save, FolderOpen, Plus, Settings, Volume2 } from "lucide-react";
 import { generateAudio, applyAudioEffects } from "@/components/utils/ttsEngine";
 import VoiceSettingsPanel from "@/components/chat/VoiceSettingsPanel";
@@ -86,16 +87,10 @@ export default function Chat({ defaultPersona = null }) {
   const saveVoiceSettings = async (newSettings) => {
     setVoiceSettings(newSettings);
     try {
-      const prefs = await base44.entities.UserPreferences.list();
-      if (prefs.length > 0) {
-        await base44.entities.UserPreferences.update(prefs[0].id, {
-          voiceSettings: newSettings
-        });
-      } else {
-        await base44.entities.UserPreferences.create({
-          voiceSettings: newSettings
-        });
-      }
+      await glyphlockWrite('preferences_save', {
+        voice_settings: newSettings,
+        intent: 'save_user_voice_preferences',
+      });
     } catch (e) {
       console.error("Failed to save preferences:", e);
     }
@@ -222,17 +217,15 @@ When answering questions, check the FAQ knowledge base first for common question
   const saveCurrentConversation = async (convId = null) => {
     try {
       const title = messages.find(m => m.role === 'user')?.text.slice(0, 50) || 'New Chat';
-      const convData = {
+      const saved = await glyphlockWrite('conversation_save', {
+        id: convId || null,
         title,
         messages,
-        last_message_at: new Date().toISOString()
-      };
+        intent: convId ? 'update_private_conversation' : 'create_private_conversation',
+      });
 
-      if (convId) {
-        await base44.entities.Conversation.update(convId, convData);
-      } else {
-        const newConv = await base44.entities.Conversation.create(convData);
-        setCurrentConvId(newConv.id);
+      if (!convId && saved?.id) {
+        setCurrentConvId(saved.id);
       }
       await loadConversations();
     } catch (e) {
