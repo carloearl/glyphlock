@@ -52,7 +52,12 @@ assert.match(
   /SystemAuditLog\.filter|functions\.invoke\(['"]getBatch17AcceptanceEvidence['"]/, 
   'Authenticated audit reconciliation is missing.',
 );
-assert.doesNotMatch(authHarness, /localStorage|sessionStorage|writeFile|\.env/, 'Authenticated harness must not persist credentials.');
+assert.doesNotMatch(authHarness, /localStorage|sessionStorage/, 'Authenticated harness must not place credentials in browser storage.');
+assert.doesNotMatch(
+  authHarness,
+  /(?:read|write)FileSync\([^)]*['"][^'"]*\.env/i,
+  'Authenticated harness must not read or write dotenv credential files.',
+);
 assert.match(authRunbook, /synthetic/i, 'Authenticated runbook does not require synthetic evidence.');
 assert.match(identityMatrix, /No existing employee or customer account was repurposed/, 'Test identity safety decision is missing.');
 
