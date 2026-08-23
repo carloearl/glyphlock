@@ -35,7 +35,7 @@ function read(relative) {
 function walk(dir, output = []) {
   if (!fs.existsSync(dir)) return output;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (['node_modules', 'dist', 'build', 'artifacts', 'internal_index'].includes(entry.name)) continue;
+    if (['node_modules', 'dist', 'build', 'artifacts'].includes(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, output);
     else if (SOURCE_EXTENSIONS.has(path.extname(entry.name))) output.push(full);
