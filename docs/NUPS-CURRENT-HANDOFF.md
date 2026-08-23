@@ -127,7 +127,7 @@ Core component checks include write-gateway, frozen financial rules, environment
 
 ## Open domain state
 
-- `NUPS-0002`: controlled app-wide migration remains `161/287`; live NUPS operational migration is complete.
+- `NUPS-0002`: controlled app-wide migration is `120 / 287`; live NUPS and classified live non-NUPS GlyphLock business migrations are complete.
 - `NUPS-0009`: authenticated private-retrieval and expiry proof pending.
 - `NUPS-0010`: resolved through governed `IntegrationMaturity` records; individual integrations retain their evidence-backed limitations.
 - `NUPS-0011`: private boundary is implemented; authenticated E2E proof pending.
@@ -144,8 +144,8 @@ No production publish is authorized by this handoff.
 
 ## Batch 18 app-wide persistence update
 
-Batch 18 reduced the controlled frontend write inventory from **161/287** to **undefined/287** by migrating the 41 remaining live GlyphLock business writes outside NUPS. No new bypass was introduced. Live NUPS and live general-GlyphLock business bypasses are now both zero under the verified classification.
+Batch 18 reduced the controlled frontend write inventory from **161 / 287** to **120 / 287** by migrating the 41 remaining live GlyphLock business writes outside NUPS. No new bypass was introduced. Live NUPS and live general-GlyphLock business bypasses are now both zero under the verified classification.
 
-The new server boundary preserves public-intake restrictions, user ownership, partner scope, governance retention, one-time public completion capabilities, idempotent service usage, and safe audit evidence. The remaining direct calls are intentionally classified audit/domain/telemetry/non-live/internal paths.
+The `glyphlockWriteGateway` server boundary preserves public-intake restrictions, user ownership, partner scope, governance retention, idempotent service usage, and safe audit evidence. Its explicit scope families are `GOVERNANCE`, `PLATFORM_ADMIN`, `PUBLIC_INTAKE`, `USER_PRIVATE`, `CONTENT_OWNER`, `PARTNER`, and `GLOBAL_SYSTEM`. The remaining 120 direct calls are intentionally classified audit/domain/telemetry/non-live/legacy/internal paths.
 
 Batch 17's authenticated workaround is available at `/Batch17Acceptance`: five verified disposable users can complete their role-specific tests through separate browser sessions without extracting bearer tokens into the CLI. Human email verification and physical-device/provider acceptance remain required, so the production release verdict stays **NO-GO**.
