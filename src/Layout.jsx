@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import SecurityMonitor from "@/components/SecurityMonitor";
 import NebulaLayer from "@/components/global/NebulaLayer";
 import CursorOrb from "@/components/global/CursorOrb";
@@ -16,7 +16,7 @@ import ScreenReaderAnnouncer from "@/components/accessibility/ScreenReaderAnnoun
 
 
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = useState(null);
+  const { user, logout, navigateToLogin } = useAuth();
   const [a11yOpen, setA11yOpen] = useState(false);
   const [ambientReady, setAmbientReady] = useState(false);
   const location = useLocation();
@@ -27,21 +27,6 @@ export default function Layout({ children, currentPageName }) {
     const cancel = window.cancelIdleCallback || window.clearTimeout;
     const id = schedule(() => setAmbientReady(true));
     return () => cancel(id);
-  }, []);
-
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const isAuthenticated = await base44.auth.isAuthenticated();
-        if (isAuthenticated) {
-          const userData = await base44.auth.me();
-          setUser(userData);
-        }
-      } catch (err) {
-        console.error("Failed to get user:", err);
-      }
-    })();
   }, []);
 
 
@@ -95,23 +80,10 @@ export default function Layout({ children, currentPageName }) {
   }, [location.pathname]);
 
 
-  const handleLogout = async () => {
-    try {
-      await base44.auth.logout();
-      setUser(null);
-    } catch (err) {
-      console.error("Logout failed:", err);
-    }
-  };
+  const handleLogout = () => logout();
 
 
-  const handleLogin = async () => {
-    try {
-      await base44.auth.redirectToLogin();
-    } catch (err) {
-      console.error("Login redirect failed:", err);
-    }
-  };
+  const handleLogin = () => navigateToLogin();
 
 
   return (
