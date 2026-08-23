@@ -1,6 +1,6 @@
 # NUPS Current Engineering Handoff
 
-**Authoritative through:** Batch 17 execution, 2026-08-22  
+**Authoritative through:** Batch 17 execution, 2026-08-23  
 **App:** Main GlyphLock / NUPS  
 **Base44 App ID:** `697a087fb354faebb72df54b`  
 **Repository:** `carloearl/glyphlock`  
@@ -99,6 +99,8 @@ docs/runbooks/NUPS-BATCH17-AUTHENTICATED-ACCEPTANCE.md
 
 Tokens are supplied only as runtime environment variables. No `.env` file is used.
 
+Batch 17 prepared five disposable Base44 users and matching DEMO/SANDBOX NUPS roles without changing any real staff account. Base44 required the emailed OTP before password login, and that one-time-code step could not be submitted through the automated execution boundary. No bearer token was created and no authenticated result was inferred. All five NUPS test identities were suspended, their test window was closed, temporary credentials were removed, and the isolated Venue B configuration was disabled.
+
 ## DJ architecture
 
 One `DJSessionProvider` owns the persistent mixer session. Deck state, song objects, provider health, queue, crossfade, and command acknowledgements survive internal view changes. Spotify and Apple Music remain discovery/import metadata sources, not venue playback sources. Club TV and external Fable surfaces remain visual or muted secondary displays rather than duplicate audio owners.
@@ -133,4 +135,6 @@ See `KNOWN_ISSUES.md` for acceptance standards and history.
 
 ## Production boundary
 
-No production publish is authorized by this handoff. A release requires a separate DACO directive after authenticated evidence tests, physical terminal commissioning, browser workflow acceptance, DJ provider soak, and GitHub CI evidence reach the required release verdict.
+No production publish is authorized by this handoff.
+
+**Current release verdict: NO-GO.** The non-interactive engineering suite is green, but the five-session authenticated protected-evidence test, real physical terminal commissioning, full authenticated venue browser journey, and real-provider 30-minute DJ soak are not complete. A release requires a separate DACO directive after those acceptance items and the ending-commit GitHub Actions run pass.
