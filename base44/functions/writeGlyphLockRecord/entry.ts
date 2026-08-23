@@ -349,10 +349,10 @@ const POLICIES = {
 const ADMIN_ROLES = new Set(['admin','PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER','SOVEREIGN']);
 const IMMUTABLE_FIELDS = new Set(['id','created_date','updated_date','created_by','created_by_id']);
 const PUBLIC_FIELDS: Record<string, Set<string>> = {
-  Consultation: new Set(['name','full_name','first_name','last_name','email','phone','company','organization','job_title','website','service','service_type','project_type','project_description','project_details','message','budget','budget_range','timeline','preferred_contact','source','referral_source','consent','privacy_consent','terms_accepted','availability']),
-  ContactEvent: new Set(['name','full_name','first_name','last_name','email','phone','subject','message','category','source','page_url','referrer','utm_source','utm_medium','utm_campaign','event_type','contact_method','consent','privacy_consent','metadata']),
-  LLMFeedback: new Set(['rating','feedback','comment','model','model_id','feature','conversation_id','message_id','category','helpful','reason','metadata']),
-  ServiceUsage: new Set(['service_name','service','feature','action','units','request_id','idempotency_key','session_id','metadata']),
+  Consultation: new Set(["budget_range","timeline","organization_name","contact_name","contact_email"]),
+  ContactEvent: new Set(["subject","message","contact_email","contact_name"]),
+  LLMFeedback: new Set(["rating","model","conversation_id","provider_id","user_email"]),
+  ServiceUsage: new Set(["service_name","request_id","session_id","user_email"]),
 };
 const PUBLIC_LIMITS: Record<string, number> = { Consultation: 5, ContactEvent: 20, LLMFeedback: 20, ServiceUsage: 120 };
 const PUBLIC_CONTACT_UPDATE_FIELDS = new Set(['email_sent','notification_sent','delivery_status','submission_status','external_reference','notification_error']);
