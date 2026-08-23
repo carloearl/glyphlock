@@ -83,6 +83,11 @@
     },
     "archive_reason": {
       "type": "string"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "History-preserving archive flag. Normal delete UI must not erase retained governance/audit evidence."
     }
   },
   "required": [

@@ -156,6 +156,16 @@
     "model": {
       "type": "string",
       "description": "AI model used for generation"
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_by": {
+      "type": "string"
+    },
+    "archive_reason": {
+      "type": "string"
     }
   },
   "required": [

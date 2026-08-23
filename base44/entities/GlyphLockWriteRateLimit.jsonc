@@ -1,0 +1,54 @@
+{
+  "name": "GlyphLockWriteRateLimit",
+  "type": "object",
+  "description": "Server-only hourly rate-limit buckets for public governed-write endpoints.",
+  "properties": {
+    "bucket_key": {
+      "type": "string"
+    },
+    "action": {
+      "type": "string"
+    },
+    "window_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "count": {
+      "type": "number",
+      "default": 0
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "bucket_key",
+    "action",
+    "window_start",
+    "count",
+    "expires_at"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "admin"
+      }
+    }
+  }
+}

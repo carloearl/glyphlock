@@ -36,6 +36,15 @@
     "ip_address": {
       "type": "string",
       "description": "Sender IP for security"
+    },
+    "public_update_token_hash": {
+      "type": "string",
+      "description": "Server-only SHA-256 hash of a short-lived anonymous submission update token. Never return to clients."
+    },
+    "public_update_token_expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Expiry for anonymous same-submission delivery-status updates."
     }
   },
   "required": [

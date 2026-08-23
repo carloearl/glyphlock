@@ -1,7 +1,7 @@
 {
   "name": "ArchitecturalDecisionRecord",
   "type": "object",
-  "description": "DACO Directive 003 \u2014 Architectural Decision Register (ADR). Append-only record of every material architectural decision in NUPS. Historical ADRs shall never be deleted; superseded ADRs reference their replacement. Authority: DACO / GlyphLock LLC.",
+  "description": "DACO Directive 003 — Architectural Decision Register (ADR). Append-only record of every material architectural decision in NUPS. Historical ADRs shall never be deleted; superseded ADRs reference their replacement. Authority: DACO / GlyphLock LLC.",
   "properties": {
     "adr_number": {
       "type": "string",
@@ -42,7 +42,7 @@
         "Integration Architecture",
         "Governance"
       ],
-      "description": "Material decision area (Directive 003 \u00a7Requirement)."
+      "description": "Material decision area (Directive 003 §Requirement)."
     },
     "decision": {
       "type": "string",
@@ -126,7 +126,7 @@
       "items": {
         "type": "string"
       },
-      "description": "DACO directives, BPAAA sections, or external references the ADR is bound to (e.g. 'DACO Directive 003', 'BPAA-NUPS-ACCT-001 \u00a73.1')."
+      "description": "DACO directives, BPAAA sections, or external references the ADR is bound to (e.g. 'DACO Directive 003', 'BPAA-NUPS-ACCT-001 §3.1')."
     },
     "supersedes": {
       "type": "string",
@@ -134,7 +134,7 @@
     },
     "superseded_by": {
       "type": "string",
-      "description": "ADR number that replaced this entry, set when status transitions to Superseded. Historical record \u2014 never deleted."
+      "description": "ADR number that replaced this entry, set when status transitions to Superseded. Historical record — never deleted."
     },
     "supersession_notes": {
       "type": "string",
@@ -147,6 +147,21 @@
       }
     },
     "notes": {
+      "type": "string"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "History-preserving archive flag. Normal delete UI must not erase retained governance/audit evidence."
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_by": {
+      "type": "string"
+    },
+    "archive_reason": {
       "type": "string"
     }
   },
