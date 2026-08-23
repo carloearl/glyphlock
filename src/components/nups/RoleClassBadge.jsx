@@ -9,6 +9,7 @@
 
 import React, { useEffect, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { isSovereign } from "@/lib/nups/sovereign";
 import { resolveRoleClass } from "@/lib/nups/roleClass";
 
@@ -20,18 +21,22 @@ const TONE = {
 };
 
 export default function RoleClassBadge() {
+  const { user, isAuthenticated, isLoadingAuth } = useAuth();
   const [cls, setCls] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) return;
-        const u = await base44.auth.me();
+        if (isLoadingAuth) return;
+        if (!isAuthenticated || !user) {
+          if (!cancelled) setCls(null);
+          return;
+        }
+        const u = user;
         let nu = null, sov = false;
         try {
-          const matches = await base44.entities.NUPSUser.filter({ created_by: u.email });
+          const matches = await base44.entities.NUPSUser.filter({ platform_email: u.email });
           nu = (matches || [])[0] || null;
           sov = (matches || []).some(isSovereign);
         } catch { /* fall through */ }
@@ -39,7 +44,7 @@ export default function RoleClassBadge() {
       } catch { /* silent */ }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [isAuthenticated, isLoadingAuth, user]);
 
   if (!cls) return null;
   const tone = TONE[cls] || TONE.STAFF;
