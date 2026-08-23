@@ -3,6 +3,8 @@ import fs from 'node:fs';
 const ORIGIN = 'https://glyphlock.io';
 const ATTEMPTS = 6;
 const RETRY_DELAY_MS = 10_000;
+const REQUEST_TIMEOUT_MS = 8_000;
+const MAX_BODY_BYTES = 256 * 1024;
 
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/151.0.0.0 Safari/537.36';
 const CRAWLER_UA = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)';
@@ -17,19 +19,52 @@ function appendSummary(markdown) {
   else process.stdout.write(`${markdown}\n`);
 }
 
-async function request(pathname, userAgent) {
-  const response = await fetch(new URL(pathname, ORIGIN), {
-    method: 'GET',
-    redirect: 'manual',
-    headers: {
-      'User-Agent': userAgent,
-      Accept: 'text/html,application/xhtml+xml',
-      'Cache-Control': 'no-cache',
-      Pragma: 'no-cache',
-    },
-  });
+async function readBodyBounded(response) {
+  if (!response.body) return '';
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
 
-  const body = await response.text();
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_BODY_BYTES) {
+        await reader.cancel('verification body exceeded bounded limit').catch(() => undefined);
+        throw new Error(`Response body exceeded ${MAX_BODY_BYTES} bytes`);
+      }
+      chunks.push(Buffer.from(value));
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  return Buffer.concat(chunks, total).toString('utf8');
+}
+
+async function request(pathname, userAgent, { readBody = false } = {}) {
+  let response;
+  try {
+    response = await fetch(new URL(pathname, ORIGIN), {
+      method: 'GET',
+      redirect: 'manual',
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      headers: {
+        'User-Agent': userAgent,
+        Accept: 'text/html,application/xhtml+xml',
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown network failure';
+    throw new Error(`Request ${pathname} failed within ${REQUEST_TIMEOUT_MS}ms: ${message}`);
+  }
+
+  const body = readBody ? await readBodyBounded(response) : '';
+  if (!readBody && response.body) await response.body.cancel().catch(() => undefined);
+
   return {
     status: response.status,
     contentType: response.headers.get('content-type') || '',
@@ -47,7 +82,7 @@ function requireCheck(condition, message, details = '') {
 }
 
 async function verifyOnce() {
-  const publicPage = await request('/About', BROWSER_UA);
+  const publicPage = await request('/About', BROWSER_UA, { readBody: true });
   requireCheck(
     publicPage.status >= 200 && publicPage.status < 400,
     'Public route did not remain available',
