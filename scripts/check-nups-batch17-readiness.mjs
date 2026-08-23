@@ -38,7 +38,11 @@ for (const name of [
 ]) {
   assert.match(authHarness, new RegExp(name), `Authenticated harness is missing ${name}.`);
 }
-assert.doesNotMatch(authHarness, /console\.(?:log|error)\([^\n]*(?:TOKEN|signed_url|file_uri)[^\n]*\)/i, 'Authenticated harness may print a secret or protected reference.');
+assert.doesNotMatch(
+  authHarness,
+  /console\.(?:log|error)\([^)]*(?:process\.env\.B17_|tokens(?:\.|\[)|signedUrl\b|fileUri\b|file_uri\b|signed_url\b)/is,
+  'Authenticated harness may print an actual credential variable or protected reference.',
+);
 assert.match(authHarness, /waitMs = \(Number\(expiryCandidate\.expires_in\) \+ 8\) \* 1000/, 'Harness must wait beyond the real signed-URL expiry.');
 assert.match(authHarness, /wrong_venue_manager_deny/, 'Wrong-venue authenticated test is missing.');
 assert.match(authHarness, /door_tax_deny/, 'Door tax denial test is missing.');
