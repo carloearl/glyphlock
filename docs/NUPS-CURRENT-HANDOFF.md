@@ -12,6 +12,7 @@ This document supersedes `src/docs/HANDOFF.md`, which is retained only as the hi
 
 ```text
 Original direct-write baseline:       287
+Controlled write migration:           161 / 287
 Current grandfathered frontend calls: 161
 Total removed:                        126
 New bypasses introduced:                0
