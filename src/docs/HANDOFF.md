@@ -1,3 +1,7 @@
+> **HISTORICAL / SUPERSEDED**
+>
+> This handoff records an earlier OMEGA implementation state and is retained only as historical evidence. It is not the current NUPS status. Use `docs/NUPS-CURRENT-HANDOFF.md`, `INVARIANTS.md`, `ARCHITECTURE.md`, `CONTEXT.md`, `KNOWN_ISSUES.md`, accepted ADRs, and current verified code.
+
 # NUPS DACO OMEGA v6.0 Run — Handoff
 
 > **HISTORICAL / SUPERSEDED.** This document records the May 2026 OMEGA v6.0 run and is not the current NUPS engineering state. Use `docs/NUPS-CURRENT-HANDOFF.md`, `INVARIANTS.md`, `ARCHITECTURE.md`, `CONTEXT.md`, and `KNOWN_ISSUES.md` for the live authoritative handoff.
