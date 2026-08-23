@@ -228,6 +228,9 @@ Batch 17 installed `npm run test:nups-batch17-authenticated`, which requires fiv
 
 Distinct deployed authenticated sessions remain the exact missing proof.
 
+### Batch 17 acceptance status
+The repository now includes `test:nups-batch17-authenticated`, a secret-safe manual harness that requires distinct real Base44 sessions and synthetic protected evidence. At Batch 17 start, the connected environment did not expose the complete manager/door/ordinary-staff/second-venue session matrix, so no authenticated result has been fabricated. This issue remains open until the harness passes and the exact same signed URL is rejected after expiry.
+
 ---
 
 ## NUPS-0010 — Integration maturity is not uniformly persisted
@@ -279,6 +282,9 @@ docs/runbooks/NUPS-BATCH17-AUTHENTICATED-ACCEPTANCE.md
 
 ### Remaining resolution
 Run the token-driven test with five distinct authenticated users to prove authorized retrieval, wrong-role denial, wrong-venue denial, authenticated signed-URL use, and expiry. Anonymous denial is already proven. Do not re-enable raw archived media viewing until those authenticated tests pass.
+
+### Batch 17 acceptance harness
+`docs/runbooks/NUPS-BATCH17-AUTHENTICATED-ACCEPTANCE.md` and `npm run test:nups-batch17-authenticated` define the required same-venue allow, door-limited allow, wrong-role denial, wrong-venue denial, global-role behavior, 120-second expiry and sanitized audit reconciliation. The issue remains open until those tests execute with distinct authenticated sessions.
 
 ---
 
