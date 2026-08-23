@@ -7,6 +7,12 @@ on:
     paths:
       - cloudflare/glyphlock-edge-guard/**
       - .github/workflows/cloudflare-edge-guard-preflight.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - cloudflare/glyphlock-edge-guard/**
+      - .github/workflows/cloudflare-edge-guard-preflight.yml
   workflow_dispatch:
 
 permissions:
