@@ -478,7 +478,10 @@ Deno.serve(async (req) => {
       const serviceName = text(body.service_name, 80);
       if (!SERVICE_NAMES.has(serviceName)) throw new HttpError(400, 'INVALID_SERVICE', 'Unknown service name.');
       const sessionId = text(body.session_id, 160);
-      const subjectKey = user?.email ? `user:${String(user.email).toLowerCase()}` : `anon:${await sha256(`${anonymousRef}|${sessionId}`)}`;
+      // Anonymous identity is server-derived from the request fingerprint. A
+      // browser-generated session id is retained only as non-authoritative
+      // diagnostics; clearing storage must not mint another free trial.
+      const subjectKey = user?.email ? `user:${String(user.email).toLowerCase()}` : anonymousRef;
       const rows = await E.ServiceUsage.filter({ subject_key: subjectKey, service_name: serviceName }, '-created_date', 5).catch(() => []);
       const before = rows[0] || null;
       const usageCount = Number(before?.usage_count || 0) + 1;
@@ -533,7 +536,14 @@ Deno.serve(async (req) => {
       const imageFileHash = Array.from(new Uint8Array(fileDigest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
       const immutableHash = await sha256(`${imageFileHash}|${JSON.stringify(stable(before.hotspots || []))}`);
       const after = await E.InteractiveImage.update(before.id, { status: 'active', immutableHash, imageFileHash, published: bool(body.published) });
-      await E.ImageHashLog.create({ imageId: before.id, imageUrl: fileUrl, immutableHash, imageFileHash, hotspotsCount: (before.hotspots || []).length, finalizedBy: user.email, status: 'finalized' }).catch(() => null);
+      await E.ImageHashLog.create({
+        imageId: before.id,
+        hash: immutableHash,
+        imageFileHash,
+        hotspotsSnapshot: JSON.stringify(stable(before.hotspots || [])),
+        ownerEmail: user.email,
+        description: `Finalized interactive image with ${(before.hotspots || []).length} hotspot(s).`,
+      }).catch(() => null);
       value = { image: after, hash: immutableHash, imageFileHash, hotspotsCount: (before.hotspots || []).length };
       audit = { ...audit, entity_name: 'InteractiveImage', record_id: before.id, operation: 'update', scope_type: 'CONTENT_OWNER', owner_ref: before.ownerEmail || before.owner_id, before: { status: before.status, hotspot_count: before.hotspots?.length || 0 }, after: { status: 'active', hotspot_count: before.hotspots?.length || 0, immutable_hash: immutableHash }, fields_changed: ['status', 'immutableHash', 'imageFileHash', 'published'], metadata: { hotspot_count: before.hotspots?.length || 0 }, severity: 'high' };
     } else if (action === 'interactive_image_archive') {
@@ -553,6 +563,13 @@ Deno.serve(async (req) => {
       const records = Array.isArray(body.records) ? body.records.slice(0, 100) : [body.record || {}];
       if (!records.length) throw new HttpError(400, 'QR_RECORD_REQUIRED', 'QR generation record is required.');
       const creator = user?.email || anonymousRef;
+      const recent = await E.QRGenHistory.filter({
+        creator_id: creator,
+        created_date: { $gte: new Date(Date.now() - 60 * 60 * 1000).toISOString() },
+      }, '-created_date', 250).catch(() => []);
+      if ((recent?.length || 0) + records.length > 200) {
+        throw new HttpError(429, 'QR_RATE_LIMITED', 'Hourly QR generation limit exceeded.');
+      }
       const results = [];
       for (const input of records) {
         const payload = text(input.payload, 10000);
@@ -601,6 +618,63 @@ Deno.serve(async (req) => {
         await E.QrPreview.delete(before.id); value = { deleted: true, id: before.id };
         audit = { ...audit, entity_name: 'QrPreview', record_id: before.id, operation: 'delete_cache', scope_type: 'USER_PRIVATE', owner_ref: before.user_id, before: { code_id: before.code_id, vaulted: false }, fields_changed: [], metadata: { deleted_cache: true } };
       }
+    } else if (action === 'partner_document_list') {
+      requireUser(user);
+      const partner = await resolvePartner(E, user);
+      if (!partner && !isAdmin(user, nups)) throw new HttpError(403, 'PARTNER_REQUIRED', 'Active partner account required.');
+      const partnerId = partner?.id || 'platform-admin';
+      const [documents, accessRows] = await Promise.all([
+        E.PartnerDocument.list('-created_date', 500),
+        E.PartnerDocumentAccess.filter({ partner_id: partnerId }, '-last_action_at', 500).catch(() => []),
+      ]);
+      const accessByDocument = new Map((accessRows || []).map((row: any) => [row.document_id, row]));
+      value = (documents || [])
+        .filter((document: any) => isAdmin(user, nups) || !document.partner_id || document.partner_id === partnerId)
+        .map((document: any) => {
+          const access = accessByDocument.get(document.id);
+          return {
+            id: document.id,
+            document_name: document.document_name,
+            document_type: document.document_type,
+            description: document.description,
+            partner_id: document.partner_id || null,
+            is_confidential: Boolean(document.is_confidential),
+            requires_signature: Boolean(document.requires_signature),
+            signed: Boolean(document.signed),
+            signed_date: document.signed_date || null,
+            expiry_date: document.expiry_date || null,
+            version: document.version || '1.0',
+            viewed: access?.viewed === true,
+            viewed_date: access?.viewed_at || null,
+            created_date: document.created_date,
+          };
+        });
+      audit = { ...audit, entity_name: 'PartnerDocument', record_id: `catalog:${partnerId}`, operation: 'access', scope_type: 'PARTNER', owner_ref: partnerId, after: { record_count: value.length }, fields_changed: [], metadata: { partner_id: partnerId, record_count: value.length } };
+    } else if (action === 'marketing_asset_list') {
+      requireUser(user);
+      const partner = await resolvePartner(E, user);
+      if (!partner && !isAdmin(user, nups)) throw new HttpError(403, 'PARTNER_REQUIRED', 'Active partner account required.');
+      const partnerId = partner?.id || 'platform-admin';
+      const tier = partner?.tier || 'admin';
+      const assets = await E.MarketingAsset.list('-created_date', 500);
+      value = (assets || [])
+        .filter((asset: any) => asset.is_active !== false)
+        .filter((asset: any) => isAdmin(user, nups) || !Array.isArray(asset.partner_tier_access) || asset.partner_tier_access.length === 0 || asset.partner_tier_access.includes(tier))
+        .map((asset: any) => ({
+          id: asset.id,
+          asset_name: asset.asset_name,
+          asset_type: asset.asset_type,
+          description: asset.description,
+          thumbnail_url: asset.thumbnail_url,
+          file_size: asset.file_size,
+          file_format: asset.file_format,
+          partner_tier_access: asset.partner_tier_access || [],
+          download_count: Number(asset.download_count || 0),
+          is_active: asset.is_active !== false,
+          tags: asset.tags || [],
+          created_date: asset.created_date,
+        }));
+      audit = { ...audit, entity_name: 'MarketingAsset', record_id: `catalog:${partnerId}`, operation: 'access', scope_type: 'PARTNER', owner_ref: partnerId, after: { record_count: value.length }, fields_changed: [], metadata: { partner_id: partnerId, record_count: value.length } };
     } else if (action === 'partner_document_access') {
       requireUser(user);
       const partner = await resolvePartner(E, user);
