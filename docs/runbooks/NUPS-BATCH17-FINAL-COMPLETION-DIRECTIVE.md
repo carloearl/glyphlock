@@ -43,7 +43,7 @@ After verification:
 
 The final run requires five distinct Base44 sessions, one for each test identity and role boundary.
 
-Load five authenticated Base44 session tokens through an approved secret manager or ephemeral local process environment. Do not paste them into the agent conversation.
+Load five distinct Base44 sessions as authenticated session tokens through an approved secret manager or ephemeral local process environment. Do not paste them into the agent conversation.
 
 Required runtime variables:
 
