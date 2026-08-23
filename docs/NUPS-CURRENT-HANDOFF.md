@@ -138,3 +138,12 @@ See `KNOWN_ISSUES.md` for acceptance standards and history.
 No production publish is authorized by this handoff.
 
 **Current release verdict: NO-GO.** The non-interactive engineering suite is green, but the five-session authenticated protected-evidence test, real physical terminal commissioning, full authenticated venue browser journey, and real-provider 30-minute DJ soak are not complete. A release requires a separate DACO directive after those acceptance items and the ending-commit GitHub Actions run pass.
+
+
+## Batch 18 app-wide persistence update
+
+Batch 18 reduced the controlled frontend write inventory from **161/287** to **undefined/287** by migrating the 41 remaining live GlyphLock business writes outside NUPS. No new bypass was introduced. Live NUPS and live general-GlyphLock business bypasses are now both zero under the verified classification.
+
+The new server boundary preserves public-intake restrictions, user ownership, partner scope, governance retention, one-time public completion capabilities, idempotent service usage, and safe audit evidence. The remaining direct calls are intentionally classified audit/domain/telemetry/non-live/internal paths.
+
+Batch 17's authenticated workaround is available at `/Batch17Acceptance`: five verified disposable users can complete their role-specific tests through separate browser sessions without extracting bearer tokens into the CLI. Human email verification and physical-device/provider acceptance remain required, so the production release verdict stays **NO-GO**.

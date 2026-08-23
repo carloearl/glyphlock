@@ -54,6 +54,12 @@ The raw count is therefore not equivalent to unresolved NUPS production risk.
 ### Required resolution
 The live NUPS operational migration objective is met. Continue monotonic reduction only under separately scoped work for app-wide GlyphLock persistence, explicit audit/event architecture, or demo/seed/legacy maintenance. Do not delete retained evidence merely to lower the number.
 
+
+### Batch 18 app-wide governance update
+Batch 18 migrated 41 remaining live GlyphLock business mutations outside NUPS through the server-governed `writeGlyphLockRecord` boundary. The direct-write inventory is now **undefined/287**, with no new bypasses, zero live high-risk NUPS bypasses, zero live-medium NUPS bypasses, and zero classified live GlyphLock business bypasses.
+
+The retained undefined calls are explicit security/admin audit events, domain events, operational telemetry, demo/seed/sandbox paths, legacy/unmounted compatibility, or canonical gateway/audit internals. They remain classified rather than deleted for counter reduction. Public intake now uses schema-derived allow-lists, safe status defaults, rate limiting, and an expiring one-time completion capability. User/private content is ownership checked; partner content is partner scoped; governance deletion creates retained evidence; service usage rejects negative values and supports idempotent replay.
+
 ---
 
 ## NUPS-0003 — Legacy entertainer payroll naming/model remains in historical code

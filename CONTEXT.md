@@ -206,3 +206,14 @@ Batch 17 is an operational acceptance and release-gate run. It must not be conve
 
 Current handoff: `docs/NUPS-CURRENT-HANDOFF.md`.
 
+
+
+## Batch 18 current persistence state
+
+- Controlled direct-write inventory: **undefined/287**.
+- Live high-risk NUPS business bypasses: **0**.
+- Live-medium NUPS business bypasses: **0**.
+- Classified live GlyphLock business bypasses outside NUPS: **0**.
+- Forty-one app-wide business calls now use `writeGlyphLockRecord` through `glyphlockWrite`.
+- Public consultation/contact intake is allow-listed and rate-limited; private chat/preferences are caller-owned; creative assets are owner/admin scoped; partner records are partner/admin scoped; usage metering is server governed.
+- The retained direct calls are evidence, telemetry, non-live utilities, compatibility paths, or gateway internals.

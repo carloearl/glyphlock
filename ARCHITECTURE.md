@@ -343,3 +343,12 @@ The DJ runtime uses one persistent session/deck state across mixer, visualizer, 
 
 Current authoritative handoff: `docs/NUPS-CURRENT-HANDOFF.md`.
 
+
+
+## 15. Batch 18 app-wide write governance
+
+The app-wide business-write boundary is `base44/functions/writeGlyphLockRecord/entry.ts`, with schema-derived entity policies in the same function package and the frontend client at `src/lib/glyphlock/glyphlockWrite.js`.
+
+Batch 18 migrated 41 live non-NUPS business writes. Current controlled direct-write state: **undefined/287**. The governed boundary separates platform administration, public intake, self-owned content, partner-scoped content, and owner/admin creative assets rather than applying venue semantics to unrelated records.
+
+Destructive governance and audit actions write append-only retention evidence to `GlyphLockWriteArchive`. Public contact follow-up uses a 15-minute, one-time, hash-stored `PublicMutationGrant`; the capability remains memory-only in the browser. Security and protected-reference fields are removed from mutation data and audit metadata.
