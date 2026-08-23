@@ -113,7 +113,7 @@ export default function InteractiveSystemMap() {
 
       <div className="mt-5 flex flex-wrap items-center justify-center gap-2 font-mono text-[9px] tracking-[.16em] text-slate-500">
         {layers.map((l, i) => (
-          <React.Fragment key={l.id}>
+          <span key={l.id} className="contents">
             <button
               onClick={() => select(l.id)}
               className="transition-colors hover:text-white"
@@ -122,7 +122,7 @@ export default function InteractiveSystemMap() {
               {l.id}
             </button>
             {i < layers.length - 1 && <span className="text-white/15">→</span>}
-          </React.Fragment>
+          </span>
         ))}
       </div>
     </section>
