@@ -9,6 +9,7 @@ import { base44 } from '@/api/base44Client';
 import { toast } from 'sonner';
 import { Send, CheckCircle } from 'lucide-react';
 import { sendFormNotification, NOTIFICATION_RECIPIENT } from '@/lib/notifications/sendFormNotification';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 
 export default function VerificationIntakeForm() {
   const [formData, setFormData] = useState({
@@ -34,11 +35,11 @@ export default function VerificationIntakeForm() {
     setIsSubmitting(true);
 
     try {
-      // Create consultation record
-      const consultation = await base44.entities.Consultation.create({
-        consultation_id: crypto.randomUUID(),
-        ...formData,
-        status: 'submitted'
+      // Create the public intake through the governed server boundary. The
+      // browser cannot assign payment, review, or administrative state.
+      const consultation = await glyphlockWrite('consultation_submit', {
+        consultation: formData,
+        intent: 'public_verification_intake_submission',
       });
 
       let referenceId = consultation?.consultation_id;
