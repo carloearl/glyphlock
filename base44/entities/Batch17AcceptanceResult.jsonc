@@ -1,0 +1,97 @@
+{
+  "name": "Batch17AcceptanceResult",
+  "type": "object",
+  "description": "Append-only sanitized evidence for one authenticated Batch 17 acceptance assignment. Contains no bearer token, OTP, password, signed URL, file URI, or protected document content.",
+  "properties": {
+    "result_id": {
+      "type": "string"
+    },
+    "run_id": {
+      "type": "string"
+    },
+    "assignment": {
+      "type": "string",
+      "enum": [
+        "VENUE_A_MANAGER",
+        "VENUE_A_DOOR",
+        "VENUE_A_STAFF",
+        "VENUE_B_MANAGER",
+        "GLOBAL_ADMIN",
+        "SIGNED_URL_EXPIRY"
+      ]
+    },
+    "actor_user_id": {
+      "type": "string"
+    },
+    "actor_email": {
+      "type": "string"
+    },
+    "actor_role": {
+      "type": "string"
+    },
+    "actor_venue_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED"
+      ]
+    },
+    "cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "result_id",
+    "run_id",
+    "assignment",
+    "actor_user_id",
+    "actor_email",
+    "actor_role",
+    "status",
+    "cases",
+    "started_at",
+    "completed_at"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}
