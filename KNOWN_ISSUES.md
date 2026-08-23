@@ -187,16 +187,12 @@ Batch 15 changed every identified live frontend and production-backend creation 
 ## NUPS-0008 — Historical handoff documentation is stale relative to live code
 
 **Severity:** MEDIUM  
-**Status:** OPEN — DOC DEBT
+**Status:** RESOLVED — CURRENT HANDOFF PUBLISHED
 
-### Observed
-`src/docs/HANDOFF.md` records an earlier OMEGA state in which `writeEntity()` had few/no migrated callers, mode behavior differed, and several phases were unstarted. The live repository now has gateway CI guards, expanded accounting, mode hooks, audit emitters, VIP/payment systems, and many later changes.
+### Resolution
+`src/docs/HANDOFF.md` is retained as historical evidence but now begins with an explicit **HISTORICAL / SUPERSEDED** notice. The authoritative current handoff is `docs/NUPS-CURRENT-HANDOFF.md` and points to `INVARIANTS.md`, `ARCHITECTURE.md`, `CONTEXT.md`, `KNOWN_ISSUES.md`, current runbooks, verification commands, and the production-release boundary.
 
-### Authority rule
-This historical document is useful evidence, but it ranks below current verified production/code behavior and accepted modern ADR/domain state.
-
-### Required resolution
-Mark the old handoff historical/superseded or publish a current handoff that points to the Layer 3 files.
+Layer 3 documentation was reconciled on 2026-08-22 for the 161/287 controlled write state, canonical guest projection, ADR-0002 audit boundary, NKS2-only sessions, VenueTerminal trust, private evidence, API-secret lifecycle, and remaining authenticated/physical acceptance requirements.
 
 ---
 
@@ -223,24 +219,30 @@ The application already exposed Base44 private-file primitives (`UploadPrivateFi
 
 Batch 15 moved the authorization policy into the `getProtectedEvidence` function package so the deployed function and executable test load the same code. This repaired a cross-function-folder import that caused HTTP 502 at function startup. `npm run check:nups-anonymous-protected-evidence` now proves the deployed endpoint starts and rejects anonymous retrieval with HTTP 401 while returning no protected metadata. The executable matrix proves fail-closed role/classification and cross-venue decisions, including manager same-venue allow, door identity-only allow, and bartender/wrong-venue/tax/biometric denials. It also verifies that contract archives, entertainer credential rosters, transaction evidence search, and W-9 listings do not emit stored protected references as raw links or images. `VIPContract` uploads through `ProtectedEvidence`, resolves contract context server-side, and submits opaque references to the signing function. `npm run check:nups-sensitive-reads` verifies venue scoping for tax, tip, contract, audit, and evidence reads.
 
-Batch 16 reruns these checks inside `check:nups-batch16` and confirms no regression while adding no new public evidence viewer. Distinct deployed authenticated sessions for authorized, wrong-role and wrong-venue actors are still unavailable in the current execution boundary, so authenticated signed-URL issuance and expiry remain the exact missing proof.
+Batch 16 reruns these checks inside `check:nups-batch16` and confirms no regression while adding no new public evidence viewer.
+
+### Batch 17 progress
+A deployed synthetic private upload succeeded using a real multipart `File`. The resulting signed URL denied anonymous access immediately and again after the requested window; no file URI or signed URL was logged. This validates the private anonymous boundary but cannot distinguish authenticated expiry because no authenticated bearer session was available.
+
+Batch 17 installed `npm run test:nups-batch17-authenticated`, which requires five distinct runtime tokens and executes same-venue manager/door allows, door tax/biometric denial, ordinary staff denial, wrong-venue denial, global behavior, authenticated signed-URL use/expiry, and audit reconciliation without printing tokens or URLs. The runner correctly reports BLOCKED until those human-authenticated sessions are supplied.
+
+Distinct deployed authenticated sessions remain the exact missing proof.
 
 ---
 
 ## NUPS-0010 — Integration maturity is not uniformly persisted
 
 **Severity:** MEDIUM  
-**Status:** OPEN
+**Status:** RESOLVED — GOVERNED MATURITY RECORD ACTIVE
 
-### Observed
-The repository has rich integration code (Stripe, OHIP, Drive, QuickBooks-style exports), but current maturity is often represented in UI state or historical notes rather than one authoritative integration-status record.
+### Resolution
+Batch 17 introduced the authoritative `IntegrationMaturity` record keyed by integration, environment, and optional venue. `recordIntegrationMaturity` requires an authenticated integration administrator, denies unauthorized cross-venue writes, rejects secret/private-reference metadata, upserts the current evidence-backed state, and emits `INTEGRATION_MATURITY_RECORDED` security evidence.
 
-### Required resolution
-Persist per-integration/per-environment state using the standard ladder:
+The canonical ladder remains:
 
-`configured → connected → authenticated → request succeeded → response validated → end-to-end verified`
+`configured → connected → authenticated → request_succeeded → response_validated → end_to_end_verified`
 
-Store non-secret evidence and test timestamp. Never promote from settings alone.
+Initial records persist the verified state of Base44 functions, private-file storage, Google Drive, Google Analytics, Notion, GitHub source synchronization, and the VenueTerminal boundary. Known limitations remain explicit and no integration is promoted from configuration alone.
 
 ---
 
@@ -265,8 +267,18 @@ Batch 13 removed direct protected-media links/images from `ContractViewer`, `Con
 ### Batch 15–16 verification
 `getProtectedEvidence` and `scripts/check-protected-evidence-policy.mjs` share the same function-local authorization module. The matrix passes for global, manager, door, ordinary staff, classification, and cross-venue cases; access/denial audit payloads contain references and decision metadata, not file URIs, signed URLs, or document content. The deployed function starts successfully and an anonymous HTTP request is denied with 401. A synthetic private-file URL was also denied to an anonymous fetch immediately, so no public anonymous evidence access was obtained. The test guards every known protected archive/list surface against raw URL rendering. `transactionLookup` requires manager-class NUPS identity, rejects cross-venue evidence searches, and returns evidence-presence metadata rather than raw CustomerIdentity or VerificationMedia records. The VIP signing page uses private uploads and opaque evidence references throughout. Batch 16 includes the complete protected-evidence and sensitive-read suite in its aggregate green check.
 
+### Batch 17 progress
+Synthetic private upload succeeded. A signed URL remained inaccessible to an anonymous request both immediately and after the requested window, confirming that possession of the URL alone did not grant anonymous access. The temporary diagnostic was retired with HTTP 410 after use.
+
+The permanent authenticated runner and runbook are:
+
+```text
+npm run test:nups-batch17-authenticated
+docs/runbooks/NUPS-BATCH17-AUTHENTICATED-ACCEPTANCE.md
+```
+
 ### Remaining resolution
-Run distinct authenticated deployed end-to-end tests proving wrong-role denial, wrong-venue denial, authorized retrieval, and signed-URL expiration. Anonymous denial is already proven. Do not re-enable raw archived media viewing until the authenticated tests pass.
+Run the token-driven test with five distinct authenticated users to prove authorized retrieval, wrong-role denial, wrong-venue denial, authenticated signed-URL use, and expiry. Anonymous denial is already proven. Do not re-enable raw archived media viewing until those authenticated tests pass.
 
 ---
 
