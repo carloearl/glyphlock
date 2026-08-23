@@ -27,19 +27,44 @@ Matching is case-insensitive, ignores trailing and repeated slashes, and handles
 ## Local verification
 
 ```bash
-npm test
+node --check src/index.js
+node --check scripts/preflight.mjs
+node --check scripts/route-pattern.mjs
+node --check scripts/verify-live.mjs
+node --check scripts/rollback.mjs
+node --test
 npx wrangler deploy --dry-run
 ```
 
-## Deployment sequence
+## Trusted delivery sequence
 
-1. Let the pull-request workflow run credential-free source and route-pattern tests. Pull-request code never receives a Cloudflare token.
-2. Merge only after NUPS CI, the credential-free Cloudflare validation, and security review pass.
-3. The merge to trusted `main` automatically runs **Cloudflare Edge Guard Preflight**; it can also be manually dispatched from `main`. Its credentialed job checks protected source hashes before executing.
-4. Confirm the token can read the active `glyphlock.io` zone, proxied apex DNS, Worker scripts/routes, Page Rules, rulesets, and selected cache settings.
-5. Stop if any route pattern that covers the apex or any `glyphlock-edge-guard` script already exists. Scheme-qualified and leading-wildcard patterns are included.
-6. Add and review a separate deployment workflow only after the sanitized inventory reports `safe_to_deploy=true`. Never put an API token in source, workflow output, artifacts, or chat.
-7. After deployment, verify public responses are unchanged, crawler requests to protected paths return 404, and browser responses on protected paths include the noindex/no-store headers.
+1. Pull requests run credential-free Worker, route-pattern, live-verifier, rollback, and unit tests. Pull-request code never receives a Cloudflare token.
+2. Merge only after NUPS CI, credential-free Cloudflare validation, and security review pass.
+3. The merge to trusted `main` automatically runs **Cloudflare Edge Guard Delivery**; it can also be manually dispatched from `main`.
+4. The credentialed preflight job uses the protected `cloudflare-production-preflight` environment and verifies pinned hashes for the inventory and route-pattern sources before executing them.
+5. Preflight inventories the active `glyphlock.io` zone, proxied apex DNS, Worker scripts/routes, Page Rules, rulesets, and selected cache settings.
+6. Deployment stops if any route pattern covers the apex or if any `glyphlock-edge-guard` script already exists. Scheme-qualified and leading-wildcard patterns are included.
+7. Deployment is limited to the exact script `glyphlock-edge-guard` and route `glyphlock.io/*`.
+8. Live verification confirms that browser `/About` remains public, Googlebot requests to `/admin/settlement` and its encoded-path variant return HTTP 404, and protected browser responses receive noindex/no-store headers.
+9. Any deployment or live-verification failure automatically attempts the exact rollback described below and then fails the workflow.
+
+## Exact rollback boundary
+
+The rollback script may delete only:
+
+- Worker route `glyphlock.io/*` when that route references `glyphlock-edge-guard`
+- Worker script `glyphlock-edge-guard`
+
+It refuses to delete the script if a non-target route begins referencing it. It never edits DNS records, SSL/TLS mode, cache rules, Page Rules, rulesets, Base44 configuration, or unrelated Workers.
+
+## Required encrypted secrets
+
+The trusted environment may use these names:
+
+- `CLOUDFLARE_API_TOKEN`, with `CF_API_TOKEN` or `CLOUDFLARE_TOKEN` accepted as aliases
+- `CLOUDFLARE_ACCOUNT_ID`, with `CF_ACCOUNT_ID` accepted as an alias
+
+Preflight derives the authoritative account and zone IDs from the active `glyphlock.io` zone and rejects a mismatched account hint. Never put an API token in source, workflow output, artifacts, issue comments, or chat.
 
 ## Authentication boundary
 

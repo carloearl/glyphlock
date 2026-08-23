@@ -5,6 +5,8 @@ import { routePatternCoversApex } from './route-pattern.mjs';
 const API_ROOT = 'https://api.cloudflare.com/client/v4';
 const ZONE_NAME = 'glyphlock.io';
 const WORKER_NAME = 'glyphlock-edge-guard';
+const REQUEST_TIMEOUT_MS = 8_000;
+const MAX_API_BODY_BYTES = 2 * 1024 * 1024;
 
 const token = [
   process.env.CLOUDFLARE_API_TOKEN,
@@ -30,9 +32,43 @@ function errorSummary(payload) {
     .join('; ');
 }
 
+async function readTextBounded(response) {
+  if (!response.body) return '';
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > MAX_API_BODY_BYTES) {
+        await reader.cancel('Cloudflare API body exceeded preflight limit').catch(() => undefined);
+        throw new Error(`Cloudflare API response exceeded ${MAX_API_BODY_BYTES} bytes.`);
+      }
+      chunks.push(Buffer.from(value));
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  return Buffer.concat(chunks, total).toString('utf8');
+}
+
 async function cloudflare(pathname) {
-  const response = await fetch(`${API_ROOT}${pathname}`, { headers });
-  const text = await response.text();
+  let response;
+  try {
+    response = await fetch(`${API_ROOT}${pathname}`, {
+      headers,
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'unknown network failure';
+    throw new Error(`Cloudflare API ${pathname} did not complete within ${REQUEST_TIMEOUT_MS}ms: ${message}`);
+  }
+
+  const text = await readTextBounded(response);
   let payload;
 
   try {
