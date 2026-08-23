@@ -1,0 +1,75 @@
+{
+  "name": "PublicSubmissionCapability",
+  "type": "object",
+  "description": "Server-only, short-lived one-time capability for a public submitter to update limited delivery fields on the record they just created. The plaintext capability is returned once and never persisted.",
+  "properties": {
+    "capability_id": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string"
+    },
+    "record_id": {
+      "type": "string"
+    },
+    "token_hash": {
+      "type": "string"
+    },
+    "actor_ip_hash": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "used_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "USED",
+        "EXPIRED",
+        "REVOKED"
+      ],
+      "default": "ACTIVE"
+    }
+  },
+  "required": [
+    "capability_id",
+    "entity_name",
+    "record_id",
+    "token_hash",
+    "created_at",
+    "expires_at",
+    "status"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    }
+  }
+}
