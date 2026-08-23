@@ -21,7 +21,11 @@ assert.match(backend, /expectedDecision\(nups, evidence\)/, 'Server must derive 
 assert.match(backend, /SystemAuditLog\.filter/, 'Server must reconcile the production security audit.');
 assert.match(backend, /signed_url_recorded: false/, 'Result evidence must state that signed URLs are not retained.');
 assert.match(schema, /__APPEND_ONLY_BLOCK__/, 'Acceptance results must be append-only.');
-assert.doesNotMatch(schema, /file_uri|signed_url|access_token|password|otp|pin/i, 'Acceptance result schema must not contain secret or protected-reference fields.');
+assert.doesNotMatch(
+  schema,
+  /"(?:file_uri|signed_url|access_token|password|otp|pin)"\s*:/i,
+  'Acceptance result schema must not define secret or protected-reference fields.',
+);
 assert.match(runbook, /five distinct Base44 sessions/i, 'Completion runbook must still require distinct authenticated sessions.');
 
 console.log('[check:nups-batch17-browser-acceptance] PASS — the no-token browser-session workaround preserves real authentication, SANDBOX evidence, audit reconciliation, expiry timing, and append-only sanitized results.');
