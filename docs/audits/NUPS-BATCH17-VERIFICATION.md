@@ -233,3 +233,16 @@ PARTIAL
 ```
 
 The non-interactive implementation and verification work is complete. Required authenticated, physical and interactive acceptance remains unfinished and was not fabricated.
+## GitHub ending-state verification
+
+```text
+ending commit: 3e0c66a3792fc453e1c5c214c39edf99e939da8e
+GitHub main:   3e0c66a3792fc453e1c5c214c39edf99e939da8e
+Actions state: PASS
+checked at:    2026-08-23T05:57:57Z
+```
+
+- `NUPS CI` — status `completed`, conclusion `success`, run `32621597422`
+
+The release verdict does not depend on optimistic interpretation of a missing or pending run. Only an explicit successful workflow conclusion counts as GitHub PASS.
+
