@@ -28,6 +28,20 @@
     "payload_url": {
       "type": "string",
       "description": "HTTPS URL (required when payload_type is url)"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_by": {
+      "type": "string"
+    },
+    "archive_reason": {
+      "type": "string"
     }
   },
   "required": [
