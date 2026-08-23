@@ -120,7 +120,7 @@ export const POLICIES = Object.freeze({
 
 const SENSITIVE_KEY = /(password|passcode|otp|pin(?:_hash)?|secret|token|authorization|cookie|session|file_uri|signed_url|ssn|social_security|tax_id|tin\b|government_id|id_number|thumbprint|fingerprint|biometric|signature_image|private_key|client_secret)/i;
 const IMMUTABLE_KEY = /^(id|created_by|created_by_id|created_date|created_at|owner_id|owner_email|user_id|user_email|platform_email|actor_email|actor_id|venue_id|mode|is_demo|role|permissions?|assigned_to|approved_by|reviewed_by)$/i;
-const PUBLIC_PRIVILEGED_KEY = /(internal|admin|role|permission|assign|approve|review|resolve|owner|actor|created_by|updated_by|venue_id|mode|is_demo|private|secret|token|password|otp|pin|file_uri|signed_url)/i;
+const PUBLIC_PRIVILEGED_KEY = /(^status$|internal|admin|role|permission|assign|approve|review|resolve|owner|actor|created_by|updated_by|venue_id|mode|is_demo|private|secret|token|password|otp|pin|file_uri|signed_url)/i;
 
 export function normalizeRole(actor = {}) {
   return String(actor.nupsRole || actor.platformRole || '').trim();
