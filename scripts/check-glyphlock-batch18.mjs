@@ -5,6 +5,7 @@ const commands = [
   ['npm', ['run', 'check:nups-batch17']],
   ['npm', ['run', 'check:glyphlock-write-governance']],
   ['npm', ['run', 'check:glyphlock-batch18-runtime']],
+  ['npm', ['run', 'check:glyphlock-batch18-documentation']],
   ['npm', ['run', 'check:nups-write-gateway']],
   ['npm', ['run', 'check:nups-isolation']],
   ['npm', ['run', 'audit:entities']],
