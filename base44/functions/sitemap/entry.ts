@@ -43,7 +43,6 @@ const PUBLIC_ROUTES = [
   { path: '/GlyphLockFinancial', priority: 0.7, changefreq: 'monthly' },
   { path: '/NUPSLanding', priority: 0.9, changefreq: 'weekly' },
   { path: '/VideoUpload', priority: 0.5, changefreq: 'monthly' },
-  { path: '/ProviderConsole', priority: 0.5, changefreq: 'monthly' },
   { path: '/Privacy', priority: 0.5, changefreq: 'yearly' },
   { path: '/Terms', priority: 0.5, changefreq: 'yearly' },
   { path: '/Cookies', priority: 0.4, changefreq: 'yearly' },

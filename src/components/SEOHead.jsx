@@ -8,8 +8,8 @@ export default function SEOHead({
   keywords,
   ogTitle,
   ogDescription,
-  image = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
-  ogImage = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/d92107808_glyphlock-3d-logo.png",
+  image = "https://glyphlock.io/glyphlock-logo.png",
+  ogImage = "https://glyphlock.io/glyphlock-social-card.png",
   url,
   type = "website"
 }) {
@@ -27,10 +27,20 @@ export default function SEOHead({
   }) || (normalizeSeoPath(path) === "/" ? "Home" : null);
   const autoData = key ? getSeoData(key) : {};
 
-  const resolvedTitle = title || autoData.title || "GlyphLock | Evidence Infrastructure for Identity, Operations & Proof";
-  const resolvedDescription = description || autoData.description || "GlyphLock connects identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS venue operations, financial accountability, APIs, hardware, and governance through one evidence architecture.";
-  const resolvedOgTitle = ogTitle || autoData.ogTitle || "GlyphLock | Connected Evidence Infrastructure";
-  const resolvedOgDescription = ogDescription || autoData.ogDescription || "From Secure QR and interactive media to automated DJ, NUPS, financial records, SDKs, APIs, hardware, and governance—GlyphLock connects the full operating event.";
+  // Canonical public-route data outranks page-local props so one source controls
+  // title, description, Open Graph, Twitter, and canonical URL consistently.
+  const resolvedTitle = key
+    ? autoData.title
+    : (title || "GlyphLock | Evidence Infrastructure for Identity, Operations & Proof");
+  const resolvedDescription = key
+    ? autoData.description
+    : (description || "Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.");
+  const resolvedOgTitle = key
+    ? resolvedTitle
+    : (ogTitle || title || resolvedTitle);
+  const resolvedOgDescription = key
+    ? resolvedDescription
+    : (ogDescription || description || resolvedDescription);
 
   // Use the page-specific keyword set as the source of truth. Global keywords
   // are a fallback only, preventing stale sitewide terms from leaking into pages.
@@ -46,7 +56,7 @@ export default function SEOHead({
   const resolvedSchemaType = autoData.schemaType || "WebSite";
 
   const siteUrl = "https://glyphlock.io";
-  const resolvedPath = url || autoData.url || path || "/";
+  const resolvedPath = autoData.url || url || path || "/";
   const fullUrl = /^https?:\/\//i.test(resolvedPath)
     ? resolvedPath
     : `${siteUrl}${resolvedPath.startsWith("/") ? resolvedPath : `/${resolvedPath}`}`;
@@ -62,7 +72,7 @@ export default function SEOHead({
       favicon.setAttribute('rel', 'icon');
       document.head.appendChild(favicon);
     }
-    favicon.setAttribute('href', 'https://media.base44.com/images/public/697a087fb354faebb72df54b/9f98e49a1_c867401ee_GLLogo.png');
+    favicon.setAttribute('href', '/glyphlock-logo.png');
     favicon.setAttribute('type', 'image/png');
 
     // Apple touch icon
@@ -72,7 +82,7 @@ export default function SEOHead({
       appleTouchIcon.setAttribute('rel', 'apple-touch-icon');
       document.head.appendChild(appleTouchIcon);
     }
-    appleTouchIcon.setAttribute('href', 'https://media.base44.com/images/public/697a087fb354faebb72df54b/9f98e49a1_c867401ee_GLLogo.png');
+    appleTouchIcon.setAttribute('href', '/glyphlock-logo.png');
 
     // Manifest
     let manifest = document.querySelector('link[rel="manifest"]');
@@ -114,23 +124,25 @@ export default function SEOHead({
     document.documentElement.setAttribute('lang', 'en');
 
     // GLYPHLOCK: Enhanced SEO & Security Meta Tags
-    const isAdminPath = /^\/(admin|dashboard|editor|apps|modules|console|sie)/i.test(location.pathname);
-    const robotsContent = isAdminPath 
-      ? 'noindex, nofollow' 
-      : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1';
+    // Index only exact canonical public paths. Every private, internal, test,
+    // duplicate-case, and unknown route fails closed to noindex/no-follow.
+    const isCanonicalPublicPath = Boolean(key && autoData.url === path);
+    const robotsContent = isCanonicalPublicPath
+      ? 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'
+      : 'noindex, nofollow, noarchive, nosnippet';
     
     updateMetaTag('robots', robotsContent);
     updateMetaTag('googlebot', robotsContent);
     updateMetaTag('bingbot', robotsContent);
     updateMetaTag('author', 'GlyphLock LLC');
     updateMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=5.0');
-    updateMetaTag('theme-color', '#000000');
+    updateMetaTag('theme-color', '#020617');
     updateMetaTag('format-detection', 'telephone=no');
     updateMetaTag('apple-mobile-web-app-capable', 'yes');
     updateMetaTag('apple-mobile-web-app-status-bar-style', 'black-translucent');
     updateMetaTag('apple-mobile-web-app-title', 'GlyphLock');
     updateMetaTag('application-name', 'GlyphLock');
-    updateMetaTag('msapplication-TileColor', '#000000');
+    updateMetaTag('msapplication-TileColor', '#020617');
     updateMetaTag('referrer', 'strict-origin-when-cross-origin');
 
     // Geo tags
@@ -398,7 +410,7 @@ export default function SEOHead({
       }
     }
 
-  }, [resolvedTitle, resolvedDescription, resolvedOgTitle, resolvedOgDescription, resolvedKeywords, image, ogImage, fullUrl, type, resolvedSchemaType]);
+  }, [resolvedTitle, resolvedDescription, resolvedOgTitle, resolvedOgDescription, resolvedKeywords, image, ogImage, fullUrl, type, resolvedSchemaType, path]);
 
   return null;
 }

@@ -24,7 +24,9 @@ const fail = (msg) => failures.push(msg);
 // ── Active SEO sources (runtime source of truth + metadata/schema/crawler emitters) ──
 const ACTIVE_SOURCES = [
   'index.html',
+  'src/App.jsx',
   'src/components/SEOHead.jsx',
+  'src/components/seo/PrerenderHints.jsx',
   'src/components/seo/seoData.jsx',
   'src/components/Footer.jsx',
   'src/Layout.jsx',
@@ -176,13 +178,13 @@ if (sitemapXml) {
 if (seoData) {
   const n = norm(seoData);
   const HOME_TITLE = 'GlyphLock | Evidence Infrastructure for Identity, Operations & Proof';
-  const HOME_DESC = 'GlyphLock connects identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS venue operations, financial accountability, APIs, hardware, and governance through one evidence architecture.';
-  const HOME_OG_TITLE = 'GlyphLock | Connected Evidence Infrastructure';
-  const HOME_OG_DESC = 'From Secure QR and interactive media to automated DJ, NUPS, financial records, SDKs, APIs, hardware, and governance—GlyphLock connects the full operating event.';
+  const HOME_DESC = 'Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.';
+  const HOME_OG_TITLE = 'GlyphLock | Evidence Infrastructure for Identity, Operations & Proof';
+  const HOME_OG_DESC = 'Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.';
   const ABOUT_TITLE = 'About GlyphLock | Technology, NUPS & Evidence Architecture';
-  const ABOUT_DESC = 'See how GlyphLock connects identity, secure QR, image carriers, GlyphBot, automated DJ and Fable, NUPS venue operations, GlyphBucks accounting, SDKs, APIs, hardware, OHIP integration work, and governance.';
-  const ABOUT_OG_TITLE = 'About GlyphLock | One Core, Six Domains, One Trust Envelope';
-  const ABOUT_OG_DESC = "Explore GlyphLock's evidence core, six operating domains, trust envelope, technical systems, operating proof, leadership, and integration surfaces.";
+  const ABOUT_DESC = 'GlyphLock builds evidence infrastructure connecting identity, permissions, and financial accountability. Founded 2025 in El Mirage, Arizona.';
+  const ABOUT_OG_TITLE = 'About GlyphLock | Technology, NUPS & Evidence Architecture';
+  const ABOUT_OG_DESC = 'GlyphLock builds evidence infrastructure connecting identity, permissions, and financial accountability. Founded 2025 in El Mirage, Arizona.';
   const ABOUT_H1 = 'Identity. Permission. Operations. Proof.';
   const ABOUT_URL = '/About';
 
@@ -232,6 +234,143 @@ for (const p of expansionSources) {
   const c = sourceContents[p];
   if (c && !c.includes('Nexus Unified POS System')) {
     fail(`NUPS expansion "Nexus Unified POS System" missing in ${p}`);
+  }
+}
+
+
+// ── 9. Prerender/SEO remediation invariants ──
+if (seoData) {
+  const entryMatches = [...seoData.matchAll(/^  "([^"]+)": \{([\s\S]*?)^  \},/gm)];
+  const entries = entryMatches.map((match) => {
+    const block = match[2];
+    const value = (field) => block.match(new RegExp(`^    ${field}:\\s*"([^"]+)"`, 'm'))?.[1] || '';
+    return { key: match[1], title: value('title'), description: value('description'), url: value('url'), ogTitle: value('ogTitle'), ogDescription: value('ogDescription') };
+  });
+  if (entries.length !== 39) fail(`SEO_DATA must contain 39 approved public routes after ProviderConsole removal (found ${entries.length})`);
+  const descriptions = entries.map((entry) => entry.description);
+  if (new Set(descriptions).size !== descriptions.length) fail('Every public route description must be distinct');
+  for (const entry of entries) {
+    if (!entry.title || !entry.description || !entry.url) fail(`Incomplete SEO record: ${entry.key}`);
+    if (entry.ogTitle !== entry.title) fail(`ogTitle must mirror title for ${entry.key}`);
+    if (entry.ogDescription !== entry.description) fail(`ogDescription must mirror description for ${entry.key}`);
+  }
+
+  const suppliedRouteCopy = new Map([
+    ['/', 'Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.'],
+    ['/About', 'GlyphLock builds evidence infrastructure connecting identity, permissions, and financial accountability. Founded 2025 in El Mirage, Arizona.'],
+    ['/Pricing', 'GlyphLock pricing for Secure QR, NUPS venue operations, and API access. Plans for single venues through multi-site operators.'],
+    ['/Solutions', 'Identity and permission workflows, secure QR carriers, venue operations, and API integration — built on a single evidence architecture.'],
+    ['/SDKDocs', 'GlyphLock SDK documentation: authentication, QR generation and verification, webhooks, and error handling.'],
+    ['/NUPSLanding', 'NUPS: venue operations software for check-in, floor status, VIP contracts, POS, and nightly settlement.'],
+    ['/SecureQRStudio', 'Generate and manage verifiable secure QR codes with permission binding and offline verification.'],
+    ['/Contact', 'Contact GlyphLock LLC in El Mirage, Arizona for demos, partnerships, and integration questions.'],
+  ]);
+  for (const [url, expected] of suppliedRouteCopy) {
+    const entry = entries.find((candidate) => candidate.url === url);
+    if (!entry) fail(`Missing supplied route metadata: ${url}`);
+    else if (entry.description !== expected) fail(`Supplied route description changed: ${url}`);
+  }
+  for (const entry of entries.filter((candidate) => !suppliedRouteCopy.has(candidate.url))) {
+    if (entry.description.length < 140 || entry.description.length > 160) {
+      fail(`Buyer description must be 140–160 characters for ${entry.url} (found ${entry.description.length})`);
+    }
+  }
+}
+
+if (indexHtml) {
+  for (const required of [
+    'https://glyphlock.io/glyphlock-social-card.png',
+    'property="og:image:width" content="1200"',
+    'property="og:image:height" content="630"',
+    'name="twitter:card" content="summary_large_image"',
+    'name="twitter:image" content="https://glyphlock.io/glyphlock-social-card.png"',
+  ]) {
+    if (!indexHtml.includes(required)) fail(`index.html missing social-card invariant: ${required}`);
+  }
+}
+if (seoHead) {
+  if (seoHead.includes('qtrypzzcjebvfcihiynt.supabase.co/storage')) fail('SEOHead og:image must not use raw Supabase storage');
+  if (!seoHead.includes("const isCanonicalPublicPath = Boolean(key && autoData.url === path)")) fail('SEOHead must fail closed for non-canonical/private routes');
+  if (!seoHead.includes("'noindex, nofollow, noarchive, nosnippet'")) fail('SEOHead private-route noindex policy missing');
+  if (!seoHead.includes("updateMetaTag('theme-color', '#020617')")) fail('SEOHead theme color must remain #020617');
+}
+
+const robotsText = sourceContents['public/robots.txt'];
+for (const route of ['/admin/', '/IntegrationTests', '/SiteBuilderTest', '/EmergencyBackup', '/FullExport', '/NotFound', '/unauthorized', '/demo/', '/NUPSAdminPortal', '/ProviderConsole']) {
+  if (robotsText && !robotsText.includes(`Disallow: ${route}`)) fail(`robots.txt missing disallow: ${route}`);
+}
+if (sitemapXml) {
+  for (const route of ['/admin/', '/IntegrationTests', '/SiteBuilderTest', '/EmergencyBackup', '/FullExport', '/NotFound', '/unauthorized', '/NUPSAdminPortal', '/ProviderConsole']) {
+    if (sitemapXml.includes(route)) fail(`Public sitemap leaks protected route: ${route}`);
+  }
+  const sitemapRoutes = [...sitemapXml.matchAll(/<loc>https:\/\/glyphlock\.io(\/[^<]*)<\/loc>/g)].map((match) => match[1]);
+  const seoRoutes = [...seoData.matchAll(/^    url:\s*"([^"]+)"/gm)].map((match) => match[1]);
+  const missingInSeo = sitemapRoutes.filter((route) => !seoRoutes.includes(route));
+  const missingInSitemap = seoRoutes.filter((route) => !sitemapRoutes.includes(route));
+  if (missingInSeo.length || missingInSitemap.length) {
+    fail(`Sitemap/SEO_DATA route mismatch — missing SEO: ${missingInSeo.join(', ') || 'none'}; missing sitemap: ${missingInSitemap.join(', ') || 'none'}`);
+  }
+}
+
+for (const asset of ['public/glyphlock-logo.png', 'public/glyphlock-social-card.png']) {
+  const full = join(ROOT, asset);
+  if (!existsSync(full)) {
+    fail(`Missing same-origin image asset: ${asset}`);
+    continue;
+  }
+  const png = readFileSync(full);
+  if (png.subarray(1, 4).toString('ascii') !== 'PNG') fail(`${asset} is not a PNG`);
+  if (asset.endsWith('social-card.png') && png.length >= 24) {
+    const width = png.readUInt32BE(16);
+    const height = png.readUInt32BE(20);
+    if (width !== 1200 || height !== 630) fail(`Social card must be 1200×630 (found ${width}×${height})`);
+  }
+}
+
+
+// ── 10. Render-readiness and crawler-policy ownership ──
+const appSource = sourceContents['src/App.jsx'];
+if (appSource) {
+  if (!appSource.includes("isCanonicalPublicSeoPath(currentPath)")) {
+    fail('Public SEO routes must render while auth/public settings load');
+  }
+  if (appSource.includes("currentPathLower.startsWith('/nupslanding')")) {
+    fail('Legacy hard-coded prerender allowlist still present in App.jsx');
+  }
+}
+
+const prerenderHints = sourceContents['src/components/seo/PrerenderHints.jsx'];
+if (prerenderHints) {
+  for (const forbidden of ["addMeta('robots'", "addMeta('fragment'", 'prerender-status-code']) {
+    if (prerenderHints.includes(forbidden)) fail(`PrerenderHints must not mutate metadata: ${forbidden}`);
+  }
+  if (!prerenderHints.includes('window.prerenderReady = true')) {
+    fail('PrerenderHints readiness signal missing');
+  }
+}
+
+if (seoHead && !seoHead.includes('const resolvedPath = autoData.url || url || path || "/"')) {
+  fail('Canonical SEO_DATA URL must outrank page-local URL props');
+}
+
+if (seoData && !seoData.includes('export const CANONICAL_POSITIONING_LINE = "GlyphLock connects identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS venue operations, financial accountability, APIs, hardware, and governance through one evidence architecture."')) {
+  fail('Canonical GlyphLock positioning line missing or rewritten');
+}
+
+const robotsSources = [
+  ['public/robots.txt', robotsText],
+  ['base44/functions/robotsTxt/entry.ts', sourceContents['base44/functions/robotsTxt/entry.ts']],
+];
+for (const [path, content] of robotsSources) {
+  if (!content) continue;
+  const userAgentCount = (content.match(/^User-agent:/gm) || []).length;
+  if (userAgentCount !== 1) {
+    fail(`${path} must use one wildcard User-agent group so later Allow rules cannot reopen protected paths (found ${userAgentCount})`);
+  }
+  for (const route of ['/nupsadminportal', '/providerconsole']) {
+    if (!content.includes(`Disallow: ${route}`) && !content.includes(`'${route}'`)) {
+      fail(`${path} missing lowercase protected-route block: ${route}`);
+    }
   }
 }
 

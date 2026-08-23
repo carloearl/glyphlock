@@ -1,6 +1,9 @@
 /**
- * PrerenderHints - Meta tags for prerender services (Prerender.io, Rendertron, etc.)
- * Signals to prerender services how to handle the page
+ * PrerenderHints
+ *
+ * Signals that a lazily loaded route has painted without taking ownership of
+ * SEO metadata. SEOHead remains the only runtime writer for robots, canonical,
+ * Open Graph, and Twitter tags.
  */
 
 import { useEffect } from 'react';
@@ -10,37 +13,36 @@ export default function PrerenderHints() {
   const location = useLocation();
 
   useEffect(() => {
-    // Add prerender meta tags
-    const addMeta = (name, content) => {
-      let meta = document.querySelector(`meta[name="${name}"]`);
-      if (!meta) {
-        meta = document.createElement('meta');
-        meta.name = name;
-        document.head.appendChild(meta);
-      }
-      meta.content = content;
-    };
+    let cancelled = false;
+    let firstFrame = 0;
+    let secondFrame = 0;
+    let settleTimer = 0;
 
-    // Prerender.io status code
-    addMeta('prerender-status-code', '200');
-    
-    // AJAX fragment for Google's deprecated but still sometimes used _escaped_fragment_
-    addMeta('fragment', '!');
-    
-    // Tell crawlers this is a SPA with dynamic content
-    addMeta('robots', 'index, follow, max-snippet:-1, max-image-preview:large');
-    
-    // Signal page is ready after React hydration
+    window.prerenderReady = false;
+
     const signalReady = () => {
+      if (cancelled) return;
       window.prerenderReady = true;
-      // Also dispatch custom event
-      window.dispatchEvent(new CustomEvent('prerenderReady'));
+      window.dispatchEvent(new CustomEvent('prerenderReady', {
+        detail: { path: location.pathname },
+      }));
     };
 
-    // Signal ready after a short delay to ensure React has rendered
-    const timer = setTimeout(signalReady, 1500);
+    // The component mounts only after the route's lazy chunk resolves. Two
+    // animation frames plus a short settle window let SEOHead effects and the
+    // route's static above-the-fold markup reach the DOM before capture.
+    firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        settleTimer = window.setTimeout(signalReady, 100);
+      });
+    });
 
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(firstFrame);
+      window.cancelAnimationFrame(secondFrame);
+      window.clearTimeout(settleTimer);
+    };
   }, [location.pathname]);
 
   return null;

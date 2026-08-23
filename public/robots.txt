@@ -41,7 +41,6 @@ Allow: /CaseStudyCovenantVictory
 Allow: /GlyphLockFinancial
 Allow: /NUPSLanding
 Allow: /VideoUpload
-Allow: /ProviderConsole
 Allow: /Privacy
 Allow: /Terms
 Allow: /Cookies
@@ -96,6 +95,12 @@ Disallow: /NotFound
 Disallow: /api/
 Disallow: /functions/
 Disallow: /admin/
+Disallow: /demo/
+Disallow: /unauthorized
+Disallow: /ProviderConsole
+Disallow: /providerconsole
+Disallow: /NUPSAdminPortal
+Disallow: /nupsadminportal
 Disallow: /nupskiosk
 Disallow: /nupshub
 Disallow: /register
@@ -161,39 +166,5 @@ Sitemap: https://glyphlock.io/sitemap.xml
 # Crawl-delay for politeness
 Crawl-delay: 1
 
-# ── AI crawlers ──
-User-agent: GPTBot
-Allow: /
-Crawl-delay: 2
-
-User-agent: ChatGPT-User
-Allow: /
-Crawl-delay: 2
-
-User-agent: anthropic-ai
-Allow: /
-Crawl-delay: 2
-
-User-agent: Claude-Web
-Allow: /
-Crawl-delay: 2
-
-User-agent: Google-Extended
-Allow: /
-Crawl-delay: 2
-
-User-agent: PerplexityBot
-Allow: /
-Crawl-delay: 2
-
-User-agent: CCBot
-Allow: /
-Crawl-delay: 2
-
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
+# All crawlers inherit the wildcard policy above. No agent-specific group may
+# reopen protected paths with a broader Allow rule.
