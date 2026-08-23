@@ -378,7 +378,7 @@ async function writeEntityInternal({
     return { ok: false, audit_id, mode, tier, result: 'blocked', block_reason: `role_not_authorized_in_REAL: ${role}` };
   }
 
-  if (isFinancial) {
+  if (isFinancial && operation !== 'delete') {
     const records = operation === 'bulkCreate' ? (Array.isArray(data) ? data : []) : [data];
     if (operation === 'bulkCreate' && records.length === 0) {
       const audit_id = await audit({
