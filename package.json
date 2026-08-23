@@ -44,7 +44,8 @@
     "test:nups-batch17-authenticated": "node scripts/test-nups-batch17-authenticated.mjs",
     "check:nups-batch17": "node scripts/check-nups-batch17.mjs",
     "check:glyphlock-write-governance": "node scripts/check-glyphlock-write-governance.mjs",
-    "check:glyphlock-batch18": "node scripts/check-glyphlock-batch18.mjs"
+    "check:glyphlock-batch18": "node scripts/check-glyphlock-batch18.mjs",
+    "check:batch17-browser-acceptance-workaround": "node scripts/check-batch17-browser-acceptance-workaround.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.43",

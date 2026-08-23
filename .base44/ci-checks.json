@@ -24,6 +24,7 @@
     "check:nups-batch17-runtime",
     "check:nups-public-runtime-boundaries",
     "check:nups-audit-integrity",
-    "check:glyphlock-write-governance"
+    "check:glyphlock-write-governance",
+    "check:batch17-browser-acceptance-workaround"
   ]
 }
