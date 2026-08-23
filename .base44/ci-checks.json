@@ -14,6 +14,7 @@
     "check:nups-batch16-runtime-boundaries",
     "check:nups-batch16-operational",
     "check:nups-batch16-runtime",
+    "check:nups-batch17-readiness",
     "test:dj",
     "check:nups-dj-continuity",
     "check:seo-metadata",
