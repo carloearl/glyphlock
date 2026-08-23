@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +31,7 @@ export default function GalleryTab({ user, onImageSelect }) {
     queryKey: ['interactive-images'],
     queryFn: async () => {
       const result = await base44.entities.InteractiveImage.list('-created_date', 100);
-      return result;
+      return (result || []).filter((image) => image.archived !== true);
     },
     initialData: [],
   });
@@ -79,37 +80,45 @@ export default function GalleryTab({ user, onImageSelect }) {
     if (selectedIds.size === 0) return;
     
     const count = selectedIds.size;
-    if (!confirm(`Are you sure you want to delete ${count} image${count > 1 ? 's' : ''}? This cannot be undone.`)) return;
+    if (!confirm(`Archive ${count} image${count > 1 ? 's' : ''}? Published and finalized evidence will be retained.`)) return;
 
     setDeleting(true);
     try {
-      const deletePromises = Array.from(selectedIds).map(id => 
-        base44.entities.InteractiveImage.delete(id)
+      const deletePromises = Array.from(selectedIds).map((id) =>
+        glyphlockWrite('interactive_image_archive', {
+          id,
+          reason: 'Archived from Image Lab gallery',
+          intent: 'archive_interactive_image_from_gallery',
+        })
       );
       
       await Promise.all(deletePromises);
-      toast.success(`Deleted ${count} image${count > 1 ? 's' : ''}`);
+      toast.success(`Archived ${count} image${count > 1 ? 's' : ''}`);
       setSelectedIds(new Set());
       setSelectionMode(false);
       refetch();
     } catch (error) {
-      console.error('Batch delete error:', error);
-      toast.error('Failed to delete some images');
+      console.error('Batch archive error:', error);
+      toast.error('Failed to archive some images');
     } finally {
       setDeleting(false);
     }
   };
 
   const handleDelete = async (imageId) => {
-    if (!confirm('Are you sure you want to delete this image?')) return;
+    if (!confirm('Archive this image? Its integrity and publication evidence will be retained.')) return;
 
     try {
-      await base44.entities.InteractiveImage.delete(imageId);
-      toast.success('Image deleted');
+      await glyphlockWrite('interactive_image_archive', {
+        id: imageId,
+        reason: 'Archived from Image Lab gallery',
+        intent: 'archive_interactive_image_from_gallery',
+      });
+      toast.success('Image archived');
       refetch();
     } catch (error) {
-      console.error('Delete error:', error);
-      toast.error('Failed to delete image');
+      console.error('Archive error:', error);
+      toast.error('Failed to archive image');
     }
   };
 
@@ -231,7 +240,7 @@ export default function GalleryTab({ user, onImageSelect }) {
                     ) : (
                       <Trash2 className="w-4 h-4 mr-2" />
                     )}
-                    Delete {selectedIds.size} Image{selectedIds.size > 1 ? 's' : ''}
+                    Archive {selectedIds.size} Image{selectedIds.size > 1 ? 's' : ''}
                   </Button>
                 </div>
               )}
@@ -343,7 +352,7 @@ export default function GalleryTab({ user, onImageSelect }) {
                         size="sm"
                         onClick={() => handleDelete(image.id)}
                         className={GlyphImageButton.danger}
-                        title="Delete"
+                        title="Archive"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
