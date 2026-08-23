@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ThumbsUp, ThumbsDown, MessageSquare, X, Send, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { base44 } from '@/api/base44Client';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 import { cn } from '@/lib/utils';
 
 export default function FeedbackWidget({ 
@@ -37,16 +37,17 @@ export default function FeedbackWidget({
   const submitFeedback = async (ratingValue, text) => {
     setSubmitting(true);
     try {
-      await base44.entities.LLMFeedback.create({
-        conversation_id: messageId,
-        provider_id: providerId || 'unknown',
-        model: model || 'unknown',
-        persona: persona || 'GENERAL',
-        rating: ratingValue,
-        feedback_text: text || '',
-        response_latency_ms: latencyMs || 0,
-        prompt_snippet: promptSnippet?.slice(0, 200) || '',
-        response_snippet: responseSnippet?.slice(0, 200) || ''
+      await glyphlockWrite('llm_feedback_submit', {
+        feedback: {
+          conversation_id: messageId,
+          provider_id: providerId || 'unknown',
+          model: model || 'unknown',
+          persona: persona || 'GENERAL',
+          rating: ratingValue,
+          feedback_text: text || '',
+          response_latency_ms: latencyMs || 0,
+        },
+        intent: 'submit_llm_feedback_without_prompt_content',
       });
       
       setSubmitted(true);
