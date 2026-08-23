@@ -536,7 +536,14 @@ Deno.serve(async (req) => {
       const imageFileHash = Array.from(new Uint8Array(fileDigest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
       const immutableHash = await sha256(`${imageFileHash}|${JSON.stringify(stable(before.hotspots || []))}`);
       const after = await E.InteractiveImage.update(before.id, { status: 'active', immutableHash, imageFileHash, published: bool(body.published) });
-      await E.ImageHashLog.create({ imageId: before.id, imageUrl: fileUrl, immutableHash, imageFileHash, hotspotsCount: (before.hotspots || []).length, finalizedBy: user.email, status: 'finalized' }).catch(() => null);
+      await E.ImageHashLog.create({
+        imageId: before.id,
+        hash: immutableHash,
+        imageFileHash,
+        hotspotsSnapshot: JSON.stringify(stable(before.hotspots || [])),
+        ownerEmail: user.email,
+        description: `Finalized interactive image with ${(before.hotspots || []).length} hotspot(s).`,
+      }).catch(() => null);
       value = { image: after, hash: immutableHash, imageFileHash, hotspotsCount: (before.hotspots || []).length };
       audit = { ...audit, entity_name: 'InteractiveImage', record_id: before.id, operation: 'update', scope_type: 'CONTENT_OWNER', owner_ref: before.ownerEmail || before.owner_id, before: { status: before.status, hotspot_count: before.hotspots?.length || 0 }, after: { status: 'active', hotspot_count: before.hotspots?.length || 0, immutable_hash: immutableHash }, fields_changed: ['status', 'immutableHash', 'imageFileHash', 'published'], metadata: { hotspot_count: before.hotspots?.length || 0 }, severity: 'high' };
     } else if (action === 'interactive_image_archive') {
