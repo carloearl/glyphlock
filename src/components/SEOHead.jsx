@@ -410,7 +410,7 @@ export default function SEOHead({
       }
     }
 
-  }, [resolvedTitle, resolvedDescription, resolvedOgTitle, resolvedOgDescription, resolvedKeywords, image, ogImage, fullUrl, type, resolvedSchemaType]);
+  }, [resolvedTitle, resolvedDescription, resolvedOgTitle, resolvedOgDescription, resolvedKeywords, image, ogImage, fullUrl, type, resolvedSchemaType, path]);
 
   return null;
 }
