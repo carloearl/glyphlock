@@ -173,3 +173,20 @@ Whenever an integration is tested, record:
 - non-secret evidence/reference
 - failure stage if unsuccessful
 - whether the test was read-only, funds-off, or live
+
+## Batch 17 integration maturity record — 2026-08-22
+
+Maturity labels are evidence-based:
+
+| Integration | Environment | Highest proven level | Evidence | Remaining limitation |
+|---|---|---|---|---|
+| Base44 application/functions | Preview / repository main | response validated | Batch 16 aggregate, deployed anonymous probes, NKS1 and playlist 410 tombstones | authenticated multi-role acceptance pending |
+| Base44 private file storage | DEMO/SANDBOX architecture | response validated | private upload path, opaque `ProtectedEvidence`, anonymous signed-file denial | authorized retrieval and expiry must be proven with real sessions |
+| VenueTerminal / NKS2 | Preview plus synthetic terminal test | response validated | unknown/inactive/untrusted/revoked fail closed; trusted synthetic terminal allowed before revocation | real venue devices require commissioning |
+| GitHub source | `carloearl/glyphlock` main | connected | Base44 auto-commits are present on main | ending Batch 17 Actions run must be inspected |
+| NUPS DJ gateway | Preview/source | response validated | canonical gateway, non-mutating capability probe, persistent session-state guards | real 30-minute continuity soak pending |
+| Payment configuration | Current venue config | configured | venue-scoped provider configuration exists | Batch 17 must not make live charges; E2E payment certification is out of scope |
+| Oracle/OHIP | Existing integration lane | configured/connected only as separately evidenced | existing readiness code and records | no Batch 17 promotion without a successful exercised call |
+
+Do not promote an integration because a credential, setting, logo or code path exists. `end-to-end verified` requires a successful real request, validated response and completed intended workflow in the stated environment.
+

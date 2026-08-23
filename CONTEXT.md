@@ -185,3 +185,24 @@ Verified on 2026-08-22:
 - lint, typecheck, UI audit, secret scan, integration boundaries, and production build passed
 
 These checks prove their stated policies. Distinct authenticated protected-evidence sessions, real physical device commissioning, full browser workflow, and a real provider DJ soak remain separate operational acceptance evidence.
+
+## Current operating context — 2026-08-22
+
+Batches 9–16 completed the risk-prioritized NUPS write migration and security hardening program. The live NUPS operational queue is now zero high-risk and zero medium-risk direct frontend business writes. The raw remaining count is 161/287 because the combined GlyphLock application retains explicit security/domain events, operational telemetry, non-NUPS product writes, controlled demo/seed utilities, legacy compatibility and gateway internals.
+
+Key current boundaries:
+
+- `GuestProfile` owns canonical minimized guest identity.
+- `VIPGuest` is a linked venue/VIP workflow projection.
+- protected identity, tax, biometric and contract evidence uses private file storage plus `ProtectedEvidence` opaque references;
+- anonymous protected-evidence retrieval is denied at the deployed endpoint;
+- authenticated role/venue allow and denial tests plus signed-URL expiry remain acceptance work;
+- `VenueTerminal` is the sole pre-authentication device-to-venue trust source;
+- actual venue browsers and stations require one-time commissioning;
+- NKS2 is the only supported kiosk session; NKS1 returns HTTP 410;
+- the DJ runtime preserves persistent deck/session state across internal views.
+
+Batch 17 is an operational acceptance and release-gate run. It must not be converted into another raw counter-reduction exercise. Its release verdict depends on authenticated protected-evidence tests, physical-device commissioning appropriate to the launch venue, full DEMO/SANDBOX workflow evidence, a real DJ continuity soak, GitHub Actions, and a rollback checkpoint.
+
+Current handoff: `docs/NUPS-CURRENT-HANDOFF.md`.
+

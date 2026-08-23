@@ -304,3 +304,42 @@ Repository controls include:
 - `scripts/check-no-tracked-secrets.mjs`
 
 The Base44 CI extension runs the current configured checks from `.base44/ci-checks.json`; GitHub workflow governance remains controlled separately per `AGENTS.md`. Aggregate commands are `npm run check:nups-batch16` and `npm run check:nups-batch17`.
+
+## 15. Current verified operational state — Batches 16–17
+
+The original 287-call frontend direct-write inventory is now **161/287**. The remainder is classified, not one undifferentiated risk queue:
+
+```text
+live high-risk NUPS                 0
+live-medium NUPS                    0
+security/admin audit              33
+domain events                     12
+operational telemetry             13
+general GlyphLock live writes     41
+demo/seed/sandbox/legacy/internal 62
+```
+
+Current guest ownership is explicit:
+
+```text
+GuestProfile = canonical minimized identity
+VIPGuest     = venue/VIP operational projection
+```
+
+Protected files use `ProtectedEvidence` opaque records and server-authorized temporary retrieval. Ordinary clients do not receive the permanent private `file_uri`.
+
+The current pre-authentication device boundary is:
+
+```text
+physical browser/device ID
+→ active + trusted VenueTerminal
+→ active venue
+→ NKS2 PIN/session service
+```
+
+`VenuePaymentConfig` does not confer device trust. The retired NKS1 route returns HTTP 410. `nupsClockInV2` and NKS2 are the only supported PIN/session service.
+
+The DJ runtime uses one persistent session/deck state across mixer, visualizer, playlist and automation views. The current reducer preserves the active song identifier and song object during provider/deck-state transitions. Operational acceptance still requires a real continuity soak rather than source inspection alone.
+
+Current authoritative handoff: `docs/NUPS-CURRENT-HANDOFF.md`.
+
