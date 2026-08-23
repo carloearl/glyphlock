@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 
 /**
@@ -29,6 +30,7 @@ const STAFF_ROLES = ["BARTENDER", "DJ", "SECURITY", "KIOSK"];
 const PERFORMER_ROLES = ["PERFORMER"];
 
 export function NUPSPermissionsProvider({ children }) {
+  const { user: authenticatedUser, isAuthenticated, isLoadingAuth } = useAuth();
   const [userPermissions, setUserPermissions] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,11 +39,12 @@ export function NUPSPermissionsProvider({ children }) {
     let cancelled = false;
 
     const fetchPermissions = async () => {
+      if (isLoadingAuth) return;
       setIsLoading(true);
       try {
-        const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) {
+        if (!isAuthenticated || !authenticatedUser) {
           setUserPermissions(null);
+          setError(null);
           setIsLoading(false);
           return;
         }
@@ -57,7 +60,7 @@ export function NUPSPermissionsProvider({ children }) {
           setError(err.message);
           // Fallback: try basic auth
           try {
-            const user = await base44.auth.me();
+            const user = authenticatedUser;
             // Carlo's owner emails get a full owner-tier bypass.
             const ownerBypass = isOwnerEmail(user.email);
             setUserPermissions({
@@ -90,7 +93,7 @@ export function NUPSPermissionsProvider({ children }) {
 
     fetchPermissions();
     return () => { cancelled = true; };
-  }, []);
+  }, [authenticatedUser, isAuthenticated, isLoadingAuth]);
 
   /**
    * can(action, venueId?) — Client-side permission check.
