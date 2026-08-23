@@ -33,12 +33,13 @@ npx wrangler deploy --dry-run
 
 ## Deployment sequence
 
-1. Run the repository's Cloudflare preflight workflow from `cloudflare/edge-guard`.
-2. Confirm the stored API token can read the active `glyphlock.io` zone, DNS proxy state, Worker scripts/routes, Page Rules, rulesets, and cache settings.
-3. Stop if an existing apex Worker route or script collision is present.
-4. Merge the reviewed deployment workflow only after preflight passes.
-5. Deploy with GitHub Actions using encrypted repository secrets. Never put the API token in source, workflow output, artifacts, or chat.
-6. Verify public responses are unchanged, crawler requests to protected paths return 404, and browser responses on protected paths include the noindex/no-store headers.
+1. Let the pull-request workflow run credential-free source and route-pattern tests. Pull-request code never receives a Cloudflare token.
+2. Merge only after NUPS CI, the credential-free Cloudflare validation, and security review pass.
+3. From trusted `main`, manually run **Cloudflare Edge Guard Preflight**. Its credentialed job checks protected source hashes before executing.
+4. Confirm the token can read the active `glyphlock.io` zone, proxied apex DNS, Worker scripts/routes, Page Rules, rulesets, and selected cache settings.
+5. Stop if any route pattern that covers the apex or any `glyphlock-edge-guard` script already exists. Scheme-qualified and leading-wildcard patterns are included.
+6. Add and review a separate deployment workflow only after the sanitized inventory reports `safe_to_deploy=true`. Never put an API token in source, workflow output, artifacts, or chat.
+7. After deployment, verify public responses are unchanged, crawler requests to protected paths return 404, and browser responses on protected paths include the noindex/no-store headers.
 
 ## Authentication boundary
 
