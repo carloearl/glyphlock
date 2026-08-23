@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,40 +14,42 @@ export default function DocumentCenter({ partner }) {
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['partner-documents', partner.id],
     queryFn: async () => {
-      const allDocs = await base44.entities.PartnerDocument.list();
-      // Filter documents for this partner or global documents
-      return allDocs.filter(doc => 
-        !doc.partner_id || doc.partner_id === partner.id
-      );
+      const [allDocs, accessRows] = await Promise.all([
+        base44.entities.PartnerDocument.list(),
+        base44.entities.PartnerDocumentAccess.filter({ partner_id: partner.id }).catch(() => []),
+      ]);
+      const accessByDocument = new Map((accessRows || []).map((row) => [row.document_id, row]));
+      return allDocs
+        .filter((doc) => !doc.partner_id || doc.partner_id === partner.id)
+        .map((doc) => ({
+          ...doc,
+          viewed: accessByDocument.get(doc.id)?.viewed === true,
+          viewed_date: accessByDocument.get(doc.id)?.viewed_at || null,
+        }));
     }
   });
 
   const markAsViewedMutation = useMutation({
-    mutationFn: async (docId) => {
-      return await base44.entities.PartnerDocument.update(docId, {
-        viewed: true,
-        viewed_date: new Date().toISOString()
-      });
-    },
+    mutationFn: ({ docId, accessAction }) => glyphlockWrite('partner_document_access', {
+      document_id: docId,
+      access_action: accessAction,
+      intent: `partner_document_${accessAction}`,
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries(['partner-documents']);
     }
   });
 
   const handleView = async (doc) => {
-    if (!doc.viewed) {
-      await markAsViewedMutation.mutateAsync(doc.id);
-    }
-    window.open(doc.file_url, '_blank');
+    const result = await markAsViewedMutation.mutateAsync({ docId: doc.id, accessAction: 'view' });
+    window.open(result.file_url, '_blank', 'noopener,noreferrer');
   };
 
   const handleDownload = async (doc) => {
     try {
-      if (!doc.viewed) {
-        await markAsViewedMutation.mutateAsync(doc.id);
-      }
+      const result = await markAsViewedMutation.mutateAsync({ docId: doc.id, accessAction: 'download' });
       const link = document.createElement('a');
-      link.href = doc.file_url;
+      link.href = result.file_url;
       link.download = doc.document_name;
       link.click();
       toast.success('Document downloaded');
