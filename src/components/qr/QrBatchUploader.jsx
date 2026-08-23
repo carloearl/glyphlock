@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { generateSHA256 } from '@/components/utils/securityUtils';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 
 export default function QrBatchUploader() {
   const [csvData, setCsvData] = useState([]);
@@ -60,59 +60,47 @@ export default function QrBatchUploader() {
     }
 
     setIsProcessing(true);
-    setProgress(0);
-    const newDrafts = [];
+    setProgress(10);
+    const records = csvData.map((row, index) => ({
+      code_id: `qr_bulk_${Date.now()}_${index}_${Math.random().toString(36).slice(2, 9)}`,
+      payload: row.payloadValue,
+      type: row.payloadType || 'url',
+      size: 512,
+      status: 'safe',
+      image_format: 'png',
+      error_correction: 'H',
+      foreground_color: '#000000',
+      background_color: '#ffffff',
+      has_logo: false,
+    }));
 
-    const total = csvData.length;
-    for (let i = 0; i < total; i++) {
-      const row = csvData[i];
-      
-      try {
-        const payload = row.payloadValue;
-        const payloadType = row.payloadType || 'url';
-        const newCodeId = `qr_bulk_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-
-        // Create QRGenHistory record directly
-        await base44.entities.QRGenHistory.create({
-          code_id: newCodeId,
-          payload,
-          payload_sha256: await generateSHA256(payload),
-          size: 512,
-          creator_id: "guest",
-          status: "safe",
-          type: payloadType,
-          image_format: "png",
-          error_correction: "H",
-          foreground_color: "#000000",
-          background_color: "#ffffff",
-          has_logo: false,
-          logo_url: null
-        });
-
-        newDrafts.push({
-          title: row.title || `QR ${i + 1}`,
-          payloadValue: payload,
-          payloadType,
-          code_id: newCodeId,
-          generationStatus: 'success'
-        });
-
-      } catch (error) {
-        newDrafts.push({
-          title: row.title || `QR ${i + 1}`,
-          payloadValue: row.payloadValue,
-          payloadType: row.payloadType || 'url',
-          generationStatus: 'error',
-          error: error.message
-        });
-      }
-
-      setProgress(((i + 1) / total) * 100);
-      setDrafts([...newDrafts]);
+    try {
+      const created = await glyphlockWrite('qr_record_generation', {
+        records,
+        intent: 'bulk_qr_generation_history',
+      });
+      setProgress(100);
+      const newDrafts = csvData.map((row, index) => ({
+        title: row.title || `QR ${index + 1}`,
+        payloadValue: row.payloadValue,
+        payloadType: row.payloadType || 'url',
+        code_id: created[index]?.history?.code_id || records[index].code_id,
+        generationStatus: 'success',
+      }));
+      setDrafts(newDrafts);
+      toast.success(`Batch generation complete: ${newDrafts.length}/${newDrafts.length} successful`);
+    } catch (error) {
+      setDrafts(csvData.map((row, index) => ({
+        title: row.title || `QR ${index + 1}`,
+        payloadValue: row.payloadValue,
+        payloadType: row.payloadType || 'url',
+        generationStatus: 'error',
+        error: error?.message || 'Governed batch recording failed',
+      })));
+      toast.error(error?.message || 'Batch generation failed');
+    } finally {
+      setIsProcessing(false);
     }
-
-    setIsProcessing(false);
-    toast.success(`Batch generation complete: ${newDrafts.filter(d => d.generationStatus === 'success').length}/${total} successful`);
   };
 
   return (
