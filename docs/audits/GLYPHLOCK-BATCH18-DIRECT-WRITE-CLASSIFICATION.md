@@ -3,7 +3,7 @@
 **Generated:** 2026-08-23T08:36:51.707Z  
 **Original baseline:** 287  
 **Batch 18 start:** 161  
-**Batch 18 end:** undefined
+**Batch 18 end:** 120 / 287
 
 | Category | Count | Batch 18 treatment |
 |---|---:|---|
@@ -18,7 +18,7 @@
 | Sandbox | 7 | Retained in SANDBOX-only workflows |
 | Legacy/unmounted | 9 | Retained for compatibility pending separate retirement evidence |
 | Gateway/audit internals | 15 | Retained as canonical implementation writes |
-| **Total retained** | **undefined** | Classified, not hidden |
+| **Total retained** | **120** | Classified, not hidden |
 
 ## Batch 18 migrated workstreams
 
