@@ -563,6 +563,13 @@ Deno.serve(async (req) => {
       const records = Array.isArray(body.records) ? body.records.slice(0, 100) : [body.record || {}];
       if (!records.length) throw new HttpError(400, 'QR_RECORD_REQUIRED', 'QR generation record is required.');
       const creator = user?.email || anonymousRef;
+      const recent = await E.QRGenHistory.filter({
+        creator_id: creator,
+        created_date: { $gte: new Date(Date.now() - 60 * 60 * 1000).toISOString() },
+      }, '-created_date', 250).catch(() => []);
+      if ((recent?.length || 0) + records.length > 200) {
+        throw new HttpError(429, 'QR_RATE_LIMITED', 'Hourly QR generation limit exceeded.');
+      }
       const results = [];
       for (const input of records) {
         const payload = text(input.payload, 10000);
