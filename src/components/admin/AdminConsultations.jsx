@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
+import { toast } from "sonner";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,17 +16,23 @@ export default function AdminConsultations({ consultations }) {
   const queryClient = useQueryClient();
 
   const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }) => base44.entities.Consultation.update(id, { status }),
+    mutationFn: ({ id, status }) => glyphlockWrite('consultation_status', {
+      id,
+      status,
+      intent: 'admin_update_consultation_status',
+    }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['all-consultations'] });
-    }
+      toast.success('Consultation status updated');
+    },
+    onError: (error) => toast.error(error?.message || 'Status update failed'),
   });
 
   const filteredConsultations = consultations.filter(c => {
     const matchesSearch = 
-      c.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.service_interest?.toLowerCase().includes(searchQuery.toLowerCase());
+      (c.contact_name || c.full_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.contact_email || c.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.verification_interest || c.service_interest || '').toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
     const matchesPayment = paymentFilter === 'all' || c.payment_status === paymentFilter;
@@ -35,10 +42,11 @@ export default function AdminConsultations({ consultations }) {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'confirmed': return <CheckCircle className="w-4 h-4" />;
-      case 'pending': return <Clock className="w-4 h-4" />;
-      case 'completed': return <CheckCircle className="w-4 h-4" />;
-      case 'cancelled': return <XCircle className="w-4 h-4" />;
+      case 'qualified': return <CheckCircle className="w-4 h-4" />;
+      case 'submitted': return <Clock className="w-4 h-4" />;
+      case 'under_review': return <Clock className="w-4 h-4" />;
+      case 'engagement_started': return <CheckCircle className="w-4 h-4" />;
+      case 'not_qualified': return <XCircle className="w-4 h-4" />;
       default: return <Clock className="w-4 h-4" />;
     }
   };
@@ -73,10 +81,11 @@ export default function AdminConsultations({ consultations }) {
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700">
               <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="confirmed">Confirmed</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="submitted">Submitted</SelectItem>
+              <SelectItem value="under_review">Under Review</SelectItem>
+              <SelectItem value="qualified">Qualified</SelectItem>
+              <SelectItem value="not_qualified">Not Qualified</SelectItem>
+              <SelectItem value="engagement_started">Engagement Started</SelectItem>
             </SelectContent>
           </Select>
           <Select value={paymentFilter} onValueChange={setPaymentFilter}>
@@ -99,33 +108,33 @@ export default function AdminConsultations({ consultations }) {
             <div key={index} className="p-4 bg-gray-800 rounded-lg border border-gray-700">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white mb-1">{consultation.full_name}</h3>
+                  <h3 className="text-lg font-bold text-white mb-1">{consultation.contact_name || consultation.full_name}</h3>
                   <div className="flex flex-wrap gap-3 text-sm text-gray-400">
                     <div className="flex items-center gap-1">
                       <Mail className="w-4 h-4" />
-                      {consultation.email}
+                      {consultation.contact_email || consultation.email}
                     </div>
-                    {consultation.phone && (
+                    {(consultation.contact_phone || consultation.phone) && (
                       <div className="flex items-center gap-1">
                         <Phone className="w-4 h-4" />
-                        {consultation.phone}
+                        {consultation.contact_phone || consultation.phone}
                       </div>
                     )}
-                    {consultation.company && (
+                    {(consultation.organization_name || consultation.company) && (
                       <div className="flex items-center gap-1">
                         <Building className="w-4 h-4" />
-                        {consultation.company}
+                        {consultation.organization_name || consultation.company}
                       </div>
                     )}
                   </div>
                 </div>
                 <div className="flex gap-2">
                   <Badge className={
-                    consultation.status === 'confirmed'
+                    consultation.status === 'qualified'
                       ? 'bg-green-500/20 text-green-400 border-green-500/50'
-                      : consultation.status === 'pending'
+                      : ['submitted', 'under_review'].includes(consultation.status)
                       ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50'
-                      : consultation.status === 'completed'
+                      : consultation.status === 'engagement_started'
                       ? 'bg-blue-500/20 text-blue-400 border-blue-500/50'
                       : 'bg-gray-500/20 text-gray-400 border-gray-500/50'
                   }>
@@ -149,7 +158,7 @@ export default function AdminConsultations({ consultations }) {
               <div className="grid md:grid-cols-2 gap-4 mb-3">
                 <div>
                   <div className="text-sm text-gray-400 mb-1">Service Interest</div>
-                  <div className="text-white font-semibold">{consultation.service_interest}</div>
+                  <div className="text-white font-semibold">{consultation.verification_interest || consultation.service_interest}</div>
                 </div>
                 {consultation.preferred_date && (
                   <div>
@@ -167,10 +176,10 @@ export default function AdminConsultations({ consultations }) {
                 )}
               </div>
 
-              {consultation.message && (
+              {(consultation.primary_concern || consultation.message) && (
                 <div className="mb-3">
                   <div className="text-sm text-gray-400 mb-1">Message</div>
-                  <p className="text-gray-300 text-sm">{consultation.message}</p>
+                  <p className="text-gray-300 text-sm">{consultation.primary_concern || consultation.message}</p>
                 </div>
               )}
 
@@ -179,22 +188,31 @@ export default function AdminConsultations({ consultations }) {
                   ID: {consultation.id.slice(0, 12)}... • Created: {new Date(consultation.created_date).toLocaleDateString()}
                 </div>
                 <div className="flex gap-2">
-                  {consultation.status === 'pending' && (
+                  {consultation.status === 'submitted' && (
                     <Button
                       size="sm"
-                      onClick={() => updateStatusMutation.mutate({ id: consultation.id, status: 'confirmed' })}
-                      className="bg-green-600 hover:bg-green-700"
+                      onClick={() => updateStatusMutation.mutate({ id: consultation.id, status: 'under_review' })}
+                      className="bg-yellow-600 hover:bg-yellow-700"
                     >
-                      Confirm
+                      Start Review
                     </Button>
                   )}
-                  {consultation.status === 'confirmed' && (
+                  {consultation.status === 'under_review' && (
                     <Button
                       size="sm"
-                      onClick={() => updateStatusMutation.mutate({ id: consultation.id, status: 'completed' })}
+                      onClick={() => updateStatusMutation.mutate({ id: consultation.id, status: 'qualified' })}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      Qualify
+                    </Button>
+                  )}
+                  {consultation.status === 'qualified' && (
+                    <Button
+                      size="sm"
+                      onClick={() => updateStatusMutation.mutate({ id: consultation.id, status: 'engagement_started' })}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
-                      Complete
+                      Start Engagement
                     </Button>
                   )}
                   <Button
