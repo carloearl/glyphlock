@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 import { useMutation } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -64,12 +65,13 @@ export default function InteractiveTab({ user, selectedImage, onImageSelect }) {
       setLoading(true);
       const uploadResult = await base44.integrations.Core.UploadFile({ file });
 
-      const image = await base44.entities.InteractiveImage.create({
-        name: file.name,
-        fileUrl: uploadResult.file_url,
-        source: 'uploaded',
-        status: 'draft',
-        ownerEmail: user?.email || 'guest',
+      const image = await glyphlockWrite('interactive_image_create', {
+        image: {
+          name: file.name,
+          fileUrl: uploadResult.file_url,
+          source: 'uploaded',
+        },
+        intent: 'image_lab_upload_interactive_image',
       });
 
       setImageAsset(image);
@@ -238,9 +240,12 @@ Be precise with the bounding box - make it fit the detected object tightly but i
     try {
       setLoading(true);
 
-      await base44.entities.InteractiveImage.update(imageAsset.id, {
+      const saved = await glyphlockWrite('interactive_image_update', {
+        id: imageAsset.id,
         hotspots,
+        intent: 'image_lab_save_hotspots',
       });
+      setImageAsset(saved);
 
       toast.success('Hotspots saved successfully');
     } catch (error) {
@@ -257,20 +262,13 @@ Be precise with the bounding box - make it fit the detected object tightly but i
     try {
       setLoading(true);
 
-      const response = await base44.functions.invoke('finalizeInteractiveImage', {
-        imageId: imageAsset.id,
+      const result = await glyphlockWrite('interactive_image_finalize', {
+        id: imageAsset.id,
+        intent: 'image_lab_finalize_interactive_image',
       });
 
-      if (response.data.success) {
-        await base44.entities.InteractiveImage.update(imageAsset.id, {
-          status: 'active',
-          immutableHash: response.data.hash,
-          imageFileHash: response.data.imageFileHash,
-        });
-
-        toast.success('Image finalized and cryptographically secured!');
-        setImageAsset({ ...imageAsset, status: 'active', immutableHash: response.data.hash });
-      }
+      toast.success('Image finalized and cryptographically secured!');
+      setImageAsset(result.image);
     } catch (error) {
       console.error('Finalize error:', error);
       toast.error('Failed to finalize image');
