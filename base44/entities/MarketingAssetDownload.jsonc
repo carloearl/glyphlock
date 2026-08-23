@@ -1,0 +1,62 @@
+{
+  "name": "MarketingAssetDownload",
+  "type": "object",
+  "description": "Append-only partner-scoped evidence that an authorized marketing asset was downloaded.",
+  "properties": {
+    "event_id": {
+      "type": "string"
+    },
+    "asset_id": {
+      "type": "string"
+    },
+    "partner_id": {
+      "type": "string"
+    },
+    "actor_email": {
+      "type": "string"
+    },
+    "partner_tier": {
+      "type": "string"
+    },
+    "downloaded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "event_id",
+    "asset_id",
+    "partner_id",
+    "actor_email",
+    "downloaded_at"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "__GATEWAY_ONLY__"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "data.actor_email": "{{user.email}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}
