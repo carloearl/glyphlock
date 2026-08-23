@@ -1,7 +1,7 @@
 # NUPS ARCHITECTURE — Layer 3 Domain State
 
 **Mapped from live Base44 app:** `697a087fb354faebb72df54b`  
-**Date:** 2026-08-20
+**Date:** 2026-08-22
 
 ## 1. System placement
 
@@ -132,7 +132,7 @@ writeEntity()
 
 Canonical gateway: `src/lib/nups/writeEntity.js`.
 
-Current migration reality: direct frontend entity writes still exist and are grandfathered by `config/nups-direct-write-legacy-manifest.json`. The guard passed on 2026-08-20 with **287/287** grandfathered calls and no new bypasses. Therefore the system is in a controlled migration state, not yet universal-gateway completion.
+Current migration reality: direct frontend entity writes still exist and are grandfathered by `config/nups-direct-write-legacy-manifest.json`. Batch 16 reduced the inventory to **161/287** with no new bypasses. The classified remainder contains **0 live high-risk NUPS** and **0 live-medium NUPS** business mutations; retained calls are security/domain/telemetry evidence, general GlyphLock persistence outside NUPS, demo/seed/sandbox/legacy code, or canonical gateway internals. App-wide universal-gateway completion remains controlled migration debt, but the live NUPS operational-write objective is complete.
 
 ## 7. Identity architecture
 
@@ -151,12 +151,12 @@ Relevant files/entities:
 
 ### Guests
 
-Two significant guest models coexist:
+The guest model is explicitly layered:
 
-- `GuestProfile` — minimized durable door identity model
-- `VIPGuest` — older/richer VIP workflow model
+- `GuestProfile` — canonical minimized, venue-scoped identity record keyed by a deterministic credential-derived `guest_id`
+- `VIPGuest` — venue/VIP operational projection linked through `guest_profile_id` and `guest_id`
 
-The overlap is an architectural consolidation issue, not permission to merge fields casually.
+Current production creation paths resolve or create `GuestProfile` first and do not copy full government ID numbers or protected media into `VIPGuest`. Historical broader fields remain readable for compatibility.
 
 ### Entertainers
 
@@ -183,7 +183,7 @@ Persistent role models are distributed among:
 - `UserRoleAssignment.role_key`
 - frontend `ROLES` + `mapNUPSRoleToRBAC()`
 
-These sets are not perfectly aligned. Mapping drift is recorded in `KNOWN_ISSUES.md`.
+`mapNUPSRoleToRBAC()` now explicitly handles supported persistent roles and fails closed for unknown or deliberately unmapped roles. DRIVER and PERFORMER do not inherit a generic operational role by default.
 
 ## 9. Financial architecture
 
@@ -268,7 +268,7 @@ Current audit/evidence entities include:
 - `PersonRecord`
 - `ChargebackEvidence`
 
-Important current mismatch: the frozen invariant currently names `SystemAuditLog + AuditEvent` as the required dual audit for all writes, while the live gateway automatically emits `MigrationAuditLog + AuditEvent + ActivityLog`. This is unresolved governance drift and is tracked in `KNOWN_ISSUES.md`.
+ADR-0002 resolves the audit-ledger boundary. Governed business writes automatically produce `MigrationAuditLog + AuditEvent`; `ActivityLog` is a best-effort operational mirror. `SystemAuditLog` is reserved for explicit security, system, and administrative events rather than duplicated on every business mutation.
 
 ## 13. Integration architecture
 
@@ -292,9 +292,15 @@ Repository controls include:
 - `scripts/check-nups-write-gateway.mjs`
 - `scripts/check-nups-frozen-rules.mjs`
 - `scripts/check-nups-mode-boundaries.mjs`
+- `scripts/check-protected-evidence-policy.mjs`
+- `scripts/check-api-key-secret-lifecycle.mjs`
+- `scripts/check-guest-identity-projection.mjs`
+- `scripts/check-nups-live-venue-boundaries.mjs`
+- `scripts/check-nups-terminal-governance.mjs`
+- `scripts/check-nups-dj-continuity.mjs`
 - `scripts/audit-entity-model.mjs`
 - `scripts/audit-nups-operational-ui.mjs`
 - `scripts/check-integration-boundaries.mjs`
 - `scripts/check-no-tracked-secrets.mjs`
 
-The current Base44 CI extension executes `check:nups-frozen-rules`; GitHub workflow governance is controlled separately per `AGENTS.md`.
+The Base44 CI extension runs the current configured checks from `.base44/ci-checks.json`; GitHub workflow governance remains controlled separately per `AGENTS.md`. Aggregate commands are `npm run check:nups-batch16` and `npm run check:nups-batch17`.
