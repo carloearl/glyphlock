@@ -20,7 +20,10 @@ assert.match(playlistClient, /venue_id:\s*resolvedVenueId/, 'Playlist persistenc
 assert.doesNotMatch(djFallbacks, /Playlist\.(?:create|update|delete)\s*\(/, 'DJ fallback must not mutate Playlist.');
 
 assert.match(djGateway, /PLAYLIST_ROLES/, 'DJ gateway must enforce playlist roles.');
-assert.match(djGateway, /DJ operation is bound to another venue/, 'DJ gateway must deny cross-venue playlist access.');
+assert.match(djGateway, /const boundVenueId = String\(operator\?\.venue_id/, 'DJ gateway must derive the non-global venue from the authenticated operator/session.');
+assert.match(djGateway, /let venueId = boundVenueId;/, 'DJ gateway must start from the authoritative bound venue.');
+assert.match(djGateway, /if \(globalRole && requestedVenueId\) venueId = requestedVenueId;/, 'Only global roles may select another active venue.');
+assert.doesNotMatch(djGateway, /if \(!globalRole[^}]*venueId\s*=\s*requestedVenueId/s, 'Non-global DJ roles must never replace their bound venue with client venue input.');
 assert.match(djGateway, /Entertainer does not belong to this venue/, 'DJ gateway must validate entertainer venue ownership.');
 assert.match(djGateway, /action === ["']probePlaylistPermission["']/, 'DJ gateway must expose a non-mutating capability probe.');
 const probeBlock = djGateway.match(/if \(action === ["']probePlaylistPermission["']\) \{([\s\S]*?)\n    \}/)?.[1] || '';
