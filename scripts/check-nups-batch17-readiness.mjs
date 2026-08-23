@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 const read = (path) => fs.readFileSync(path, 'utf8');
 
@@ -20,7 +21,8 @@ const protectedRetrieval = read('base44/functions/getProtectedEvidence/entry.ts'
 const acceptanceAudit = read('base44/functions/getBatch17AcceptanceEvidence/entry.ts');
 
 assert.match(historical, /HISTORICAL \/ SUPERSEDED/, 'Historical handoff is not clearly superseded.');
-assert.match(handoff, /161 \/ 287/, 'Current handoff does not record the current write baseline.');
+const writeSnapshot = JSON.parse(execFileSync('node', ['scripts/check-nups-write-gateway.mjs', '--snapshot'], { encoding: 'utf8' }));
+assert.match(handoff, new RegExp(`${writeSnapshot.total}\\s*\\/\\s*287`), 'Current handoff does not record the live write baseline.');
 assert.match(handoff, /GuestProfile = canonical minimized guest identity/, 'Current guest ownership is missing from the handoff.');
 assert.match(handoff, /`?VenueTerminal`?\s+(?:=|is)\s+the?\s*sole pre-auth(?:entication)? device-to-venue trust boundary/i, 'Terminal trust boundary is missing from the handoff.');
 assert.match(handoff, /NKS2/, 'NKS2-only session posture is missing from the current handoff.');
