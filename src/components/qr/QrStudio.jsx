@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -357,35 +358,32 @@ export default function QrStudio({ initialTab = 'create' }) {
 
       const finalLogoUrl = await uploadLogoToServer();
 
-      await base44.entities.QRGenHistory.create({
-        code_id: newCodeId,
-        payload,
-        payload_sha256: await generateSHA256(payload),
-        size,
-        creator_id: currentUser?.email || "anonymous",
-        status: combinedResult ? (combinedResult.final_score >= 80 ? "safe" : "suspicious") : "safe",
-        type: qrType,
-        image_format: "png",
-        error_correction: errorCorrectionLevel,
-        foreground_color: customization.foregroundColor,
-        background_color: customization.backgroundColor,
-        has_logo: !!finalLogoUrl,
-        logo_url: finalLogoUrl
-      });
-
-      if (combinedResult) {
-        await base44.entities.QRAIScore.create({
+      await glyphlockWrite('qr_record_generation', {
+        record: {
           code_id: newCodeId,
-          final_score: combinedResult.final_score,
-          domain_trust: combinedResult.domain_trust,
-          sentiment_score: combinedResult.sentiment_score,
-          entity_legitimacy: combinedResult.entity_legitimacy,
-          risk_level: combinedResult.risk_level,
-          ml_version: combinedResult.ml_version || "1.0.0",
-          phishing_indicators: combinedResult.phishing_indicators || [],
-          threat_types: combinedResult.threat_types || []
-        });
-      }
+          payload,
+          size,
+          status: combinedResult ? (combinedResult.final_score >= 80 ? 'safe' : 'suspicious') : 'safe',
+          type: qrType,
+          image_format: 'png',
+          error_correction: errorCorrectionLevel,
+          foreground_color: customization.foregroundColor,
+          background_color: customization.backgroundColor,
+          has_logo: !!finalLogoUrl,
+          logo_url: finalLogoUrl,
+          ai_score: combinedResult ? {
+            final_score: combinedResult.final_score,
+            domain_trust: combinedResult.domain_trust,
+            sentiment_score: combinedResult.sentiment_score,
+            entity_legitimacy: combinedResult.entity_legitimacy,
+            risk_level: combinedResult.risk_level,
+            ml_version: combinedResult.ml_version || '1.0.0',
+            phishing_indicators: combinedResult.phishing_indicators || [],
+            threat_types: combinedResult.threat_types || [],
+          } : null,
+        },
+        intent: 'record_qr_generation_and_ai_score',
+      });
 
       const immutableHash = await generateSHA256(payload);
       
@@ -509,7 +507,11 @@ export default function QrStudio({ initialTab = 'create' }) {
   // Handle delete from vault
   const handleDeleteVaultItem = async (itemId) => {
     try {
-      await base44.entities.QrPreview.delete(itemId);
+      await glyphlockWrite('qr_preview_remove', {
+        id: itemId,
+        reason: 'Removed from QR Vault',
+        intent: 'archive_qr_vault_item',
+      });
       await refreshVault();
       toast.success('Removed from vault');
       return true;
