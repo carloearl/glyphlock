@@ -99,6 +99,8 @@ docs/runbooks/NUPS-BATCH17-AUTHENTICATED-ACCEPTANCE.md
 
 Tokens are supplied only as runtime environment variables. No `.env` file is used.
 
+Batch 18 added the preferred no-token workaround at `/NUPSBatch17Acceptance`. Each disposable user signs in through a separate normal browser profile and runs the case assigned to that real session. The server derives the expected decision, reconciles the matching security audit, and stores an append-only sanitized result. The page never requests or exposes passwords, OTPs, bearer tokens, PINs, signed URLs, or private file URIs. Human completion of the Base44 email OTP remains required.
+
 Batch 17 prepared five disposable Base44 users and matching DEMO/SANDBOX NUPS roles without changing any real staff account. Base44 required the emailed OTP before password login, and that one-time-code step could not be submitted through the automated execution boundary. No bearer token was created and no authenticated result was inferred. All five NUPS test identities were suspended, their test window was closed, temporary credentials were removed, and the isolated Venue B configuration was disabled.
 
 ## DJ architecture
