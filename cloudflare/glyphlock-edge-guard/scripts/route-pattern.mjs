@@ -15,3 +15,9 @@ export function routePatternCoversApex(pattern, zoneName) {
     || hostnamePattern === `*${zone}`
     || hostnamePattern === '*';
 }
+
+export function workerDomainCoversApex(hostname, zoneName) {
+  const zone = String(zoneName || '').trim().toLowerCase();
+  const candidate = String(hostname || '').trim().toLowerCase();
+  return Boolean(zone) && candidate === zone;
+}

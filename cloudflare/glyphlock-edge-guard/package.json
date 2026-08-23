@@ -5,9 +5,15 @@
   "scripts": {
     "test": "node --test",
     "preflight": "node scripts/preflight.mjs",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "verify:live": "node scripts/verify-live.mjs",
+    "rollback": "node scripts/rollback.mjs",
+    "deploy:dry-run": "wrangler deploy --dry-run"
   },
   "devDependencies": {
     "wrangler": "4.121.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   }
 }

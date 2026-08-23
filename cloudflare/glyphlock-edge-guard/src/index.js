@@ -1,4 +1,4 @@
-const CRAWLER_USER_AGENT = /(?:Googlebot|Google-InspectionTool|bingbot|BingPreview|DuckDuckBot|Baiduspider|YandexBot|Applebot|Twitterbot|facebookexternalhit|Facebot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|Pinterestbot)/i;
+const CRAWLER_USER_AGENT = /(?:Googlebot|Google-InspectionTool|bingbot|BingPreview|DuckDuckBot|Baiduspider|YandexBot|Applebot|OAI-SearchBot|OAI-AdsBot|GPTBot|ChatGPT-User|Twitterbot|facebookexternalhit|Facebot|LinkedInBot|Slackbot|Discordbot|WhatsApp|TelegramBot|Pinterestbot)/i;
 
 const PROTECTED_EXACT_PATHS = new Set([
   '/integrationtests',

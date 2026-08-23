@@ -1,10 +1,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { routePatternCoversApex } from './route-pattern.mjs';
+import { routePatternCoversApex, workerDomainCoversApex } from './route-pattern.mjs';
 
 const API_ROOT = 'https://api.cloudflare.com/client/v4';
 const ZONE_NAME = 'glyphlock.io';
 const WORKER_NAME = 'glyphlock-edge-guard';
+const API_TIMEOUT_MS = 20_000;
 
 const token = [
   process.env.CLOUDFLARE_API_TOKEN,
@@ -13,7 +14,7 @@ const token = [
 ].find((value) => typeof value === 'string' && value.trim());
 
 if (!token) {
-  throw new Error('No Cloudflare API token was found in CLOUDFLARE_API_TOKEN, CF_API_TOKEN, or CLOUDFLARE_TOKEN.');
+  throw new Error('No Cloudflare API token was found in the approved server-side environment.');
 }
 
 const headers = {
@@ -31,7 +32,10 @@ function errorSummary(payload) {
 }
 
 async function cloudflare(pathname) {
-  const response = await fetch(`${API_ROOT}${pathname}`, { headers });
+  const response = await fetch(`${API_ROOT}${pathname}`, {
+    headers,
+    signal: AbortSignal.timeout(API_TIMEOUT_MS),
+  });
   const text = await response.text();
   let payload;
 
@@ -88,9 +92,10 @@ if (accountHint && accountHint !== accountId) {
 }
 
 const dnsQuery = new URLSearchParams({ name: ZONE_NAME, per_page: '100' });
-const [routes, scripts, pageRules, rulesets, dnsRecords, settings] = await Promise.all([
+const [routes, scripts, workerDomains, pageRules, rulesets, dnsRecords, settings] = await Promise.all([
   cloudflare(`/zones/${zoneId}/workers/routes`),
   cloudflare(`/accounts/${accountId}/workers/scripts`),
+  cloudflare(`/accounts/${accountId}/workers/domains?per_page=100`),
   cloudflare(`/zones/${zoneId}/pagerules?per_page=100`),
   cloudflare(`/zones/${zoneId}/rulesets`),
   cloudflare(`/zones/${zoneId}/dns_records?${dnsQuery}`),
@@ -136,6 +141,15 @@ const routeSummaries = Array.isArray(routes)
 const scriptSummaries = Array.isArray(scripts)
   ? scripts.map((script) => ({ name: script.id || script.name || '', modified_on: script.modified_on || null }))
   : [];
+const workerDomainSummaries = Array.isArray(workerDomains)
+  ? workerDomains.map((domain) => ({
+      hostname: domain.hostname || '',
+      service: domain.service || '',
+      environment: domain.environment || '',
+      zone_id: domain.zone_id || '',
+      zone_name: domain.zone_name || '',
+    }))
+  : [];
 const dnsSummaries = Array.isArray(dnsRecords)
   ? dnsRecords.map((record) => ({
       name: record.name || '',
@@ -149,19 +163,30 @@ const apexRoutes = routeSummaries.filter((route) => routePatternCoversApex(route
 const conflictingRoutes = apexRoutes.filter((route) => route.script !== WORKER_NAME);
 const existingGuardScript = scriptSummaries.some((script) => script.name === WORKER_NAME);
 const existingGuardRoutes = apexRoutes.filter((route) => route.script === WORKER_NAME);
+const apexWorkerDomains = workerDomainSummaries.filter((domain) => workerDomainCoversApex(domain.hostname, ZONE_NAME));
+const conflictingWorkerDomains = apexWorkerDomains.filter((domain) => domain.service !== WORKER_NAME);
+const existingGuardDomains = apexWorkerDomains.filter((domain) => domain.service === WORKER_NAME);
 const proxiedApexDns = dnsSummaries.some(
   (record) => record.name.toLowerCase() === ZONE_NAME && record.proxied,
 );
 
-// This first deployment is deliberately strict. Existing apex Workers or an
-// existing script with this name require a human-reviewed migration/rollback
-// plan rather than an automatic overwrite.
+// First deployment is deliberately strict. Any existing apex route, custom
+// Worker domain, or same-named script requires a reviewed migration and
+// rollback plan rather than an automatic overwrite or stacked edge control.
 const safeToDeploy =
   proxiedApexDns &&
   apexRoutes.length === 0 &&
   conflictingRoutes.length === 0 &&
+  apexWorkerDomains.length === 0 &&
+  conflictingWorkerDomains.length === 0 &&
   !existingGuardScript &&
-  existingGuardRoutes.length === 0;
+  existingGuardRoutes.length === 0 &&
+  existingGuardDomains.length === 0;
+
+const freshDeploy =
+  !existingGuardScript &&
+  existingGuardRoutes.length === 0 &&
+  existingGuardDomains.length === 0;
 
 const inventory = {
   generated_at: new Date().toISOString(),
@@ -169,6 +194,7 @@ const inventory = {
   dns: dnsSummaries,
   worker_routes: routeSummaries,
   worker_scripts: scriptSummaries,
+  worker_domains: workerDomainSummaries,
   page_rules: pageRuleSummaries,
   rulesets: rulesetSummaries,
   cache_settings: cacheSettings,
@@ -176,6 +202,8 @@ const inventory = {
     proxied_apex_dns: proxiedApexDns,
     apex_route_count: apexRoutes.length,
     conflicting_apex_route_count: conflictingRoutes.length,
+    apex_worker_domain_count: apexWorkerDomains.length,
+    conflicting_apex_worker_domain_count: conflictingWorkerDomains.length,
     existing_guard_script: existingGuardScript,
     safe_to_deploy: safeToDeploy,
   },
@@ -191,10 +219,13 @@ fs.writeFileSync(
 writeOutput('account_id', accountId);
 writeOutput('zone_id', zoneId);
 writeOutput('safe_to_deploy', safeToDeploy);
-writeOutput('fresh_deploy', !existingGuardScript && existingGuardRoutes.length === 0);
+writeOutput('fresh_deploy', freshDeploy);
 
 const routeRows = routeSummaries.length
   ? routeSummaries.map((route) => `| \`${route.pattern}\` | \`${route.script || '(none)'}\` |`).join('\n')
+  : '| None | None |';
+const workerDomainRows = workerDomainSummaries.length
+  ? workerDomainSummaries.map((domain) => `| \`${domain.hostname}\` | \`${domain.service || '(none)'}\` |`).join('\n')
   : '| None | None |';
 const rulesetRows = rulesetSummaries.length
   ? rulesetSummaries.map((ruleset) => `| ${ruleset.name || '(unnamed)'} | \`${ruleset.phase || '(none)'}\` | ${ruleset.kind || ''} |`).join('\n')
@@ -210,6 +241,7 @@ appendSummary(`## Cloudflare glyphlock.io preflight
 - Proxied apex DNS record: **${proxiedApexDns ? 'yes' : 'no'}**
 - Worker scripts visible: **${scriptSummaries.length}**
 - Worker routes visible: **${routeSummaries.length}**
+- Worker custom domains visible: **${workerDomainSummaries.length}**
 - Page Rules visible: **${pageRuleSummaries.length}**
 - Zone rulesets visible: **${rulesetSummaries.length}**
 - First-deploy decision: **${safeToDeploy ? 'SAFE TO DEPLOY' : 'BLOCKED'}**
@@ -219,6 +251,12 @@ appendSummary(`## Cloudflare glyphlock.io preflight
 | Pattern | Script |
 |---|---|
 ${routeRows}
+
+### Worker custom domains
+
+| Hostname | Service |
+|---|---|
+${workerDomainRows}
 
 ### Rulesets
 
