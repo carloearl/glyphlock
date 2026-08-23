@@ -1,6 +1,12 @@
 name: Cloudflare Edge Guard Preflight
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - cloudflare/glyphlock-edge-guard/**
+      - .github/workflows/cloudflare-edge-guard-preflight.yml
   pull_request:
     branches:
       - main
@@ -39,7 +45,7 @@ jobs:
           node --test
 
   preflight:
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     name: Inventory glyphlock.io before mutation
     needs: validate
     runs-on: ubuntu-latest
