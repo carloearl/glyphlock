@@ -1,0 +1,59 @@
+name: Cloudflare Edge Guard Preflight
+
+on:
+  push:
+    branches:
+      - cloudflare/edge-guard
+    paths:
+      - cloudflare/glyphlock-edge-guard/**
+      - .github/workflows/cloudflare-edge-guard-preflight.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-edge-guard-preflight-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  preflight:
+    name: Inventory glyphlock.io before mutation
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+      CLOUDFLARE_INVENTORY_DIR: ${{ runner.temp }}/cloudflare-inventory
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Validate Worker source
+        working-directory: cloudflare/glyphlock-edge-guard
+        run: |
+          node --check src/index.js
+          node --test
+
+      - name: Inventory Cloudflare account and zone
+        id: inventory
+        working-directory: cloudflare/glyphlock-edge-guard
+        run: node scripts/preflight.mjs
+
+      - name: Upload sanitized inventory
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: glyphlock-cloudflare-preflight-${{ github.run_id }}
+          path: ${{ runner.temp }}/cloudflare-inventory/cloudflare-preflight-inventory.json
+          if-no-files-found: warn
+          retention-days: 14
