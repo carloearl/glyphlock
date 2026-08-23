@@ -26,6 +26,7 @@
     "check:nups-audit-integrity",
     "check:glyphlock-write-governance",
     "check:batch17-browser-acceptance-workaround",
-    "test:glyphlock-write-policy"
+    "test:glyphlock-write-policy",
+    "check:glyphlock-batch18-runtime"
   ]
 }

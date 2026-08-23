@@ -46,7 +46,8 @@
     "check:glyphlock-write-governance": "node scripts/check-glyphlock-write-governance.mjs",
     "check:glyphlock-batch18": "node scripts/check-glyphlock-batch18.mjs",
     "check:batch17-browser-acceptance-workaround": "node scripts/check-batch17-browser-acceptance-workaround.mjs",
-    "test:glyphlock-write-policy": "node scripts/test-glyphlock-write-policy.mjs"
+    "test:glyphlock-write-policy": "node scripts/test-glyphlock-write-policy.mjs",
+    "check:glyphlock-batch18-runtime": "node scripts/check-glyphlock-batch18-runtime.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.43",
