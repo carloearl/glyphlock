@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { base44 } from '@/api/base44Client';
 import { audit as auditService } from '../services';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 
 export function useGlyphBotAudit(currentUser) {
   const [audits, setAudits] = useState([]);
@@ -39,22 +40,10 @@ export function useGlyphBotAudit(currentUser) {
     if (!currentUser?.email) return null;
 
     try {
-      const data = {
-        user_id: currentUser.email,
-        targetType: auditData.targetType || 'business',
-        targetIdentifier: auditData.targetIdentifier,
-        auditMode: auditData.auditMode || 'SURFACE',
-        rawInput: auditData.rawInput || auditData.targetIdentifier,
-        notes: auditData.notes || '',
-        status: 'PENDING',
-        findings: '{}',
-        summary: '',
-        riskScore: 0,
-        overallGrade: '',
-        isArchived: false
-      };
-
-      const audit = await base44.entities.GlyphBotAudit.create(data);
+      const audit = await glyphlockWrite('glyphbot_audit_create', {
+        audit: auditData,
+        intent: 'glyphbot_create_audit',
+      });
       const auditId = audit.id || audit._id || audit.entity_id;
       
       await loadAudits();
@@ -69,7 +58,11 @@ export function useGlyphBotAudit(currentUser) {
     if (!auditId) return false;
 
     try {
-      await base44.entities.GlyphBotAudit.update(auditId, updates);
+      await glyphlockWrite('glyphbot_audit_update', {
+        id: auditId,
+        updates,
+        intent: 'glyphbot_update_audit',
+      });
       await loadAudits();
       return true;
     } catch (e) {
@@ -109,11 +102,15 @@ export function useGlyphBotAudit(currentUser) {
     if (!auditId) return false;
 
     try {
-      await base44.entities.GlyphBotAudit.delete(auditId);
+      await glyphlockWrite('glyphbot_audit_archive', {
+        id: auditId,
+        reason: 'Archived from GlyphBot audit history',
+        intent: 'glyphbot_archive_instead_of_delete',
+      });
       await loadAudits();
       return true;
     } catch (e) {
-      console.error('[GlyphBot Audit] Failed to delete audit:', e);
+      console.error('[GlyphBot Audit] Failed to archive audit:', e);
       return false;
     }
   }, [loadAudits]);
@@ -122,7 +119,11 @@ export function useGlyphBotAudit(currentUser) {
     if (!auditId) return false;
 
     try {
-      await base44.entities.GlyphBotAudit.update(auditId, { isArchived: true });
+      await glyphlockWrite('glyphbot_audit_archive', {
+        id: auditId,
+        reason: 'Archived by audit owner',
+        intent: 'glyphbot_archive_audit',
+      });
       await loadAudits();
       return true;
     } catch (e) {
@@ -135,7 +136,10 @@ export function useGlyphBotAudit(currentUser) {
     if (!auditId) return false;
 
     try {
-      await base44.entities.GlyphBotAudit.update(auditId, { isArchived: false });
+      await glyphlockWrite('glyphbot_audit_unarchive', {
+        id: auditId,
+        intent: 'glyphbot_unarchive_audit',
+      });
       await loadAudits();
       return true;
     } catch (e) {
