@@ -35,7 +35,7 @@ function read(relative) {
 function walk(dir, output = []) {
   if (!fs.existsSync(dir)) return output;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (['node_modules', 'dist', 'build', 'artifacts', 'internal_index'].includes(entry.name)) continue;
+    if (['node_modules', 'dist', 'build', 'artifacts'].includes(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, output);
     else if (SOURCE_EXTENSIONS.has(path.extname(entry.name))) output.push(full);
@@ -154,7 +154,7 @@ assert.doesNotMatch(gateway, /body\.(?:user_email|usage_count|is_trial)/, 'Clien
 assert.match(usageSchema, /"subject_key"[\s\S]*"request_id"/, 'Usage schema must support server identity and idempotency.');
 const feedbackBlock = gateway.match(/action === 'llm_feedback_submit'[\s\S]*?(?=\} else if \(action ===)/)?.[0] || '';
 assert.match(feedbackBlock, /prompt_snippet:\s*''[\s\S]*response_snippet:\s*''/, 'Feedback prompt/response fields must be deliberately blank.');
-assert.doesNotMatch(feedbackBlock, /input\.(?:prompt|response|prompt_snippet|response_snippet)/, 'Feedback persistence must not copy client prompt/response content.');
+assert.doesNotMatch(feedbackBlock, /input\.(?:prompt(?:_snippet)?|response(?:_snippet)?)\b/, 'Feedback persistence must not copy client prompt/response content.');
 assert.match(feedbackBlock, /RATE_LIMITED/, 'Feedback submission must be rate limited.');
 
 // Partner isolation and evidence.
@@ -177,11 +177,14 @@ assert.doesNotMatch(gateway, /metadata:\s*\{[^}]*?(?:file_uri|signed_url|passwor
 
 // Scorecard. Count direct writes using the same syntax as the Tier-2 guard.
 const allWritePattern = /\bbase44\.entities\.([A-Za-z_$][\w$]*)\.(create|update|delete|bulkCreate)\s*\(/g;
+const dynamicWritePattern = /\bbase44\.entities\[([^\]\n]+)\]\.(create|update|delete|bulkCreate)\s*\(/g;
 let totalWrites = 0;
 for (const file of walk(path.join(ROOT, 'src'))) {
   const source = fs.readFileSync(file, 'utf8');
   allWritePattern.lastIndex = 0;
+  dynamicWritePattern.lastIndex = 0;
   while (allWritePattern.exec(source) !== null) totalWrites += 1;
+  while (dynamicWritePattern.exec(source) !== null) totalWrites += 1;
 }
 assert.equal(totalWrites, 120, `Batch 18 expected 120 grandfathered frontend writes, found ${totalWrites}. Reclassify before changing this contract.`);
 
