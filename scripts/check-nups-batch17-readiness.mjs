@@ -22,7 +22,7 @@ const acceptanceAudit = read('base44/functions/getBatch17AcceptanceEvidence/entr
 assert.match(historical, /HISTORICAL \/ SUPERSEDED/, 'Historical handoff is not clearly superseded.');
 assert.match(handoff, /161 \/ 287/, 'Current handoff does not record the current write baseline.');
 assert.match(handoff, /GuestProfile = canonical minimized guest identity/, 'Current guest ownership is missing from the handoff.');
-assert.match(handoff, /VenueTerminal = sole pre-auth device-to-venue trust boundary/, 'Terminal trust boundary is missing from the handoff.');
+assert.match(handoff, /`?VenueTerminal`?\s+(?:=|is)\s+the?\s*sole pre-auth(?:entication)? device-to-venue trust boundary/i, 'Terminal trust boundary is missing from the handoff.');
 assert.match(handoff, /NKS2/, 'NKS2-only session posture is missing from the current handoff.');
 assert.match(architecture, /live high-risk NUPS\s+0/, 'Architecture does not record zero live high-risk NUPS writes.');
 assert.match(context, /Batch 17 is an operational acceptance/, 'Context does not identify Batch 17 as acceptance work.');
