@@ -64,7 +64,6 @@ jobs:
       CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-      CLOUDFLARE_INVENTORY_DIR: ${{ runner.temp }}/cloudflare-inventory
 
     steps:
       - name: Checkout trusted main
@@ -86,6 +85,8 @@ jobs:
       - name: Inventory Cloudflare account and zone
         id: inventory
         working-directory: cloudflare/glyphlock-edge-guard
+        env:
+          CLOUDFLARE_INVENTORY_DIR: ${{ runner.temp }}/cloudflare-inventory
         run: node scripts/preflight.mjs
 
       - name: Upload sanitized inventory
