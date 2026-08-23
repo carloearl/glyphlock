@@ -478,7 +478,10 @@ Deno.serve(async (req) => {
       const serviceName = text(body.service_name, 80);
       if (!SERVICE_NAMES.has(serviceName)) throw new HttpError(400, 'INVALID_SERVICE', 'Unknown service name.');
       const sessionId = text(body.session_id, 160);
-      const subjectKey = user?.email ? `user:${String(user.email).toLowerCase()}` : `anon:${await sha256(`${anonymousRef}|${sessionId}`)}`;
+      // Anonymous identity is server-derived from the request fingerprint. A
+      // browser-generated session id is retained only as non-authoritative
+      // diagnostics; clearing storage must not mint another free trial.
+      const subjectKey = user?.email ? `user:${String(user.email).toLowerCase()}` : anonymousRef;
       const rows = await E.ServiceUsage.filter({ subject_key: subjectKey, service_name: serviceName }, '-created_date', 5).catch(() => []);
       const before = rows[0] || null;
       const usageCount = Number(before?.usage_count || 0) + 1;
