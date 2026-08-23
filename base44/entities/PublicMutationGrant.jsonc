@@ -1,0 +1,86 @@
+{
+  "name": "PublicMutationGrant",
+  "type": "object",
+  "description": "Short-lived one-time capability used to finish an explicitly allowed public intake workflow without allowing arbitrary record updates.",
+  "properties": {
+    "grant_id": {
+      "type": "string"
+    },
+    "token_hash": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string"
+    },
+    "record_id": {
+      "type": "string"
+    },
+    "allowed_fields": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "purpose": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "ACTIVE",
+        "CONSUMED",
+        "REVOKED",
+        "EXPIRED"
+      ],
+      "default": "ACTIVE"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "consumed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "request_fingerprint": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "grant_id",
+    "token_hash",
+    "entity_name",
+    "record_id",
+    "allowed_fields",
+    "purpose",
+    "status",
+    "expires_at",
+    "created_at"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}
