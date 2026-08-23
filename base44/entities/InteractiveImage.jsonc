@@ -1,18 +1,38 @@
 {
   "name": "InteractiveImage",
   "type": "object",
+  "description": "User-owned interactive image lifecycle record. Drafts may be edited by their owner; finalized or published evidence is archived rather than hard-deleted.",
   "properties": {
-    "description": {
-      "type": "string",
-      "maxLength": 1000
-    },
     "asset_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "source": {
       "type": "string",
-      "description": "System-generated unique asset identifier"
+      "enum": [
+        "generated",
+        "uploaded"
+      ],
+      "default": "uploaded"
+    },
+    "fileUrl": {
+      "type": "string",
+      "description": "Canonical image URL used by the current Image Lab workflow."
+    },
+    "image_url": {
+      "type": "string",
+      "description": "Compatibility mirror of fileUrl."
+    },
+    "ownerEmail": {
+      "type": "string"
+    },
+    "owner_id": {
+      "type": "string"
     },
     "fingerprint": {
-      "type": "string",
-      "description": "Perceptual hash or SHA-256 of image binary (internal only, never exposed)"
+      "type": "string"
     },
     "fingerprint_method": {
       "type": "string",
@@ -20,27 +40,64 @@
         "phash",
         "sha256"
       ],
-      "description": "Method used to compute fingerprint"
+      "default": "sha256"
     },
-    "image_url": {
+    "status": {
       "type": "string",
-      "description": "Stored file location URL"
-    },
-    "owner_id": {
-      "type": "string",
-      "description": "Authenticated user identifier"
+      "enum": [
+        "draft",
+        "active",
+        "revoked"
+      ],
+      "default": "draft"
     },
     "published": {
       "type": "boolean",
-      "default": false,
-      "description": "Publication status"
+      "default": false
+    },
+    "hotspots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "immutableHash": {
+      "type": "string"
+    },
+    "imageFileHash": {
+      "type": "string"
+    },
+    "width": {
+      "type": "number"
+    },
+    "height": {
+      "type": "number"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_by": {
+      "type": "string"
+    },
+    "archive_reason": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000
     }
   },
   "required": [
     "asset_id",
-    "fingerprint",
-    "fingerprint_method",
-    "image_url",
+    "name",
+    "fileUrl",
+    "ownerEmail",
     "owner_id"
   ],
   "rls": {
@@ -73,7 +130,7 @@
     },
     "delete": {
       "user_condition": {
-        "role": "admin"
+        "role": "__ARCHIVE_ONLY__"
       }
     }
   }
