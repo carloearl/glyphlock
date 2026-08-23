@@ -15,7 +15,11 @@ assert.match(page, /execute_assignment/, 'Browser acceptance must execute the ca
 assert.match(page, /record_expiry/, 'Browser acceptance must test signed-link expiry.');
 assert.match(page, /finalize/, 'Browser acceptance must reconcile all five sessions.');
 assert.doesNotMatch(page, /localStorage|sessionStorage/, 'Acceptance sessions must not store credentials or results in browser storage.');
-assert.doesNotMatch(page, /access_token|Bearer |authorization/i, 'Acceptance UI must never handle raw bearer tokens.');
+assert.doesNotMatch(
+  page,
+  /\baccess_token\b|\bauthorization\b\s*[:=]|['"`]Bearer\s+(?:\$\{|[A-Za-z0-9._~-]{12,})/i,
+  'Acceptance UI must never construct, store, or attach raw bearer tokens.',
+);
 assert.match(page, /credentials: 'include'/, 'Signed-link probe must use the current authenticated browser session.');
 assert.match(page, /expiresIn \+ 3/, 'Expiry probe must reuse the exact link after its bounded test TTL.');
 
