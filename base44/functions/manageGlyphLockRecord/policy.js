@@ -232,7 +232,7 @@ export function publicRecentUpdateFields(data = {}) {
   return result;
 }
 
-export function authorize({ policy, action, actor, record, data }) {
+export function authorize({ policy, action, actor, record }) {
   const rule = policy?.[action];
   if (!rule) return { allowed: false, reason: 'operation_not_allowed' };
   if (rule === 'PUBLIC_INTAKE' || rule === 'PUBLIC_RECENT_UPDATE' || rule === 'LIMITED_FEEDBACK' || rule === 'SERVER_METER') {
