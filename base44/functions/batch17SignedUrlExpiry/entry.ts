@@ -15,8 +15,9 @@ Deno.serve(async (req) => {
     const issuedAt = new Date().toISOString();
     const synthetic = new TextEncoder().encode(`GLYPHLOCK BATCH 17 SYNTHETIC EVIDENCE\nNOT A REAL ID OR TAX DOCUMENT\n${issuedAt}`);
     const contentHash = await hashHex(synthetic);
-    const file = new File([synthetic], 'batch17-synthetic-evidence.txt', { type: 'text/plain' });
-    const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file });
+    const encoded = btoa(String.fromCharCode(...synthetic));
+    const fileBlob = await fetch(`data:text/plain;base64,${encoded}`).then((response) => response.blob());
+    const { file_uri } = await base44.integrations.Core.UploadPrivateFile({ file: fileBlob });
     const expiresIn = 5;
     const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri, expires_in: expiresIn });
 
