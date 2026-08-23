@@ -7,6 +7,8 @@ test('normalizes repeated, trailing, encoded, and double-encoded slashes', () =>
   assert.equal(normalizePathname('//admin//settlement/'), '/admin/settlement');
   assert.equal(normalizePathname('/admin%2Fsettlement'), '/admin/settlement');
   assert.equal(normalizePathname('/admin%252Fsettlement'), '/admin/settlement');
+  assert.equal(normalizePathname('/admin%5Csettlement'), '/admin/settlement');
+  assert.equal(normalizePathname('/admin%255Csettlement'), '/admin/settlement');
   assert.equal(normalizePathname('/'), '/');
 });
 
@@ -15,6 +17,8 @@ test('matches protected paths case-insensitively', () => {
     '/admin',
     '/admin/settlement',
     '/ADMIN/payment-reconciliation/',
+    '/admin%5Cpayment-reconciliation',
+    '/admin%255Cpayment-reconciliation',
     '/NUPSAdminPortal',
     '/ProviderConsole',
     '/IntegrationTests',
