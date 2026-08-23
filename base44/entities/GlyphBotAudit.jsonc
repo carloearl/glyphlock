@@ -73,6 +73,16 @@
       "type": "boolean",
       "description": "Whether audit is archived",
       "default": false
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_by": {
+      "type": "string"
+    },
+    "archive_reason": {
+      "type": "string"
     }
   },
   "required": [
