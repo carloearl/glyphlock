@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Lock, AlertCircle } from "lucide-react";
@@ -19,77 +20,29 @@ export default function FreeTrialGuard({ serviceName, children, allowAdminBypass
 
   const checkAccess = async () => {
     try {
-      // During development, allow bypass for admin users
       const isAuth = await base44.auth.isAuthenticated();
-      
+      let sessionId = '';
+
       if (isAuth) {
         const userData = await base44.auth.me();
         setUser(userData);
-
-        // Allow admin users full access if enabled
         if (allowAdminBypass && userData.role === 'admin') {
           setCanAccess(true);
-          setLoading(false);
           return;
         }
-
-        // Check service usage for authenticated users
-        const usage = await base44.entities.ServiceUsage.filter({
-          user_email: userData.email,
-          service_name: serviceName
-        });
-
-        if (usage.length === 0) {
-          // First time use - create usage record
-          await base44.entities.ServiceUsage.create({
-            user_email: userData.email,
-            service_name: serviceName,
-            usage_count: 1,
-            is_trial: true
-          });
-          setUsageCount(1);
-          setCanAccess(true);
-        } else {
-          const userUsage = usage[0];
-          setUsageCount(userUsage.usage_count);
-          
-          // Allow access if this is their first free trial
-          if (userUsage.is_trial && userUsage.usage_count === 1) {
-            setCanAccess(true);
-          } else {
-            setCanAccess(false);
-          }
-        }
       } else {
-        // Anonymous user - check session-based usage
-        let sessionId = localStorage.getItem('glyphlock_session_id');
-        if (!sessionId) {
-          sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-          localStorage.setItem('glyphlock_session_id', sessionId);
-        }
-
-        const usage = await base44.entities.ServiceUsage.filter({
-          session_id: sessionId,
-          service_name: serviceName
-        });
-
-        if (usage.length === 0) {
-          // First time use - create usage record
-          await base44.entities.ServiceUsage.create({
-            user_email: sessionId,
-            service_name: serviceName,
-            usage_count: 1,
-            is_trial: true,
-            session_id: sessionId
-          });
-          setUsageCount(1);
-          setCanAccess(true);
-        } else {
-          const sessionUsage = usage[0];
-          setUsageCount(sessionUsage.usage_count);
-          setCanAccess(false); // Block after first use for anonymous
-        }
+        sessionId = localStorage.getItem('glyphlock_session_id') || crypto.randomUUID();
+        localStorage.setItem('glyphlock_session_id', sessionId);
       }
+
+      const result = await glyphlockWrite('service_usage_check', {
+        service_name: serviceName,
+        session_id: sessionId,
+        request_id: crypto.randomUUID(),
+        intent: 'server_controlled_free_trial_usage',
+      });
+      setUsageCount(result.usage_count || 0);
+      setCanAccess(result.can_access === true);
     } catch (error) {
       console.error("Access check error:", error);
       setCanAccess(false);
