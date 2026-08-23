@@ -1,0 +1,102 @@
+{
+  "name": "GlyphLockWriteArchive",
+  "type": "object",
+  "description": "Append-only retention or tombstone evidence for governed GlyphLock record deletions and archival actions. Protected content and secrets must be scrubbed before persistence.",
+  "properties": {
+    "archive_id": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string"
+    },
+    "source_record_id": {
+      "type": "string"
+    },
+    "operation": {
+      "type": "string",
+      "enum": [
+        "ARCHIVE",
+        "DELETE_TOMBSTONE"
+      ]
+    },
+    "retention_class": {
+      "type": "string",
+      "enum": [
+        "GOVERNANCE_SNAPSHOT",
+        "AUDIT_SNAPSHOT",
+        "CONTENT_TOMBSTONE",
+        "TEMPORARY_TOMBSTONE"
+      ]
+    },
+    "content_hash": {
+      "type": "string"
+    },
+    "sanitized_snapshot": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "actor_id": {
+      "type": "string"
+    },
+    "actor_email": {
+      "type": "string"
+    },
+    "actor_role": {
+      "type": "string"
+    },
+    "scope_type": {
+      "type": "string"
+    },
+    "scope_id": {
+      "type": "string"
+    },
+    "intent": {
+      "type": "string"
+    },
+    "reason": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "archive_id",
+    "entity_name",
+    "source_record_id",
+    "operation",
+    "retention_class",
+    "content_hash",
+    "actor_email",
+    "scope_type",
+    "intent",
+    "created_at"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}
