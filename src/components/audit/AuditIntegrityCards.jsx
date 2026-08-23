@@ -41,11 +41,11 @@ export default function AuditIntegrityCards({ analytics }) {
       <div className="bg-gray-900/70 border border-violet-500/40 rounded-2xl p-5">
         <div className="flex items-start justify-between mb-2">
           <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">
-            Critical Actions
+            High-impact Actions
           </span>
           <ScrollText className="w-5 h-5 text-violet-400" />
         </div>
-        <div className="text-3xl font-black text-white">{analytics.totals.critical}</div>
+        <div className="text-3xl font-black text-white">{analytics.totals.highImpactActions}</div>
         <div className="text-[10px] text-gray-500 mt-1">DELETE · CONFIG · PAYOUT · SETTLE · EXPORT</div>
       </div>
 
