@@ -66,9 +66,8 @@ Deno.serve(async (req) => {
       counts: { accessed, denied, total: events.length },
       events,
       safety: {
-        includes_file_uri: false,
-        includes_signed_url: false,
-        includes_document_content: false,
+        protected_references_included: false,
+        document_content_included: false,
       },
     });
   } catch (error: any) {
