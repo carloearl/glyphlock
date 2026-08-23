@@ -70,6 +70,20 @@
       "type": "string",
       "format": "date-time",
       "description": "When moved to vault"
+    },
+    "archived": {
+      "type": "boolean",
+      "default": false
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archived_by": {
+      "type": "string"
+    },
+    "archive_reason": {
+      "type": "string"
     }
   },
   "required": [
