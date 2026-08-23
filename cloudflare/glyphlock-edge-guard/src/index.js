@@ -32,7 +32,10 @@ function decodePathname(pathname) {
 }
 
 export function normalizePathname(pathname) {
-  const collapsed = decodePathname(pathname).replace(/\/{2,}/g, '/');
+  // Treat forward and backward separators alike after decoding. Some origins
+  // normalize backslashes to slashes, so classifying them differently at the
+  // edge would create an encoded-path bypass.
+  const collapsed = decodePathname(pathname).replace(/[\\/]+/g, '/');
   if (collapsed === '/') return '/';
   return collapsed.replace(/\/+$/, '') || '/';
 }
@@ -91,7 +94,10 @@ export default {
         path: normalizePathname(url.pathname),
         message: error instanceof Error ? error.message : 'unknown error',
       }));
-      return new Response('Bad Gateway', { status: 502 });
+      return new Response('Bad Gateway', {
+        status: 502,
+        headers: protectedPath ? protectedHeaders() : undefined,
+      });
     }
 
     if (!protectedPath || originResponse.status === 101) return originResponse;
