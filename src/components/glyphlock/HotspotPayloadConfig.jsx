@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import { glyphlockWrite } from '@/lib/glyphlock/glyphlockWriteGateway';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -19,7 +20,7 @@ export default function HotspotPayloadConfig({ hotspotId, onPayloadSaved }) {
 
   const loadPayload = async () => {
     try {
-      const payloads = await base44.entities.HotspotPayload.filter({ hotspot_id: hotspotId });
+      const payloads = await base44.entities.HotspotPayload.filter({ hotspot_id: hotspotId, archived: { $ne: true } });
       if (payloads.length > 0) {
         setPayload(payloads[0]);
         setPayloadType(payloads[0].payload_type);
@@ -60,7 +61,11 @@ export default function HotspotPayloadConfig({ hotspotId, onPayloadSaved }) {
     if (!payload) return;
     setSaving(true);
     try {
-      await base44.entities.HotspotPayload.delete(payload.id);
+      await glyphlockWrite('hotspot_payload_archive', {
+        id: payload.id,
+        reason: 'Removed from hotspot configuration',
+        intent: 'archive_hotspot_payload',
+      });
       setPayload(null);
       setPayloadType('url');
       setPayloadUrl('');
