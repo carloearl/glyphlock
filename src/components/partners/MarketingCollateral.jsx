@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,13 +61,12 @@ export default function MarketingCollateral({ partner }) {
 
   const handleDownload = async (asset) => {
     try {
-      // Track download
-      await base44.entities.MarketingAsset.update(asset.id, {
-        download_count: (asset.download_count || 0) + 1
+      const result = await glyphlockWrite('marketing_asset_download', {
+        asset_id: asset.id,
+        intent: 'partner_marketing_asset_download',
       });
-      
-      // Trigger download
-      window.open(asset.file_url, '_blank');
+
+      window.open(result.file_url, '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error('Download error:', error);
     }
