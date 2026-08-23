@@ -32,7 +32,15 @@ assert.doesNotMatch(transactionSearch, /href=\{media\.media_url\}/, 'Transaction
 assert.doesNotMatch(taxForms, /href=\{r\.form\.scanned_form_url\}/, 'Tax-form list must not expose stored W-9 references directly.');
 assert.doesNotMatch(contractArchiveUi, /<(?:img|a)[^>]+(?:id_photo|thumbprint|signed_hardcopy|guest_photo)_url/i, 'Contract archives must not render stored protected-media references directly.');
 assert.doesNotMatch(retrieval, /metadata\s*:\s*\{[^}]*\b(?:file_uri|signed_url)\b/is, 'Protected-evidence audit metadata must not contain private file URIs or signed URLs.');
-assert.match(retrieval, /expires_in:\s*120/, 'Authorized retrieval must issue a short-lived signed URL.');
+
+const usesFixedShortTtl = /expires_in:\s*120/.test(retrieval);
+const usesBoundedShortTtl = /let\s+expiresIn\s*=\s*120/.test(retrieval)
+  && /CreateFileSignedUrl\s*\(\s*\{[^}]*expires_in:\s*expiresIn[^}]*\}\s*\)/s.test(retrieval)
+  && /expires_in:\s*expiresIn/.test(retrieval)
+  && /requestedTestTtl\s*<\s*5\s*\|\|\s*requestedTestTtl\s*>\s*15/.test(retrieval)
+  && /evidence\.mode\s*===\s*['"]SANDBOX['"]/.test(retrieval);
+assert.ok(usesFixedShortTtl || usesBoundedShortTtl, 'Authorized retrieval must issue a short-lived signed URL, with any reduced test TTL restricted to bounded SANDBOX evidence.');
+
 assert.doesNotMatch(vipContract, /Core\.UploadFile/, 'VIP contract signing must not upload identity/biometric evidence through public-file storage.');
 assert.match(vipContract, /uploadProtectedEvidence/, 'VIP contract signing must use the protected-evidence upload path.');
 assert.match(vipContract, /protected:\$\{protectedEvidenceRefs\.thumbprint\}/, 'VIP contract signing must submit an opaque protected thumbprint reference.');
