@@ -241,6 +241,9 @@ Base44 still required each disposable user to complete the emailed one-time veri
 
 This issue remains open until the five-session harness passes and the exact same signed URL succeeds before expiry and is rejected afterward.
 
+### Batch 18 browser-session workaround
+`NUPSBatch17Acceptance` now removes the need to extract or copy bearer tokens. Five separately verified disposable users can log in through five browser profiles, open `/NUPSBatch17Acceptance`, run their assigned real-session case, and write only an append-only sanitized result. `recordBatch17AcceptanceResult` independently derives the expected decision from the authenticated NUPS role, evidence classification, and venue, then reconciles the matching `SystemAuditLog` event. Human completion of Base44's emailed OTP is still required and is not bypassed.
+
 ---
 
 ## NUPS-0010 — Integration maturity is not uniformly persisted
@@ -296,7 +299,10 @@ Run the token-driven test with five distinct authenticated users to prove author
 ### Batch 17 acceptance harness
 `docs/runbooks/NUPS-BATCH17-AUTHENTICATED-ACCEPTANCE.md` and the token-only authenticated runner define the required same-venue allow, door-limited allow, wrong-role denial, wrong-venue denial, global-role behavior, 120-second expiry and sanitized audit reconciliation.
 
-Five disposable test accounts and matching NUPS identities were prepared, but Base44 blocked password login until the emailed OTP was completed. Because that human verification step could not be automated safely, every synthetic NUPS identity was suspended and the synthetic Venue B was disabled. The issue remains open until the runner executes with five verified, distinct authenticated sessions.
+Five disposable test accounts and matching NUPS identities were prepared, but Base44 blocked password login until the emailed OTP was completed. Because that human verification step could not be automated safely, every synthetic NUPS identity was suspended and the synthetic Venue B was disabled. The issue remains open until the runner or the browser-session console executes with five verified, distinct authenticated sessions.
+
+### Batch 18 browser-session workaround
+The no-token acceptance console prepares synthetic SANDBOX evidence, exercises the deployed `getProtectedEvidence` path in the current browser session, waits beyond the actual signed-link lifetime for the expiry case, clears the URL from component state, and stores only status codes, a one-way URL hash, the expected/observed decision, and audit-presence evidence. This closes the token-handling obstacle without weakening the requirement for five actual Base44 sessions.
 
 ---
 
