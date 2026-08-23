@@ -1,0 +1,102 @@
+{
+  "name": "GovernedRecordArchive",
+  "type": "object",
+  "description": "Append-only retention evidence created before governed destructive actions or material governance-record updates. Protected values and private media references are redacted before persistence.",
+  "properties": {
+    "archive_id": {
+      "type": "string"
+    },
+    "entity_name": {
+      "type": "string"
+    },
+    "record_id": {
+      "type": "string"
+    },
+    "archive_kind": {
+      "type": "string",
+      "enum": [
+        "FULL_REDACTED_SNAPSHOT",
+        "SAFE_TOMBSTONE",
+        "PRE_UPDATE_VERSION"
+      ]
+    },
+    "reason": {
+      "type": "string"
+    },
+    "actor_email": {
+      "type": "string"
+    },
+    "actor_role": {
+      "type": "string"
+    },
+    "scope_type": {
+      "type": "string"
+    },
+    "scope_id": {
+      "type": "string"
+    },
+    "record_hash": {
+      "type": "string"
+    },
+    "snapshot": {
+      "type": "object",
+      "description": "Redacted snapshot or minimized tombstone. Never contains secrets, tokens, private file URIs, signed URLs, government IDs, tax IDs, or biometric media."
+    },
+    "archived_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_mode": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "archive_id",
+    "entity_name",
+    "record_id",
+    "archive_kind",
+    "reason",
+    "actor_email",
+    "record_hash",
+    "archived_at"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "PLATFORM_ADMIN"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "SOVEREIGN"
+          }
+        }
+      ]
+    },
+    "update": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}
