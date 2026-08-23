@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { routePatternCoversApex } from './route-pattern.mjs';
 
 const API_ROOT = 'https://api.cloudflare.com/client/v4';
 const ZONE_NAME = 'glyphlock.io';
@@ -144,10 +145,7 @@ const dnsSummaries = Array.isArray(dnsRecords)
     }))
   : [];
 
-const apexRoutes = routeSummaries.filter((route) => {
-  const pattern = route.pattern.toLowerCase();
-  return pattern === ZONE_NAME || pattern.startsWith(`${ZONE_NAME}/`);
-});
+const apexRoutes = routeSummaries.filter((route) => routePatternCoversApex(route.pattern, ZONE_NAME));
 const conflictingRoutes = apexRoutes.filter((route) => route.script !== WORKER_NAME);
 const existingGuardScript = scriptSummaries.some((script) => script.name === WORKER_NAME);
 const existingGuardRoutes = apexRoutes.filter((route) => route.script === WORKER_NAME);
