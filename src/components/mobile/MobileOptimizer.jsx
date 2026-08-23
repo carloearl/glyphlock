@@ -80,7 +80,6 @@ export const OptimizedImage = ({
       alt={alt}
       className={className}
       loading={priority ? 'eager' : loading}
-      fetchpriority={priority ? 'high' : 'auto'}
       decoding="async"
     />
   );
