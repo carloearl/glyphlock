@@ -1,13 +1,13 @@
-name: Cloudflare Edge Guard Preflight
+name: Cloudflare Edge Guard Delivery
 
 on:
-  push:
+  pull_request:
     branches:
-      - cloudflare/edge-guard
+      - main
     paths:
       - cloudflare/glyphlock-edge-guard/**
       - .github/workflows/cloudflare-edge-guard-preflight.yml
-  pull_request:
+  push:
     branches:
       - main
     paths:
@@ -19,36 +19,57 @@ permissions:
   contents: read
 
 concurrency:
-  group: cloudflare-edge-guard-preflight-${{ github.ref }}
+  group: cloudflare-edge-guard-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  preflight:
-    name: Inventory glyphlock.io before mutation
+  static-verification:
+    name: Verify edge guard without credentials
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-      CLOUDFLARE_TOKEN: ${{ secrets.CLOUDFLARE_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
-      CLOUDFLARE_INVENTORY_DIR: ${{ runner.temp }}/cloudflare-inventory
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Use Node.js 20
+      - name: Use Node.js 22
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Validate Worker source
+      - name: Validate Worker, deployment, verification, and rollback source
         working-directory: cloudflare/glyphlock-edge-guard
         run: |
           node --check src/index.js
+          node --check scripts/preflight.mjs
+          node --check scripts/verify-live.mjs
+          node --check scripts/rollback.mjs
           node --test
+
+  preflight:
+    name: Inventory glyphlock.io before mutation
+    needs: static-verification
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      account_id: ${{ steps.inventory.outputs.account_id }}
+      zone_id: ${{ steps.inventory.outputs.zone_id }}
+      safe_to_deploy: ${{ steps.inventory.outputs.safe_to_deploy }}
+      fresh_deploy: ${{ steps.inventory.outputs.fresh_deploy }}
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || secrets.CF_ACCOUNT_ID }}
+      CLOUDFLARE_INVENTORY_DIR: ${{ runner.temp }}/cloudflare-inventory
+
+    steps:
+      - name: Checkout trusted main commit
+        uses: actions/checkout@v6
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
 
       - name: Inventory Cloudflare account and zone
         id: inventory
@@ -63,3 +84,70 @@ jobs:
           path: ${{ runner.temp }}/cloudflare-inventory/cloudflare-preflight-inventory.json
           if-no-files-found: warn
           retention-days: 14
+
+  deploy:
+    name: Deploy and verify edge guard
+    needs: preflight
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.preflight.outputs.safe_to_deploy == 'true' && needs.preflight.outputs.fresh_deploy == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ needs.preflight.outputs.account_id }}
+      CLOUDFLARE_ZONE_ID: ${{ needs.preflight.outputs.zone_id }}
+
+    steps:
+      - name: Checkout verified main commit
+        uses: actions/checkout@v6
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Re-run Worker unit tests immediately before deployment
+        working-directory: cloudflare/glyphlock-edge-guard
+        run: node --test
+
+      - name: Deploy exact edge guard Worker and route
+        id: deploy
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN || secrets.CF_API_TOKEN || secrets.CLOUDFLARE_TOKEN }}
+          accountId: ${{ needs.preflight.outputs.account_id }}
+          wranglerVersion: '4.121.0'
+          workingDirectory: cloudflare/glyphlock-edge-guard
+          command: deploy
+
+      - name: Verify public and protected live routes
+        id: verify
+        if: steps.deploy.outcome == 'success'
+        continue-on-error: true
+        working-directory: cloudflare/glyphlock-edge-guard
+        run: node scripts/verify-live.mjs
+
+      - name: Roll back exact route and script after any failed delivery gate
+        id: rollback
+        if: always() && (steps.deploy.outcome != 'success' || steps.verify.outcome != 'success')
+        working-directory: cloudflare/glyphlock-edge-guard
+        run: node scripts/rollback.mjs
+
+      - name: Mark failed delivery after rollback
+        if: always() && (steps.deploy.outcome != 'success' || steps.verify.outcome != 'success')
+        run: |
+          echo 'Cloudflare edge guard delivery failed and the exact route/script rollback was attempted.'
+          exit 1
+
+      - name: Record successful delivery
+        if: steps.deploy.outcome == 'success' && steps.verify.outcome == 'success'
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'SUMMARY'
+          ## Cloudflare edge guard delivery
+
+          **Result: PASS**
+
+          The exact `glyphlock-edge-guard` Worker is active on `glyphlock.io/*`. Public traffic remains available, crawler requests to protected paths return HTTP 404, and protected browser responses receive noindex/no-store headers.
+
+          No DNS record, SSL/TLS mode, cache rule, Page Rule, ruleset, Base44 authentication setting, or crawler-prerender fallback was changed.
+          SUMMARY
