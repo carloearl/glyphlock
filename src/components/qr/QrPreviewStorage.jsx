@@ -48,33 +48,12 @@ export function useQrPreviewStorage(userId) {
     if (!userId) return null;
 
     try {
-      // Check current count
-      const currentPreviews = await base44.entities.QrPreview.filter(
-        { user_id: userId, vaulted: false, archived: { $ne: true } },
-        'created_date'
-      );
-
-      // If at limit, delete oldest
-      if (currentPreviews.length >= MAX_PREVIEWS) {
-        const oldest = currentPreviews[0];
-        await base44.entities.QrPreview.delete(oldest.id);
-        toast.info('Limit of 10 previews reached. Oldest preview removed. Save important QR codes to your Vault.');
-      }
-
-      // Save new preview
-      const newPreview = await base44.entities.QrPreview.create({
-        user_id: userId,
-        code_id: previewData.code_id,
-        payload: previewData.payload,
-        payload_type: previewData.payload_type || 'url',
-        image_data_url: previewData.image_data_url,
-        customization: previewData.customization,
-        size: previewData.size || 512,
-        error_correction: previewData.error_correction || 'H',
-        risk_score: previewData.risk_score || 0,
-        risk_flags: previewData.risk_flags || [],
-        immutable_hash: previewData.immutable_hash,
-        vaulted: false
+      const newPreview = await glyphlockWrite('qr_preview_save', {
+        preview: {
+          ...previewData,
+          vaulted: false,
+        },
+        intent: 'auto_save_ephemeral_qr_preview',
       });
 
       // Refresh list
@@ -92,9 +71,9 @@ export function useQrPreviewStorage(userId) {
     if (!userId) return false;
 
     try {
-      await base44.entities.QrPreview.update(previewId, {
-        vaulted: true,
-        vault_date: new Date().toISOString()
+      await glyphlockWrite('qr_preview_vault', {
+        id: previewId,
+        intent: 'move_qr_preview_to_vault',
       });
 
       // Also update QRGenHistory if exists
@@ -125,7 +104,11 @@ export function useQrPreviewStorage(userId) {
     if (!userId) return false;
 
     try {
-      await base44.entities.QrPreview.delete(previewId);
+      await glyphlockWrite('qr_preview_remove', {
+        id: previewId,
+        reason: 'Removed by preview owner',
+        intent: 'remove_qr_preview',
+      });
       await loadPreviews();
       toast.success('Preview deleted');
       return true;
