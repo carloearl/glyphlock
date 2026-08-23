@@ -63,7 +63,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Protected evidence access denied' }, { status: 403 });
     }
 
-    const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: evidence.file_uri, expires_in: 120 });
+    let expiresIn = 120;
+    const requestedTestTtl = Number(body.test_ttl || 0);
+    const syntheticBatch17 = evidence.mode === 'SANDBOX'
+      && evidence.subject_entity === 'Batch17SyntheticEvidence'
+      && purpose.startsWith('batch17:');
+    if (requestedTestTtl) {
+      const managerClass = MANAGER_ROLES.has(nups.role || '');
+      if (!syntheticBatch17 || !managerClass || requestedTestTtl < 5 || requestedTestTtl > 15) {
+        return Response.json({ error: 'Test TTL is restricted to manager-authorized Batch 17 SANDBOX evidence.' }, { status: 403 });
+      }
+      expiresIn = requestedTestTtl;
+    }
+
+    const { signed_url } = await base44.integrations.Core.CreateFileSignedUrl({ file_uri: evidence.file_uri, expires_in: expiresIn });
     await base44.asServiceRole.entities.SystemAuditLog.create({
       event_type: 'PROTECTED_EVIDENCE_ACCESSED',
       description: `Authorized protected evidence retrieval for ${evidence.evidence_id}`,
@@ -71,7 +84,7 @@ Deno.serve(async (req) => {
       status: 'success', severity: 'medium',
       metadata: { evidence_id: evidence.evidence_id, venue_id: evidence.venue_id, classification: evidence.classification, purpose, actor_role: nups.role },
     }).catch(() => null);
-    return Response.json({ success: true, signed_url, expires_in: 120, evidence: { evidence_id: evidence.evidence_id, artifact_type: evidence.artifact_type, classification: evidence.classification } });
+    return Response.json({ success: true, signed_url, expires_in: expiresIn, evidence: { evidence_id: evidence.evidence_id, artifact_type: evidence.artifact_type, classification: evidence.classification } });
   } catch (error) {
     return Response.json({ error: error?.message || 'Protected evidence retrieval failed' }, { status: 500 });
   }
