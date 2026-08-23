@@ -99,8 +99,7 @@
             "role": {
               "$in": [
                 "admin",
-                "marketing",
-                "partner"
+                "marketing"
               ]
             }
           }
