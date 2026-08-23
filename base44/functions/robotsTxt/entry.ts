@@ -15,7 +15,7 @@ const PUBLIC_ALLOW = [
   '/Roadmap', '/Partners', '/DreamTeam', '/FAQ', '/GovernanceHub',
   '/MasterCovenant', '/TrustSecurity', '/NISTChallenge', '/CaseStudies',
   '/CaseStudyTruthStrike', '/CaseStudyAIBinding', '/CaseStudyCovenantVictory',
-  '/GlyphLockFinancial', '/NUPSLanding', '/VideoUpload', '/ProviderConsole',
+  '/GlyphLockFinancial', '/NUPSLanding', '/VideoUpload',
   '/Privacy', '/Terms', '/Cookies', '/Accessibility', '/CodeOfEthics',
 ];
 
@@ -30,7 +30,8 @@ const NOINDEX = [
   '/ContractArchive', '/ContractSearch', '/StrategicScale', '/OHIPReadiness',
   '/VIPContract', '/Sitemap', '/SitemapApp', '/SitemapDynamic', '/SitemapImages',
   '/SitemapInteractive', '/SitemapQr', '/sitemap-qr', '/Robots', '/NotFound',
-  '/api/', '/functions/', '/admin/',
+  '/api/', '/functions/', '/admin/', '/NUPSAdminPortal', '/ProviderConsole',
+  '/unauthorized', '/demo/',
   '/nupskiosk', '/nupshub', '/register', '/registerconsole', '/barregister',
   '/receipts', '/driverpayouts', '/glyphbucks', '/accounting', '/tonight',
   '/contracts', '/contractshub', '/vipbillprinter', '/managerconsole',

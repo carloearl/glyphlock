@@ -41,7 +41,6 @@ Allow: /CaseStudyCovenantVictory
 Allow: /GlyphLockFinancial
 Allow: /NUPSLanding
 Allow: /VideoUpload
-Allow: /ProviderConsole
 Allow: /Privacy
 Allow: /Terms
 Allow: /Cookies
@@ -96,6 +95,10 @@ Disallow: /NotFound
 Disallow: /api/
 Disallow: /functions/
 Disallow: /admin/
+Disallow: /demo/
+Disallow: /unauthorized
+Disallow: /ProviderConsole
+Disallow: /NUPSAdminPortal
 Disallow: /nupskiosk
 Disallow: /nupshub
 Disallow: /register
