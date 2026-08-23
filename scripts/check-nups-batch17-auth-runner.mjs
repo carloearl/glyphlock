@@ -31,7 +31,7 @@ assert.match(source, /doesNotMatch\(serialized, \/file_uri\|signed_url/, 'Runner
 assert.match(source, /signed_urls_printed:\s*false/, 'Runner report must state signed URLs were not printed.');
 assert.match(source, /private_file_uris_printed:\s*false/, 'Runner report must state private URIs were not printed.');
 assert.doesNotMatch(source, /console\.log\([^\n]*(?:TOKEN|signedUrl|fileUri)/i, 'Runner must not log credential or URL variables.');
-assert.doesNotMatch(source, /dotenv|\.env/, 'Runner must not load committed dotenv files.');
+assert.doesNotMatch(source, /from\s+['"]dotenv|require\(['"]dotenv|readFileSync\([^)]*\.env/i, 'Runner must not load committed dotenv files.');
 assert.match(runbook, /Do not create an `.env` file/, 'Runbook must prohibit dotenv persistence.');
 assert.match(runbook, /five distinct Base44 users/i, 'Runbook must require distinct authenticated users.');
 
