@@ -1,0 +1,114 @@
+{
+  "name": "Batch17AcceptanceRun",
+  "type": "object",
+  "description": "Controlled multi-session acceptance run for Batch 17. Stores only synthetic evidence identifiers and sanitized results; never stores bearer tokens, OTPs, passwords, signed URLs, or private file URIs.",
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PREPARING",
+        "READY",
+        "RUNNING",
+        "PASSED",
+        "FAILED",
+        "CANCELLED",
+        "EXPIRED"
+      ],
+      "default": "PREPARING"
+    },
+    "venue_a_id": {
+      "type": "string"
+    },
+    "venue_b_id": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "SANDBOX"
+      ],
+      "default": "SANDBOX"
+    },
+    "evidence_ids": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "required_assignments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "completed_assignments": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "expiry_result": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "audit_result": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "started_by": {
+      "type": "string"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "run_id",
+    "status",
+    "venue_a_id",
+    "venue_b_id",
+    "mode",
+    "required_assignments",
+    "completed_assignments",
+    "started_by",
+    "started_at",
+    "expires_at"
+  ],
+  "rls": {
+    "create": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}
