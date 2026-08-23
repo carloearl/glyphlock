@@ -70,7 +70,10 @@ const assetDownloadSchema = read('base44/entities/MarketingAssetDownload.jsonc')
 
 assert.match(helper, /functions\.invoke\(['"]glyphlockWriteGateway['"]/, 'Frontend helper must call the explicit server gateway.');
 assert.doesNotMatch(gateway, /(?:asServiceRole\.)?entities\s*\[\s*body\./, 'Gateway must not accept client-selected entity names.');
-assert.doesNotMatch(gateway, /E\s*\[\s*(?:body|action|entity)/, 'Gateway must not dynamically select an entity from client input.');
+assert.doesNotMatch(gateway, /getRecord\(E,\s*(?:body\.|action\b|entity\b)/, 'Gateway must not pass client-selected entities into getRecord.');
+for (const match of gateway.matchAll(/getRecord\(E,\s*([^,\n]+)/g)) {
+  assert.match(match[1].trim(), /^['"][A-Za-z0-9_$]+['"]$/, `getRecord entity must be a server literal, found ${match[1].trim()}`);
+}
 assert.doesNotMatch(gateway, /body\.(?:actor_email|actor_role|owner_id|user_email)\s*(?:\?|\|\||,|})/, 'Client identity must not become authoritative actor identity.');
 
 const expectedActions = [
