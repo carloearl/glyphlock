@@ -11,6 +11,8 @@ Use exactly:
 
 Never infer a higher state from a lower state. Stored credentials alone mean **configured**.
 
+Authoritative current state is persisted in the governed `IntegrationMaturity` entity. `recordIntegrationMaturity` is the server-side update boundary and rejects secret/private-reference metadata. This document explains the evidence and limitations behind those records.
+
 ## Base44 OAuth connectors — runtime-verified connector state
 
 ### Google Drive
