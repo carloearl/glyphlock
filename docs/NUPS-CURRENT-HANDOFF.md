@@ -124,7 +124,7 @@ Core component checks include write-gateway, frozen financial rules, environment
 
 - `NUPS-0002`: controlled app-wide migration remains `161/287`; live NUPS operational migration is complete.
 - `NUPS-0009`: authenticated private-retrieval and expiry proof pending.
-- `NUPS-0010`: integration maturity must be updated from actual requests, not configuration.
+- `NUPS-0010`: resolved through governed `IntegrationMaturity` records; individual integrations retain their evidence-backed limitations.
 - `NUPS-0011`: private boundary is implemented; authenticated E2E proof pending.
 - `NUPS-0013`: software control complete; real physical devices require one-time commissioning.
 
