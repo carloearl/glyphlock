@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { base44 } from "@/api/base44Client";
+import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
+import { toast } from "sonner";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -149,26 +151,18 @@ export default function ArchitecturalDecisionRegister() {
         tags: (form.tags || "").split(",").map((s) => s.trim()).filter(Boolean),
       };
 
-      let saved;
-      if (editing === "new") {
-        saved = await base44.entities.ArchitecturalDecisionRecord.create(payload);
-      } else {
-        saved = await base44.entities.ArchitecturalDecisionRecord.update(editing.id, payload);
-      }
-
-      if (payload.supersedes) {
-        const prev = records.find((r) => r.adr_number === payload.supersedes);
-        if (prev && prev.status !== "Superseded") {
-          await base44.entities.ArchitecturalDecisionRecord.update(prev.id, {
-            status: "Superseded",
-            superseded_by: payload.adr_number,
-          });
-        }
-      }
+      const saved = await glyphlockWrite('adr_save', {
+        id: editing === 'new' ? null : editing.id,
+        record: payload,
+        intent: editing === 'new' ? 'create_architectural_decision' : 'update_architectural_decision',
+      });
 
       setEditing(null);
       await load();
       if (saved?.id) setSelected(saved);
+      toast.success(editing === 'new' ? 'ADR created' : 'ADR updated');
+    } catch (error) {
+      toast.error(error?.message || 'ADR save failed');
     } finally {
       setSaving(false);
     }
