@@ -1,0 +1,105 @@
+{
+  "name": "IntegrationMaturity",
+  "type": "object",
+  "description": "Authoritative current non-secret maturity state for a GlyphLock/NUPS integration in one environment and optional venue.",
+  "properties": {
+    "status_key": {
+      "type": "string",
+      "description": "Stable integration/environment/venue key."
+    },
+    "integration_key": {
+      "type": "string"
+    },
+    "display_name": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "string",
+      "enum": [
+        "PLATFORM",
+        "REAL",
+        "DEMO",
+        "SANDBOX"
+      ]
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "maturity": {
+      "type": "string",
+      "enum": [
+        "configured",
+        "connected",
+        "authenticated",
+        "request_succeeded",
+        "response_validated",
+        "end_to_end_verified"
+      ]
+    },
+    "maturity_rank": {
+      "type": "number"
+    },
+    "result": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "PARTIAL",
+        "BLOCKED"
+      ]
+    },
+    "tested_action": {
+      "type": "string"
+    },
+    "tested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_reference": {
+      "type": "string"
+    },
+    "known_limitation": {
+      "type": "string"
+    },
+    "recorded_by": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "status_key",
+    "integration_key",
+    "display_name",
+    "environment",
+    "maturity",
+    "maturity_rank",
+    "result",
+    "tested_action",
+    "tested_at",
+    "recorded_by"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "__SERVER_GOVERNED_ONLY__"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "__SERVER_GOVERNED_ONLY__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__APPEND_ONLY_BLOCK__"
+      }
+    }
+  }
+}
