@@ -153,7 +153,8 @@ assert.match(gateway, /const subjectKey = user\?\.email \?[^;]+: anonymousRef;/,
 assert.doesNotMatch(gateway, /body\.(?:user_email|usage_count|is_trial)/, 'Clients must not supply authoritative usage identity/count/plan fields.');
 assert.match(usageSchema, /"subject_key"[\s\S]*"request_id"/, 'Usage schema must support server identity and idempotency.');
 const feedbackBlock = gateway.match(/action === 'llm_feedback_submit'[\s\S]*?(?=\} else if \(action ===)/)?.[0] || '';
-assert.doesNotMatch(feedbackBlock, /prompt_snippet|response_snippet/, 'Feedback persistence must not copy prompt/response content.');
+assert.match(feedbackBlock, /prompt_snippet:\s*''[\s\S]*response_snippet:\s*''/, 'Feedback prompt/response fields must be deliberately blank.');
+assert.doesNotMatch(feedbackBlock, /input\.(?:prompt|response|prompt_snippet|response_snippet)/, 'Feedback persistence must not copy client prompt/response content.');
 assert.match(feedbackBlock, /RATE_LIMITED/, 'Feedback submission must be rate limited.');
 
 // Partner isolation and evidence.
