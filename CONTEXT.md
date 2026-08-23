@@ -4,7 +4,7 @@
 **Canonical Base44 app:** `697a087fb354faebb72df54b`  
 **Canonical source repository:** `carloearl/glyphlock`  
 **Canonical branch:** `main`  
-**Mapped:** 2026-08-20 (America/Phoenix)
+**Mapped:** 2026-08-22 (America/Phoenix)
 
 This file describes what NUPS currently is. It is knowledge, not agent instructions. When this file conflicts with frozen invariants, the invariant wins and the mismatch belongs in `KNOWN_ISSUES.md`.
 
@@ -33,13 +33,13 @@ Retired term: **Dream Dollars** → GlyphBucks.
 NUPS currently has multiple purpose-specific person records:
 
 - `GuestProfile` — durable, venue-scoped guest identity profile using a deterministic one-way credential-derived key and minimized credential storage.
-- `VIPGuest` — VIP workflow guest record; legacy/operational fields remain broader than `GuestProfile`.
+- `VIPGuest` — venue/VIP workflow projection linked to canonical identity through `guest_profile_id` and `guest_id`; historical broader fields remain compatibility-only.
 - `Entertainer` — independent-contractor profile, credential status, agreement status, payout-hold state, and venue scope.
 - `NUPSUser` — staff/manager/owner operational account and PIN/RBAC layer on top of Base44 authentication.
 - `DriverProfile` — driver credential/profile, signed QR reference, venue scope, and YTD payout state.
 - `PersonRecord` — append-only snapshot/archive layer for entertainer/staff/guest/driver lifecycle evidence.
 
-Canonical profile consolidation is still in progress; see `KNOWN_ISSUES.md` for overlapping identity models.
+Guest identity ownership is resolved: `GuestProfile` is canonical minimized identity and `VIPGuest` is the operational projection. Other person classes remain purpose-specific and are not merged casually.
 
 ## Venue model
 
@@ -47,6 +47,7 @@ Canonical profile consolidation is still in progress; see `KNOWN_ISSUES.md` for 
 - `VenueRateConfig` is the active per-venue operational/rate configuration and includes the venue ledger mode.
 - `useActiveVenue()` stores the operator's selected venue in local storage under `nups_active_venue`, validates it against active `Venue` rows, and preserves legitimate multi-venue selection.
 - Code must prefer the selected live venue record and never introduce a new hardcoded production venue id.
+- `VenueTerminal` is the sole pre-authentication device-to-venue trust boundary. A device is accepted only when its exact stable ID is active and trusted for the venue. Payment configuration does not confer device trust.
 
 ## Mode model
 
@@ -130,7 +131,7 @@ Frontend canonical role mapping is defined in `src/config/roles.js`. Current UI 
 - dj
 - vip_hostess
 
-The persistent `NUPSUser.role` enum is broader and includes platform/venue owner/manager, floor host, hostess, door girl, doorman, driver, performer, bartender, security, DJ, kiosk, demo, and sovereign roles. This creates mapping drift that must be treated deliberately; see `KNOWN_ISSUES.md`.
+The persistent `NUPSUser.role` enum is broader and includes platform/venue owner/manager, floor host, hostess, door girl, doorman, driver, performer, bartender, security, DJ, kiosk, demo, and sovereign roles. The adapter explicitly maps supported operational roles and fails closed for unknown or deliberately unmapped roles; DRIVER and PERFORMER do not silently inherit generic permissions.
 
 ## Write governance
 
@@ -148,7 +149,7 @@ The gateway currently provides:
 - observational `AuditEvent` emission
 - user-facing `ActivityLog` mirroring
 
-The repository is under a Tier-2-style migration guard: direct frontend writes are grandfathered by `config/nups-direct-write-legacy-manifest.json`, and CI prevents the count/signature set from increasing. The mapped baseline on 2026-08-20 is **287 grandfathered direct frontend writes**.
+The repository is under a Tier-2-style migration guard: direct frontend writes are grandfathered by `config/nups-direct-write-legacy-manifest.json`, and CI prevents the count/signature set from increasing. The current state is **161/287** with zero new bypasses, zero live high-risk NUPS business bypasses, and zero live-medium NUPS business bypasses. The retained calls are classified rather than erased for numerical theater.
 
 ## CI / verification controls
 
@@ -157,16 +158,30 @@ Relevant scripts:
 - `npm run check:nups-write-gateway`
 - `npm run check:nups-frozen-rules`
 - `npm run check:nups-isolation`
+- `npm run check:nups-protected-evidence`
+- `npm run check:nups-api-key-secrets`
+- `npm run check:nups-guest-identity`
+- `npm run check:nups-live-venue-boundaries`
+- `npm run check:nups-terminal-governance`
+- `npm run test:dj`
+- `npm run check:nups-dj-continuity`
 - `npm run audit:entities`
 - `npm run audit:nups-ui`
 - `npm run check:integrations`
 - `npm run check:secrets`
 - `npm run ci:base44`
+- `npm run check:nups-batch16`
+- `npm run check:nups-batch17`
 
-Verified on 2026-08-20:
+Verified on 2026-08-22:
 
-- write-gateway guard passed: 287/287 grandfathered writes, no new bypasses
-- frozen-rules check passed
-- mode/isolation check passed
+- write-gateway guard passed: 161/287 grandfathered writes, no new bypasses
+- frozen financial/contractor rules passed
+- mode/isolation checks passed
+- protected-evidence policy and anonymous denial passed
+- guest identity projection passed
+- terminal governance and NKS2 runtime boundaries passed
+- DJ continuity contracts and reducer tests passed
+- lint, typecheck, UI audit, secret scan, integration boundaries, and production build passed
 
-These checks prove their stated static policies only; they do not by themselves prove live end-to-end venue workflows.
+These checks prove their stated policies. Distinct authenticated protected-evidence sessions, real physical device commissioning, full browser workflow, and a real provider DJ soak remain separate operational acceptance evidence.
