@@ -519,6 +519,23 @@ Deno.serve(async (req) => {
       const after = await E.InteractiveImage.update(before.id, { hotspots });
       value = after;
       audit = { ...audit, entity_name: 'InteractiveImage', record_id: before.id, operation: 'update', scope_type: 'CONTENT_OWNER', owner_ref: before.ownerEmail || before.owner_id, before: { hotspot_count: before.hotspots?.length || 0 }, after: { hotspot_count: hotspots.length }, fields_changed: ['hotspots'], metadata: { hotspot_count: hotspots.length }, severity: 'medium' };
+    } else if (action === 'interactive_image_finalize') {
+      requireUser(user);
+      const before = await getRecord(E, 'InteractiveImage', text(body.id, 160));
+      if (!owns(before, user) && !isAdmin(user, nups)) throw new HttpError(403, 'OWNER_REQUIRED', 'Image ownership required.');
+      if (before.archived) throw new HttpError(409, 'IMAGE_ARCHIVED', 'Archived images cannot be finalized.');
+      const fileUrl = text(before.fileUrl || before.image_url, 5000);
+      if (!/^https?:\/\//i.test(fileUrl)) throw new HttpError(409, 'IMAGE_URL_MISSING', 'Image file URL is unavailable.');
+      const fileResponse = await fetch(fileUrl);
+      if (!fileResponse.ok) throw new HttpError(502, 'IMAGE_FETCH_FAILED', 'Image file could not be retrieved for finalization.');
+      const bytes = new Uint8Array(await fileResponse.arrayBuffer());
+      const fileDigest = await crypto.subtle.digest('SHA-256', bytes);
+      const imageFileHash = Array.from(new Uint8Array(fileDigest)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+      const immutableHash = await sha256(`${imageFileHash}|${JSON.stringify(stable(before.hotspots || []))}`);
+      const after = await E.InteractiveImage.update(before.id, { status: 'active', immutableHash, imageFileHash, published: bool(body.published) });
+      await E.ImageHashLog.create({ imageId: before.id, imageUrl: fileUrl, immutableHash, imageFileHash, hotspotsCount: (before.hotspots || []).length, finalizedBy: user.email, status: 'finalized' }).catch(() => null);
+      value = { image: after, hash: immutableHash, imageFileHash, hotspotsCount: (before.hotspots || []).length };
+      audit = { ...audit, entity_name: 'InteractiveImage', record_id: before.id, operation: 'update', scope_type: 'CONTENT_OWNER', owner_ref: before.ownerEmail || before.owner_id, before: { status: before.status, hotspot_count: before.hotspots?.length || 0 }, after: { status: 'active', hotspot_count: before.hotspots?.length || 0, immutable_hash: immutableHash }, fields_changed: ['status', 'immutableHash', 'imageFileHash', 'published'], metadata: { hotspot_count: before.hotspots?.length || 0 }, severity: 'high' };
     } else if (action === 'interactive_image_archive') {
       requireUser(user);
       const before = await getRecord(E, 'InteractiveImage', text(body.id, 160));
