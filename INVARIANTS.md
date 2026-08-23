@@ -2,7 +2,7 @@
 
 **Layer 3 — Domain State.** Authoritative record of NUPS frozen business rules.  
 **Owner:** Carlo — GlyphLock LLC. Only the owner may change an invariant, and only via ADR.  
-**Mapped/confirmed:** 2026-08-20
+**Mapped/confirmed:** 2026-08-22
 
 > Agents: this file outranks existing implementation. If code contradicts an invariant here, the code is the defect or an explicitly documented migration exception in `KNOWN_ISSUES.md`.
 
@@ -93,8 +93,8 @@ Per `docs/adr/ADR-0002-nups-audit-ledger-boundaries.md`, the canonical automatic
 
 Direct frontend writes remain grandfathered under `config/nups-direct-write-legacy-manifest.json`; their count may decrease but may not increase. This is a migration exception, not permission for new bypasses.
 
-**Static guard result 2026-08-20:** 287/287 grandfathered writes; no new bypasses.  
-**Status:** FROZEN — MIGRATION IN PROGRESS
+**Static guard result 2026-08-22:** 161/287 grandfathered frontend writes remain; no new bypasses; classified live high-risk and live-medium NUPS business bypasses are both zero.  
+**Status:** FROZEN — APP-WIDE MIGRATION IN PROGRESS; LIVE NUPS OPERATIONAL MIGRATION COMPLETE
 
 ## INV-07 — Security boundary
 
@@ -119,3 +119,4 @@ Persistent and frontend role sets are not perfectly aligned; see `KNOWN_ISSUES.m
 | Version | Date | Change | ADR |
 |---|---|---|---|
 | 5.0 | 2026-08-20 | Baseline seven invariants mapped to canonical live GlyphLock/NUPS app; resolver path filled; live migration exceptions documented without weakening rules | ADR pending |
+| 5.1 | 2026-08-22 | Verification evidence refreshed: 161/287 controlled remainder, zero live NUPS high/medium bypasses, canonical guest projection, private evidence and terminal trust controls reflected without changing the frozen business rules | ADR-0002 for audit boundary |
