@@ -138,6 +138,21 @@
       "default": false,
       "description": "Whether rollback is possible"
     },
+    "archived": {
+      "type": "boolean",
+      "default": false,
+      "description": "History-preserving removal from the active Deploy Center list. Applied evidence is never hard-deleted."
+    },
+    "archivedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "archivedBy": {
+      "type": "string"
+    },
+    "archiveReason": {
+      "type": "string"
+    },
     "model": {
       "type": "string",
       "description": "AI model used for generation"
