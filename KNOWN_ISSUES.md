@@ -39,26 +39,32 @@ Verification on 2026-08-20:
 `npm run check:nups-write-gateway` → PASS: `287/287 grandfathered frontend writes remain; no new bypasses.`
 
 ### Meaning
-The migration guard prevents entropy: new bypasses fail CI. Batch 16 reduced the baseline to **161/287** by migrating the final six live-medium NUPS writes: DailyChecklistConfig create/update, entertainer Playlist create/update, and the diagnostic Playlist create/delete probe. The current classification is recorded in `docs/audits/NUPS-BATCH16-DIRECT-WRITE-CLASSIFICATION.md`:
+The migration guard prevents entropy: new bypasses fail CI. Batch 16 reduced the baseline to **161 / 287** and completed the live NUPS operational queue. Batch 18 then migrated the remaining 41 classified live GlyphLock business mutations outside NUPS through the explicit `glyphlockWriteGateway` boundary.
+
+The verified Batch 18 state is **120 / 287**:
 
 - live high-risk NUPS business bypasses: **0**
 - live-medium NUPS business bypasses: **0**
+- live GlyphLock business bypasses outside NUPS: **0**
 - explicit security/admin audit events: 33
 - domain events: 12
 - operational telemetry: 13
-- live writes elsewhere in the combined GlyphLock app: 41
-- demo/seed/sandbox/legacy/internal calls: 62
+- demo: 16
+- seed: 15
+- sandbox: 7
+- legacy/unmounted: 9
+- gateway/audit internals: 15
 
-The raw count is therefore not equivalent to unresolved NUPS production risk.
+The raw retained count is therefore not equivalent to unresolved production business-write risk.
 
 ### Required resolution
-The live NUPS operational migration objective is met. Continue monotonic reduction only under separately scoped work for app-wide GlyphLock persistence, explicit audit/event architecture, or demo/seed/legacy maintenance. Do not delete retained evidence merely to lower the number.
+The live NUPS and classified live app-wide GlyphLock business migration objectives are met. Continue monotonic reduction only under separately scoped work for explicit audit/event architecture or demo/seed/sandbox/legacy maintenance. Do not delete retained evidence merely to lower the number.
 
 
-### Batch 18 app-wide governance update
-Batch 18 migrated 41 remaining live GlyphLock business mutations outside NUPS through the server-governed `writeGlyphLockRecord` boundary. The direct-write inventory is now **undefined/287**, with no new bypasses, zero live high-risk NUPS bypasses, zero live-medium NUPS bypasses, and zero classified live GlyphLock business bypasses.
+### Batch 18 app-wide business migration
+Batch 18 migrated 41 remaining live GlyphLock business mutations outside NUPS through the server-governed `glyphlockWriteGateway` boundary. The direct-write inventory is now **120 / 287**, with no new bypasses, zero live high-risk NUPS bypasses, zero live-medium NUPS bypasses, and zero classified live GlyphLock business bypasses.
 
-The retained undefined calls are explicit security/admin audit events, domain events, operational telemetry, demo/seed/sandbox paths, legacy/unmounted compatibility, or canonical gateway/audit internals. They remain classified rather than deleted for counter reduction. Public intake now uses schema-derived allow-lists, safe status defaults, rate limiting, and an expiring one-time completion capability. User/private content is ownership checked; partner content is partner scoped; governance deletion creates retained evidence; service usage rejects negative values and supports idempotent replay.
+The retained 120 calls are explicit security/admin audit events, domain events, operational telemetry, demo/seed/sandbox paths, legacy/unmounted compatibility, or canonical gateway/audit internals. They remain classified rather than deleted for counter reduction. Public intake uses allow-lists, safe status defaults and rate limiting. User/private content is ownership checked; partner content is partner scoped; governance deletion creates retained evidence; service usage is server derived and idempotent. Evidence: `docs/audits/GLYPHLOCK-BATCH18-WRITE-INVENTORY.md` and `docs/audits/GLYPHLOCK-BATCH18-VERIFICATION.md`.
 
 ---
 
