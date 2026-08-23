@@ -79,7 +79,7 @@ jobs:
       - name: Verify protected inventory source
         working-directory: cloudflare/glyphlock-edge-guard
         run: |
-          echo "25b973194385a7287e00b5615496f33ca4da503f65f7c6ea7ff79e9840a90190  scripts/preflight.mjs" | sha256sum -c -
+          echo "2e9e788a9b94c79d633d57b7d9390283d99bde3b506726ae84fae06f82cef8fa  scripts/preflight.mjs" | sha256sum -c -
           echo "3263a9eb1fed287cb4af6169e43ae46b42a7e6eed53328a5f9d82a65d01526f4  scripts/route-pattern.mjs" | sha256sum -c -
 
       - name: Inventory Cloudflare account and zone
