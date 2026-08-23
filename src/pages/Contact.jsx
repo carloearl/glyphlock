@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { base44 } from "@/api/base44Client";
+import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
 import { useMutation } from "@tanstack/react-query";
 import { Mail, Phone, MapPin, Send, CheckCircle2, Globe } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -9,7 +9,6 @@ import SEOHead from "@/components/SEOHead";
 import { GlyphInput, GlyphButton, GlyphFormPanel } from "@/components/ui/GlyphForm";
 import { motion, useInView } from "framer-motion";
 import CyanLoader from "@/components/shared/CyanLoader";
-import { sendFormNotification } from "@/lib/notifications/sendFormNotification";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -30,28 +29,14 @@ export default function Contact() {
 
   const sendEmail = useMutation({
     mutationFn: async (data) => {
-      // Create evidence record first
-      const contactEvent = await base44.entities.ContactEvent.create({
-        contact_email: data.email,
-        contact_name: data.name,
-        subject: data.subject,
-        message: data.message,
-        status: "pending",
-        ip_address: "client_ip"
+      const result = await glyphlockWrite('contact_submit', {
+        contact: data,
+        intent: 'public_contact_form_submission',
       });
-
-      // Send email (logged to EmailDeliveryLog either way)
-      const delivery = await sendFormNotification({
-        source: "contact_form",
-        reference: contactEvent.id,
-        contactEmail: data.email,
-        subject: `Contact Form: ${data.subject}`,
-        body: `Name: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`
-      });
-
-      await base44.entities.ContactEvent.update(contactEvent.id, { status: delivery.status });
-
-      if (delivery.status === "failed") throw new Error(delivery.error);
+      if (result.delivery_status === 'failed') {
+        throw new Error(result.delivery_error || 'The request was saved, but the notification could not be sent.');
+      }
+      return result;
     },
     onSuccess: () => {
       setSubmitted(true);
