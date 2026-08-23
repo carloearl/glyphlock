@@ -30,11 +30,11 @@ assert.match(integrations, /Batch 17 integration maturity record/, 'Integration 
 assert.match(issues, /NUPS-0008[\s\S]*RESOLVED — CURRENT HANDOFF PUBLISHED/, 'NUPS-0008 is not resolved with current documentation evidence.');
 
 for (const name of [
+  'B17_MANAGER_A_TOKEN',
+  'B17_DOOR_A_TOKEN',
+  'B17_STAFF_A_TOKEN',
+  'B17_MANAGER_B_TOKEN',
   'B17_GLOBAL_TOKEN',
-  'B17_VENUE_A_MANAGER_TOKEN',
-  'B17_VENUE_A_DOOR_TOKEN',
-  'B17_VENUE_A_STAFF_TOKEN',
-  'B17_VENUE_B_MANAGER_TOKEN',
 ]) {
   assert.match(authHarness, new RegExp(name), `Authenticated harness is missing ${name}.`);
 }
