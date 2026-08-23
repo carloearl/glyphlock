@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,18 +13,9 @@ export default function DocumentCenter({ partner }) {
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['partner-documents', partner.id],
     queryFn: async () => {
-      const [allDocs, accessRows] = await Promise.all([
-        base44.entities.PartnerDocument.list(),
-        base44.entities.PartnerDocumentAccess.filter({ partner_id: partner.id }).catch(() => []),
-      ]);
-      const accessByDocument = new Map((accessRows || []).map((row) => [row.document_id, row]));
-      return allDocs
-        .filter((doc) => !doc.partner_id || doc.partner_id === partner.id)
-        .map((doc) => ({
-          ...doc,
-          viewed: accessByDocument.get(doc.id)?.viewed === true,
-          viewed_date: accessByDocument.get(doc.id)?.viewed_at || null,
-        }));
+      return glyphlockWrite('partner_document_list', {
+        intent: 'list_partner_scoped_documents',
+      });
     }
   });
 

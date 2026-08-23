@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { base44 } from "@/api/base44Client";
 import { glyphlockWrite } from "@/lib/glyphlock/glyphlockWriteGateway";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,12 +14,9 @@ export default function MarketingCollateral({ partner }) {
   const { data: assets = [], isLoading } = useQuery({
     queryKey: ['marketing-assets'],
     queryFn: async () => {
-      const allAssets = await base44.entities.MarketingAsset.list();
-      // Filter by partner tier access
-      return allAssets.filter(asset => 
-        asset.is_active && 
-        (!asset.partner_tier_access || asset.partner_tier_access.includes(partner.tier))
-      );
+      return glyphlockWrite('marketing_asset_list', {
+        intent: 'list_partner_tier_marketing_assets',
+      });
     }
   });
 
