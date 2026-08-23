@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+
 const ORIGIN = 'https://glyphlock.io';
 const ATTEMPTS = 6;
 const RETRY_DELAY_MS = 10_000;
@@ -11,25 +13,8 @@ function sleep(ms) {
 
 function appendSummary(markdown) {
   const summaryFile = process.env.GITHUB_STEP_SUMMARY;
-  if (summaryFile) {
-    const fs = requireNodeFs();
-    fs.appendFileSync(summaryFile, `${markdown}\n`);
-  } else {
-    process.stdout.write(`${markdown}\n`);
-  }
-}
-
-function requireNodeFs() {
-  // Kept behind a helper so this verifier remains dependency-free and does not
-  // load filesystem access until a GitHub step summary is actually available.
-  return globalThis.__nodeFs ??= awaitImportFs();
-}
-
-function awaitImportFs() {
-  // createRequire is unnecessary here; Node exposes this module through the
-  // synchronous module loader used by createRequire below.
-  const { createRequire } = process.getBuiltinModule('node:module');
-  return createRequire(import.meta.url)('node:fs');
+  if (summaryFile) fs.appendFileSync(summaryFile, `${markdown}\n`);
+  else process.stdout.write(`${markdown}\n`);
 }
 
 async function request(pathname, userAgent) {
