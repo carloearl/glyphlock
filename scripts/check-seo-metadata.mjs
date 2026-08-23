@@ -24,7 +24,9 @@ const fail = (msg) => failures.push(msg);
 // ── Active SEO sources (runtime source of truth + metadata/schema/crawler emitters) ──
 const ACTIVE_SOURCES = [
   'index.html',
+  'src/App.jsx',
   'src/components/SEOHead.jsx',
+  'src/components/seo/PrerenderHints.jsx',
   'src/components/seo/seoData.jsx',
   'src/components/Footer.jsx',
   'src/Layout.jsx',
@@ -322,6 +324,53 @@ for (const asset of ['public/glyphlock-logo.png', 'public/glyphlock-social-card.
     const width = png.readUInt32BE(16);
     const height = png.readUInt32BE(20);
     if (width !== 1200 || height !== 630) fail(`Social card must be 1200×630 (found ${width}×${height})`);
+  }
+}
+
+
+// ── 10. Render-readiness and crawler-policy ownership ──
+const appSource = sourceContents['src/App.jsx'];
+if (appSource) {
+  if (!appSource.includes("isCanonicalPublicSeoPath(currentPath)")) {
+    fail('Public SEO routes must render while auth/public settings load');
+  }
+  if (appSource.includes("currentPathLower.startsWith('/nupslanding')")) {
+    fail('Legacy hard-coded prerender allowlist still present in App.jsx');
+  }
+}
+
+const prerenderHints = sourceContents['src/components/seo/PrerenderHints.jsx'];
+if (prerenderHints) {
+  for (const forbidden of ["addMeta('robots'", "addMeta('fragment'", 'prerender-status-code']) {
+    if (prerenderHints.includes(forbidden)) fail(`PrerenderHints must not mutate metadata: ${forbidden}`);
+  }
+  if (!prerenderHints.includes('window.prerenderReady = true')) {
+    fail('PrerenderHints readiness signal missing');
+  }
+}
+
+if (seoHead && !seoHead.includes('const resolvedPath = autoData.url || url || path || "/"')) {
+  fail('Canonical SEO_DATA URL must outrank page-local URL props');
+}
+
+if (seoData && !seoData.includes('export const CANONICAL_POSITIONING_LINE = "GlyphLock connects identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS venue operations, financial accountability, APIs, hardware, and governance through one evidence architecture."')) {
+  fail('Canonical GlyphLock positioning line missing or rewritten');
+}
+
+const robotsSources = [
+  ['public/robots.txt', robotsText],
+  ['base44/functions/robotsTxt/entry.ts', sourceContents['base44/functions/robotsTxt/entry.ts']],
+];
+for (const [path, content] of robotsSources) {
+  if (!content) continue;
+  const userAgentCount = (content.match(/^User-agent:/gm) || []).length;
+  if (userAgentCount !== 1) {
+    fail(`${path} must use one wildcard User-agent group so later Allow rules cannot reopen protected paths (found ${userAgentCount})`);
+  }
+  for (const route of ['/nupsadminportal', '/providerconsole']) {
+    if (!content.includes(`Disallow: ${route}`) && !content.includes(`'${route}'`)) {
+      fail(`${path} missing lowercase protected-route block: ${route}`);
+    }
   }
 }
 

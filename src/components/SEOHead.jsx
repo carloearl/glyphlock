@@ -56,7 +56,7 @@ export default function SEOHead({
   const resolvedSchemaType = autoData.schemaType || "WebSite";
 
   const siteUrl = "https://glyphlock.io";
-  const resolvedPath = url || autoData.url || path || "/";
+  const resolvedPath = autoData.url || url || path || "/";
   const fullUrl = /^https?:\/\//i.test(resolvedPath)
     ? resolvedPath
     : `${siteUrl}${resolvedPath.startsWith("/") ? resolvedPath : `/${resolvedPath}`}`;

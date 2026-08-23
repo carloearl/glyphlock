@@ -15,6 +15,8 @@
 
 export const CANONICAL_ORIGIN = "https://glyphlock.io";
 
+export const CANONICAL_POSITIONING_LINE = "GlyphLock connects identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS venue operations, financial accountability, APIs, hardware, and governance through one evidence architecture.";
+
 // Global fallback keyword set — also used for the Home page.
 export const GLOBAL_FALLBACK_KEYWORDS = [
   "GlyphLock",
@@ -38,6 +40,7 @@ export const SEO_DATA = {
     description: "Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.",
     keywords: [...GLOBAL_FALLBACK_KEYWORDS],
     h1: "Build. Verify. Operate.",
+    positioningLine: CANONICAL_POSITIONING_LINE,
     url: "/",
     ogTitle: "GlyphLock | Evidence Infrastructure for Identity, Operations & Proof",
     ogDescription: "Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.",
@@ -562,12 +565,16 @@ export const SEO_DATA = {
   },
 };
 
+export const isCanonicalPublicSeoPath = (path = "/") =>
+  Object.values(SEO_DATA).some((entry) => entry.url === path);
+
 export const getSeoData = (pageName) => {
   return SEO_DATA[pageName] || {
     title: "GlyphLock | Evidence Infrastructure for Identity, Operations & Proof",
     description: "Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.",
     keywords: [...GLOBAL_FALLBACK_KEYWORDS],
     h1: "GlyphLock Platform",
+    positioningLine: CANONICAL_POSITIONING_LINE,
     url: "/",
     ogTitle: "GlyphLock | Evidence Infrastructure for Identity, Operations & Proof",
     ogDescription: "Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.",

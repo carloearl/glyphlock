@@ -12,6 +12,7 @@ import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { recordNavigation } from '@/lib/nups/navStack';
+import { isCanonicalPublicSeoPath } from '@/components/seo/seoData';
 import { NUPSPermissionsProvider } from '@/components/nups/hooks/useNUPSPermissions';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import KioskShell from './components/nups/KioskShell';
@@ -59,7 +60,13 @@ const AuthenticatedApp = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const currentPathLower = currentPath.toLowerCase();
-  const rendersWhileAuthLoads = currentPathLower === '/' || currentPathLower === '/home' || currentPathLower.startsWith('/nupslanding') || currentPathLower.startsWith('/landing');
+  // Canonical public pages render immediately so Base44's prerender pass can
+  // capture their static route content instead of the auth-loading spinner.
+  // Auth and role guards still execute normally for every private route.
+  const rendersWhileAuthLoads =
+    isCanonicalPublicSeoPath(currentPath) ||
+    currentPathLower === '/home' ||
+    currentPathLower === '/landing';
 
   // Record EVERY route change in the central nav stack (idempotent), before
   // children render — so the Back button works on all pages, not only pages
