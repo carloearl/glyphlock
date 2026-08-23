@@ -16,6 +16,6 @@ assert.match(backend, /forbidden secret or private reference field/, 'Maturity m
 assert.doesNotMatch(backend, /IntegrationMaturity\.delete/, 'Maturity history must not be hard-deleted by the normal service.');
 assert.match(integrations, /configured → connected → authenticated → request succeeded → response validated → end-to-end verified/, 'Integration maturity vocabulary drifted.');
 assert.match(integrations, /exactly three active Base44 OAuth connectors/, 'Current connector inventory is not documented.');
-assert.match(integrations, /Authenticated signed retrieval and expiry: \*\*not yet end-to-end verified\*\*/, 'Private-file maturity must retain the authenticated limitation.');
+assert.match(integrations, /authenticated signed retrieval and expiry: \*\*not yet end-to-end verified\*\*/i, 'Private-file maturity must retain the authenticated limitation.');
 
 console.log('[check:nups-integration-maturity] passed: maturity is persisted, governed, evidence-backed, secret-free, and uses the canonical ladder.');
