@@ -160,6 +160,7 @@ Disallow: /nistchallenge
 Disallow: /casestudies
 Disallow: /glyphlockfinancial
 Disallow: /nupslanding
+Disallow: /ohipreadiness
 
 # ── Discovery ──
 Sitemap: https://glyphlock.io/sitemap.xml
