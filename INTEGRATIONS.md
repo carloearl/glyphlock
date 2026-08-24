@@ -92,13 +92,15 @@ The readiness function supports secure configuration checks, OAuth/client-creden
 
 ### Maturity
 
-- Integration implementation: **configured-capable**
-- Stored credential completeness: **not re-verified in this mapping**
-- Current OAuth success: **not re-verified in this mapping**
-- Current read-only OHIP response: **not re-verified in this mapping**
-- End-to-end production customer environment: **not verified**
+- Integration implementation: **configured**
+- Partner Sandbox connection: **connected**
+- Stored server-side credential completeness: **configured** — reverified through the owner-only readiness console on August 24, 2026; secret values were not displayed
+- Partner Sandbox OAuth: **authenticated** — fresh owner-only read-only test on August 24, 2026
+- Partner Sandbox room-configuration request: **request succeeded** — 250 rows were scanned and nothing was written
+- Sanitized Partner Sandbox room response: **response validated** — 0 format-clean, 250 requiring review; no token, credential, guest, reservation, payment, or raw Oracle payload reached the browser
+- End-to-end production customer environment: **not verified** — the Oracle portal showed zero customer environments on August 24, 2026
 
-Historical UI/document claims must not override fresh runtime evidence. Use the OHIP readiness function when updating this state.
+Historical evidence separately records an August 12, 2026 authenticated read-only Partner Sandbox request with HTTP success and 921 ms latency. It must not be represented as the August 24 result. The highest current maturity is **response validated**, not **end-to-end verified**.
 
 ## Payment provider overlay / external terminals
 
@@ -186,7 +188,7 @@ Maturity labels are evidence-based:
 | GitHub source | `carloearl/glyphlock` main | connected | Base44 auto-commits are present on main | ending Batch 17 Actions run must be inspected |
 | NUPS DJ gateway | Preview/source | response validated | canonical gateway, non-mutating capability probe, persistent session-state guards | real 30-minute continuity soak pending |
 | Payment configuration | Current venue config | configured | venue-scoped provider configuration exists | Batch 17 must not make live charges; E2E payment certification is out of scope |
-| Oracle/OHIP | Existing integration lane | configured/connected only as separately evidenced | existing readiness code and records | no Batch 17 promotion without a successful exercised call |
+| Oracle/OHIP | Partner Sandbox | response validated | August 24, 2026 owner-only OAuth and read-only room-configuration request; sanitized 250-row response; no writes | zero authorized customer environments; Marketplace, production application/key, customer authorization, production validation, and Simphony validation remain separate gates |
 
 Do not promote an integration because a credential, setting, logo or code path exists. `end-to-end verified` requires a successful real request, validated response and completed intended workflow in the stated environment.
 
