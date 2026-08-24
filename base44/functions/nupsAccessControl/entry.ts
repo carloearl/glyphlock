@@ -52,14 +52,10 @@ async function getDecisionAuthorities(base44, email) {
   const authorities = [];
   for (const tier of ['OWNER', 'ADMINISTRATOR']) {
     for (const grant of (approved || []).filter((r) => r.granted_role === tier)) {
+      if (grant.mode !== 'REAL') continue;
       if (!grant.nups_user_id) continue;
       const account = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
-      if (
-        account?.status === 'active'
-        && normalizeEmail(account.platform_email) === e
-        && account.venue_id === grant.venue_id
-        && accountMode(account) === grant.mode
-      ) {
+      if (accountMatchesGrant(account, grant, e, true)) {
         authorities.push({ tier, venue_id: grant.venue_id, mode: grant.mode, nups_user_id: grant.nups_user_id });
       }
     }
@@ -84,6 +80,16 @@ function canonicalVenueId(venue) {
 
 function accountMode(account) {
   return account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+}
+
+function accountMatchesGrant(account, grant, email, requireReal = false) {
+  return Boolean(
+    account?.status === 'active'
+    && normalizeEmail(account.platform_email) === normalizeEmail(email)
+    && account.venue_id === grant.venue_id
+    && accountMode(account) === grant.mode
+    && (!requireReal || (grant.mode === 'REAL' && accountMode(account) === 'REAL'))
+  );
 }
 
 function isExpiredDecisionClaim(request) {
@@ -136,6 +142,23 @@ async function releaseDecisionClaim(base44, requestId, idempotencyKey, actorEmai
   }, {
     $set: { decision_claim_active: false },
   });
+}
+
+async function getDecisionReplayResponse(base44, request, decision, idempotencyKey, actorEmail) {
+  const prior = (request?.decision_log || []).find((entry) => entry.idempotency_key === idempotencyKey);
+  if (!prior) return null;
+  if (prior.decision !== decision || normalizeEmail(prior.by) !== actorEmail) {
+    return Response.json({ error: 'The idempotency_key was already used for a different decision or actor.' }, { status: 409 });
+  }
+  if (APPROVAL_DECISIONS.includes(decision)) {
+    const account = request.nups_user_id
+      ? await base44.asServiceRole.entities.NUPSUser.get(request.nups_user_id).catch(() => null)
+      : null;
+    if (!accountMatchesGrant(account, request, request.email)) {
+      return Response.json({ error: 'The prior approval did not finish activating its bound account. Owner reconciliation is required.' }, { status: 409 });
+    }
+  }
+  return Response.json({ success: true, idempotent_replay: true, request: safeRequest(request) });
 }
 
 function safeRequest(r) {
@@ -246,7 +269,7 @@ Deno.serve(async (req) => {
       // DACO-NUPS-RBAC-CORRECTION-20260717 §5 — no implicit platform-admin ownership.
       // Back office requires Carlo's protected Owner identity or an explicit APPROVED grant.
       if (SOVEREIGN_EMAILS.includes(email)) {
-        return Response.json({ authorized: true, granted_role: 'OWNER', decision_tier: 'SOVEREIGN', destination: '/NUPSAdminPortal', full_name: user.full_name, actor_email: email });
+        return Response.json({ authorized: true, granted_role: 'OWNER', decision_tier: 'SOVEREIGN', mode: 'REAL', venue_id: null, destination: '/NUPSAdminPortal', full_name: user.full_name, actor_email: email });
       }
       const authority = (await getDecisionAuthorities(base44, email))[0];
       if (authority) {
@@ -254,6 +277,8 @@ Deno.serve(async (req) => {
           authorized: true,
           granted_role: authority.tier,
           decision_tier: authority.tier,
+          mode: authority.mode,
+          venue_id: authority.venue_id,
           destination: '/NUPSAdminPortal',
           full_name: user.full_name,
           actor_email: email,
@@ -274,20 +299,14 @@ Deno.serve(async (req) => {
         return Response.json({ authorized: false, reason: 'Approved access is missing its linked NUPS account.' });
       }
       const nu = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
-      if (
-        !nu
-        || nu.status !== 'active'
-        || normalizeEmail(nu.platform_email) !== email
-        || nu.venue_id !== grant.venue_id
-        || accountMode(nu) !== grant.mode
-      ) {
+      if (!accountMatchesGrant(nu, grant, email)) {
         return Response.json({ authorized: false, reason: 'Account has been suspended, revoked, or is not bound to this approval.' });
       }
       const destination =
         grant.granted_role === 'ENTERTAINER' ? '/EntertainerHome'
         : ['ADMINISTRATOR', 'OWNER'].includes(grant.granted_role) ? '/NUPSAdminPortal'
         : '/StaffHome';
-      return Response.json({ authorized: true, granted_role: grant.granted_role, decision_tier: grant.granted_role, destination, full_name: grant.full_legal_name, actor_email: email });
+      return Response.json({ authorized: true, granted_role: grant.granted_role, decision_tier: grant.granted_role, mode: grant.mode, venue_id: grant.venue_id, destination, full_name: grant.full_legal_name, actor_email: email });
     }
 
     // ─── OWNER-ONLY ACTIONS BELOW (§5) ──────────────────────────────────────
@@ -322,13 +341,8 @@ Deno.serve(async (req) => {
       if (!decisionAuthorities.some((authority) => canAuthorityActOnRequest(authority, r, decision))) {
         return Response.json({ error: 'This request is outside your venue, mode, or decision authority.' }, { status: 403 });
       }
-      const prior = (r.decision_log || []).find((entry) => entry.idempotency_key === idempotency_key);
-      if (prior) {
-        if (prior.decision !== decision || normalizeEmail(prior.by) !== email) {
-          return Response.json({ error: 'The idempotency_key was already used for a different decision or actor.' }, { status: 409 });
-        }
-        return Response.json({ success: true, idempotent_replay: true, request: safeRequest(r) });
-      }
+      const replay = await getDecisionReplayResponse(base44, r, decision, idempotency_key, email);
+      if (replay) return replay;
       if (!isDecisionAllowedFromStatus(r.status, decision)) {
         return Response.json({ error: `Decision ${decision} is not allowed from status ${r.status}.` }, { status: 409 });
       }
@@ -342,10 +356,8 @@ Deno.serve(async (req) => {
       r = await claimDecision(base44, r, idempotency_key, email);
       if (!r) {
         const latest = await base44.asServiceRole.entities.NUPSAccessRequest.get(request_id).catch(() => null);
-        const completed = (latest?.decision_log || []).find((entry) => entry.idempotency_key === idempotency_key);
-        if (completed && completed.decision === decision && normalizeEmail(completed.by) === email) {
-          return Response.json({ success: true, idempotent_replay: true, request: safeRequest(latest) });
-        }
+        const completedReplay = await getDecisionReplayResponse(base44, latest, decision, idempotency_key, email);
+        if (completedReplay) return completedReplay;
         return Response.json({ error: 'Another decision is already processing for this request. Retry safely with the same idempotency key.' }, { status: 409 });
       }
 
@@ -384,8 +396,11 @@ Deno.serve(async (req) => {
             ) {
               return Response.json({ error: 'The linked NUPS account does not match this request.' }, { status: 409 });
             }
+            if (linkedUser.status === 'active') {
+              return Response.json({ error: 'A pre-existing active account cannot be rebound by this approval. Owner reconciliation is required.' }, { status: 409 });
+            }
             await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, {
-              status: 'active', role: nupsRole, approved_by: email,
+              status: 'suspended', role: nupsRole, approved_by: email,
               platform_email: normalizeEmail(r.email), venue_id: resolvedVenueId,
               access_mode: r.mode, is_demo: r.mode !== 'REAL',
             });
@@ -397,15 +412,21 @@ Deno.serve(async (req) => {
               venue_id: resolvedVenueId,
               platform_email: normalizeEmail(r.email),
               approved_by: email,
-              status: 'active',
+              status: 'suspended',
               is_demo: ['SANDBOX', 'DEMO', 'TEST'].includes(r.mode),
               access_mode: r.mode,
               created_note: `Approved via NUPSAccessRequest ${r.id} (${decision})`,
             });
             nupsUserId = nu.id;
           }
-          const updated = await base44.asServiceRole.entities.NUPSAccessRequest.update(request_id, {
+          // Two-phase activation: the account remains non-operational until the
+          // approval record and its account binding have committed durably.
+          await base44.asServiceRole.entities.NUPSAccessRequest.update(request_id, {
             ...patch, status: 'APPROVED', granted_role: grantedRole, nups_user_id: nupsUserId,
+            decision_claim_active: true,
+          });
+          await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, { status: 'active' });
+          const updated = await base44.asServiceRole.entities.NUPSAccessRequest.update(request_id, {
             decision_claim_active: false,
           });
           claimHeld = false;

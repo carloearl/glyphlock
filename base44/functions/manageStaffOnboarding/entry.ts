@@ -1,6 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const MANAGER_ROLES = new Set(['PLATFORM_ADMIN','VENUE_OWNER','VENUE_MANAGER','SOVEREIGN']);
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
 const ROLE_MAP = {
   manager: 'VENUE_MANAGER', bartender: 'BARTENDER', floor_host: 'FLOOR_HOST',
   hostess: 'HOSTESS', door_girl: 'DOOR_GIRL', doorman: 'DOORMAN',
@@ -13,15 +14,33 @@ Deno.serve(async (req) => {
     const caller = await base44.auth.me().catch(() => null);
     if (!caller?.email) return Response.json({ error: 'Sign in required.' }, { status: 401 });
     const E = base44.asServiceRole.entities;
-    const managers = (await E.NUPSUser.filter({ platform_email: String(caller.email).toLowerCase(), status: 'active' })) || [];
-    const authorized = caller.role === 'admin' || managers.some(m => MANAGER_ROLES.has(m.role));
-    if (!authorized) return Response.json({ error: 'Manager authorization required.' }, { status: 403 });
+    const callerEmail = String(caller.email).trim().toLowerCase();
+    const sovereign = SOVEREIGN_EMAILS.has(callerEmail);
+    const managers = (await E.NUPSUser.filter({ platform_email: callerEmail, status: 'active' })) || [];
+    const grants = sovereign ? [] : ((await E.NUPSAccessRequest.filter({ email: callerEmail, status: 'APPROVED' })) || []);
+    const authorizedManagers = managers.filter((manager) => {
+      const accountMode = manager.access_mode || (manager.is_demo ? 'DEMO' : 'REAL');
+      return accountMode === 'REAL'
+        && MANAGER_ROLES.has(manager.role)
+        && grants.some((grant) =>
+          grant.mode === 'REAL'
+          && grant.nups_user_id === manager.id
+          && grant.venue_id === manager.venue_id
+          && ['MANAGER', 'ADMINISTRATOR', 'OWNER'].includes(grant.granted_role)
+        );
+    });
+    if (!sovereign && authorizedManagers.length === 0) {
+      return Response.json({ error: 'Approved REAL manager authorization required.' }, { status: 403 });
+    }
 
     const body = await req.json();
     if (body.action !== 'finalizeActivation') return Response.json({ error: 'Unknown action.' }, { status: 400 });
     const application = await E.StaffApplication.get(body.application_id).catch(() => null);
     if (!application) return Response.json({ error: 'Application not found.' }, { status: 404 });
     if (!application.venue_id) return Response.json({ error: 'Application is missing an active venue assignment.' }, { status: 409 });
+    if (!sovereign && !authorizedManagers.some((manager) => manager.venue_id === application.venue_id)) {
+      return Response.json({ error: 'Cross-venue staff activation denied.' }, { status: 403 });
+    }
     if (application.application_type !== 'W2_EMPLOYEE') return Response.json({ error: 'Independent contractors must use the separate 1099 onboarding workflow.' }, { status: 409 });
     if (application.status === 'ACTIVE' || application.nups_user_id) return Response.json({ error: 'Credentials were already issued for this application.' }, { status: 409 });
 
@@ -77,7 +96,8 @@ Deno.serve(async (req) => {
       platform_email: String(application.email).toLowerCase(), phone: application.phone,
       role: cleanRole, venue_id: application.venue_id, employee_id: employeeNumber,
       status: 'active', approved_by: caller.email, pin_hash, pin_salt, pin_lookup: lookup,
-      pin_must_change: true, pin_issued_at: ts, created_by_manager: true
+      pin_must_change: true, pin_issued_at: ts, created_by_manager: true,
+      access_mode: 'REAL', is_demo: false
     });
     await E.StaffApplication.update(application.id, {
       status:'ACTIVE', completion_percent:100, current_step:9, nups_user_id:staff.id,

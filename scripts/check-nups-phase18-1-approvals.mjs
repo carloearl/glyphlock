@@ -15,10 +15,14 @@ const requestForm = fs.readFileSync("src/components/nups/kiosk/AccessRequestForm
 const owner = fs.readFileSync("src/pages/NUPSOwner.jsx", "utf8");
 const auth = fs.readFileSync("src/lib/AuthContext.jsx", "utf8");
 const guard = fs.readFileSync("src/components/nups/RoleClassGuard.jsx", "utf8");
+const operationalGuard = fs.readFileSync("src/components/nups/NUPSRouteGuard.jsx", "utf8");
 const client = fs.readFileSync("src/lib/nups/accessRequestClient.js", "utf8");
 const roleSelector = fs.readFileSync("src/components/nups/kiosk/AccessRoleSelector.jsx", "utf8");
 const clockIn = fs.readFileSync("base44/functions/nupsClockInV2/entry.ts", "utf8");
 const vipWorkflow = fs.readFileSync("base44/functions/vipWorkflow/entry.ts", "utf8");
+const staffOnboarding = fs.readFileSync("base44/functions/manageStaffOnboarding/entry.ts", "utf8");
+const venueTerminal = fs.readFileSync("base44/functions/manageVenueTerminal/entry.ts", "utf8");
+const vipBills = fs.readFileSync("base44/functions/registerVIPBills/entry.ts", "utf8");
 const manifest = JSON.parse(fs.readFileSync(".base44/ci-checks.json", "utf8"));
 
 const scopedStaffRequest = {
@@ -62,6 +66,7 @@ const checks = [
     assert.equal(canRequestRoleInMode("OWNER", "SANDBOX"), false);
     assert.equal(canRequestRoleInMode("DJ", "DEMO"), true);
     assert.match(access, /accountMode\(account\) === grant\.mode/);
+    assert.match(access, /if \(grant\.mode !== 'REAL'\) continue/);
     assert.match(roleSelector, /allowPrivileged = false/);
   }],
   ["decision state transitions are bounded", () => {
@@ -73,7 +78,7 @@ const checks = [
   ["idempotency keys are validated and persisted", () => {
     assert.equal(isValidIdempotencyKey("approval:1234567890abcdef"), true);
     assert.equal(isValidIdempotencyKey("short"), false);
-    assert.match(access, /entry\.idempotency_key === idempotency_key/);
+    assert.match(access, /entry\.idempotency_key === idempotencyKey/);
     assert.match(access, /idempotent_replay: true/);
     assert.match(ui, /crypto\.randomUUID\(\)/);
     assert.match(ui, /decisionKeys\.current\.get\(operation\)/);
@@ -86,6 +91,13 @@ const checks = [
     assert.match(access, /decision_claim_active:\s*false/);
     assert.match(requestSchema, /"decision_claim_active"[\s\S]*?"default": false/);
   }],
+  ["approval activates an account only after its grant commits", () => {
+    const suspendedCreate = access.indexOf("status: 'suspended'");
+    const approvedWrite = access.indexOf("...patch, status: 'APPROVED'");
+    const activeWrite = access.indexOf("NUPSUser.update(nupsUserId, { status: 'active' }");
+    assert.ok(suspendedCreate > -1 && approvedWrite > suspendedCreate && activeWrite > approvedWrite);
+    assert.match(access, /prior approval did not finish activating its bound account/);
+  }],
   ["sign-in no longer bootstraps privileged access", () => {
     assert.doesNotMatch(auth, /ensurePrivilegedAccess/);
     assert.equal(fs.existsSync("src/lib/nups/privilegedAccess.js"), false);
@@ -95,6 +107,9 @@ const checks = [
     assert.doesNotMatch(guard, /entities\.NUPSUser\.filter/);
     assert.doesNotMatch(guard, /resolveRoleClass\(\{ user: u/);
     assert.match(guard, /Authorization infrastructure failures fail closed/);
+    assert.match(operationalGuard, /functions\.invoke\("nupsAccessControl", \{ action: "checkAccess" \}\)/);
+    assert.match(operationalGuard, /access\.mode !== "REAL"/);
+    assert.doesNotMatch(operationalGuard, /hasOwnerPreview|user\.role === "admin"|entities\.NUPSUser\.filter/);
   }],
   ["mobile submission includes the active venue", () => {
     assert.match(client, /venue_id: venueId/);
@@ -116,6 +131,13 @@ const checks = [
     }
     assert.match(clockIn, /Cross-venue PIN provisioning denied/);
     assert.match(vipWorkflow, /Back-office grant is bound to another venue/);
+    for (const source of [staffOnboarding, venueTerminal, vipBills]) {
+      assert.match(source, /grant\.mode === 'REAL'/);
+      assert.match(source, /grant\.nups_user_id === (?:manager|account)\.id/);
+      assert.match(source, /accountMode.*'REAL'/s);
+    }
+    assert.doesNotMatch(staffOnboarding, /caller\.role === 'admin'/);
+    assert.doesNotMatch(venueTerminal, /user\.role === 'admin'/);
   }],
   ["approval status filters and owner route exist", () => {
     for (const label of ["PENDING", "APPROVED", "HISTORY", "ALL"]) assert.match(ui, new RegExp(label));

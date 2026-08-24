@@ -18,14 +18,12 @@ import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { isSovereign } from "@/lib/nups/sovereign";
-import { isOwnerEmail } from "@/lib/nups/ownerEmails";
-import { readVerdict, writeVerdict } from "@/lib/nups/routeGuardCache";
-import { hasOwnerPreview } from "@/lib/nups/previewBypass";
+import { writeVerdict } from "@/lib/nups/routeGuardCache";
 
 // All valid operational roles — public GlyphLock users have NONE of these
 const ALL_OPERATIONAL_ROLES = [
   "PLATFORM_ADMIN",
+  "SOVEREIGN",
   "VENUE_OWNER",
   "VENUE_MANAGER",
   "FLOOR_HOST",
@@ -34,100 +32,53 @@ const ALL_OPERATIONAL_ROLES = [
   "SECURITY",
   "KIOSK",
   "PERFORMER",
+  "HOSTESS",
+  "DOOR_GIRL",
+  "DOORMAN",
   "DEMO",
 ];
 
+const GRANT_TO_NUPS_ROLE = {
+  OWNER: "VENUE_OWNER",
+  ADMINISTRATOR: "PLATFORM_ADMIN",
+  MANAGER: "VENUE_MANAGER",
+  ENTERTAINER: "PERFORMER",
+};
+
 export default function NUPSRouteGuard({ children, requiredRoles = [], allowAdmin = true }) {
   const navigate = useNavigate();
-  // Seed initial status from the session cache so admins don't re-see the
-  // full-screen "Verifying access..." spinner on every internal navigation.
-  const cached = typeof window !== "undefined" ? readVerdict() : null;
-  const [status, setStatus] = useState(cached?.status === "granted" ? "granted" : "loading");
+  // Never render protected children from a cached client verdict. Every mount
+  // revalidates the current server-side grant and operating mode.
+  const [status, setStatus] = useState("loading");
 
   useEffect(() => {
     let cancelled = false;
 
     (async () => {
-      // Owner PIN URL bypass (?pin=90210) — authorized visual-access preview.
-      if (hasOwnerPreview()) { if (!cancelled) setStatus("granted"); return; }
       try {
-        const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) {
-          if (!cancelled) setStatus("unauthenticated");
+        const res = await base44.functions.invoke("nupsAccessControl", { action: "checkAccess" });
+        const access = res.data || {};
+        if (cancelled) return;
+        if (access.authorized !== true || access.mode !== "REAL") {
+          setStatus("denied");
           return;
         }
-
-        const user = await base44.auth.me();
-
-        // OWNER-EMAIL BYPASS — Carlo's two accounts (carloearl@glyphlock.com /
-        // carloearl@gmail.com) skip every gate as SOVEREIGN / ADMIN.
-        if (isOwnerEmail(user.email)) {
-          if (!cancelled) {
-            writeVerdict({ status: "granted", email: user.email, why: "owner_email" });
-            setStatus("granted");
-          }
-          return;
-        }
-
-        // SOVEREIGN BYPASS — NUPSUser.sovereign_flag === true OR role === "SOVEREIGN",
-        // looked up by created_by === auth email.
-        try {
-          const sovMatches = await base44.entities.NUPSUser.filter({ created_by: user.email });
-          if ((sovMatches || []).some(isSovereign)) {
-            if (!cancelled) {
-              writeVerdict({ status: "granted", email: user.email, why: "sovereign" });
-              setStatus("granted");
-            }
-            return;
-          }
-        } catch { /* fall through to standard checks */ }
-
-        // Base44 admin role always gets access
-        if (allowAdmin && user.role === "admin") {
-          if (!cancelled) {
-            writeVerdict({ status: "granted", email: user.email, why: "admin" });
-            setStatus("granted");
-          }
-          return;
-        }
-
-        // Attempt RBAC lookup
-        let assignedRoles = [];
-        try {
-          const res = await base44.functions.invoke("getUserPermissions", {});
-          assignedRoles = res.data?.venue_access?.map(va => va.role_key) || [];
-        } catch {
-          // RBAC unavailable — if user is admin, allow; otherwise deny
-          if (user.role === "admin") {
-            if (!cancelled) setStatus("granted");
-          } else {
-            if (!cancelled) setStatus("denied");
-          }
-          return;
-        }
-
-        // Check: does user have ANY operational role at all?
-        const hasAnyOperationalRole = assignedRoles.some(r => ALL_OPERATIONAL_ROLES.includes(r));
-        if (!hasAnyOperationalRole) {
+        const assignedRole = access.decision_tier === "SOVEREIGN"
+          ? "SOVEREIGN"
+          : (GRANT_TO_NUPS_ROLE[access.granted_role] || access.granted_role);
+        if (!ALL_OPERATIONAL_ROLES.includes(assignedRole)) {
           if (!cancelled) setStatus("denied");
           return;
         }
-
-        // Check: does user have the SPECIFIC required roles for this route?
-        if (requiredRoles.length > 0) {
-          const hasRequired = requiredRoles.some(r => assignedRoles.includes(r));
-          if (!hasRequired) {
-            if (!cancelled) setStatus("denied");
-            return;
-          }
+        const isAdminRole = ["SOVEREIGN", "PLATFORM_ADMIN", "VENUE_OWNER"].includes(assignedRole);
+        if (requiredRoles.length > 0 && !(allowAdmin && isAdminRole) && !requiredRoles.includes(assignedRole)) {
+          setStatus("denied");
+          return;
         }
-
-        if (!cancelled) {
-          writeVerdict({ status: "granted", email: user.email, why: "rbac" });
-          setStatus("granted");
-        }
-      } catch {
-        if (!cancelled) setStatus("unauthenticated");
+        writeVerdict({ status: "granted", email: access.actor_email, why: "server_grant" });
+        setStatus("granted");
+      } catch (error) {
+        if (!cancelled) setStatus(error?.response?.status === 401 ? "unauthenticated" : "denied");
       }
     })();
 

@@ -1,8 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
 
-const OWNER_EMAIL = 'carloearl@glyphlock.com';
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
 const ADMIN_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN']);
-const GLOBAL_ROLES = new Set(['PLATFORM_ADMIN', 'SOVEREIGN']);
 const TERMINAL_TYPES = new Set(['PAYMENT_TERMINAL', 'DOOR', 'CLOCK', 'DJ', 'MANAGER', 'SCANNER', 'VIP', 'KIOSK', 'OTHER']);
 
 function cleanId(value: unknown): string {
@@ -30,11 +29,20 @@ function publicTerminal(row: any) {
   };
 }
 
-async function findNupsUser(E: any, email: string) {
-  const byEmail = await E.NUPSUser.filter({ platform_email: email, status: 'active' }, null, 1).catch(() => []);
-  if (byEmail?.[0]) return byEmail[0];
-  const username = email.split('@')[0];
-  return (await E.NUPSUser.filter({ username, status: 'active' }, null, 1).catch(() => []))?.[0] || null;
+async function findAuthorizedNupsUser(E: any, email: string, requestedVenue: string) {
+  const accounts = await E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []);
+  const grants = await E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 20).catch(() => []);
+  return (accounts || []).find((account: any) => {
+    const accountMode = account.access_mode || (account.is_demo ? 'DEMO' : 'REAL');
+    if (accountMode !== 'REAL' || !ADMIN_ROLES.has(account.role)) return false;
+    if (requestedVenue && account.venue_id !== requestedVenue) return false;
+    return (grants || []).some((grant: any) =>
+      grant.mode === 'REAL'
+      && grant.nups_user_id === account.id
+      && grant.venue_id === account.venue_id
+      && ['MANAGER', 'ADMINISTRATOR', 'OWNER'].includes(grant.granted_role)
+    );
+  }) || null;
 }
 
 async function findActiveVenue(E: any, venueId: string) {
@@ -75,15 +83,15 @@ Deno.serve(async (req) => {
     const action = String(body.action || 'list');
     const E = base44.asServiceRole.entities;
     const email = String(user.email).trim().toLowerCase();
-    const identity = await findNupsUser(E, email);
-    const fallbackRole = email === OWNER_EMAIL ? 'SOVEREIGN' : user.role === 'admin' ? 'PLATFORM_ADMIN' : null;
-    const role = identity?.role || fallbackRole;
+    const requestedVenue = cleanText(body.venue_id, 160);
+    const sovereign = SOVEREIGN_EMAILS.has(email);
+    const identity = sovereign ? null : await findAuthorizedNupsUser(E, email, requestedVenue);
+    const role = sovereign ? 'SOVEREIGN' : identity?.role;
     if (!role || !ADMIN_ROLES.has(role)) {
-      return Response.json({ error: 'Authorized NUPS manager identity required' }, { status: 403 });
+      return Response.json({ error: 'Approved REAL NUPS manager identity required' }, { status: 403 });
     }
 
-    const requestedVenue = cleanText(body.venue_id, 160);
-    const globalRole = GLOBAL_ROLES.has(role);
+    const globalRole = sovereign;
     const assignedVenue = cleanText(identity?.venue_id, 160);
     const targetVenue = globalRole && requestedVenue ? requestedVenue : assignedVenue;
     if (!globalRole && requestedVenue && requestedVenue !== assignedVenue) {

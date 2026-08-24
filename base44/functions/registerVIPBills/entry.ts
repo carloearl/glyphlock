@@ -5,17 +5,33 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
 // serial + Code-128 barcode number), all status "issued". Serial-collision
 // safe: rejects if any serial in the requested range already exists.
 //
-// Auth: staff/manager/admin only. All writes are service-role (server side).
+// Auth: approved REAL manager/owner/admin only. All writes are service-role.
+
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+const BILL_ISSUER_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN']);
 
 async function resolveAuthorizedVenue(base44, user, requestedVenueId) {
   const E = base44.asServiceRole.entities;
-  const email = String(user?.email || '').toLowerCase();
-  const nups = (await E.NUPSUser.filter({ platform_email: email, status: 'active' }, null, 1).catch(() => []))?.[0] || null;
-  if (!nups) throw new Error('Active NUPS identity required.');
-  const global = ['PLATFORM_ADMIN','SOVEREIGN'].includes(nups.role);
-  const venueId = global && requestedVenueId ? String(requestedVenueId) : String(nups.venue_id || '');
+  const email = String(user?.email || '').trim().toLowerCase();
+  const requested = String(requestedVenueId || '');
+  const sovereign = SOVEREIGN_EMAILS.has(email);
+  const accounts = sovereign ? [] : await E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []);
+  const grants = sovereign ? [] : await E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 20).catch(() => []);
+  const nups = sovereign ? null : (accounts || []).find((account) => {
+    const accountMode = account.access_mode || (account.is_demo ? 'DEMO' : 'REAL');
+    if (accountMode !== 'REAL' || !BILL_ISSUER_ROLES.has(account.role)) return false;
+    if (requested && account.venue_id !== requested) return false;
+    return (grants || []).some((grant) =>
+      grant.mode === 'REAL'
+      && grant.nups_user_id === account.id
+      && grant.venue_id === account.venue_id
+      && ['MANAGER', 'ADMINISTRATOR', 'OWNER'].includes(grant.granted_role)
+    );
+  }) || null;
+  if (!sovereign && !nups) throw new Error('Approved REAL NUPS manager identity required.');
+  const venueId = sovereign && requested ? requested : String(nups?.venue_id || '');
   if (!venueId) throw new Error('Authorized venue could not be resolved.');
-  if (!global && requestedVenueId && String(requestedVenueId) !== venueId) throw new Error('Cross-venue bill registration denied.');
+  if (!sovereign && requested && requested !== venueId) throw new Error('Cross-venue bill registration denied.');
   const venue = (await E.Venue.filter({ venue_id: venueId, status: 'active' }, null, 1).catch(() => []))?.[0]
     || await E.Venue.get(venueId).catch(() => null);
   if (!venue || venue.status === 'inactive') throw new Error('Authorized venue is not active.');
