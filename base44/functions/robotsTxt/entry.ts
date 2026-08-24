@@ -14,7 +14,7 @@ const PUBLIC_ALLOW = [
   '/SecurityOperationsCenter', '/Blockchain', '/SDKDocs', '/SecurityDocs',
   '/Roadmap', '/Partners', '/DreamTeam', '/FAQ', '/GovernanceHub',
   '/MasterCovenant', '/TrustSecurity', '/NISTChallenge', '/CaseStudies',
-  '/CaseStudyTruthStrike', '/CaseStudyAIBinding', '/CaseStudyCovenantVictory',
+  '/CaseStudyOracleOHIP', '/CaseStudyTruthStrike', '/CaseStudyAIBinding', '/CaseStudyCovenantVictory',
   '/GlyphLockFinancial', '/NUPSLanding', '/VideoUpload',
   '/Privacy', '/Terms', '/Cookies', '/Accessibility', '/CodeOfEthics',
 ];
