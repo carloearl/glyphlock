@@ -33,7 +33,7 @@ const PRODUCTION_STAGES = [
   {
     label: 'Partner Sandbox',
     status: 'complete',
-    detail: 'OAuth and controlled read-only OHIP validation verified.',
+    detail: 'August 24, 2026: OAuth succeeded, a controlled read-only room-configuration request succeeded, and the sanitized response was validated. Highest maturity: response validated.',
   },
   {
     label: 'Oracle PartnerNetwork Membership',
@@ -84,7 +84,7 @@ const MARKETPLACE_HANDOFF = [
   {
     label: 'OHIP technical evidence',
     status: 'complete',
-    detail: 'OAuth plus controlled read-only property and room configuration calls passed in the Partner Sandbox.',
+    detail: 'August 24, 2026: OAuth and controlled read-only room-configuration calls succeeded in the Partner Sandbox; the sanitized response was validated.',
   },
   {
     label: 'Marketplace publisher registration',
@@ -441,7 +441,7 @@ export default function OHIPReadiness() {
               );
             })}
             <p className="text-xs leading-5 text-slate-500">
-              Current evidence confirms active Level 0 OPN membership and successful Partner Sandbox validation. Marketplace publisher approval, listing acceptance, production access, customer authorization, and Oracle supplier or banking setup remain separate gates.
+              Current evidence confirms active Level 0 OPN membership and an August 24, 2026 Partner Sandbox result at the response validated maturity level. Marketplace publisher approval, listing acceptance, production access, customer authorization, and Oracle supplier or banking setup remain separate gates.
             </p>
           </CardContent>
         </Card>
