@@ -48,7 +48,7 @@ const DUP_CASE = [
   '/securityoperationscenter', '/blockchain', '/sdkdocs', '/securitydocs',
   '/roadmap', '/partners', '/dreamteam', '/faq', '/governancehub',
   '/mastercovenant', '/trustsecurity', '/nistchallenge', '/casestudies',
-  '/glyphlockfinancial', '/nupslanding',
+  '/glyphlockfinancial', '/nupslanding', '/ohipreadiness',
 ];
 
 Deno.serve(async () => {
