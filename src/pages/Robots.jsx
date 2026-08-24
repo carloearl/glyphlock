@@ -48,6 +48,7 @@ Disallow: /NUPSOwner
 Disallow: /NUPSSandbox
 Disallow: /NUPSStaff
 Disallow: /OHIPReadiness
+Disallow: /ohipreadiness
 Disallow: /SiteBuilder
 Disallow: /api/
 Disallow: /functions/
