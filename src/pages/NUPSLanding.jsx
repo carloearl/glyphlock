@@ -1792,17 +1792,18 @@ export default function NUPSLanding() {
                 <h3 id="oracle-ohip-heading">Oracle Hospitality <span>via OHIP</span></h3>
               </div>
               <div className="integration-statuses">
-                <div className="integration-status">Partner Sandbox Connected</div>
+                <div className="integration-status">Partner Sandbox Response Validated</div>
                 <div className="integration-status opn">OPN Level 0 Active</div>
+                <div className="integration-status opn">OCMA Review Pending</div>
               </div>
             </div>
 
             <p className="integration-lead">
-              NUPS has completed authenticated, controlled read-only calls against the Oracle
-              Hospitality Integration Platform Partner Sandbox. This establishes the technical
-              path for connecting verified NUPS venue operations with OPERA Cloud property
-              configuration while keeping Oracle credentials and tokens server-side. Oracle approved
-              and activated GlyphLock LLC’s Level 0 OPN membership on August 19, 2026.
+              On August 24, 2026, NUPS completed an authenticated, controlled read-only room-configuration
+              request against the Oracle Hospitality Integration Platform Partner Sandbox and validated
+              the sanitized response. This establishes a technical path for connecting verified NUPS venue
+              operations with OPERA Cloud property configuration while keeping Oracle credentials and tokens
+              server-side. GlyphLock LLC’s Level 0 OPN membership has been active since August 19, 2026.
             </p>
 
             <div className="integration-grid">
@@ -1831,6 +1832,11 @@ export default function NUPSLanding() {
                 <strong>Server-Side Secrets</strong>
                 <p>No Oracle secret, OAuth token, guest record, reservation, or raw response is exposed publicly.</p>
               </div>
+              <div className="integration-proof-card">
+                <span className="kicker">Oracle Marketplace</span>
+                <strong>Agreement Under Review</strong>
+                <p>The Oracle Cloud Marketplace Agreement was submitted August 24, 2026 under subscription 1655445. Oracle review is pending; no publisher or listing approval is claimed.</p>
+              </div>
             </div>
 
             <div className="integration-actions">
@@ -1840,6 +1846,9 @@ export default function NUPSLanding() {
               <button type="button" onClick={() => navigate('/NUPSKiosk')}>
                 Explore NUPS
               </button>
+              <button type="button" onClick={() => navigate('/CaseStudyOracleOHIP')}>
+                View Oracle Integration Evidence
+              </button>
               {canManageOhip && (
                 <button type="button" onClick={() => navigate('/OHIPReadiness')}>
                   Open Secure OHIP Console
@@ -1848,13 +1857,13 @@ export default function NUPSLanding() {
             </div>
 
             <p className="integration-disclaimer">
-              Current status: Level 0 OPN membership approved and activated, with read-only OHIP
-              technical validation completed in Oracle's shared Partner Sandbox. These are verified
-              membership and technical milestones, but they do not yet represent Marketplace
-              publisher approval, listing acceptance, Oracle
-              certification or endorsement, a production customer connection, or an executed
-              commercial partnership. Production access still requires the applicable Oracle
-              application, environment, hotel authorization, and production credentials.
+              Current status: Level 0 OPN membership is active, and the August 24, 2026 read-only
+              Partner Sandbox test reached response validated maturity. The Oracle Cloud Marketplace
+              Agreement is submitted under subscription 1655445 and remains under Oracle review. These
+              milestones do not represent Marketplace publisher approval, listing acceptance, Oracle
+              certification or endorsement, a production customer connection, or an executed commercial
+              partnership. Production access still requires the applicable Oracle application,
+              environment, hotel authorization, and production credentials.
             </p>
           </section>
 
