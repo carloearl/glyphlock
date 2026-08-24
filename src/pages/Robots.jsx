@@ -83,7 +83,7 @@ export default function Robots() {
 
         <p className="text-gray-400 mb-6 text-sm">
           This file instructs search engine crawlers on how to index GlyphLock.io.
-          It references the primary sitemap index which contains all child sitemaps.
+          It references the canonical public sitemap and keeps authenticated routes out of discovery.
         </p>
 
         <pre className="bg-gray-900 p-6 rounded-lg text-sm text-gray-300 overflow-x-auto whitespace-pre-wrap border border-cyan-500/20">
@@ -111,8 +111,8 @@ export default function Robots() {
         <div className="mt-8 bg-gray-900/30 border border-gray-700 rounded-lg p-6">
           <h3 className="text-lg font-bold text-white mb-3">Important Notes</h3>
           <ul className="text-gray-400 text-sm space-y-2">
-            <li>• <strong className="text-white">Sitemap:</strong> Single index at /sitemap.xml references all child sitemaps</li>
-            <li>• <strong className="text-white">Crawl Delay:</strong> 1 second for polite crawling (0 for Googlebot)</li>
+            <li>• <strong className="text-white">Sitemap:</strong> Canonical public routes are listed at /sitemap.xml</li>
+            <li>• <strong className="text-white">Crawl Delay:</strong> 1 second for polite crawling</li>
             <li>• <strong className="text-white">Blocked:</strong> Admin panels, API endpoints, and private areas</li>
             <li>• <strong className="text-white">Allowed:</strong> All public tools and pages</li>
           </ul>
