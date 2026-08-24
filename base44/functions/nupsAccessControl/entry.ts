@@ -1,9 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
-// DACO-NUPS-ROLE-VIP-BUILD-20260717 §4–7 — Owner/Admin access request, approval, and back-office authorization.
-// Approval authority: sovereign owner accounts plus any expressly approved
-// OWNER or ADMINISTRATOR. Owners and administrators may approve their own
-// request. All decisions append to the request's decision_log.
+// DACO-NUPS Phase 18.1 — Owner/Admin access request, approval, and back-office authorization.
+// Approval authority: sovereign owner accounts plus expressly approved OWNER
+// or ADMINISTRATOR grants. Self-approval is forbidden, and administrators
+// cannot grant OWNER. All decisions append to the request's decision_log.
 
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
 
@@ -28,15 +28,16 @@ const NUPS_ROLE_MAP = {
   SECURITY: 'SECURITY',
 };
 
-// Decision authority (owner directive 2026-08-21): sovereign accounts plus
-// any APPROVED OWNER or ADMINISTRATOR may decide — including on their own
-// request (self-approval permitted for owner/admin authority).
-async function isAuthorizedOwner(base44, email) {
+// Return the actor's exact decision tier so server-side policy can distinguish
+// OWNER from ADMINISTRATOR. UI visibility is never used as authorization.
+async function getDecisionAuthority(base44, email) {
   const e = String(email || '').trim().toLowerCase();
-  if (!e) return false;
-  if (SOVEREIGN_EMAILS.includes(e)) return true;
+  if (!e) return null;
+  if (SOVEREIGN_EMAILS.includes(e)) return 'SOVEREIGN';
   const approved = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email: e, status: 'APPROVED' });
-  return (approved || []).some(r => ['OWNER', 'ADMINISTRATOR'].includes(r.granted_role));
+  if ((approved || []).some(r => r.granted_role === 'OWNER')) return 'OWNER';
+  if ((approved || []).some(r => r.granted_role === 'ADMINISTRATOR')) return 'ADMINISTRATOR';
+  return null;
 }
 
 function safeRequest(r) {
@@ -137,7 +138,7 @@ Deno.serve(async (req) => {
       // DACO-NUPS-RBAC-CORRECTION-20260717 §5 — no implicit platform-admin ownership.
       // Back office requires Carlo's protected Owner identity or an explicit APPROVED grant.
       if (SOVEREIGN_EMAILS.includes(email)) {
-        return Response.json({ authorized: true, granted_role: 'OWNER', destination: '/NUPSAdminPortal', full_name: user.full_name });
+        return Response.json({ authorized: true, granted_role: 'OWNER', destination: '/NUPSAdminPortal', full_name: user.full_name, actor_email: email });
       }
       const mine = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 5);
       const grant = (mine || [])[0];
@@ -160,12 +161,12 @@ Deno.serve(async (req) => {
         grant.granted_role === 'ENTERTAINER' ? '/EntertainerHome'
         : ['ADMINISTRATOR', 'OWNER'].includes(grant.granted_role) ? '/NUPSAdminPortal'
         : '/StaffHome';
-      return Response.json({ authorized: true, granted_role: grant.granted_role, destination, full_name: grant.full_legal_name });
+      return Response.json({ authorized: true, granted_role: grant.granted_role, destination, full_name: grant.full_legal_name, actor_email: email });
     }
 
     // ─── OWNER-ONLY ACTIONS BELOW (§5) ──────────────────────────────────────
-    const ownerOk = await isAuthorizedOwner(base44, email);
-    if (!ownerOk) return Response.json({ error: 'Owner approval authority required.' }, { status: 403 });
+    const decisionAuthority = await getDecisionAuthority(base44, email);
+    if (!decisionAuthority) return Response.json({ error: 'Owner or administrator approval authority required.' }, { status: 403 });
 
     if (action === 'listRequests') {
       const all = await base44.asServiceRole.entities.NUPSAccessRequest.list('-created_date', 200);
@@ -173,9 +174,8 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'decide') {
-      // Decision authority already verified above (isAuthorizedOwner):
-      // sovereign accounts and approved OWNER/ADMINISTRATOR grants.
-      // Self-approval is permitted for owner/admin authority (directive 2026-08-21).
+      // Decision authority is verified above. Self-approval is always denied.
+      // Administrators may manage operational access but cannot grant OWNER.
       const { request_id, decision, note } = body;
       const valid = ['APPROVE_ENTERTAINER', 'APPROVE_STAFF', 'APPROVE_ADMIN', 'APPROVE_OWNER', 'REJECT', 'REQUEST_INFO', 'SUSPEND', 'REVOKE'];
       if (!request_id || !valid.includes(decision)) {
@@ -183,6 +183,12 @@ Deno.serve(async (req) => {
       }
       const r = await base44.asServiceRole.entities.NUPSAccessRequest.get(request_id).catch(() => null);
       if (!r) return Response.json({ error: 'Request not found.' }, { status: 404 });
+      if (String(r.email || '').trim().toLowerCase() === email) {
+        return Response.json({ error: 'You cannot approve, reject, suspend, or revoke your own access request.' }, { status: 403 });
+      }
+      if (decision === 'APPROVE_OWNER' && decisionAuthority === 'ADMINISTRATOR') {
+        return Response.json({ error: 'Administrators cannot grant Owner access.' }, { status: 403 });
+      }
 
       const now = new Date().toISOString();
       const log = [...(r.decision_log || []), { decision, by: email, note: note || '', timestamp: now }];
