@@ -3,7 +3,6 @@ import { base44 } from '@/api/base44Client';
 import { appParams } from '@/lib/app-params';
 import { createAxiosClient } from '@base44/sdk/dist/utils/axios-client';
 import { logLoginOnce, logLogout } from '@/lib/nups/activityLog';
-import { ensurePrivilegedAccess } from '@/lib/nups/privilegedAccess';
 import { clearVerdict as clearRouteGuardCache } from '@/lib/nups/routeGuardCache';
 
 const AuthContext = createContext();
@@ -100,8 +99,6 @@ export const AuthProvider = ({ children }) => {
       setIsLoadingAuth(false);
       // DACO-20260610 WS-1: Log LOGIN once per session (non-blocking)
       logLoginOnce(currentUser).catch(() => {});
-      // DACO-20260702: Privileged access bootstrap (non-blocking)
-      ensurePrivilegedAccess(currentUser).catch(() => {});
     } catch (error) {
       console.error('User auth check failed:', error);
       setIsLoadingAuth(false);

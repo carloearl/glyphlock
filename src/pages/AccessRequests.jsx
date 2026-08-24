@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,19 +25,32 @@ export default function AccessRequests() {
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
   const [canDecide, setCanDecide] = useState(false);
-  const [actor, setActor] = useState({ email: "", role: "" });
+  const [actor, setActor] = useState({ email: "", role: "", tier: "" });
   const [statusFilter, setStatusFilter] = useState("PENDING");
+  const decisionKeys = useRef(new Map());
+
+  const canActOnRequest = (request) => {
+    if (!canDecide || String(request.email || "").toLowerCase() === actor.email) return false;
+    const role = request.granted_role || request.requested_role;
+    if (actor.tier === "SOVEREIGN") return true;
+    if (actor.tier === "OWNER") return role !== "OWNER";
+    return actor.tier === "ADMINISTRATOR" && !["OWNER", "ADMINISTRATOR"].includes(role);
+  };
 
   useEffect(() => {
     base44.functions.invoke("nupsAccessControl", { action: "checkAccess" })
       .then((res) => {
         const authorized = res.data?.authorized === true && ["OWNER", "ADMINISTRATOR"].includes(res.data?.granted_role);
         setCanDecide(authorized);
-        setActor({ email: String(res.data?.actor_email || "").toLowerCase(), role: res.data?.granted_role || "" });
+        setActor({
+          email: String(res.data?.actor_email || "").toLowerCase(),
+          role: res.data?.granted_role || "",
+          tier: res.data?.decision_tier || "",
+        });
       })
       .catch(() => {
         setCanDecide(false);
-        setActor({ email: "", role: "" });
+        setActor({ email: "", role: "", tier: "" });
       });
   }, []);
 
@@ -60,8 +73,18 @@ export default function AccessRequests() {
     }
     setBusyId(id);
     setError("");
+    const operation = `${id}:${decision}`;
+    const idempotencyKey = decisionKeys.current.get(operation) || crypto.randomUUID();
+    decisionKeys.current.set(operation, idempotencyKey);
     try {
-      await base44.functions.invoke("nupsAccessControl", { action: "decide", request_id: id, decision, note });
+      await base44.functions.invoke("nupsAccessControl", {
+        action: "decide",
+        request_id: id,
+        decision,
+        note,
+        idempotency_key: idempotencyKey,
+      });
+      decisionKeys.current.delete(operation);
       await load();
     } catch (e) {
       setError(e?.response?.data?.error || "Decision failed.");
@@ -121,7 +144,7 @@ export default function AccessRequests() {
               {r.decision_note && <> · "{r.decision_note}"</>}
             </p>
             <div className="flex flex-wrap gap-2 mt-3">
-              {canDecide && String(r.email || "").toLowerCase() !== actor.email && ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status) && (
+              {canActOnRequest(r) && ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status) && (
                 <>
                   {r.requested_role === "ENTERTAINER" && <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ENTERTAINER")} className="bg-pink-700 hover:bg-pink-600 min-h-[44px]">Approve as Entertainer</Button>}
                   {STAFF_ROLES.includes(r.requested_role) && r.requested_role !== "ENTERTAINER" && (
@@ -129,15 +152,15 @@ export default function AccessRequests() {
                       Approve as {r.requested_role.replaceAll("_", " ")}
                     </Button>
                   )}
-                  <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ADMIN")} className="bg-emerald-700 hover:bg-emerald-600 min-h-[44px]">Approve as Administrator</Button>
-                  {actor.role === "OWNER" && <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_OWNER")} className="bg-violet-700 hover:bg-violet-600 min-h-[44px]">Approve as Owner</Button>}
+                  {r.requested_role === "ADMINISTRATOR" && ["SOVEREIGN", "OWNER"].includes(actor.tier) && <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ADMIN")} className="bg-emerald-700 hover:bg-emerald-600 min-h-[44px]">Approve as Administrator</Button>}
+                  {r.requested_role === "OWNER" && actor.tier === "SOVEREIGN" && <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_OWNER")} className="bg-violet-700 hover:bg-violet-600 min-h-[44px]">Approve as Owner</Button>}
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "REJECT")} variant="destructive" className="min-h-[44px]">Reject</Button>
                   {r.status !== "NEEDS_INFORMATION" && (
                     <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "REQUEST_INFO")} variant="outline" className="border-slate-600 text-slate-300 min-h-[44px]">Request Info</Button>
                   )}
                 </>
               )}
-              {canDecide && String(r.email || "").toLowerCase() !== actor.email && r.status === "APPROVED" && (
+              {canActOnRequest(r) && r.status === "APPROVED" && (
                 <>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "SUSPEND")} className="bg-orange-800 hover:bg-orange-700 min-h-[44px]">Suspend</Button>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "REVOKE")} variant="destructive" className="min-h-[44px]">Revoke</Button>

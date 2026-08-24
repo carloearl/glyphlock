@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
 import { loadMyAccessRequests, submitAccessRequest } from "@/lib/nups/accessRequestClient";
 import AccessRoleSelector, { PRIVILEGED_ROLES } from "./AccessRoleSelector";
+import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 const STATUS_COLORS = {
   PENDING_OWNER_APPROVAL: "bg-amber-600",
@@ -21,6 +22,7 @@ const STATUS_COLORS = {
 // Requires platform sign-in (verified email). Requests start PENDING_OWNER_APPROVAL
 // and never create active access by themselves.
 export default function AccessRequestForm({ requestedMode = "SANDBOX" }) {
+  const activeVenue = useActiveVenue();
   const [authed, setAuthed] = useState(null);
   const [form, setForm] = useState({ full_legal_name: "", phone: "", requested_role: "ENTERTAINER", reason: "", mode: requestedMode });
   const [busy, setBusy] = useState(false);
@@ -41,7 +43,10 @@ export default function AccessRequestForm({ requestedMode = "SANDBOX" }) {
     setBusy(true);
     setError("");
     try {
-      const request = await submitAccessRequest(form);
+      const request = await submitAccessRequest({
+        ...form,
+        venue_id: activeVenue?.venue_id || activeVenue?.id,
+      });
       setMyRequests([request, ...myRequests]);
       setForm({ full_legal_name: "", phone: "", requested_role: "ENTERTAINER", reason: "", mode: requestedMode });
     } catch (e) {
@@ -71,6 +76,9 @@ export default function AccessRequestForm({ requestedMode = "SANDBOX" }) {
       <div className={`rounded-lg border px-3 py-2 text-center text-xs font-bold tracking-wide ${requestedMode === "DEMO" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-indigo-500/40 bg-indigo-500/10 text-indigo-300"}`}>
         {requestedMode === "DEMO" ? "TRAINING ACCESS REQUEST" : "SANDBOX TEST ACCESS REQUEST"}
       </div>
+      <p className="text-xs text-slate-500 text-center">
+        Venue: {activeVenue?.name || "Loading active venue…"}
+      </p>
       {myRequests.length > 0 && (
         <div className="space-y-2">
           {myRequests.map((r) => (
@@ -98,7 +106,7 @@ export default function AccessRequestForm({ requestedMode = "SANDBOX" }) {
           <Textarea placeholder="Reason for access" value={form.reason}
             onChange={(e) => setForm({ ...form, reason: e.target.value })} className="bg-slate-900 border-slate-700 text-white" rows={3} />
           {error && <p className="text-red-400 text-sm">{error}</p>}
-          <Button onClick={submit} disabled={busy || !form.full_legal_name || !form.reason}
+          <Button onClick={submit} disabled={busy || !activeVenue || !form.full_legal_name || !form.reason}
             className="w-full h-14 bg-violet-700 hover:bg-violet-600">
             {busy ? <Loader2 className="w-5 h-5 animate-spin" /> : "Submit Access Request"}
           </Button>

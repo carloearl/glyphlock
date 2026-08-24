@@ -1,21 +1,102 @@
+import assert from "node:assert/strict";
 import fs from "node:fs";
+import {
+  canAuthorityActOnRequest,
+  decisionMatchesRequestedRole,
+  isDecisionAllowedFromStatus,
+  isValidIdempotencyKey,
+} from "../base44/functions/nupsAccessControl/policy.mjs";
 
 const access = fs.readFileSync("base44/functions/nupsAccessControl/entry.ts", "utf8");
 const ui = fs.readFileSync("src/pages/AccessRequests.jsx", "utf8");
 const owner = fs.readFileSync("src/pages/NUPSOwner.jsx", "utf8");
+const auth = fs.readFileSync("src/lib/AuthContext.jsx", "utf8");
+const guard = fs.readFileSync("src/components/nups/RoleClassGuard.jsx", "utf8");
+const client = fs.readFileSync("src/lib/nups/accessRequestClient.js", "utf8");
+const manifest = JSON.parse(fs.readFileSync(".base44/ci-checks.json", "utf8"));
+
+const scopedStaffRequest = {
+  requested_role: "DJ",
+  granted_role: "",
+  venue_id: "dream_palace",
+  mode: "DEMO",
+};
+const scopedAdminRequest = { ...scopedStaffRequest, requested_role: "ADMINISTRATOR" };
+const sovereign = { tier: "SOVEREIGN", venue_id: null, mode: null };
+const ownerAuthority = { tier: "OWNER", venue_id: "dream_palace", mode: "DEMO" };
+const adminAuthority = { tier: "ADMINISTRATOR", venue_id: "dream_palace", mode: "DEMO" };
 
 const checks = [
-  ["server blocks self approval", access.includes("cannot approve, reject, suspend, or revoke your own access request") && access.includes("String(r.email || '').trim().toLowerCase() === email")],
-  ["administrator cannot grant owner", access.includes("decision === 'APPROVE_OWNER' && decisionAuthority === 'ADMINISTRATOR'")],
-  ["authority distinguishes owner and administrator", access.includes("getDecisionAuthority") && access.includes("return 'ADMINISTRATOR'")],
-  ["UI hides own-request actions", ui.includes('String(r.email || "").toLowerCase() !== actor.email')],
-  ["UI hides owner grant from administrator", ui.includes('actor.role === "OWNER"')],
-  ["mobile controls meet touch target", ui.includes("min-h-[44px]")],
-  ["approval status filters exist", ["PENDING", "APPROVED", "HISTORY", "ALL"].every((label) => ui.includes(label))],
-  ["owner dashboard links canonical approval center", owner.includes("route: '/AccessRequests'")],
+  ["server blocks self approval", () => {
+    assert.match(access, /cannot approve, reject, suspend, or revoke your own access request/);
+    assert.match(access, /normalizeEmail\(r\.email\) === email/);
+  }],
+  ["administrator cannot grant administrator or owner", () => {
+    assert.equal(canAuthorityActOnRequest(adminAuthority, scopedAdminRequest, "APPROVE_ADMIN"), false);
+    assert.equal(canAuthorityActOnRequest(adminAuthority, { ...scopedAdminRequest, requested_role: "OWNER" }, "APPROVE_OWNER"), false);
+  }],
+  ["delegated owner cannot create another owner", () => {
+    assert.equal(canAuthorityActOnRequest(ownerAuthority, { ...scopedAdminRequest, requested_role: "OWNER" }, "APPROVE_OWNER"), false);
+    assert.equal(canAuthorityActOnRequest(sovereign, { ...scopedAdminRequest, requested_role: "OWNER" }, "APPROVE_OWNER"), true);
+  }],
+  ["venue and mode isolation is enforced", () => {
+    assert.equal(canAuthorityActOnRequest(adminAuthority, scopedStaffRequest, "APPROVE_STAFF"), true);
+    assert.equal(canAuthorityActOnRequest(adminAuthority, { ...scopedStaffRequest, venue_id: "other" }, "APPROVE_STAFF"), false);
+    assert.equal(canAuthorityActOnRequest(adminAuthority, { ...scopedStaffRequest, mode: "REAL" }, "APPROVE_STAFF"), false);
+  }],
+  ["approval must match the requested role", () => {
+    assert.equal(decisionMatchesRequestedRole("DJ", "APPROVE_STAFF"), true);
+    assert.equal(decisionMatchesRequestedRole("DJ", "APPROVE_ADMIN"), false);
+    assert.equal(decisionMatchesRequestedRole("ADMINISTRATOR", "APPROVE_ADMIN"), true);
+  }],
+  ["decision state transitions are bounded", () => {
+    assert.equal(isDecisionAllowedFromStatus("PENDING_OWNER_APPROVAL", "APPROVE_STAFF"), true);
+    assert.equal(isDecisionAllowedFromStatus("APPROVED", "APPROVE_STAFF"), false);
+    assert.equal(isDecisionAllowedFromStatus("APPROVED", "SUSPEND"), true);
+    assert.equal(isDecisionAllowedFromStatus("REVOKED", "REVOKE"), false);
+  }],
+  ["idempotency keys are validated and persisted", () => {
+    assert.equal(isValidIdempotencyKey("approval:1234567890abcdef"), true);
+    assert.equal(isValidIdempotencyKey("short"), false);
+    assert.match(access, /entry\.idempotency_key === idempotency_key/);
+    assert.match(access, /idempotent_replay: true/);
+    assert.match(ui, /crypto\.randomUUID\(\)/);
+    assert.match(ui, /decisionKeys\.current\.get\(operation\)/);
+  }],
+  ["sign-in no longer bootstraps privileged access", () => {
+    assert.doesNotMatch(auth, /ensurePrivilegedAccess/);
+    assert.equal(fs.existsSync("src/lib/nups/privilegedAccess.js"), false);
+  }],
+  ["route guard requires server-verified NUPS access", () => {
+    assert.match(guard, /functions\.invoke\("nupsAccessControl", \{ action: "checkAccess" \}\)/);
+    assert.doesNotMatch(guard, /entities\.NUPSUser\.filter/);
+    assert.doesNotMatch(guard, /resolveRoleClass\(\{ user: u/);
+    assert.match(guard, /Authorization infrastructure failures fail closed/);
+  }],
+  ["mobile submission includes the active venue", () => {
+    assert.match(client, /venue_id: venueId/);
+    assert.match(ui, /min-h-\[44px\]/);
+  }],
+  ["approval status filters and owner route exist", () => {
+    for (const label of ["PENDING", "APPROVED", "HISTORY", "ALL"]) assert.match(ui, new RegExp(label));
+    assert.match(owner, /route: '\/AccessRequests'/);
+  }],
+  ["the Phase 18.1 gate is part of Base44-managed CI", () => {
+    assert.ok(manifest.scripts.includes("check:nups-phase18-1-approvals"));
+  }],
 ];
 
-const failed = checks.filter(([, ok]) => !ok);
-for (const [name, ok] of checks) console.log(`${ok ? "PASS" : "FAIL"} — ${name}`);
-if (failed.length) process.exit(1);
-console.log("\nNUPS Phase 18.1 approval stabilization checks passed.");
+let failures = 0;
+for (const [name, check] of checks) {
+  try {
+    check();
+    console.log(`PASS — ${name}`);
+  } catch (error) {
+    failures += 1;
+    console.error(`FAIL — ${name}`);
+    console.error(error.message);
+  }
+}
+
+if (failures) process.exit(1);
+console.log("\nNUPS Phase 18.1 approval security checks passed.");

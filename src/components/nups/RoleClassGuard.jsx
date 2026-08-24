@@ -18,7 +18,6 @@ import { useNavigate } from "react-router-dom";
 import { Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
-import { isSovereign } from "@/lib/nups/sovereign";
 import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
 
@@ -72,22 +71,36 @@ export default function RoleClassGuard({ allow = [], children }) {
           return;
         }
 
-        let nu = null, sov = false;
         try {
-          const matches = await base44.entities.NUPSUser.filter({ created_by: u.email });
-          nu = (matches || [])[0] || null;
-          sov = (matches || []).some(isSovereign);
-        } catch { /* fall through */ }
+          const access = await base44.functions.invoke("nupsAccessControl", { action: "checkAccess" });
+          if (cancelled) return;
+          if (access.data?.authorized !== true) {
+            setRoleClass(ROLE_CLASS.STAFF);
+            setStatus("denied");
+            return;
+          }
+          const grantedRole = access.data?.granted_role;
+          const cls = ["OWNER", "ADMINISTRATOR"].includes(grantedRole)
+            ? ROLE_CLASS.ADMIN
+            : resolveRoleClass({ nupsUser: { role: grantedRole } });
+          setRoleClass(cls);
 
-        const cls = resolveRoleClass({ user: u, nupsUser: nu, sovereign: sov });
-        if (cancelled) return;
-        setRoleClass(cls);
+          // ADMIN is a superset — always granted.
+          if (cls === ROLE_CLASS.ADMIN) { setStatus("granted"); return; }
 
-        // ADMIN is a superset — always granted.
-        if (cls === ROLE_CLASS.ADMIN) { setStatus("granted"); return; }
+          if (allow.includes(cls)) setStatus("granted");
+          else setStatus("denied");
+          return;
+        } catch {
+          // Authorization infrastructure failures fail closed. A platform
+          // login alone never substitutes for a NUPS approval.
+          if (!cancelled) {
+            setRoleClass(ROLE_CLASS.STAFF);
+            setStatus("denied");
+          }
+          return;
+        }
 
-        if (allow.includes(cls)) setStatus("granted");
-        else setStatus("denied");
       } catch {
         if (!cancelled) setStatus("unauth");
       }

@@ -1,4 +1,14 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import {
+  APPROVAL_DECISIONS,
+  STAFF_ROLES,
+  VALID_DECISIONS,
+  canAuthorityActOnRequest,
+  decisionMatchesRequestedRole,
+  isDecisionAllowedFromStatus,
+  isValidIdempotencyKey,
+  normalizeEmail,
+} from './policy.mjs';
 
 // DACO-NUPS Phase 18.1 — Owner/Admin access request, approval, and back-office authorization.
 // Approval authority: sovereign owner accounts plus expressly approved OWNER
@@ -8,10 +18,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
 
 // Sovereign accounts — never need an access request (owner directive 2026-08-19).
-const SOVEREIGN_EMAILS = ['carloearl@glyphlock.com', 'carloearl@gmail.com', 'svsantos@outlook.com'];
+const SOVEREIGN_EMAILS = ['carloearl@glyphlock.com', 'carloearl@gmail.com'];
 
 // Any staff role may request access; ADMINISTRATOR / OWNER are privileged tiers.
-const STAFF_ROLES = ['ENTERTAINER', 'HOSTESS', 'DOORMAN', 'DOOR_GIRL', 'BARTENDER', 'DJ', 'SECURITY', 'MANAGER'];
 const REQUESTABLE_ROLES = [...STAFF_ROLES, 'ADMINISTRATOR', 'OWNER'];
 
 // Requested role → NUPSUser.role
@@ -31,13 +40,41 @@ const NUPS_ROLE_MAP = {
 // Return the actor's exact decision tier so server-side policy can distinguish
 // OWNER from ADMINISTRATOR. UI visibility is never used as authorization.
 async function getDecisionAuthority(base44, email) {
-  const e = String(email || '').trim().toLowerCase();
+  const e = normalizeEmail(email);
   if (!e) return null;
-  if (SOVEREIGN_EMAILS.includes(e)) return 'SOVEREIGN';
-  const approved = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email: e, status: 'APPROVED' });
-  if ((approved || []).some(r => r.granted_role === 'OWNER')) return 'OWNER';
-  if ((approved || []).some(r => r.granted_role === 'ADMINISTRATOR')) return 'ADMINISTRATOR';
+  if (SOVEREIGN_EMAILS.includes(e)) return { tier: 'SOVEREIGN', venue_id: null, mode: null };
+  const approved = await base44.asServiceRole.entities.NUPSAccessRequest.filter(
+    { email: e, status: 'APPROVED' }, '-created_date', 20,
+  );
+  for (const tier of ['OWNER', 'ADMINISTRATOR']) {
+    for (const grant of (approved || []).filter((r) => r.granted_role === tier)) {
+      if (!grant.nups_user_id) continue;
+      const account = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
+      if (
+        account?.status === 'active'
+        && normalizeEmail(account.platform_email) === e
+        && account.venue_id === grant.venue_id
+      ) {
+        return { tier, venue_id: grant.venue_id, mode: grant.mode, nups_user_id: grant.nups_user_id };
+      }
+    }
+  }
   return null;
+}
+
+async function getActiveVenue(base44, venueRef) {
+  const ref = String(venueRef || '').trim();
+  if (!ref) return null;
+  let venue = await base44.asServiceRole.entities.Venue.get(ref).catch(() => null);
+  if (!venue) {
+    const matches = await base44.asServiceRole.entities.Venue.filter({ venue_id: ref }, '-created_date', 2);
+    venue = (matches || [])[0] || null;
+  }
+  return venue?.status === 'active' ? venue : null;
+}
+
+function canonicalVenueId(venue) {
+  return String(venue?.venue_id || venue?.id || '').trim();
 }
 
 function safeRequest(r) {
@@ -70,7 +107,7 @@ Deno.serve(async (req) => {
     let user = null;
     try { user = await base44.auth.me(); } catch { /* not signed in */ }
     if (!user) return Response.json({ error: 'Sign in required.' }, { status: 401 });
-    const email = String(user.email || '').trim().toLowerCase();
+    const email = normalizeEmail(user.email);
 
     // ─── SUBMIT ACCESS REQUEST (§4) ─────────────────────────────────────────
     if (action === 'submitRequest') {
@@ -81,10 +118,15 @@ Deno.serve(async (req) => {
       if (!REQUESTABLE_ROLES.includes(requested_role)) {
         return Response.json({ error: 'Invalid access type.' }, { status: 400 });
       }
+      const venue = await getActiveVenue(base44, venue_id);
+      if (!venue) return Response.json({ error: 'Select an active venue before requesting access.' }, { status: 400 });
+      const resolvedVenueId = canonicalVenueId(venue);
+      const resolvedMode = ['SANDBOX', 'DEMO'].includes(mode) ? mode : 'SANDBOX';
       const existing = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email });
-      const open = (existing || []).find(r => ['PENDING_OWNER_APPROVAL', 'NEEDS_INFORMATION'].includes(r.status));
+      const sameScope = (existing || []).filter((r) => r.venue_id === resolvedVenueId && r.mode === resolvedMode);
+      const open = sameScope.find(r => ['PENDING_OWNER_APPROVAL', 'NEEDS_INFORMATION'].includes(r.status));
       if (open) return Response.json({ error: 'You already have a pending access request.', request: safeRequest(open) }, { status: 409 });
-      const approvedAlready = (existing || []).find(r => r.status === 'APPROVED');
+      const approvedAlready = sameScope.find(r => r.status === 'APPROVED');
       if (approvedAlready) return Response.json({ error: 'You already have approved access. Use Owner/Admin Sign In.', request: safeRequest(approvedAlready) }, { status: 409 });
 
       const rec = await base44.asServiceRole.entities.NUPSAccessRequest.create({
@@ -92,10 +134,10 @@ Deno.serve(async (req) => {
         email,
         phone: phone || '',
         requested_role,
-        venue_id,
+        venue_id: resolvedVenueId,
         reason,
         status: 'PENDING_OWNER_APPROVAL',
-        mode: ['SANDBOX', 'DEMO'].includes(mode) ? mode : 'SANDBOX',
+        mode: resolvedMode,
         decision_log: [{ decision: 'SUBMITTED', by: email, note: '', timestamp: new Date().toISOString() }],
       });
       // Owner notification — requests can be approved in-app (NUPSAdminPortal /
@@ -138,7 +180,18 @@ Deno.serve(async (req) => {
       // DACO-NUPS-RBAC-CORRECTION-20260717 §5 — no implicit platform-admin ownership.
       // Back office requires Carlo's protected Owner identity or an explicit APPROVED grant.
       if (SOVEREIGN_EMAILS.includes(email)) {
-        return Response.json({ authorized: true, granted_role: 'OWNER', destination: '/NUPSAdminPortal', full_name: user.full_name, actor_email: email });
+        return Response.json({ authorized: true, granted_role: 'OWNER', decision_tier: 'SOVEREIGN', destination: '/NUPSAdminPortal', full_name: user.full_name, actor_email: email });
+      }
+      const authority = await getDecisionAuthority(base44, email);
+      if (authority) {
+        return Response.json({
+          authorized: true,
+          granted_role: authority.tier,
+          decision_tier: authority.tier,
+          destination: '/NUPSAdminPortal',
+          full_name: user.full_name,
+          actor_email: email,
+        });
       }
       const mine = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 5);
       const grant = (mine || [])[0];
@@ -151,17 +204,23 @@ Deno.serve(async (req) => {
         });
       }
       // Verify the linked NUPS account is still active (revocation takes effect immediately).
-      if (grant.nups_user_id) {
-        const nu = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
-        if (!nu || nu.status !== 'active') {
-          return Response.json({ authorized: false, reason: 'Account has been suspended or revoked.' });
-        }
+      if (!grant.nups_user_id) {
+        return Response.json({ authorized: false, reason: 'Approved access is missing its linked NUPS account.' });
+      }
+      const nu = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
+      if (
+        !nu
+        || nu.status !== 'active'
+        || normalizeEmail(nu.platform_email) !== email
+        || nu.venue_id !== grant.venue_id
+      ) {
+        return Response.json({ authorized: false, reason: 'Account has been suspended, revoked, or is not bound to this approval.' });
       }
       const destination =
         grant.granted_role === 'ENTERTAINER' ? '/EntertainerHome'
         : ['ADMINISTRATOR', 'OWNER'].includes(grant.granted_role) ? '/NUPSAdminPortal'
         : '/StaffHome';
-      return Response.json({ authorized: true, granted_role: grant.granted_role, destination, full_name: grant.full_legal_name, actor_email: email });
+      return Response.json({ authorized: true, granted_role: grant.granted_role, decision_tier: grant.granted_role, destination, full_name: grant.full_legal_name, actor_email: email });
     }
 
     // ─── OWNER-ONLY ACTIONS BELOW (§5) ──────────────────────────────────────
@@ -170,32 +229,52 @@ Deno.serve(async (req) => {
 
     if (action === 'listRequests') {
       const all = await base44.asServiceRole.entities.NUPSAccessRequest.list('-created_date', 200);
-      return Response.json({ requests: (all || []).map(safeRequest) });
+      const scoped = decisionAuthority.tier === 'SOVEREIGN'
+        ? (all || [])
+        : (all || []).filter((r) => r.venue_id === decisionAuthority.venue_id && r.mode === decisionAuthority.mode);
+      return Response.json({ requests: scoped.map(safeRequest) });
     }
 
     if (action === 'decide') {
       // Decision authority is verified above. Self-approval is always denied.
       // Administrators may manage operational access but cannot grant OWNER.
-      const { request_id, decision, note } = body;
-      const valid = ['APPROVE_ENTERTAINER', 'APPROVE_STAFF', 'APPROVE_ADMIN', 'APPROVE_OWNER', 'REJECT', 'REQUEST_INFO', 'SUSPEND', 'REVOKE'];
-      if (!request_id || !valid.includes(decision)) {
+      const { request_id, decision, note, idempotency_key } = body;
+      if (!request_id || !VALID_DECISIONS.includes(decision)) {
         return Response.json({ error: 'request_id and a valid decision are required.' }, { status: 400 });
+      }
+      if (!isValidIdempotencyKey(idempotency_key)) {
+        return Response.json({ error: 'A valid idempotency_key is required.' }, { status: 400 });
       }
       const r = await base44.asServiceRole.entities.NUPSAccessRequest.get(request_id).catch(() => null);
       if (!r) return Response.json({ error: 'Request not found.' }, { status: 404 });
-      if (String(r.email || '').trim().toLowerCase() === email) {
+      if (normalizeEmail(r.email) === email) {
         return Response.json({ error: 'You cannot approve, reject, suspend, or revoke your own access request.' }, { status: 403 });
       }
-      if (decision === 'APPROVE_OWNER' && decisionAuthority === 'ADMINISTRATOR') {
-        return Response.json({ error: 'Administrators cannot grant Owner access.' }, { status: 403 });
+      if (!canAuthorityActOnRequest(decisionAuthority, r, decision)) {
+        return Response.json({ error: 'This request is outside your venue, mode, or decision authority.' }, { status: 403 });
+      }
+      const prior = (r.decision_log || []).find((entry) => entry.idempotency_key === idempotency_key);
+      if (prior) {
+        if (prior.decision !== decision || normalizeEmail(prior.by) !== email) {
+          return Response.json({ error: 'The idempotency_key was already used for a different decision or actor.' }, { status: 409 });
+        }
+        return Response.json({ success: true, idempotent_replay: true, request: safeRequest(r) });
+      }
+      if (!isDecisionAllowedFromStatus(r.status, decision)) {
+        return Response.json({ error: `Decision ${decision} is not allowed from status ${r.status}.` }, { status: 409 });
+      }
+      if (APPROVAL_DECISIONS.includes(decision) && !decisionMatchesRequestedRole(r.requested_role, decision)) {
+        return Response.json({ error: 'The approval decision must match the access role that was requested.' }, { status: 409 });
       }
 
       const now = new Date().toISOString();
-      const log = [...(r.decision_log || []), { decision, by: email, note: note || '', timestamp: now }];
+      const log = [...(r.decision_log || []), { decision, by: email, note: note || '', timestamp: now, idempotency_key }];
       const patch = { decided_by: email, decided_at: now, decision_note: note || '', decision_log: log };
 
-      if (['APPROVE_ENTERTAINER', 'APPROVE_STAFF', 'APPROVE_ADMIN', 'APPROVE_OWNER'].includes(decision)) {
-        if (!r.venue_id) return Response.json({ error: 'Request is missing an active venue assignment.' }, { status: 409 });
+      if (APPROVAL_DECISIONS.includes(decision)) {
+        const venue = await getActiveVenue(base44, r.venue_id);
+        if (!venue) return Response.json({ error: 'Request is missing an active venue assignment.' }, { status: 409 });
+        const resolvedVenueId = canonicalVenueId(venue);
         // APPROVE_STAFF grants exactly the staff role that was requested.
         const grantedRole =
           decision === 'APPROVE_OWNER' ? 'OWNER'
@@ -205,15 +284,32 @@ Deno.serve(async (req) => {
         // Create (or reactivate) the NUPS account bound to the platform email.
         let nupsUserId = r.nups_user_id;
         const nupsRole = NUPS_ROLE_MAP[grantedRole] || 'PERFORMER';
+        if (!nupsUserId) {
+          const existingUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+            platform_email: normalizeEmail(r.email), venue_id: resolvedVenueId,
+          }, '-created_date', 5);
+          nupsUserId = (existingUsers || [])[0]?.id || null;
+        }
         if (nupsUserId) {
-          await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, { status: 'active', role: nupsRole, approved_by: email });
+          const linkedUser = await base44.asServiceRole.entities.NUPSUser.get(nupsUserId).catch(() => null);
+          if (
+            !linkedUser
+            || normalizeEmail(linkedUser.platform_email) !== normalizeEmail(r.email)
+            || linkedUser.venue_id !== resolvedVenueId
+          ) {
+            return Response.json({ error: 'The linked NUPS account does not match this request.' }, { status: 409 });
+          }
+          await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, {
+            status: 'active', role: nupsRole, approved_by: email,
+            platform_email: normalizeEmail(r.email), venue_id: resolvedVenueId,
+          });
         } else {
           const nu = await base44.asServiceRole.entities.NUPSUser.create({
             username: r.email,
             full_name: r.full_legal_name,
             role: nupsRole,
-            venue_id: r.venue_id,
-            platform_email: r.email,
+            venue_id: resolvedVenueId,
+            platform_email: normalizeEmail(r.email),
             approved_by: email,
             status: 'active',
             is_demo: ['SANDBOX', 'DEMO', 'TEST'].includes(r.mode),

@@ -16,8 +16,11 @@ export async function loadMyAccessRequests() {
 }
 
 export async function submitAccessRequest(form) {
+  const venueId = form.venue_id || getActiveVenueId();
+  if (!venueId) throw new Error("Select an active venue before requesting NUPS access.");
+  const payload = { ...form, venue_id: venueId };
   try {
-    const response = await base44.functions.invoke("nupsAccessControl", { action: "submitRequest", ...form });
+    const response = await base44.functions.invoke("nupsAccessControl", { action: "submitRequest", ...payload });
     return response.data.request;
   } catch (error) {
     if (!unavailable(error)) throw error;
@@ -27,15 +30,13 @@ export async function submitAccessRequest(form) {
     if (existing.some((request) => ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION"].includes(request.status))) {
       throw new Error("You already have a pending access request.");
     }
-    const venueId = form.venue_id || getActiveVenueId();
-    if (!venueId) throw new Error("Select an active venue before requesting NUPS access.");
     return writeIdentityRecord({
       entity: "NUPSAccessRequest",
       operation: "create",
       venueId,
       intent: "NUPS_ACCESS_REQUEST_SUBMIT_FALLBACK",
       data: {
-        ...form,
+        ...payload,
         email,
         venue_id: venueId,
         status: "PENDING_OWNER_APPROVAL",
