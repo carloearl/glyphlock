@@ -145,8 +145,8 @@ jobs:
       - name: Verify protected delivery source
         working-directory: cloudflare/glyphlock-edge-guard
         run: |
-          echo "a6f211de31e256d242d0dd8279c13700bac85c2b914df9faab4f195ddea584b4  src/index.js" | sha256sum -c -
-          echo "5a8a33eade369bb8bc4e7a95b6ce007dd68c5df3dc9061818afaf4dd46f7c931  scripts/verify-live.mjs" | sha256sum -c -
+          echo "374ed55a41a5390c8eda2fa125b8582ae20aac5b8eac909d2ca3c1fa19427a4b  src/index.js" | sha256sum -c -
+          echo "0d24de775bbc60bc6048514bde3c0ff7c1bec4268d762635d84de540e1bdbb23  scripts/verify-live.mjs" | sha256sum -c -
           echo "0e1f7e17849e945858806fd284c1c69dc7414835b0be53479055ade6025c38f8  scripts/rollback.mjs" | sha256sum -c -
 
       - name: Install pinned Wrangler
