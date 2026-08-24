@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.43';
 import {
   APPROVAL_DECISIONS,
   STAFF_ROLES,
@@ -17,6 +17,7 @@ import {
 // cannot grant OWNER. All decisions append to the request's decision_log.
 
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
+const DECISION_CLAIM_TTL_MS = 5 * 60 * 1000;
 
 // Sovereign accounts — never need an access request (owner directive 2026-08-19).
 const SOVEREIGN_EMAILS = ['carloearl@glyphlock.com', 'carloearl@gmail.com'];
@@ -83,6 +84,58 @@ function canonicalVenueId(venue) {
 
 function accountMode(account) {
   return account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+}
+
+function isExpiredDecisionClaim(request) {
+  if (!request?.decision_claim_active || !request?.decision_claimed_at) return false;
+  const claimedAt = Date.parse(request.decision_claimed_at);
+  return Number.isFinite(claimedAt) && Date.now() - claimedAt > DECISION_CLAIM_TTL_MS;
+}
+
+async function claimDecision(base44, request, idempotencyKey, actorEmail) {
+  let current = request;
+  if (isExpiredDecisionClaim(current)) {
+    await base44.asServiceRole.entities.NUPSAccessRequest.updateMany({
+      id: current.id,
+      decision_claim_active: true,
+      decision_claim_key: current.decision_claim_key,
+      decision_claimed_at: current.decision_claimed_at,
+    }, {
+      $set: { decision_claim_active: false },
+    });
+    current = await base44.asServiceRole.entities.NUPSAccessRequest.get(current.id);
+  }
+
+  const result = await base44.asServiceRole.entities.NUPSAccessRequest.updateMany({
+    $and: [
+      { id: current.id },
+      { status: current.status },
+      { $or: [
+        { decision_claim_active: false },
+        { decision_claim_active: { $exists: false } },
+      ] },
+    ],
+  }, {
+    $set: {
+      decision_claim_active: true,
+      decision_claim_key: idempotencyKey,
+      decision_claimed_by: actorEmail,
+      decision_claimed_at: new Date().toISOString(),
+    },
+  });
+  if (result?.updated !== 1) return null;
+  return base44.asServiceRole.entities.NUPSAccessRequest.get(current.id);
+}
+
+async function releaseDecisionClaim(base44, requestId, idempotencyKey, actorEmail) {
+  await base44.asServiceRole.entities.NUPSAccessRequest.updateMany({
+    id: requestId,
+    decision_claim_active: true,
+    decision_claim_key: idempotencyKey,
+    decision_claimed_by: actorEmail,
+  }, {
+    $set: { decision_claim_active: false },
+  });
 }
 
 function safeRequest(r) {
@@ -261,7 +314,7 @@ Deno.serve(async (req) => {
       if (!isValidIdempotencyKey(idempotency_key)) {
         return Response.json({ error: 'A valid idempotency_key is required.' }, { status: 400 });
       }
-      const r = await base44.asServiceRole.entities.NUPSAccessRequest.get(request_id).catch(() => null);
+      let r = await base44.asServiceRole.entities.NUPSAccessRequest.get(request_id).catch(() => null);
       if (!r) return Response.json({ error: 'Request not found.' }, { status: 404 });
       if (normalizeEmail(r.email) === email) {
         return Response.json({ error: 'You cannot approve, reject, suspend, or revoke your own access request.' }, { status: 403 });
@@ -286,77 +339,97 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Privileged access cannot be approved from a non-live request.' }, { status: 403 });
       }
 
-      const now = new Date().toISOString();
-      const log = [...(r.decision_log || []), { decision, by: email, note: note || '', timestamp: now, idempotency_key }];
-      const patch = { decided_by: email, decided_at: now, decision_note: note || '', decision_log: log };
-
-      if (APPROVAL_DECISIONS.includes(decision)) {
-        const venue = await getActiveVenue(base44, r.venue_id);
-        if (!venue) return Response.json({ error: 'Request is missing an active venue assignment.' }, { status: 409 });
-        const resolvedVenueId = canonicalVenueId(venue);
-        // APPROVE_STAFF grants exactly the staff role that was requested.
-        const grantedRole =
-          decision === 'APPROVE_OWNER' ? 'OWNER'
-          : decision === 'APPROVE_ADMIN' ? 'ADMINISTRATOR'
-          : decision === 'APPROVE_STAFF' && STAFF_ROLES.includes(r.requested_role) ? r.requested_role
-          : 'ENTERTAINER';
-        // Create (or reactivate) the NUPS account bound to the platform email.
-        let nupsUserId = r.nups_user_id;
-        const nupsRole = NUPS_ROLE_MAP[grantedRole] || 'PERFORMER';
-        if (!nupsUserId) {
-          const existingUsers = await base44.asServiceRole.entities.NUPSUser.filter({
-            platform_email: normalizeEmail(r.email), venue_id: resolvedVenueId,
-          }, '-created_date', 5);
-          nupsUserId = (existingUsers || []).find((candidate) => accountMode(candidate) === r.mode)?.id || null;
+      r = await claimDecision(base44, r, idempotency_key, email);
+      if (!r) {
+        const latest = await base44.asServiceRole.entities.NUPSAccessRequest.get(request_id).catch(() => null);
+        const completed = (latest?.decision_log || []).find((entry) => entry.idempotency_key === idempotency_key);
+        if (completed && completed.decision === decision && normalizeEmail(completed.by) === email) {
+          return Response.json({ success: true, idempotent_replay: true, request: safeRequest(latest) });
         }
-        if (nupsUserId) {
-          const linkedUser = await base44.asServiceRole.entities.NUPSUser.get(nupsUserId).catch(() => null);
-          if (
-            !linkedUser
-            || normalizeEmail(linkedUser.platform_email) !== normalizeEmail(r.email)
-            || linkedUser.venue_id !== resolvedVenueId
-            || accountMode(linkedUser) !== r.mode
-          ) {
-            return Response.json({ error: 'The linked NUPS account does not match this request.' }, { status: 409 });
+        return Response.json({ error: 'Another decision is already processing for this request. Retry safely with the same idempotency key.' }, { status: 409 });
+      }
+
+      let claimHeld = true;
+      try {
+        const now = new Date().toISOString();
+        const log = [...(r.decision_log || []), { decision, by: email, note: note || '', timestamp: now, idempotency_key }];
+        const patch = { decided_by: email, decided_at: now, decision_note: note || '', decision_log: log };
+
+        if (APPROVAL_DECISIONS.includes(decision)) {
+          const venue = await getActiveVenue(base44, r.venue_id);
+          if (!venue) return Response.json({ error: 'Request is missing an active venue assignment.' }, { status: 409 });
+          const resolvedVenueId = canonicalVenueId(venue);
+          // APPROVE_STAFF grants exactly the staff role that was requested.
+          const grantedRole =
+            decision === 'APPROVE_OWNER' ? 'OWNER'
+            : decision === 'APPROVE_ADMIN' ? 'ADMINISTRATOR'
+            : decision === 'APPROVE_STAFF' && STAFF_ROLES.includes(r.requested_role) ? r.requested_role
+            : 'ENTERTAINER';
+          // Create (or reactivate) the NUPS account bound to the platform email.
+          let nupsUserId = r.nups_user_id;
+          const nupsRole = NUPS_ROLE_MAP[grantedRole] || 'PERFORMER';
+          if (!nupsUserId) {
+            const existingUsers = await base44.asServiceRole.entities.NUPSUser.filter({
+              platform_email: normalizeEmail(r.email), venue_id: resolvedVenueId,
+            }, '-created_date', 5);
+            nupsUserId = (existingUsers || []).find((candidate) => accountMode(candidate) === r.mode)?.id || null;
           }
-          await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, {
-            status: 'active', role: nupsRole, approved_by: email,
-            platform_email: normalizeEmail(r.email), venue_id: resolvedVenueId,
-            access_mode: r.mode, is_demo: r.mode !== 'REAL',
+          if (nupsUserId) {
+            const linkedUser = await base44.asServiceRole.entities.NUPSUser.get(nupsUserId).catch(() => null);
+            if (
+              !linkedUser
+              || normalizeEmail(linkedUser.platform_email) !== normalizeEmail(r.email)
+              || linkedUser.venue_id !== resolvedVenueId
+              || accountMode(linkedUser) !== r.mode
+            ) {
+              return Response.json({ error: 'The linked NUPS account does not match this request.' }, { status: 409 });
+            }
+            await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, {
+              status: 'active', role: nupsRole, approved_by: email,
+              platform_email: normalizeEmail(r.email), venue_id: resolvedVenueId,
+              access_mode: r.mode, is_demo: r.mode !== 'REAL',
+            });
+          } else {
+            const nu = await base44.asServiceRole.entities.NUPSUser.create({
+              username: r.email,
+              full_name: r.full_legal_name,
+              role: nupsRole,
+              venue_id: resolvedVenueId,
+              platform_email: normalizeEmail(r.email),
+              approved_by: email,
+              status: 'active',
+              is_demo: ['SANDBOX', 'DEMO', 'TEST'].includes(r.mode),
+              access_mode: r.mode,
+              created_note: `Approved via NUPSAccessRequest ${r.id} (${decision})`,
+            });
+            nupsUserId = nu.id;
+          }
+          const updated = await base44.asServiceRole.entities.NUPSAccessRequest.update(request_id, {
+            ...patch, status: 'APPROVED', granted_role: grantedRole, nups_user_id: nupsUserId,
+            decision_claim_active: false,
           });
-        } else {
-          const nu = await base44.asServiceRole.entities.NUPSUser.create({
-            username: r.email,
-            full_name: r.full_legal_name,
-            role: nupsRole,
-            venue_id: resolvedVenueId,
-            platform_email: normalizeEmail(r.email),
-            approved_by: email,
-            status: 'active',
-            is_demo: ['SANDBOX', 'DEMO', 'TEST'].includes(r.mode),
-            access_mode: r.mode,
-            created_note: `Approved via NUPSAccessRequest ${r.id} (${decision})`,
+          claimHeld = false;
+          return Response.json({ success: true, request: safeRequest(updated) });
+        }
+
+        const statusMap = { REJECT: 'REJECTED', REQUEST_INFO: 'NEEDS_INFORMATION', SUSPEND: 'SUSPENDED', REVOKE: 'REVOKED' };
+        const newStatus = statusMap[decision];
+        // Revocation / suspension deactivates the linked account immediately.
+        if ((decision === 'REVOKE' || decision === 'SUSPEND') && r.nups_user_id) {
+          await base44.asServiceRole.entities.NUPSUser.update(r.nups_user_id, {
+            status: decision === 'REVOKE' ? 'terminated' : 'suspended',
           });
-          nupsUserId = nu.id;
         }
         const updated = await base44.asServiceRole.entities.NUPSAccessRequest.update(request_id, {
-          ...patch, status: 'APPROVED', granted_role: grantedRole, nups_user_id: nupsUserId,
+          ...patch, status: newStatus, granted_role: '', decision_claim_active: false,
         });
+        claimHeld = false;
         return Response.json({ success: true, request: safeRequest(updated) });
+      } finally {
+        if (claimHeld) {
+          await releaseDecisionClaim(base44, request_id, idempotency_key, email).catch(() => null);
+        }
       }
-
-      const statusMap = { REJECT: 'REJECTED', REQUEST_INFO: 'NEEDS_INFORMATION', SUSPEND: 'SUSPENDED', REVOKE: 'REVOKED' };
-      const newStatus = statusMap[decision];
-      // Revocation / suspension deactivates the linked account immediately.
-      if ((decision === 'REVOKE' || decision === 'SUSPEND') && r.nups_user_id) {
-        await base44.asServiceRole.entities.NUPSUser.update(r.nups_user_id, {
-          status: decision === 'REVOKE' ? 'terminated' : 'suspended',
-        });
-      }
-      const updated = await base44.asServiceRole.entities.NUPSAccessRequest.update(request_id, {
-        ...patch, status: newStatus, granted_role: decision.startsWith('APPROVE') ? r.granted_role : '',
-      });
-      return Response.json({ success: true, request: safeRequest(updated) });
     }
 
     return Response.json({ error: `Unknown action: ${action}` }, { status: 400 });

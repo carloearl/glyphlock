@@ -9,6 +9,7 @@ import {
 } from "../base44/functions/nupsAccessControl/policy.mjs";
 
 const access = fs.readFileSync("base44/functions/nupsAccessControl/entry.ts", "utf8");
+const requestSchema = fs.readFileSync("base44/entities/NUPSAccessRequest.jsonc", "utf8");
 const ui = fs.readFileSync("src/pages/AccessRequests.jsx", "utf8");
 const requestForm = fs.readFileSync("src/components/nups/kiosk/AccessRequestForm.jsx", "utf8");
 const owner = fs.readFileSync("src/pages/NUPSOwner.jsx", "utf8");
@@ -76,6 +77,14 @@ const checks = [
     assert.match(access, /idempotent_replay: true/);
     assert.match(ui, /crypto\.randomUUID\(\)/);
     assert.match(ui, /decisionKeys\.current\.get\(operation\)/);
+  }],
+  ["decision side effects require an atomic compare-and-set claim", () => {
+    assert.match(access, /NUPSAccessRequest\.updateMany\(\{[\s\S]*?decision_claim_active:\s*\{\s*\$exists:\s*false\s*\}/);
+    assert.match(access, /result\?\.updated !== 1/);
+    assert.match(access, /r = await claimDecision\(base44, r, idempotency_key, email\)/);
+    assert.match(access, /Another decision is already processing/);
+    assert.match(access, /decision_claim_active:\s*false/);
+    assert.match(requestSchema, /"decision_claim_active"[\s\S]*?"default": false/);
   }],
   ["sign-in no longer bootstraps privileged access", () => {
     assert.doesNotMatch(auth, /ensurePrivilegedAccess/);

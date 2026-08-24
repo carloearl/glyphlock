@@ -66,6 +66,23 @@
     "decision_note": {
       "type": "string"
     },
+    "decision_claim_active": {
+      "type": "boolean",
+      "default": false,
+      "description": "Server-managed compare-and-set lock for one in-flight decision."
+    },
+    "decision_claim_key": {
+      "type": "string",
+      "description": "Idempotency key holding the current or most recent decision claim."
+    },
+    "decision_claimed_by": {
+      "type": "string",
+      "description": "Platform-verified email that acquired the decision claim."
+    },
+    "decision_claimed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "decision_log": {
       "type": "array",
       "items": {
