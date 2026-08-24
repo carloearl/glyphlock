@@ -47,7 +47,7 @@ async function getDecisionAuthorities(base44, email) {
   if (!e) return [];
   if (SOVEREIGN_EMAILS.includes(e)) return [{ tier: 'SOVEREIGN', venue_id: null, mode: null }];
   const approved = await base44.asServiceRole.entities.NUPSAccessRequest.filter(
-    { email: e, status: 'APPROVED' }, '-created_date', 20,
+    { email: e, status: 'APPROVED' }, '-created_date',
   );
   const authorities = [];
   for (const tier of ['OWNER', 'ADMINISTRATOR']) {
@@ -294,6 +294,10 @@ Deno.serve(async (req) => {
     // ─── CHECK BACK-OFFICE ACCESS (§6–7) ────────────────────────────────────
     if (action === 'checkAccess') {
       const requestedMode = ['REAL', 'TEST', 'DEMO', 'SANDBOX'].includes(body.mode) ? body.mode : null;
+      const requiredRoles = Array.isArray(body.required_roles)
+        ? [...new Set(body.required_roles.filter((role) => Object.values(NUPS_ROLE_MAP).includes(role)))].slice(0, 20)
+        : [];
+      const allowAdmin = body.allow_admin !== false;
       let requestedVenueId = String(body.venue_id || '').trim() || null;
       if (requestedVenueId) {
         const requestedVenue = await getActiveVenue(base44, requestedVenueId);
@@ -305,13 +309,22 @@ Deno.serve(async (req) => {
       if (SOVEREIGN_EMAILS.includes(email)) {
         return Response.json({ authorized: true, granted_role: 'OWNER', decision_tier: 'SOVEREIGN', mode: requestedMode || 'REAL', venue_id: requestedVenueId, destination: '/NUPSAdminPortal', full_name: user.full_name, actor_email: email });
       }
-      const mine = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 50);
+      const grantQuery = {
+        email,
+        status: 'APPROVED',
+        ...(requestedVenueId ? { venue_id: requestedVenueId } : {}),
+        ...(requestedMode ? { mode: requestedMode } : {}),
+      };
+      const mine = await base44.asServiceRole.entities.NUPSAccessRequest.filter(grantQuery, '-created_date');
       let grant = null;
       let nu = null;
       for (const candidate of (mine || [])) {
         if (requestedVenueId && candidate.venue_id !== requestedVenueId) continue;
         if (requestedMode && candidate.mode !== requestedMode) continue;
         if (['ADMINISTRATOR', 'OWNER'].includes(candidate.granted_role) && candidate.mode !== 'REAL') continue;
+        const candidateRole = NUPS_ROLE_MAP[candidate.granted_role];
+        const candidateIsAdmin = ['ADMINISTRATOR', 'OWNER'].includes(candidate.granted_role);
+        if (requiredRoles.length > 0 && !(allowAdmin && candidateIsAdmin) && !requiredRoles.includes(candidateRole)) continue;
         if (!candidate.nups_user_id) continue;
         const account = await base44.asServiceRole.entities.NUPSUser.get(candidate.nups_user_id).catch(() => null);
         if (accountMatchesGrant(account, candidate, email)) {

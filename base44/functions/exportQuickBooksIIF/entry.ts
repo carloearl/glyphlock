@@ -39,15 +39,12 @@ async function resolveActiveVenue(E: any, venueRef: unknown) {
 
 async function resolveRealManager(E: any, email: string, venueId: string) {
   if (SOVEREIGN_EMAILS.has(email)) return { role: 'SOVEREIGN', venue_id: venueId };
-  const [accounts, grants] = await Promise.all([
-    E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []),
-    E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 50).catch(() => []),
-  ]);
+  const grants = await E.NUPSAccessRequest.filter({ email, status: 'APPROVED', venue_id: venueId, mode: 'REAL' }, '-created_date').catch(() => []);
   for (const grant of grants || []) {
     if (grant.venue_id !== venueId || grant.mode !== 'REAL' || !grant.nups_user_id) continue;
-    const account = (accounts || []).find((candidate: any) => candidate.id === grant.nups_user_id);
+    const account = await E.NUPSUser.get(grant.nups_user_id).catch(() => null);
     const expectedRole = NUPS_ROLE_BY_GRANT[grant.granted_role];
-    if (account && expectedRole && account.role === expectedRole && ALLOWED_ROLES.has(account.role) && account.venue_id === venueId && accountMode(account) === 'REAL') return account;
+    if (account?.status === 'active' && expectedRole && account.role === expectedRole && ALLOWED_ROLES.has(account.role) && account.venue_id === venueId && accountMode(account) === 'REAL') return account;
   }
   return null;
 }

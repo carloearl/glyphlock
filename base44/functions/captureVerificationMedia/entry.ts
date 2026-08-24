@@ -25,15 +25,12 @@ async function resolveActiveVenue(base44: any, venueRef: unknown) {
 async function resolveGrantedIdentity(base44: any, email: string, venueId: string, mode: string) {
   if (SOVEREIGN_EMAILS.has(email)) return { role: 'SOVEREIGN', venue_id: venueId, access_mode: mode };
   const E = base44.asServiceRole.entities;
-  const [accounts, grants] = await Promise.all([
-    E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []),
-    E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 50).catch(() => []),
-  ]);
+  const grants = await E.NUPSAccessRequest.filter({ email, status: 'APPROVED', venue_id: venueId, mode }, '-created_date').catch(() => []);
   for (const grant of grants || []) {
     if (grant.venue_id !== venueId || grant.mode !== mode || !grant.nups_user_id) continue;
-    const account = (accounts || []).find((candidate: any) => candidate.id === grant.nups_user_id);
+    const account = await E.NUPSUser.get(grant.nups_user_id).catch(() => null);
     const expectedRole = NUPS_ROLE_BY_GRANT[grant.granted_role];
-    if (account && expectedRole && account.role === expectedRole && account.venue_id === venueId && accountMode(account) === mode) {
+    if (account?.status === 'active' && expectedRole && account.role === expectedRole && account.venue_id === venueId && accountMode(account) === mode) {
       return account;
     }
   }
@@ -77,6 +74,20 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'An active NUPS identity with a matching approved venue and mode grant is required' }, { status: 403 });
     }
 
+    let barcodeRecord = null;
+    if (contract_barcode) {
+      if (!transaction_id) return Response.json({ error: 'A transaction is required for barcode-linked media' }, { status: 400 });
+      const barcodeMatches = await E.BarcodeRegistry.filter({
+        barcode_id: contract_barcode,
+        transaction_id,
+      }, '-created_date').catch(() => []);
+      const allowedVenueRefs = new Set([String(venue_id), requestedVenue.canonicalId]);
+      barcodeRecord = (barcodeMatches || []).find((record: any) => allowedVenueRefs.has(String(record.venue_id || ''))) || null;
+      if (!barcodeRecord) {
+        return Response.json({ error: 'Barcode is not bound to this transaction and authorized venue' }, { status: 403 });
+      }
+    }
+
     const media_url = `protected:${evidence.id}`;
     const media_hash = evidence.content_hash || '';
     const media_id = `MEDIA-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
@@ -98,10 +109,9 @@ Deno.serve(async (req) => {
       geolocation: geolocation || null,
     });
 
-    const barcode = await E.BarcodeRegistry.filter({ barcode_id: contract_barcode });
-    if (barcode.length > 0) {
-      await E.BarcodeRegistry.update(barcode[0].id, {
-        scan_count: (barcode[0].scan_count || 0) + 1,
+    if (barcodeRecord) {
+      await E.BarcodeRegistry.update(barcodeRecord.id, {
+        scan_count: (barcodeRecord.scan_count || 0) + 1,
         last_scanned_at: new Date().toISOString(),
         last_scanned_by: user.email,
       });

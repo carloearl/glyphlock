@@ -29,16 +29,13 @@ async function resolveGrantedIdentity(base44: any, email: string, venueId: strin
     return { role: 'SOVEREIGN', venue_id: venueId, access_mode: mode, sovereign: true };
   }
   const E = base44.asServiceRole.entities;
-  const [accounts, grants] = await Promise.all([
-    E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []),
-    E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 50).catch(() => []),
-  ]);
+  const grants = await E.NUPSAccessRequest.filter({ email, status: 'APPROVED', venue_id: venueId, mode }, '-created_date').catch(() => []);
   for (const grant of grants || []) {
     if (grant.venue_id !== venueId || grant.mode !== mode || !grant.nups_user_id) continue;
-    const account = (accounts || []).find((candidate: any) => candidate.id === grant.nups_user_id);
+    const account = await E.NUPSUser.get(grant.nups_user_id).catch(() => null);
     const expectedRole = NUPS_ROLE_BY_GRANT[grant.granted_role];
     if (
-      account
+      account?.status === 'active'
       && expectedRole
       && account.role === expectedRole
       && account.venue_id === venueId

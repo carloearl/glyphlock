@@ -20,13 +20,19 @@ import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
-import { getActiveVenueId, saveActiveVenue } from "@/hooks/useActiveVenue";
+import { resolveGuardAccess } from "@/lib/nups/resolveGuardAccess";
 
 const GRANT_TO_NUPS_ROLE = {
   OWNER: "VENUE_OWNER",
   ADMINISTRATOR: "PLATFORM_ADMIN",
   MANAGER: "VENUE_MANAGER",
   ENTERTAINER: "PERFORMER",
+};
+const ROLE_CLASS_TO_NUPS_ROLES = {
+  ADMIN: ["PLATFORM_ADMIN", "VENUE_OWNER"],
+  MANAGER: ["VENUE_MANAGER"],
+  ENTERTAINER: ["PERFORMER"],
+  STAFF: ["HOSTESS", "DOOR_GIRL", "DOORMAN", "BARTENDER", "SECURITY", "DJ"],
 };
 
 export default function RoleClassGuard({ allow = [], children }) {
@@ -80,21 +86,8 @@ export default function RoleClassGuard({ allow = [], children }) {
         }
 
         try {
-          let venueId = getActiveVenueId();
-          if (!venueId) {
-            const venues = await base44.entities.Venue.filter({ status: "active" }, "-created_date", 1);
-            if (!venues?.[0]) {
-              if (!cancelled) setStatus("denied");
-              return;
-            }
-            saveActiveVenue(venues[0]);
-            venueId = venues[0].id;
-          }
-          const access = await base44.functions.invoke("nupsAccessControl", {
-            action: "checkAccess",
-            venue_id: venueId,
-            mode: "REAL",
-          });
+          const requiredRoles = [...new Set(allow.flatMap((roleClassName) => ROLE_CLASS_TO_NUPS_ROLES[roleClassName] || []))];
+          const access = { data: await resolveGuardAccess({ requiredRoles, allowAdmin: true }) };
           if (cancelled) return;
           if (access.data?.authorized !== true) {
             setRoleClass(ROLE_CLASS.STAFF);

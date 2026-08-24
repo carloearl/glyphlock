@@ -17,6 +17,7 @@ const auth = fs.readFileSync("src/lib/AuthContext.jsx", "utf8");
 const guard = fs.readFileSync("src/components/nups/RoleClassGuard.jsx", "utf8");
 const operationalGuard = fs.readFileSync("src/components/nups/NUPSRouteGuard.jsx", "utf8");
 const kioskGuard = fs.readFileSync("src/components/nups/KioskSessionGuard.jsx", "utf8");
+const guardAccess = fs.readFileSync("src/lib/nups/resolveGuardAccess.js", "utf8");
 const client = fs.readFileSync("src/lib/nups/accessRequestClient.js", "utf8");
 const roleSelector = fs.readFileSync("src/components/nups/kiosk/AccessRoleSelector.jsx", "utf8");
 const clockIn = fs.readFileSync("base44/functions/nupsClockInV2/entry.ts", "utf8");
@@ -117,21 +118,23 @@ const checks = [
     assert.equal(fs.existsSync("src/lib/nups/privilegedAccess.js"), false);
   }],
   ["route guard requires server-verified NUPS access", () => {
-    assert.match(guard, /functions\.invoke\("nupsAccessControl", \{[\s\S]*?action: "checkAccess",[\s\S]*?venue_id: venueId,[\s\S]*?mode: "REAL"/);
+    assert.match(guard, /resolveGuardAccess\(\{ requiredRoles, allowAdmin: true \}\)/);
     assert.doesNotMatch(guard, /entities\.NUPSUser\.filter/);
     assert.doesNotMatch(guard, /resolveRoleClass\(\{ user: u/);
     assert.match(guard, /Authorization infrastructure failures fail closed/);
     assert.match(guard, /GRANT_TO_NUPS_ROLE\[grantedRole\]/);
-    assert.match(operationalGuard, /functions\.invoke\("nupsAccessControl", \{[\s\S]*?action: "checkAccess",[\s\S]*?venue_id: venueId,[\s\S]*?mode: "REAL"/);
+    assert.match(operationalGuard, /resolveGuardAccess\(\{ requiredRoles, allowAdmin \}\)/);
     assert.match(operationalGuard, /access\.mode !== "REAL"/);
     assert.doesNotMatch(operationalGuard, /hasOwnerPreview|user\.role === "admin"|entities\.NUPSUser\.filter/);
     assert.match(access, /if \(requestedVenueId && candidate\.venue_id !== requestedVenueId\) continue/);
     assert.match(access, /if \(requestedMode && candidate\.mode !== requestedMode\) continue/);
+    assert.match(access, /requiredRoles\.includes\(candidateRole\)/);
     assert.doesNotMatch(kioskGuard, /hasOwnerPreview/);
-    assert.match(kioskGuard, /venue_id: venueId/);
-    assert.match(kioskGuard, /mode: "REAL"/);
+    assert.match(kioskGuard, /resolveGuardAccess\(\{ requiredRoles: roles, allowAdmin: true \}\)/);
     assert.match(kioskGuard, /access\.mode === "REAL" && roleAllowed/);
     assert.match(kioskGuard, /roles\.includes\(resolvedRole\)/);
+    assert.match(guardAccess, /caller's own approved/);
+    assert.match(guardAccess, /required_roles: requiredRoles/);
   }],
   ["mobile submission includes the active venue", () => {
     assert.match(client, /venue_id: venueId/);
@@ -165,20 +168,24 @@ const checks = [
   }],
   ["protected evidence requires an exact active account and approved grant tuple", () => {
     for (const source of [getEvidence, registerEvidence, captureEvidence]) {
-      assert.match(source, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED' \}/);
+      assert.match(source, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED', venue_id: venueId, mode \}/);
       assert.match(source, /grant\.venue_id !== venueId \|\| grant\.mode !== mode \|\| !grant\.nups_user_id/);
-      assert.match(source, /candidate\.id === grant\.nups_user_id/);
+      assert.match(source, /NUPSUser\.get\(grant\.nups_user_id\)/);
+      assert.match(source, /account\?\.status === 'active'/);
       assert.match(source, /accountMode\(account\) === mode/);
       assert.doesNotMatch(source, /email\.split\('@'\)/);
     }
     assert.match(registerEvidence, /if \(!EVIDENCE_MODES\.has\(mode\)\)/);
     assert.doesNotMatch(registerEvidence, /body\.mode[\s\S]{0,120}: 'REAL'/);
+    assert.match(captureEvidence, /barcode_id: contract_barcode,[\s\S]*transaction_id/);
+    assert.match(captureEvidence, /allowedVenueRefs\.has/);
   }],
   ["contract, accounting export, and batch close require exact REAL grants", () => {
     for (const source of [vipContractGenerate, quickBooksExport, closePOSBatch]) {
-      assert.match(source, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED' \}/);
+      assert.match(source, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED', venue_id: venueId, mode: 'REAL' \}/);
       assert.match(source, /grant\.venue_id !== venueId \|\| grant\.mode !== 'REAL' \|\| !grant\.nups_user_id/);
-      assert.match(source, /candidate\.id === grant\.nups_user_id/);
+      assert.match(source, /NUPSUser\.get\(grant\.nups_user_id\)/);
+      assert.match(source, /account\?\.status === 'active'/);
       assert.match(source, /accountMode\(account\) === 'REAL'/);
       assert.doesNotMatch(source, /user\.role === 'admin'|new Set\(\['admin'/);
     }

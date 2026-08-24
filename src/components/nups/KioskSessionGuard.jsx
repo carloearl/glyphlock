@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Loader2, ShieldX } from "lucide-react";
 import { isOwnerEmail } from "@/lib/nups/ownerEmails";
-import { getActiveVenueId, saveActiveVenue } from "@/hooks/useActiveVenue";
+import { resolveGuardAccess } from "@/lib/nups/resolveGuardAccess";
 
 const GRANT_TO_NUPS_ROLE = {
   OWNER: "VENUE_OWNER",
@@ -45,27 +45,12 @@ export default function KioskSessionGuard({ roles = [], children }) {
           const me = await base44.auth.me();
           // Carlo's owner emails bypass the back-office grant check.
           if (isOwnerEmail(me?.email)) { if (alive) setState("ok"); return; }
-          let venueId = getActiveVenueId();
-          if (!venueId) {
-            const venues = await base44.entities.Venue.filter({ status: "active" }, "-created_date", 1);
-            if (venues?.[0]) {
-              saveActiveVenue(venues[0]);
-              venueId = venues[0].id;
-            }
-          }
-          if (venueId) {
-            const res = await base44.functions.invoke("nupsAccessControl", {
-              action: "checkAccess",
-              venue_id: venueId,
-              mode: "REAL",
-            });
-            const access = res.data || {};
-            const resolvedRole = GRANT_TO_NUPS_ROLE[access.granted_role] || access.granted_role;
-            const roleAllowed = ADMIN_ROLES.has(resolvedRole) || roles.includes(resolvedRole);
-            if (access.authorized === true && access.mode === "REAL" && roleAllowed) {
-              if (alive) setState("ok");
-              return;
-            }
+          const access = await resolveGuardAccess({ requiredRoles: roles, allowAdmin: true });
+          const resolvedRole = GRANT_TO_NUPS_ROLE[access.granted_role] || access.granted_role;
+          const roleAllowed = ADMIN_ROLES.has(resolvedRole) || roles.includes(resolvedRole);
+          if (access.authorized === true && access.mode === "REAL" && roleAllowed) {
+            if (alive) setState("ok");
+            return;
           }
         }
       } catch { /* denied */ }
