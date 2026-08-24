@@ -23,6 +23,7 @@ Allow: /GlyphLockFinancial
 Allow: /GovernanceHub
 Allow: /MasterCovenant
 Allow: /CaseStudies
+Allow: /CaseStudyOracleOHIP
 Allow: /Roadmap
 Allow: /Partners
 Allow: /DreamTeam
@@ -46,6 +47,7 @@ Disallow: /PaymentCancel
 Disallow: /NUPSOwner
 Disallow: /NUPSSandbox
 Disallow: /NUPSStaff
+Disallow: /OHIPReadiness
 Disallow: /SiteBuilder
 Disallow: /api/
 Disallow: /functions/
@@ -53,14 +55,6 @@ Disallow: /admin/
 
 Sitemap: https://glyphlock.io/sitemap.xml
 
-Crawl-delay: 1
-
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 0
-
-User-agent: Bingbot
-Allow: /
 Crawl-delay: 1`;
 
 export default function Robots() {
