@@ -89,11 +89,20 @@ async function verifyOnce() {
   const openAiAdmin = await request('/NUPSAdminPortal', OPENAI_SEARCH_UA);
   requireCrawlerBlock(openAiAdmin, 'OAI-SearchBot NUPS admin request');
 
+  const crawlerOhip = await request('/OHIPReadiness', GOOGLEBOT_UA);
+  requireCrawlerBlock(crawlerOhip, 'Googlebot OHIP readiness request');
+
   const browserAdmin = await request('/NUPSAdminPortal', BROWSER_UA);
   requireCheck(browserAdmin.status < 500, 'Protected browser route returned a server error', `status=${browserAdmin.status}`);
   requireCheck(/noindex/i.test(browserAdmin.robots), 'Protected browser route is missing noindex');
   requireCheck(/nofollow/i.test(browserAdmin.robots), 'Protected browser route is missing nofollow');
   requireCheck(/no-store/i.test(browserAdmin.cacheControl), 'Protected browser route is cacheable');
+
+  const browserOhip = await request('/OHIPReadiness', BROWSER_UA);
+  requireCheck(browserOhip.status < 500, 'OHIP readiness browser route returned a server error', `status=${browserOhip.status}`);
+  requireCheck(/noindex/i.test(browserOhip.robots), 'OHIP readiness browser route is missing noindex');
+  requireCheck(/nofollow/i.test(browserOhip.robots), 'OHIP readiness browser route is missing nofollow');
+  requireCheck(/no-store/i.test(browserOhip.cacheControl), 'OHIP readiness browser route is cacheable');
 
   return {
     publicStatus: publicPage.status,
@@ -101,7 +110,9 @@ async function verifyOnce() {
     encodedStatus: encodedCrawlerAdmin.status,
     backslashStatus: backslashCrawlerAdmin.status,
     openAiStatus: openAiAdmin.status,
+    ohipCrawlerStatus: crawlerOhip.status,
     protectedBrowserStatus: browserAdmin.status,
+    ohipBrowserStatus: browserOhip.status,
   };
 }
 
@@ -118,7 +129,9 @@ for (let attempt = 1; attempt <= ATTEMPTS; attempt += 1) {
 | Googlebot encoded admin path | ${result.encodedStatus} |
 | Googlebot backslash-encoded admin path | ${result.backslashStatus} |
 | OAI-SearchBot \`/NUPSAdminPortal\` | ${result.openAiStatus} |
+| Googlebot \`/OHIPReadiness\` | ${result.ohipCrawlerStatus} |
 | Browser \`/NUPSAdminPortal\` | ${result.protectedBrowserStatus} |
+| Browser \`/OHIPReadiness\` | ${result.ohipBrowserStatus} |
 
 **Result: PASS** — public traffic remained available and protected routes received the intended crawler block and noindex/no-store policy.`);
     console.log('[cloudflare:verify-live] PASS');
