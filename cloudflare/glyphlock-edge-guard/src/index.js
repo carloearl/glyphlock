@@ -9,6 +9,7 @@ const PROTECTED_EXACT_PATHS = new Set([
   '/unauthorized',
   '/nupsadminportal',
   '/providerconsole',
+  '/ohipreadiness',
 ]);
 
 const PROTECTED_PREFIXES = ['/admin', '/demo'];
