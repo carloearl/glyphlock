@@ -16,6 +16,14 @@ Deno.serve(async (req) => {
     const action = body.action;
     const VENUE = String(body.venue_id || '').trim();
     if (!VENUE) return Response.json({ error: 'Active venue is required.' }, { status: 400 });
+    const venueRecord = await E.Venue.get(VENUE).catch(() => null)
+      || (await E.Venue.filter({ venue_id: VENUE, status: 'active' }, null, 1).catch(() => []))?.[0]
+      || null;
+    if (!venueRecord || venueRecord.status !== 'active') {
+      return Response.json({ error: 'Active venue is not registered.' }, { status: 403 });
+    }
+    const AUTH_VENUE = String(venueRecord.venue_id || venueRecord.id || '').trim();
+    const venueRefs = new Set([VENUE, AUTH_VENUE]);
 
     // ── DACO-NUPS-RBAC-CORRECTION-20260717 §3–5 — authorization guard ──────
     // Two accepted identities, nothing else:
@@ -60,7 +68,7 @@ Deno.serve(async (req) => {
         for (const grant of grants.filter((candidate) =>
           ['OWNER', 'ADMINISTRATOR'].includes(candidate.granted_role)
           && candidate.mode === 'REAL'
-          && candidate.venue_id === VENUE
+          && candidate.venue_id === AUTH_VENUE
         )) {
           if (!grant.nups_user_id) continue;
           const account = await E.NUPSUser.get(grant.nups_user_id).catch(() => null);
@@ -93,16 +101,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (backOfficeGrant && backOfficeGrant.venue_id !== VENUE) {
+    if (backOfficeGrant && backOfficeGrant.venue_id !== AUTH_VENUE) {
       return Response.json({ error: 'Back-office grant is bound to another venue.' }, { status: 403 });
     }
-    if (operator && String(operator.venue || '') !== VENUE) {
+    if (operator && !venueRefs.has(String(operator.venue || ''))) {
       return Response.json({ error: 'Kiosk session is bound to another venue.' }, { status: 403 });
-    }
-    const venueRecord = (await E.Venue.filter({ venue_id: VENUE, status: 'active' }, null, 1).catch(() => []))?.[0]
-      || await E.Venue.get(VENUE).catch(() => null);
-    if (!venueRecord || venueRecord.status === 'inactive') {
-      return Response.json({ error: 'Active venue is not registered.' }, { status: 403 });
     }
     const now = () => new Date().toISOString();
     const ref = (p) => `${p}-${new Date().toISOString().slice(2, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;

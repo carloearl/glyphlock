@@ -109,6 +109,8 @@ const checks = [
     assert.ok(suspendedCreate > -1 && approvedWrite > suspendedCreate && activeWrite > approvedWrite);
     assert.match(access, /prior approval did not finish activating its bound account/);
     assert.match(access, /reconciled: true/);
+    assert.match(access, /request\.decision_claim_key === idempotencyKey/);
+    assert.match(access, /request = await base44\.asServiceRole\.entities\.NUPSAccessRequest\.get\(request\.id\)/);
     assert.match(access, /account\?\.status === 'suspended'/);
     assert.match(access, /Approved via NUPSAccessRequest \$\{r\.id\}/);
     assert.match(access, /startsWith\(requestMarker\)/);
@@ -157,7 +159,8 @@ const checks = [
     assert.match(clockIn, /Cross-venue PIN provisioning denied/);
     assert.match(clockIn, /candidate\.venue_id === targetUser\.venue_id/);
     assert.match(vipWorkflow, /Back-office grant is bound to another venue/);
-    assert.match(vipWorkflow, /candidate\.venue_id === VENUE/);
+    assert.match(vipWorkflow, /candidate\.venue_id === AUTH_VENUE/);
+    assert.match(vipWorkflow, /venueRecord\.venue_id \|\| venueRecord\.id/);
     for (const source of [staffOnboarding, venueTerminal, vipBills]) {
       assert.match(source, /grant\.mode === 'REAL'/);
       assert.match(source, /grant\.nups_user_id === (?:manager|account)\.id/);

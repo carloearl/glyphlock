@@ -184,6 +184,14 @@ async function getDecisionReplayResponse(base44, request, decision, idempotencyK
       }
       return Response.json({ error: 'The prior approval did not finish activating its bound account. Owner reconciliation is required.' }, { status: 409 });
     }
+    if (
+      request.decision_claim_active
+      && request.decision_claim_key === idempotencyKey
+      && normalizeEmail(request.decision_claimed_by) === actorEmail
+    ) {
+      await releaseDecisionClaim(base44, request.id, idempotencyKey, actorEmail);
+      request = await base44.asServiceRole.entities.NUPSAccessRequest.get(request.id);
+    }
   }
   return Response.json({ success: true, idempotent_replay: true, request: safeRequest(request) });
 }
