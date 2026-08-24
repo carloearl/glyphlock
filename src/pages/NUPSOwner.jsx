@@ -269,6 +269,7 @@ export default function NUPSOwner() {
     { key: 'inventory',  label: 'Inventory',      icon: Package },
     { key: 'audit',      label: 'Audit Log',      icon: Shield },
     { key: 'oracle',     label: 'Oracle OHIP',    icon: ShieldCheck, route: '/OHIPReadiness', ownerEmailOnly: true },
+    { key: 'approvals',  label: 'Approvals',      icon: ShieldCheck, route: '/AccessRequests' },
     { key: 'admin',      label: 'Admin',          icon: KeyRound },
     // Renamed to distinguish from Admin → Venue Settings (rates/receipts/
     // checklist/contracts/CoA editors) — this legacy pane edits the venue
