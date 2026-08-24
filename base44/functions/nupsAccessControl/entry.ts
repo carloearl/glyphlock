@@ -391,6 +391,18 @@ Deno.serve(async (req) => {
         return Response.json({ error: 'Another decision is already processing for this request. Retry safely with the same idempotency key.' }, { status: 409 });
       }
 
+      // A status-preserving decision (REQUEST_INFO from NEEDS_INFORMATION) can
+      // finish between the initial read and this successful claim. Re-check the
+      // claimed record so the same key never appends a duplicate log entry.
+      const completedAfterClaim = (r.decision_log || []).find((entry) => entry.idempotency_key === idempotency_key);
+      if (completedAfterClaim) {
+        await releaseDecisionClaim(base44, request_id, idempotency_key, email);
+        if (completedAfterClaim.decision !== decision || normalizeEmail(completedAfterClaim.by) !== email) {
+          return Response.json({ error: 'The idempotency_key was already used for a different decision or actor.' }, { status: 409 });
+        }
+        return Response.json({ success: true, idempotent_replay: true, request: safeRequest(r) });
+      }
+
       let claimHeld = true;
       try {
         const now = new Date().toISOString();
@@ -414,7 +426,11 @@ Deno.serve(async (req) => {
             const existingUsers = await base44.asServiceRole.entities.NUPSUser.filter({
               platform_email: normalizeEmail(r.email), venue_id: resolvedVenueId,
             }, '-created_date', 5);
-            nupsUserId = (existingUsers || []).find((candidate) => accountMode(candidate) === r.mode)?.id || null;
+            const requestMarker = `Approved via NUPSAccessRequest ${r.id} (`;
+            nupsUserId = (existingUsers || []).find((candidate) =>
+              accountMode(candidate) === r.mode
+              && String(candidate.created_note || '').startsWith(requestMarker)
+            )?.id || null;
           }
           if (nupsUserId) {
             const linkedUser = await base44.asServiceRole.entities.NUPSUser.get(nupsUserId).catch(() => null);

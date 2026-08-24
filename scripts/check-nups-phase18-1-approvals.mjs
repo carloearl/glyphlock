@@ -96,6 +96,8 @@ const checks = [
     assert.match(access, /result\?\.updated !== 1/);
     assert.match(access, /r = await claimDecision\(base44, r, idempotency_key, email\)/);
     assert.match(access, /Another decision is already processing/);
+    assert.match(access, /completedAfterClaim/);
+    assert.match(access, /releaseDecisionClaim\(base44, request_id, idempotency_key, email\)/);
     assert.match(access, /decision_claim_active:\s*false/);
     assert.match(requestSchema, /"decision_claim_active"[\s\S]*?"default": false/);
   }],
@@ -107,6 +109,8 @@ const checks = [
     assert.match(access, /prior approval did not finish activating its bound account/);
     assert.match(access, /reconciled: true/);
     assert.match(access, /account\?\.status === 'suspended'/);
+    assert.match(access, /Approved via NUPSAccessRequest \$\{r\.id\}/);
+    assert.match(access, /startsWith\(requestMarker\)/);
   }],
   ["sign-in no longer bootstraps privileged access", () => {
     assert.doesNotMatch(auth, /ensurePrivilegedAccess/);
@@ -143,12 +147,14 @@ const checks = [
   }],
   ["downstream privileged grant consumers require real scoped identities", () => {
     for (const source of [clockIn, vipWorkflow]) {
-      assert.match(source, /\['OWNER', 'ADMINISTRATOR'\]\.includes\(candidate\.granted_role\)/);
+      assert.match(source, /\['OWNER', 'ADMINISTRATOR'(?:, 'MANAGER')?\]\.includes\(candidate\.granted_role\)/);
       assert.match(source, /candidate\.mode === 'REAL'/);
       assert.match(source, /accountMode === 'REAL'/);
     }
     assert.match(clockIn, /Cross-venue PIN provisioning denied/);
+    assert.match(clockIn, /candidate\.venue_id === targetUser\.venue_id/);
     assert.match(vipWorkflow, /Back-office grant is bound to another venue/);
+    assert.match(vipWorkflow, /candidate\.venue_id === VENUE/);
     for (const source of [staffOnboarding, venueTerminal, vipBills]) {
       assert.match(source, /grant\.mode === 'REAL'/);
       assert.match(source, /grant\.nups_user_id === (?:manager|account)\.id/);

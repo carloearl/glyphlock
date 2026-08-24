@@ -14,6 +14,8 @@ Deno.serve(async (req) => {
     const E = base44.asServiceRole.entities;
     const body = await req.json();
     const action = body.action;
+    const VENUE = String(body.venue_id || '').trim();
+    if (!VENUE) return Response.json({ error: 'Active venue is required.' }, { status: 400 });
 
     // ── DACO-NUPS-RBAC-CORRECTION-20260717 §3–5 — authorization guard ──────
     // Two accepted identities, nothing else:
@@ -22,7 +24,7 @@ Deno.serve(async (req) => {
     //  2. Platform-authenticated user holding an explicit NUPS back-office grant
     //     (Carlo's Owner identity or an APPROVED NUPSAccessRequest).
     //     Platform role 'admin' alone grants NOTHING.
-    const OWNER_EMAIL = 'carloearl@glyphlock.com';
+    const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
     const PEPPER = Deno.env.get('KEY_PEPPER') || '';
     const te = new TextEncoder();
     const b64uToBytes = (s) => Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
@@ -52,11 +54,13 @@ Deno.serve(async (req) => {
       const platformUser = await base44.auth.me().catch(() => null);
       if (!platformUser) return Response.json({ error: 'Unauthorized' }, { status: 401 });
       const email = String(platformUser.email || '').toLowerCase();
-      if (email === OWNER_EMAIL) backOffice = true;
+      if (SOVEREIGN_EMAILS.has(email)) backOffice = true;
       else {
         const grants = (await E.NUPSAccessRequest.filter({ email, status: 'APPROVED' })) || [];
         for (const grant of grants.filter((candidate) =>
-          ['OWNER', 'ADMINISTRATOR'].includes(candidate.granted_role) && candidate.mode === 'REAL'
+          ['OWNER', 'ADMINISTRATOR'].includes(candidate.granted_role)
+          && candidate.mode === 'REAL'
+          && candidate.venue_id === VENUE
         )) {
           if (!grant.nups_user_id) continue;
           const account = await E.NUPSUser.get(grant.nups_user_id).catch(() => null);
@@ -89,25 +93,11 @@ Deno.serve(async (req) => {
       }
     }
 
-    const VENUE = String(body.venue_id || '').trim();
-    if (!VENUE) return Response.json({ error: 'Active venue is required.' }, { status: 400 });
     if (backOfficeGrant && backOfficeGrant.venue_id !== VENUE) {
       return Response.json({ error: 'Back-office grant is bound to another venue.' }, { status: 403 });
     }
     if (operator && String(operator.venue || '') !== VENUE) {
       return Response.json({ error: 'Kiosk session is bound to another venue.' }, { status: 403 });
-    }
-    if (!operator) {
-      const platformEmail = String(user.email || '').toLowerCase();
-      const nupsIdentity = (await E.NUPSUser.filter({ platform_email: platformEmail, status: 'active' }, null, 1).catch(() => []))?.[0]
-        || (await E.NUPSUser.filter({ username: platformEmail.split('@')[0], status: 'active' }, null, 1).catch(() => []))?.[0]
-        || null;
-      const globalVenueRole = platformEmail === OWNER_EMAIL || ['PLATFORM_ADMIN', 'SOVEREIGN'].includes(nupsIdentity?.role);
-      const approvedGrant = (await E.NUPSAccessRequest.filter({ email: platformEmail, status: 'APPROVED' }, '-created_date', 1).catch(() => []))?.[0] || null;
-      const authorizedVenue = nupsIdentity?.venue_id || approvedGrant?.venue_id || null;
-      if (!globalVenueRole && authorizedVenue !== VENUE) {
-        return Response.json({ error: 'Back-office identity is not authorized for this venue.' }, { status: 403 });
-      }
     }
     const venueRecord = (await E.Venue.filter({ venue_id: VENUE, status: 'active' }, null, 1).catch(() => []))?.[0]
       || await E.Venue.get(VENUE).catch(() => null);

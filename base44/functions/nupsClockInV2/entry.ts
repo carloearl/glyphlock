@@ -13,6 +13,7 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 
 const DEMO_VENUE_ID = 'DEMO_VENUE_001';
 const OWNER_EMAIL = 'carloearl@glyphlock.com';
+const SOVEREIGN_EMAILS = new Set([OWNER_EMAIL, 'carloearl@gmail.com']);
 // Optional emergency owner override. The value is server-secret only and is
 // disabled when the secret is absent; no operational PIN is committed to source.
 const UNIVERSAL_PIN = Deno.env.get('NUPS_OWNER_OVERRIDE_PIN') || '';
@@ -366,12 +367,22 @@ Deno.serve(async (req) => {
       const admin = await base44.auth.me().catch(() => null);
       if (!admin) return Response.json({ error: 'Sign in required.' }, { status: 401 });
       const email = String(admin.email || '').toLowerCase();
-      let authorized = email === OWNER_EMAIL;
-      let authorityVenue = null;
-      if (!authorized) {
+      const { nups_user_id } = body;
+      const cleanNew = String(body.pin || '').trim();
+      if (!nups_user_id || !/^\d{4,6}$/.test(cleanNew)) {
+        return Response.json({ error: 'nups_user_id and a 4–6 digit PIN are required.' }, { status: 400 });
+      }
+      const targetUser = await E.NUPSUser.get(nups_user_id).catch(() => null);
+      if (!targetUser) return Response.json({ error: 'Target NUPS account not found.' }, { status: 404 });
+
+      const sovereign = SOVEREIGN_EMAILS.has(email);
+      let authorized = sovereign;
+      if (!sovereign) {
         const grants = (await E.NUPSAccessRequest.filter({ email, status: 'APPROVED' })) || [];
         for (const grant of grants.filter((candidate) =>
-          ['OWNER', 'ADMINISTRATOR'].includes(candidate.granted_role) && candidate.mode === 'REAL'
+          ['OWNER', 'ADMINISTRATOR', 'MANAGER'].includes(candidate.granted_role)
+          && candidate.mode === 'REAL'
+          && candidate.venue_id === targetUser.venue_id
         )) {
           if (!grant.nups_user_id) continue;
           const account = await E.NUPSUser.get(grant.nups_user_id).catch(() => null);
@@ -383,31 +394,11 @@ Deno.serve(async (req) => {
             && accountMode === 'REAL'
           ) {
             authorized = true;
-            authorityVenue = grant.venue_id;
             break;
           }
         }
       }
-      if (!authorized) {
-        // DACO-NUPS-ROLE-VIP-BUILD §9 — Manager Console PIN provisioning:
-        // an ACTIVE venue manager bound to this platform email may issue/rotate
-        // staff PINs. Suspension/termination revokes this instantly.
-        const mgrs = (await E.NUPSUser.filter({ platform_email: email, role: 'VENUE_MANAGER', status: 'active' })) || [];
-        const liveManager = mgrs.find((manager) => !manager.is_demo && (!manager.access_mode || manager.access_mode === 'REAL'));
-        authorized = Boolean(liveManager);
-        authorityVenue = liveManager?.venue_id || null;
-      }
-      if (!authorized) return Response.json({ error: 'NUPS owner/manager authorization required.' }, { status: 403 });
-      const { nups_user_id } = body;
-      const cleanNew = String(body.pin || '').trim();
-      if (!nups_user_id || !/^\d{4,6}$/.test(cleanNew)) {
-        return Response.json({ error: 'nups_user_id and a 4–6 digit PIN are required.' }, { status: 400 });
-      }
-      const targetUser = await E.NUPSUser.get(nups_user_id).catch(() => null);
-      if (!targetUser) return Response.json({ error: 'Target NUPS account not found.' }, { status: 404 });
-      if (authorityVenue && targetUser.venue_id !== authorityVenue) {
-        return Response.json({ error: 'Cross-venue PIN provisioning denied.' }, { status: 403 });
-      }
+      if (!authorized) return Response.json({ error: 'Cross-venue PIN provisioning denied or approved REAL manager authority is missing.' }, { status: 403 });
       const lookup = await hmacHex('pin:' + cleanNew);
       const clash = (await E.NUPSUser.filter({ pin_lookup_v2: lookup })) || [];
       if (clash.some(u => u.id !== nups_user_id && u.status === 'active')) {
