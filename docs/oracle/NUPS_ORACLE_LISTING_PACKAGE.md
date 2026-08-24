@@ -1,6 +1,6 @@
 # NUPS Oracle Marketplace Listing Package
 
-Status: draft — not submitted  
+Status: draft listing package — Oracle Cloud Marketplace Agreement submitted; Oracle review pending  
 Evidence cutoff: August 24, 2026  
 Owner: GlyphLock LLC  
 Integration owner: carloearl@glyphlock.com
@@ -29,6 +29,9 @@ This package must not state or imply Oracle certification, production approval, 
 | OPN enrollment | `1654123` |
 | OPN level | Level 0 |
 | OPN term | August 19, 2026–August 18, 2027 |
+| Oracle Cloud Marketplace Agreement | Submitted August 24, 2026 · subscription `1655445` · Oracle review pending |
+| Marketplace publisher registration | **Not yet confirmed / not approved** |
+| Listing record | **Not created / not accepted** |
 | Listing OCID | **Pending — do not invent** |
 | Production application/key | **Not issued / not verified** |
 | Authorized customer environment | **None shown as of August 24, 2026** |
@@ -42,6 +45,12 @@ This package must not state or imply Oracle certification, production approval, 
 - Current Oracle environment: Partner Sandbox only
 - Current maturity: **response validated**
 - Production maturity: **locked**
+- Preferred Marketplace custom URL suffix: `glyphlock-nups` (reserve only if Oracle makes it available)
+- Public product URL: `https://glyphlock.io/NUPSLanding`
+- Public Oracle integration evidence: `https://glyphlock.io/CaseStudyOracleOHIP`
+- Public support/contact URL: `https://glyphlock.io/Contact`
+- Privacy Policy: `https://glyphlock.io/Privacy`
+- Terms: `https://glyphlock.io/Terms`
 
 ## Draft short description
 
@@ -72,30 +81,33 @@ Current OHIP capability is limited to controlled read-only configuration validat
 - Oracle transaction/invoice `102669026` — August 21, 2026; payment record only.
 - Owner-provided portal screenshots — August 24, 2026: application, subscriptions, Partner Sandbox environments, and zero customer environments.
 - Owner-only Base44 readiness screenshot — August 24, 2026: sanitized 250-row mapping preview, no writes.
+- Oracle Cloud Marketplace Agreement confirmation — August 24, 2026: subscription `1655445`, submitted to Oracle for review; not an approval.
 
 ## Assets to assemble before submission
 
 - [ ] Approved company logo and product icon
 - [ ] Product screenshots with no credentials, tokens, guest data, or raw Oracle payload
-- [ ] Public product URL and support URL
-- [ ] Privacy Policy and Terms URLs
+- [x] Public product URL and support URL
+- [x] Privacy Policy and Terms URLs
 - [ ] Support contact and escalation hours
 - [ ] Architecture/data-flow diagram
 - [ ] Security questionnaire responses
-- [ ] Read-only Partner Sandbox validation narrative
-- [ ] Customer use-case narrative that does not imply production authorization
+- [x] Read-only Partner Sandbox validation narrative
+- [x] Customer use-case narrative that does not imply production authorization
 - [ ] Commercial model and pricing text
 - [ ] Oracle category and regional availability selections
+- [ ] OCMA approval confirmation — subscription `1655445` currently under Oracle review
 - [ ] Publisher registration confirmation
-- [ ] Oracle-issued listing record and OCID
+- [ ] Oracle-issued listing record and identifier; do not invent an OCID
 
 ## Submission gates
 
-1. Oracle Marketplace publisher registration completed.
-2. Oracle confirms the correct Hospitality Partnerships/Marketplace workflow.
-3. Listing form requirements and required legal/commercial documents are known.
-4. All claims are rechecked against current Oracle evidence.
-5. Oracle issues a listing record/OCID; record it here only after issuance.
+1. Oracle approves or otherwise completes review of OCMA subscription `1655445`.
+2. Oracle Marketplace publisher registration is completed and confirmed.
+3. Oracle confirms the correct Hospitality Partnerships/Marketplace workflow.
+4. Listing form requirements and required legal/commercial documents are known.
+5. All claims are rechecked against current Oracle evidence.
+6. Oracle issues a listing record and any required listing identifier; record only what Oracle actually issues.
 
 ## Production gates outside Marketplace submission
 
