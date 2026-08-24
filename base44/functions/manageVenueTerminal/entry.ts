@@ -30,19 +30,36 @@ function publicTerminal(row: any) {
 }
 
 async function findAuthorizedNupsUser(E: any, email: string, requestedVenue: string) {
-  const accounts = await E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []);
-  const grants = await E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 20).catch(() => []);
-  return (accounts || []).find((account: any) => {
-    const accountMode = account.access_mode || (account.is_demo ? 'DEMO' : 'REAL');
-    if (accountMode !== 'REAL' || !ADMIN_ROLES.has(account.role)) return false;
-    if (requestedVenue && account.venue_id !== requestedVenue) return false;
-    return (grants || []).some((grant: any) =>
-      grant.mode === 'REAL'
-      && grant.nups_user_id === account.id
-      && grant.venue_id === account.venue_id
-      && ['MANAGER', 'ADMINISTRATOR', 'OWNER'].includes(grant.granted_role)
-    );
-  }) || null;
+  const grantQuery = {
+    email,
+    status: 'APPROVED',
+    mode: 'REAL',
+    ...(requestedVenue ? { venue_id: requestedVenue } : {}),
+  };
+  const grants = await E.NUPSAccessRequest.filter(grantQuery, '-created_date', 500).catch(() => []);
+
+  for (const grant of grants || []) {
+    if (
+      grant.mode !== 'REAL'
+      || !grant.nups_user_id
+      || !['MANAGER', 'ADMINISTRATOR', 'OWNER'].includes(grant.granted_role)
+      || (requestedVenue && grant.venue_id !== requestedVenue)
+    ) continue;
+
+    const account = await E.NUPSUser.get(grant.nups_user_id).catch(() => null);
+    const accountMode = account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+    if (
+      !account
+      || account.status !== 'active'
+      || String(account.platform_email || '').trim().toLowerCase() !== email
+      || accountMode !== 'REAL'
+      || !ADMIN_ROLES.has(account.role)
+      || account.venue_id !== grant.venue_id
+    ) continue;
+
+    if (grant.nups_user_id === account.id) return account;
+  }
+  return null;
 }
 
 async function findActiveVenue(E: any, venueId: string) {
