@@ -100,6 +100,11 @@ const checks = [
     assert.match(access, /completedAfterClaim/);
     assert.match(access, /releaseDecisionClaim\(base44, request_id, idempotency_key, email\)/);
     assert.match(access, /decision_claim_active:\s*false/);
+    assert.match(access, /async function updateClaimedRequest[\s\S]*?decision_claim_key:\s*idempotencyKey[\s\S]*?decision_claimed_by:\s*actorEmail/);
+    assert.match(access, /if \(!isExpiredDecisionClaim\(request\)\)[\s\S]*?Approval is still finalizing/);
+    assert.match(access, /const committedGrant = await updateClaimedRequest/);
+    assert.match(access, /const updated = await updateClaimedRequest\([\s\S]*?decision_claim_active:\s*false/);
+    assert.doesNotMatch(access, /NUPSAccessRequest\.update\(request_id,\s*\{[\s\S]{0,240}?decision_claim_active:\s*false/);
     assert.match(requestSchema, /"decision_claim_active"[\s\S]*?"default": false/);
   }],
   ["approval activates an account only after its grant commits", () => {
@@ -162,7 +167,7 @@ const checks = [
     assert.match(vipWorkflow, /candidate\.venue_id === AUTH_VENUE/);
     assert.match(vipWorkflow, /venueRecord\.venue_id \|\| venueRecord\.id/);
     for (const source of [staffOnboarding, venueTerminal, vipBills]) {
-      assert.match(source, /grant\.mode === 'REAL'/);
+      assert.match(source, /grant\.mode\s*(?:===|!==)\s*'REAL'/);
       assert.match(source, /grant\.nups_user_id === (?:manager|account)\.id/);
       assert.match(source, /accountMode.*'REAL'/s);
     }

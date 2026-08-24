@@ -138,7 +138,7 @@ async function claimDecision(base44, request, idempotencyKey, actorEmail) {
 }
 
 async function releaseDecisionClaim(base44, requestId, idempotencyKey, actorEmail) {
-  await base44.asServiceRole.entities.NUPSAccessRequest.updateMany({
+  const result = await base44.asServiceRole.entities.NUPSAccessRequest.updateMany({
     id: requestId,
     decision_claim_active: true,
     decision_claim_key: idempotencyKey,
@@ -146,6 +146,20 @@ async function releaseDecisionClaim(base44, requestId, idempotencyKey, actorEmai
   }, {
     $set: { decision_claim_active: false },
   });
+  return result?.updated === 1;
+}
+
+async function updateClaimedRequest(base44, requestId, idempotencyKey, actorEmail, patch) {
+  const result = await base44.asServiceRole.entities.NUPSAccessRequest.updateMany({
+    id: requestId,
+    decision_claim_active: true,
+    decision_claim_key: idempotencyKey,
+    decision_claimed_by: actorEmail,
+  }, {
+    $set: patch,
+  });
+  if (result?.updated !== 1) return null;
+  return base44.asServiceRole.entities.NUPSAccessRequest.get(requestId);
 }
 
 async function getDecisionReplayResponse(base44, request, decision, idempotencyKey, actorEmail) {
@@ -171,9 +185,12 @@ async function getDecisionReplayResponse(base44, request, decision, idempotencyK
         let claimHeld = true;
         try {
           await base44.asServiceRole.entities.NUPSUser.update(account.id, { status: 'active' });
-          const recovered = await base44.asServiceRole.entities.NUPSAccessRequest.update(request.id, {
-            decision_claim_active: false,
-          });
+          const recovered = await updateClaimedRequest(
+            base44, request.id, idempotencyKey, actorEmail, { decision_claim_active: false },
+          );
+          if (!recovered) {
+            return Response.json({ error: 'Approval reconciliation lost its decision claim. Retry with the same idempotency key.' }, { status: 409 });
+          }
           claimHeld = false;
           return Response.json({ success: true, idempotent_replay: true, reconciled: true, request: safeRequest(recovered) });
         } finally {
@@ -189,7 +206,13 @@ async function getDecisionReplayResponse(base44, request, decision, idempotencyK
       && request.decision_claim_key === idempotencyKey
       && normalizeEmail(request.decision_claimed_by) === actorEmail
     ) {
-      await releaseDecisionClaim(base44, request.id, idempotencyKey, actorEmail);
+      if (!isExpiredDecisionClaim(request)) {
+        return Response.json({ error: 'Approval is still finalizing. Retry safely with the same idempotency key.' }, { status: 409 });
+      }
+      const released = await releaseDecisionClaim(base44, request.id, idempotencyKey, actorEmail);
+      if (!released) {
+        return Response.json({ error: 'Approval finalization state changed. Retry safely with the same idempotency key.' }, { status: 409 });
+      }
       request = await base44.asServiceRole.entities.NUPSAccessRequest.get(request.id);
     }
   }
@@ -417,11 +440,15 @@ Deno.serve(async (req) => {
       // claimed record so the same key never appends a duplicate log entry.
       const completedAfterClaim = (r.decision_log || []).find((entry) => entry.idempotency_key === idempotency_key);
       if (completedAfterClaim) {
-        await releaseDecisionClaim(base44, request_id, idempotency_key, email);
+        const released = await releaseDecisionClaim(base44, request_id, idempotency_key, email);
+        if (!released) {
+          return Response.json({ error: 'Decision finalization state changed. Retry safely with the same idempotency key.' }, { status: 409 });
+        }
         if (completedAfterClaim.decision !== decision || normalizeEmail(completedAfterClaim.by) !== email) {
           return Response.json({ error: 'The idempotency_key was already used for a different decision or actor.' }, { status: 409 });
         }
-        return Response.json({ success: true, idempotent_replay: true, request: safeRequest(r) });
+        const replayed = await base44.asServiceRole.entities.NUPSAccessRequest.get(request_id);
+        return Response.json({ success: true, idempotent_replay: true, request: safeRequest(replayed) });
       }
 
       let claimHeld = true;
@@ -488,14 +515,20 @@ Deno.serve(async (req) => {
           }
           // Two-phase activation: the account remains non-operational until the
           // approval record and its account binding have committed durably.
-          await base44.asServiceRole.entities.NUPSAccessRequest.update(request_id, {
+          const committedGrant = await updateClaimedRequest(base44, request_id, idempotency_key, email, {
             ...patch, status: 'APPROVED', granted_role: grantedRole, nups_user_id: nupsUserId,
             decision_claim_active: true,
           });
+          if (!committedGrant) {
+            return Response.json({ error: 'Approval lost its decision claim before the grant committed.' }, { status: 409 });
+          }
           await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, { status: 'active' });
-          const updated = await base44.asServiceRole.entities.NUPSAccessRequest.update(request_id, {
-            decision_claim_active: false,
-          });
+          const updated = await updateClaimedRequest(
+            base44, request_id, idempotency_key, email, { decision_claim_active: false },
+          );
+          if (!updated) {
+            return Response.json({ error: 'Approval finalization lost its decision claim. Retry with the same idempotency key.' }, { status: 409 });
+          }
           claimHeld = false;
           return Response.json({ success: true, request: safeRequest(updated) });
         }
@@ -508,9 +541,12 @@ Deno.serve(async (req) => {
             status: decision === 'REVOKE' ? 'terminated' : 'suspended',
           });
         }
-        const updated = await base44.asServiceRole.entities.NUPSAccessRequest.update(request_id, {
+        const updated = await updateClaimedRequest(base44, request_id, idempotency_key, email, {
           ...patch, status: newStatus, granted_role: '', decision_claim_active: false,
         });
+        if (!updated) {
+          return Response.json({ error: 'Decision finalization lost its decision claim. Retry with the same idempotency key.' }, { status: 409 });
+        }
         claimHeld = false;
         return Response.json({ success: true, request: safeRequest(updated) });
       } finally {
