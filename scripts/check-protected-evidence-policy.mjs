@@ -8,6 +8,7 @@ const deny = (input) => assert.equal(protectedEvidenceDecision(input).allowed, f
 allow({ role: 'VENUE_MANAGER', actorVenueId: 'A', evidenceVenueId: 'A', classification: 'PRIVATE_TAX' });
 allow({ role: 'DOORMAN', actorVenueId: 'A', evidenceVenueId: 'A', classification: 'PRIVATE_IDENTITY' });
 allow({ role: 'SOVEREIGN', actorVenueId: 'A', evidenceVenueId: 'B', classification: 'PRIVATE_BIOMETRIC' });
+deny({ role: 'PLATFORM_ADMIN', actorVenueId: 'A', evidenceVenueId: 'B', classification: 'PRIVATE_BIOMETRIC' });
 deny({ role: 'BARTENDER', actorVenueId: 'A', evidenceVenueId: 'A', classification: 'PRIVATE_IDENTITY' });
 deny({ role: 'DOORMAN', actorVenueId: 'A', evidenceVenueId: 'A', classification: 'PRIVATE_TAX' });
 deny({ role: 'DOOR_GIRL', actorVenueId: 'A', evidenceVenueId: 'A', classification: 'PRIVATE_BIOMETRIC' });
@@ -38,7 +39,7 @@ const usesBoundedShortTtl = /let\s+expiresIn\s*=\s*120/.test(retrieval)
   && /CreateFileSignedUrl\s*\(\s*\{[^}]*expires_in:\s*expiresIn[^}]*\}\s*\)/s.test(retrieval)
   && /expires_in:\s*expiresIn/.test(retrieval)
   && /requestedTestTtl\s*<\s*5\s*\|\|\s*requestedTestTtl\s*>\s*15/.test(retrieval)
-  && /evidence\.mode\s*===\s*['"]SANDBOX['"]/.test(retrieval);
+  && /(?:evidence\.mode|evidenceMode)\s*===\s*['"]SANDBOX['"]/.test(retrieval);
 assert.ok(usesFixedShortTtl || usesBoundedShortTtl, 'Authorized retrieval must issue a short-lived signed URL, with any reduced test TTL restricted to bounded SANDBOX evidence.');
 
 assert.doesNotMatch(vipContract, /Core\.UploadFile/, 'VIP contract signing must not upload identity/biometric evidence through public-file storage.');

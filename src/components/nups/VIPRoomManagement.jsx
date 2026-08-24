@@ -390,6 +390,7 @@ export default function VIPRoomManagement({ user }) {
                   duration_minutes: sessionForm.duration_minutes,
                 }}
                 guestName={sessionForm.guest_name}
+                venueId={activeVenue?.id || activeVenue?.venue_id || null}
                 onContractSigned={() => {
                   startSession.mutate(sessionForm);
                 }}

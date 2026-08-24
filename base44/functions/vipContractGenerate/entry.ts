@@ -1,8 +1,45 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.21';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.43';
+
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+const CONTRACT_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'HOSTESS', 'SOVEREIGN']);
+const NUPS_ROLE_BY_GRANT: Record<string, string> = {
+  OWNER: 'VENUE_OWNER', ADMINISTRATOR: 'PLATFORM_ADMIN', MANAGER: 'VENUE_MANAGER',
+  ENTERTAINER: 'PERFORMER', HOSTESS: 'HOSTESS', DOORMAN: 'DOORMAN',
+  DOOR_GIRL: 'DOOR_GIRL', BARTENDER: 'BARTENDER', DJ: 'DJ', SECURITY: 'SECURITY',
+};
+
+const normalizeEmail = (value: unknown) => String(value || '').trim().toLowerCase();
+const accountMode = (account: any) => account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+
+async function resolveActiveVenue(E: any, venueRef: unknown) {
+  const ref = String(venueRef || '').trim();
+  if (!ref) return null;
+  let venue = await E.Venue.get(ref).catch(() => null);
+  if (!venue) venue = (await E.Venue.filter({ venue_id: ref }, '-created_date', 2).catch(() => []))?.[0] || null;
+  if (venue?.status !== 'active') return null;
+  return { record: venue, canonicalId: String(venue.venue_id || venue.id || '').trim() };
+}
+
+async function resolveRealGrantedIdentity(E: any, email: string, venueId: string) {
+  if (SOVEREIGN_EMAILS.has(email)) return { role: 'SOVEREIGN', venue_id: venueId, access_mode: 'REAL' };
+  const [accounts, grants] = await Promise.all([
+    E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []),
+    E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 50).catch(() => []),
+  ]);
+  for (const grant of grants || []) {
+    if (grant.venue_id !== venueId || grant.mode !== 'REAL' || !grant.nups_user_id) continue;
+    const account = (accounts || []).find((candidate: any) => candidate.id === grant.nups_user_id);
+    const expectedRole = NUPS_ROLE_BY_GRANT[grant.granted_role];
+    if (account && expectedRole && account.role === expectedRole && CONTRACT_ROLES.has(account.role) && account.venue_id === venueId && accountMode(account) === 'REAL') {
+      return account;
+    }
+  }
+  return null;
+}
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
-  const user = await base44.auth.me();
+  const user = await base44.auth.me().catch(() => null);
 
   if (!user) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
@@ -10,17 +47,14 @@ Deno.serve(async (req) => {
 
   const payload = await req.json();
   const E = base44.asServiceRole.entities;
-  const email = String(user.email || '').toLowerCase();
-  const nupsUser = (await E.NUPSUser.filter({ platform_email: email, status: 'active' }, null, 1).catch(() => []))?.[0] || null;
-  if (!nupsUser) return Response.json({ error: 'Active NUPS identity required' }, { status: 403 });
-  const global = ['PLATFORM_ADMIN','SOVEREIGN'].includes(nupsUser.role);
   const requestedVenueId = String(payload.venue_id || '').trim();
-  const authorizedVenueId = global && requestedVenueId ? requestedVenueId : String(nupsUser.venue_id || '').trim();
-  if (!authorizedVenueId) return Response.json({ error: 'Authorized venue could not be resolved' }, { status: 403 });
-  if (!global && requestedVenueId && requestedVenueId !== authorizedVenueId) return Response.json({ error: 'Cross-venue contract generation denied' }, { status: 403 });
-  const venue = (await E.Venue.filter({ venue_id: authorizedVenueId, status: 'active' }, null, 1).catch(() => []))?.[0]
-    || await E.Venue.get(authorizedVenueId).catch(() => null);
-  if (!venue || venue.status === 'inactive') return Response.json({ error: 'Authorized venue is not active' }, { status: 403 });
+  if (!requestedVenueId) return Response.json({ error: 'An active venue is required' }, { status: 400 });
+  const resolvedVenue = await resolveActiveVenue(E, requestedVenueId);
+  if (!resolvedVenue) return Response.json({ error: 'Authorized venue is not active' }, { status: 403 });
+  const email = normalizeEmail(user.email);
+  const nupsUser = await resolveRealGrantedIdentity(E, email, resolvedVenue.canonicalId);
+  if (!nupsUser) return Response.json({ error: 'Approved REAL NUPS contract authority is required for this venue' }, { status: 403 });
+  const venue = resolvedVenue.record;
   const {
     room_number,
     guest_name,

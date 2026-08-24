@@ -57,7 +57,7 @@ assert.match(backend, /accessCount >= 6 && denialCount >= 5/, 'Audit reconciliat
 assert.doesNotMatch(backend, /Deno\.env\.get\([^)]*(?:TOKEN|PASSWORD|OTP)/i, 'Backend workaround must not depend on stored test credentials.');
 
 assert.match(evidence, /requestedTestTtl < 5 \|\| requestedTestTtl > 15/, 'Test TTL must remain tightly bounded.');
-assert.match(evidence, /evidence\.mode === 'SANDBOX'/, 'Short TTL must be restricted to SANDBOX evidence.');
+assert.match(evidence, /(?:evidence\.mode|evidenceMode) === 'SANDBOX'/, 'Short TTL must be restricted to SANDBOX evidence.');
 assert.match(evidence, /evidence\.subject_entity === 'Batch17SyntheticEvidence'/, 'Short TTL must be restricted to Batch 17 synthetic evidence.');
 assert.match(evidence, /MANAGER_ROLES\.has/, 'Short TTL must require manager-class authorization.');
 assert.deepEqual(parsedRunSchema?.properties?.mode?.enum, ['SANDBOX'], 'Acceptance runs must be SANDBOX-only.');

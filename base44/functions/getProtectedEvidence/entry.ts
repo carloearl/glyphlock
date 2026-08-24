@@ -1,38 +1,51 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.39';
+import { protectedEvidenceDecision } from './protectedEvidencePolicy.js';
 
-type ProtectedEvidenceDecisionInput = {
-  role?: string;
-  actorVenueId?: string;
-  evidenceVenueId?: string;
-  classification?: string;
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+const MANAGER_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN']);
+const EVIDENCE_MODES = new Set(['REAL', 'DEMO', 'SANDBOX']);
+const NUPS_ROLE_BY_GRANT: Record<string, string> = {
+  OWNER: 'VENUE_OWNER', ADMINISTRATOR: 'PLATFORM_ADMIN', MANAGER: 'VENUE_MANAGER',
+  ENTERTAINER: 'PERFORMER', HOSTESS: 'HOSTESS', DOORMAN: 'DOORMAN',
+  DOOR_GIRL: 'DOOR_GIRL', BARTENDER: 'BARTENDER', DJ: 'DJ', SECURITY: 'SECURITY',
 };
 
-const GLOBAL_ROLES = new Set(['PLATFORM_ADMIN', 'SOVEREIGN']);
-const MANAGER_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN']);
-const DOOR_ROLES = new Set(['DOOR_GIRL', 'DOORMAN']);
+const normalizeEmail = (value: unknown) => String(value || '').trim().toLowerCase();
+const accountMode = (account: any) => account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
 
-function protectedEvidenceDecision({
-  role,
-  actorVenueId,
-  evidenceVenueId,
-  classification,
-}: ProtectedEvidenceDecisionInput) {
-  const sameVenue = Boolean(actorVenueId && evidenceVenueId && actorVenueId === evidenceVenueId);
-  if (GLOBAL_ROLES.has(role || '')) return { allowed: true, reason: 'global_role' };
-  if (MANAGER_ROLES.has(role || '') && sameVenue) return { allowed: true, reason: 'venue_manager' };
-  if (DOOR_ROLES.has(role || '') && sameVenue && classification === 'PRIVATE_IDENTITY') {
-    return { allowed: true, reason: 'door_identity_only' };
+async function resolveActiveVenue(base44: any, venueRef: unknown) {
+  const ref = String(venueRef || '').trim();
+  if (!ref) return null;
+  let venue = await base44.asServiceRole.entities.Venue.get(ref).catch(() => null);
+  if (!venue) {
+    venue = (await base44.asServiceRole.entities.Venue.filter({ venue_id: ref }, '-created_date', 2).catch(() => []))?.[0] || null;
   }
-  if (!sameVenue) return { allowed: false, reason: 'venue_mismatch' };
-  return { allowed: false, reason: 'role_or_classification_denied' };
+  if (venue?.status !== 'active') return null;
+  return { canonicalId: String(venue.venue_id || venue.id || '').trim() };
 }
 
-async function resolveNupsUser(base44, email: string) {
+async function resolveGrantedIdentity(base44: any, email: string, venueId: string, mode: string) {
+  if (SOVEREIGN_EMAILS.has(email)) {
+    return { role: 'SOVEREIGN', venue_id: venueId, access_mode: mode, sovereign: true };
+  }
   const E = base44.asServiceRole.entities;
-  const byEmail = await E.NUPSUser.filter({ platform_email: email, status: 'active' }, null, 1).catch(() => []);
-  if (byEmail?.[0]) return byEmail[0];
-  const username = email.split('@')[0].toLowerCase();
-  return (await E.NUPSUser.filter({ username, status: 'active' }, null, 1).catch(() => []))?.[0] || null;
+  const [accounts, grants] = await Promise.all([
+    E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []),
+    E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 50).catch(() => []),
+  ]);
+  for (const grant of grants || []) {
+    if (grant.venue_id !== venueId || grant.mode !== mode || !grant.nups_user_id) continue;
+    const account = (accounts || []).find((candidate: any) => candidate.id === grant.nups_user_id);
+    const expectedRole = NUPS_ROLE_BY_GRANT[grant.granted_role];
+    if (
+      account
+      && expectedRole
+      && account.role === expectedRole
+      && account.venue_id === venueId
+      && accountMode(account) === mode
+    ) return account;
+  }
+  return null;
 }
 
 Deno.serve(async (req) => {
@@ -40,8 +53,6 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me().catch(() => null);
     if (!user?.email) return Response.json({ error: 'Authentication required' }, { status: 401 });
-    const nups = await resolveNupsUser(base44, String(user.email).toLowerCase());
-    if (!nups) return Response.json({ error: 'Active NUPS identity required' }, { status: 403 });
 
     const body = await req.json();
     const evidenceId = String(body.evidence_id || '').trim();
@@ -50,7 +61,19 @@ Deno.serve(async (req) => {
     const evidence = await base44.asServiceRole.entities.ProtectedEvidence.get(evidenceId).catch(() => null);
     if (!evidence) return Response.json({ error: 'Protected evidence not found' }, { status: 404 });
 
-    const decision = protectedEvidenceDecision({ role: nups.role, actorVenueId: nups.venue_id, evidenceVenueId: evidence.venue_id, classification: evidence.classification });
+    const evidenceMode = EVIDENCE_MODES.has(evidence.mode) ? evidence.mode : 'REAL';
+    const venue = await resolveActiveVenue(base44, evidence.venue_id);
+    if (!venue) return Response.json({ error: 'Protected evidence venue is not active' }, { status: 403 });
+    const email = normalizeEmail(user.email);
+    const nups = await resolveGrantedIdentity(base44, email, venue.canonicalId, evidenceMode);
+    if (!nups) return Response.json({ error: 'An active NUPS identity with a matching approved venue and mode grant is required' }, { status: 403 });
+
+    const decision = protectedEvidenceDecision({
+      role: nups.role,
+      actorVenueId: nups.venue_id,
+      evidenceVenueId: venue.canonicalId,
+      classification: evidence.classification,
+    });
 
     if (!decision.allowed) {
       await base44.asServiceRole.entities.SystemAuditLog.create({
@@ -58,14 +81,14 @@ Deno.serve(async (req) => {
         description: `Protected evidence access denied for ${evidence.evidence_id}`,
         actor_email: user.email,
         status: 'blocked', severity: 'high',
-        metadata: { evidence_id: evidence.evidence_id, venue_id: evidence.venue_id, classification: evidence.classification, purpose, actor_role: nups.role, decision_reason: decision.reason },
+        metadata: { evidence_id: evidence.evidence_id, venue_id: venue.canonicalId, classification: evidence.classification, purpose, actor_role: nups.role, access_mode: evidenceMode, decision_reason: decision.reason },
       }).catch(() => null);
       return Response.json({ error: 'Protected evidence access denied' }, { status: 403 });
     }
 
     let expiresIn = 120;
     const requestedTestTtl = Number(body.test_ttl || 0);
-    const syntheticBatch17 = evidence.mode === 'SANDBOX'
+    const syntheticBatch17 = evidenceMode === 'SANDBOX'
       && evidence.subject_entity === 'Batch17SyntheticEvidence'
       && purpose.startsWith('batch17:');
     if (requestedTestTtl) {
@@ -82,7 +105,7 @@ Deno.serve(async (req) => {
       description: `Authorized protected evidence retrieval for ${evidence.evidence_id}`,
       actor_email: user.email,
       status: 'success', severity: 'medium',
-      metadata: { evidence_id: evidence.evidence_id, venue_id: evidence.venue_id, classification: evidence.classification, purpose, actor_role: nups.role },
+      metadata: { evidence_id: evidence.evidence_id, venue_id: venue.canonicalId, classification: evidence.classification, purpose, actor_role: nups.role, access_mode: evidenceMode },
     }).catch(() => null);
     return Response.json({ success: true, signed_url, expires_in: expiresIn, evidence: { evidence_id: evidence.evidence_id, artifact_type: evidence.artifact_type, classification: evidence.classification } });
   } catch (error) {

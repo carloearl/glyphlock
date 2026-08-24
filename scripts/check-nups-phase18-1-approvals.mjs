@@ -16,6 +16,7 @@ const owner = fs.readFileSync("src/pages/NUPSOwner.jsx", "utf8");
 const auth = fs.readFileSync("src/lib/AuthContext.jsx", "utf8");
 const guard = fs.readFileSync("src/components/nups/RoleClassGuard.jsx", "utf8");
 const operationalGuard = fs.readFileSync("src/components/nups/NUPSRouteGuard.jsx", "utf8");
+const kioskGuard = fs.readFileSync("src/components/nups/KioskSessionGuard.jsx", "utf8");
 const client = fs.readFileSync("src/lib/nups/accessRequestClient.js", "utf8");
 const roleSelector = fs.readFileSync("src/components/nups/kiosk/AccessRoleSelector.jsx", "utf8");
 const clockIn = fs.readFileSync("base44/functions/nupsClockInV2/entry.ts", "utf8");
@@ -23,6 +24,13 @@ const vipWorkflow = fs.readFileSync("base44/functions/vipWorkflow/entry.ts", "ut
 const staffOnboarding = fs.readFileSync("base44/functions/manageStaffOnboarding/entry.ts", "utf8");
 const venueTerminal = fs.readFileSync("base44/functions/manageVenueTerminal/entry.ts", "utf8");
 const vipBills = fs.readFileSync("base44/functions/registerVIPBills/entry.ts", "utf8");
+const getEvidence = fs.readFileSync("base44/functions/getProtectedEvidence/entry.ts", "utf8");
+const registerEvidence = fs.readFileSync("base44/functions/registerProtectedEvidence/entry.ts", "utf8");
+const captureEvidence = fs.readFileSync("base44/functions/captureVerificationMedia/entry.ts", "utf8");
+const vipContractGenerate = fs.readFileSync("base44/functions/vipContractGenerate/entry.ts", "utf8");
+const quickBooksExport = fs.readFileSync("base44/functions/exportQuickBooksIIF/entry.ts", "utf8");
+const closePOSBatch = fs.readFileSync("base44/functions/closePOSBatch/entry.ts", "utf8");
+const vipContractFlow = fs.readFileSync("src/components/nups/VIPContractFlow.jsx", "utf8");
 const manifest = JSON.parse(fs.readFileSync(".base44/ci-checks.json", "utf8"));
 
 const scopedStaffRequest = {
@@ -97,19 +105,29 @@ const checks = [
     const activeWrite = access.indexOf("NUPSUser.update(nupsUserId, { status: 'active' }");
     assert.ok(suspendedCreate > -1 && approvedWrite > suspendedCreate && activeWrite > approvedWrite);
     assert.match(access, /prior approval did not finish activating its bound account/);
+    assert.match(access, /reconciled: true/);
+    assert.match(access, /account\?\.status === 'suspended'/);
   }],
   ["sign-in no longer bootstraps privileged access", () => {
     assert.doesNotMatch(auth, /ensurePrivilegedAccess/);
     assert.equal(fs.existsSync("src/lib/nups/privilegedAccess.js"), false);
   }],
   ["route guard requires server-verified NUPS access", () => {
-    assert.match(guard, /functions\.invoke\("nupsAccessControl", \{ action: "checkAccess" \}\)/);
+    assert.match(guard, /functions\.invoke\("nupsAccessControl", \{[\s\S]*?action: "checkAccess",[\s\S]*?venue_id: venueId,[\s\S]*?mode: "REAL"/);
     assert.doesNotMatch(guard, /entities\.NUPSUser\.filter/);
     assert.doesNotMatch(guard, /resolveRoleClass\(\{ user: u/);
     assert.match(guard, /Authorization infrastructure failures fail closed/);
-    assert.match(operationalGuard, /functions\.invoke\("nupsAccessControl", \{ action: "checkAccess" \}\)/);
+    assert.match(guard, /GRANT_TO_NUPS_ROLE\[grantedRole\]/);
+    assert.match(operationalGuard, /functions\.invoke\("nupsAccessControl", \{[\s\S]*?action: "checkAccess",[\s\S]*?venue_id: venueId,[\s\S]*?mode: "REAL"/);
     assert.match(operationalGuard, /access\.mode !== "REAL"/);
     assert.doesNotMatch(operationalGuard, /hasOwnerPreview|user\.role === "admin"|entities\.NUPSUser\.filter/);
+    assert.match(access, /if \(requestedVenueId && candidate\.venue_id !== requestedVenueId\) continue/);
+    assert.match(access, /if \(requestedMode && candidate\.mode !== requestedMode\) continue/);
+    assert.doesNotMatch(kioskGuard, /hasOwnerPreview/);
+    assert.match(kioskGuard, /venue_id: venueId/);
+    assert.match(kioskGuard, /mode: "REAL"/);
+    assert.match(kioskGuard, /access\.mode === "REAL" && roleAllowed/);
+    assert.match(kioskGuard, /roles\.includes\(resolvedRole\)/);
   }],
   ["mobile submission includes the active venue", () => {
     assert.match(client, /venue_id: venueId/);
@@ -138,6 +156,30 @@ const checks = [
     }
     assert.doesNotMatch(staffOnboarding, /caller\.role === 'admin'/);
     assert.doesNotMatch(venueTerminal, /user\.role === 'admin'/);
+  }],
+  ["protected evidence requires an exact active account and approved grant tuple", () => {
+    for (const source of [getEvidence, registerEvidence, captureEvidence]) {
+      assert.match(source, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED' \}/);
+      assert.match(source, /grant\.venue_id !== venueId \|\| grant\.mode !== mode \|\| !grant\.nups_user_id/);
+      assert.match(source, /candidate\.id === grant\.nups_user_id/);
+      assert.match(source, /accountMode\(account\) === mode/);
+      assert.doesNotMatch(source, /email\.split\('@'\)/);
+    }
+    assert.match(registerEvidence, /if \(!EVIDENCE_MODES\.has\(mode\)\)/);
+    assert.doesNotMatch(registerEvidence, /body\.mode[\s\S]{0,120}: 'REAL'/);
+  }],
+  ["contract, accounting export, and batch close require exact REAL grants", () => {
+    for (const source of [vipContractGenerate, quickBooksExport, closePOSBatch]) {
+      assert.match(source, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED' \}/);
+      assert.match(source, /grant\.venue_id !== venueId \|\| grant\.mode !== 'REAL' \|\| !grant\.nups_user_id/);
+      assert.match(source, /candidate\.id === grant\.nups_user_id/);
+      assert.match(source, /accountMode\(account\) === 'REAL'/);
+      assert.doesNotMatch(source, /user\.role === 'admin'|new Set\(\['admin'/);
+    }
+    assert.match(vipContractGenerate, /CONTRACT_ROLES\.has\(account\.role\)/);
+    assert.match(vipContractFlow, /venue_id: venueId/);
+    assert.match(quickBooksExport, /venueEntertainerIds\.has\(p\.entertainer_id\)/);
+    assert.match(quickBooksExport, /Entertainer\.filter\(venueFilter/);
   }],
   ["approval status filters and owner route exist", () => {
     for (const label of ["PENDING", "APPROVED", "HISTORY", "ALL"]) assert.match(ui, new RegExp(label));

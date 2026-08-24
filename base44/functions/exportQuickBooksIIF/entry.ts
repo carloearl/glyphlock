@@ -17,36 +17,67 @@
  *   • GlyphBucks face value is liability, never revenue
  *   • Payouts are expense disbursements, never negative revenue
  */
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.43';
 
-const ALLOWED_ROLES = new Set(['admin', 'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER']);
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+const ALLOWED_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN']);
+const NUPS_ROLE_BY_GRANT: Record<string, string> = {
+  OWNER: 'VENUE_OWNER', ADMINISTRATOR: 'PLATFORM_ADMIN', MANAGER: 'VENUE_MANAGER',
+};
+
+const normalizeEmail = (value: unknown) => String(value || '').trim().toLowerCase();
+const accountMode = (account: any) => account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+
+async function resolveActiveVenue(E: any, venueRef: unknown) {
+  const ref = String(venueRef || '').trim();
+  if (!ref) return null;
+  let venue = await E.Venue.get(ref).catch(() => null);
+  if (!venue) venue = (await E.Venue.filter({ venue_id: ref }, '-created_date', 2).catch(() => []))?.[0] || null;
+  if (venue?.status !== 'active') return null;
+  return String(venue.venue_id || venue.id || '').trim();
+}
+
+async function resolveRealManager(E: any, email: string, venueId: string) {
+  if (SOVEREIGN_EMAILS.has(email)) return { role: 'SOVEREIGN', venue_id: venueId };
+  const [accounts, grants] = await Promise.all([
+    E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []),
+    E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 50).catch(() => []),
+  ]);
+  for (const grant of grants || []) {
+    if (grant.venue_id !== venueId || grant.mode !== 'REAL' || !grant.nups_user_id) continue;
+    const account = (accounts || []).find((candidate: any) => candidate.id === grant.nups_user_id);
+    const expectedRole = NUPS_ROLE_BY_GRANT[grant.granted_role];
+    if (account && expectedRole && account.role === expectedRole && ALLOWED_ROLES.has(account.role) && account.venue_id === venueId && accountMode(account) === 'REAL') return account;
+  }
+  return null;
+}
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
-    if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const role = user.role || user.nups_role;
-    if (!ALLOWED_ROLES.has(role)) {
-      return Response.json({ error: 'Forbidden — manager+ only' }, { status: 403 });
-    }
+    const user = await base44.auth.me().catch(() => null);
+    if (!user?.email) return Response.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
     const { start_date, end_date, venue_id, format = 'iif' } = body || {};
 
-    if (!start_date || !end_date) {
-      return Response.json({ error: 'start_date and end_date required (YYYY-MM-DD)' }, { status: 400 });
+    if (!start_date || !end_date || !venue_id) {
+      return Response.json({ error: 'start_date, end_date, and venue_id are required' }, { status: 400 });
     }
 
-    const venueFilter = venue_id ? { venue_id } : {};
     const sr = base44.asServiceRole;
+    const canonicalVenueId = await resolveActiveVenue(sr.entities, venue_id);
+    if (!canonicalVenueId) return Response.json({ error: 'An active venue is required' }, { status: 403 });
+    const manager = await resolveRealManager(sr.entities, normalizeEmail(user.email), canonicalVenueId);
+    if (!manager) return Response.json({ error: 'Approved REAL manager authorization is required for this venue' }, { status: 403 });
+    const venueFilter = { venue_id };
 
-    const [settlements, driverPayouts, payrollRecords, glyphBucksOrders] = await Promise.all([
+    const [settlements, driverPayouts, payrollRecords, glyphBucksOrders, venueEntertainers] = await Promise.all([
       sr.entities.DailySettlement.filter(venueFilter, '-business_date', 2000),
       sr.entities.DriverPayout.filter(venueFilter, '-payout_date', 5000),
       sr.entities.PayrollRecord.list('-pay_period_end', 2000),
       sr.entities.GlyphBucksOrder.filter(venueFilter, '-created_date', 5000),
+      sr.entities.Entertainer.filter(venueFilter, '-created_date', 5000),
     ]);
 
     const inRange = (d) => {
@@ -59,7 +90,12 @@ Deno.serve(async (req) => {
     const periodDrivers = driverPayouts.filter(
       (d) => inRange(d.payout_date) && (d.payout_status === 'PROCESSED' || d.status === 'paid')
     );
-    const periodPayroll = payrollRecords.filter((p) => inRange(p.pay_period_end) && p.status === 'paid');
+    // PayrollRecord has no venue_id, so scope it through the linked Entertainer.
+    // Unlinked legacy payroll is excluded instead of leaking across venues.
+    const venueEntertainerIds = new Set((venueEntertainers || []).map((entertainer) => entertainer.id));
+    const periodPayroll = payrollRecords.filter((p) =>
+      venueEntertainerIds.has(p.entertainer_id) && inRange(p.pay_period_end) && p.status === 'paid'
+    );
     const periodGB = glyphBucksOrders.filter(
       (g) => inRange(g.created_date) && (g.status === 'signed' || g.status === 'printed' || g.status === 'archived')
     );

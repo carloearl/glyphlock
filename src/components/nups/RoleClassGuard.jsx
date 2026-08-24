@@ -20,6 +20,14 @@ import { Button } from "@/components/ui/button";
 import { base44 } from "@/api/base44Client";
 import { isOwnerEmail } from "@/lib/nups/ownerEmails";
 import { resolveRoleClass, homeForRoleClass, ROLE_CLASS } from "@/lib/nups/roleClass";
+import { getActiveVenueId, saveActiveVenue } from "@/hooks/useActiveVenue";
+
+const GRANT_TO_NUPS_ROLE = {
+  OWNER: "VENUE_OWNER",
+  ADMINISTRATOR: "PLATFORM_ADMIN",
+  MANAGER: "VENUE_MANAGER",
+  ENTERTAINER: "PERFORMER",
+};
 
 export default function RoleClassGuard({ allow = [], children }) {
   const navigate = useNavigate();
@@ -72,7 +80,21 @@ export default function RoleClassGuard({ allow = [], children }) {
         }
 
         try {
-          const access = await base44.functions.invoke("nupsAccessControl", { action: "checkAccess" });
+          let venueId = getActiveVenueId();
+          if (!venueId) {
+            const venues = await base44.entities.Venue.filter({ status: "active" }, "-created_date", 1);
+            if (!venues?.[0]) {
+              if (!cancelled) setStatus("denied");
+              return;
+            }
+            saveActiveVenue(venues[0]);
+            venueId = venues[0].id;
+          }
+          const access = await base44.functions.invoke("nupsAccessControl", {
+            action: "checkAccess",
+            venue_id: venueId,
+            mode: "REAL",
+          });
           if (cancelled) return;
           if (access.data?.authorized !== true) {
             setRoleClass(ROLE_CLASS.STAFF);
@@ -80,9 +102,10 @@ export default function RoleClassGuard({ allow = [], children }) {
             return;
           }
           const grantedRole = access.data?.granted_role;
+          const nupsRole = GRANT_TO_NUPS_ROLE[grantedRole] || grantedRole;
           const cls = ["OWNER", "ADMINISTRATOR"].includes(grantedRole)
             ? ROLE_CLASS.ADMIN
-            : resolveRoleClass({ nupsUser: { role: grantedRole } });
+            : resolveRoleClass({ nupsUser: { role: nupsRole } });
           setRoleClass(cls);
 
           // ADMIN is a superset — always granted.

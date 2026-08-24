@@ -9,7 +9,7 @@ import { FileText, Copy, ExternalLink, CheckCircle2, Loader2, Clock, AlertTriang
 import { VIP_ROOM_SERVICE_AGREEMENT } from "@/constants/contractText";
 import VIPGlyphBucksAutoMint from "@/components/nups/VIPGlyphBucksAutoMint";
 
-export default function VIPContractFlow({ room, guestName, onContractSigned, onClose }) {
+export default function VIPContractFlow({ room, guestName, venueId, onContractSigned, onClose }) {
   const [step, setStep] = useState("idle"); // idle | review | generating | ready | signed | error
   const [contractUrl, setContractUrl] = useState("");
   const [expiresAt, setExpiresAt] = useState("");
@@ -46,6 +46,7 @@ export default function VIPContractFlow({ room, guestName, onContractSigned, onC
       const res = await base44.functions.invoke("vipContractGenerate", {
         guest_name: guestName,
         room_number: room.room_number,
+        venue_id: venueId,
         duration_minutes: room.duration_minutes || 60,
         rate_per_hour: room.rate_per_hour || 300,
       });

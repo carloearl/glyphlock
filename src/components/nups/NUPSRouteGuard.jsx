@@ -19,6 +19,7 @@ import { base44 } from "@/api/base44Client";
 import { Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { writeVerdict } from "@/lib/nups/routeGuardCache";
+import { getActiveVenueId, saveActiveVenue } from "@/hooks/useActiveVenue";
 
 // All valid operational roles — public GlyphLock users have NONE of these
 const ALL_OPERATIONAL_ROLES = [
@@ -56,7 +57,21 @@ export default function NUPSRouteGuard({ children, requiredRoles = [], allowAdmi
 
     (async () => {
       try {
-        const res = await base44.functions.invoke("nupsAccessControl", { action: "checkAccess" });
+        let venueId = getActiveVenueId();
+        if (!venueId) {
+          const venues = await base44.entities.Venue.filter({ status: "active" }, "-created_date", 1);
+          if (!venues?.[0]) {
+            if (!cancelled) setStatus("denied");
+            return;
+          }
+          saveActiveVenue(venues[0]);
+          venueId = venues[0].id;
+        }
+        const res = await base44.functions.invoke("nupsAccessControl", {
+          action: "checkAccess",
+          venue_id: venueId,
+          mode: "REAL",
+        });
         const access = res.data || {};
         if (cancelled) return;
         if (access.authorized !== true || access.mode !== "REAL") {

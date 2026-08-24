@@ -2,8 +2,16 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { Loader2, ShieldX } from "lucide-react";
-import { hasOwnerPreview } from "@/lib/nups/previewBypass";
 import { isOwnerEmail } from "@/lib/nups/ownerEmails";
+import { getActiveVenueId, saveActiveVenue } from "@/hooks/useActiveVenue";
+
+const GRANT_TO_NUPS_ROLE = {
+  OWNER: "VENUE_OWNER",
+  ADMINISTRATOR: "PLATFORM_ADMIN",
+  MANAGER: "VENUE_MANAGER",
+  ENTERTAINER: "PERFORMER",
+};
+const ADMIN_ROLES = new Set(["VENUE_OWNER", "PLATFORM_ADMIN", "SOVEREIGN"]);
 
 // DACO-NUPS-RBAC-CORRECTION-20260717 §6 — active-session role guard.
 // Validates the server-issued kiosk session (signature, expiry, live shift,
@@ -19,8 +27,6 @@ export default function KioskSessionGuard({ roles = [], children }) {
   useEffect(() => {
     let alive = true;
     (async () => {
-      // Owner PIN URL bypass (?pin=90210) — authorized visual-access preview.
-      if (hasOwnerPreview()) { if (alive) setState("ok"); return; }
       const token = sessionStorage.getItem("nups_kiosk_session");
       if (token) {
         try {
@@ -39,8 +45,28 @@ export default function KioskSessionGuard({ roles = [], children }) {
           const me = await base44.auth.me();
           // Carlo's owner emails bypass the back-office grant check.
           if (isOwnerEmail(me?.email)) { if (alive) setState("ok"); return; }
-          const res = await base44.functions.invoke("nupsAccessControl", { action: "checkAccess" });
-          if (res.data?.authorized) { if (alive) setState("ok"); return; }
+          let venueId = getActiveVenueId();
+          if (!venueId) {
+            const venues = await base44.entities.Venue.filter({ status: "active" }, "-created_date", 1);
+            if (venues?.[0]) {
+              saveActiveVenue(venues[0]);
+              venueId = venues[0].id;
+            }
+          }
+          if (venueId) {
+            const res = await base44.functions.invoke("nupsAccessControl", {
+              action: "checkAccess",
+              venue_id: venueId,
+              mode: "REAL",
+            });
+            const access = res.data || {};
+            const resolvedRole = GRANT_TO_NUPS_ROLE[access.granted_role] || access.granted_role;
+            const roleAllowed = ADMIN_ROLES.has(resolvedRole) || roles.includes(resolvedRole);
+            if (access.authorized === true && access.mode === "REAL" && roleAllowed) {
+              if (alive) setState("ok");
+              return;
+            }
+          }
         }
       } catch { /* denied */ }
       if (alive) {

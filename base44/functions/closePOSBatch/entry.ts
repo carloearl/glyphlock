@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.43';
 
 /**
  * SECURE POS BATCH CLOSE
@@ -6,14 +6,45 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.23';
  * Role: PLATFORM_ADMIN | VENUE_OWNER | VENUE_MANAGER required.
  */
 
-const ALLOWED_ROLES = ['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER'];
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+const ALLOWED_ROLES = new Set(['PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER', 'SOVEREIGN']);
+const NUPS_ROLE_BY_GRANT: Record<string, string> = {
+  OWNER: 'VENUE_OWNER', ADMINISTRATOR: 'PLATFORM_ADMIN', MANAGER: 'VENUE_MANAGER',
+};
+
+const normalizeEmail = (value: unknown) => String(value || '').trim().toLowerCase();
+const accountMode = (account: any) => account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+
+async function resolveActiveVenue(E: any, venueRef: unknown) {
+  const ref = String(venueRef || '').trim();
+  if (!ref) return null;
+  let venue = await E.Venue.get(ref).catch(() => null);
+  if (!venue) venue = (await E.Venue.filter({ venue_id: ref }, '-created_date', 2).catch(() => []))?.[0] || null;
+  if (venue?.status !== 'active') return null;
+  return String(venue.venue_id || venue.id || '').trim();
+}
+
+async function resolveRealManager(E: any, email: string, venueId: string) {
+  if (SOVEREIGN_EMAILS.has(email)) return { role: 'SOVEREIGN', venue_id: venueId };
+  const [accounts, grants] = await Promise.all([
+    E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []),
+    E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 50).catch(() => []),
+  ]);
+  for (const grant of grants || []) {
+    if (grant.venue_id !== venueId || grant.mode !== 'REAL' || !grant.nups_user_id) continue;
+    const account = (accounts || []).find((candidate: any) => candidate.id === grant.nups_user_id);
+    const expectedRole = NUPS_ROLE_BY_GRANT[grant.granted_role];
+    if (account && expectedRole && account.role === expectedRole && ALLOWED_ROLES.has(account.role) && account.venue_id === venueId && accountMode(account) === 'REAL') return account;
+  }
+  return null;
+}
 
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const user = await base44.auth.me();
+    const user = await base44.auth.me().catch(() => null);
 
-    if (!user) {
+    if (!user?.email) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -23,17 +54,9 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'batch_id is required' }, { status: 400 });
     }
 
-    // Role check
-    const nupsUsers = await base44.asServiceRole.entities.NUPSUser.filter({ email: user.email });
-    const nupsUser = nupsUsers[0];
-    const userRole = nupsUser?.role || (user.role === 'admin' ? 'PLATFORM_ADMIN' : null);
-
-    if (!ALLOWED_ROLES.includes(userRole)) {
-      return Response.json({ error: 'Forbidden: insufficient role' }, { status: 403 });
-    }
-
     // Fetch batch
-    const allBatches = await base44.asServiceRole.entities.POSBatch.list('-created_date', 50);
+    const E = base44.asServiceRole.entities;
+    const allBatches = await E.POSBatch.list('-created_date', 50);
     const batch = allBatches.find(b => b.batch_id === batch_id || b.id === batch_id);
 
     if (!batch) {
@@ -44,13 +67,14 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Batch already closed' }, { status: 409 });
     }
 
-    // Venue scope check
-    if (userRole !== 'PLATFORM_ADMIN' && nupsUser?.venue_id && batch.venue_id && nupsUser.venue_id !== batch.venue_id) {
-      return Response.json({ error: 'Forbidden: venue mismatch' }, { status: 403 });
-    }
+    const canonicalVenueId = await resolveActiveVenue(E, batch.venue_id);
+    if (!canonicalVenueId) return Response.json({ error: 'Batch venue is not active' }, { status: 403 });
+    const nupsUser = await resolveRealManager(E, normalizeEmail(user.email), canonicalVenueId);
+    if (!nupsUser) return Response.json({ error: 'Approved REAL manager authorization is required for this batch venue' }, { status: 403 });
+    const userRole = nupsUser.role;
 
     // Calculate batch totals from real transactions
-    const allTxns = await base44.asServiceRole.entities.POSTransaction.list('-created_date', 500);
+    const allTxns = await E.POSTransaction.list('-created_date', 500);
     const batchTxns = allTxns.filter(t => t.batch_id === batch_id || t.batch_id === batch.id);
     // DACO-20260613-DOOR-RBAC — exclude funds-off validation records from booked totals.
     // `!== true` preserves legacy rows (undefined/null/false → included).
@@ -77,7 +101,7 @@ Deno.serve(async (req) => {
       transaction_count: realTxns.length,
     };
 
-    await base44.asServiceRole.entities.POSBatch.update(batch.id, {
+    await E.POSBatch.update(batch.id, {
       status: 'closed',
       closing_cash: closingCashNum,
       end_time: new Date().toISOString(),
@@ -88,7 +112,7 @@ Deno.serve(async (req) => {
     });
 
     // Audit log
-    await base44.asServiceRole.entities.SystemAuditLog.create({
+    await E.SystemAuditLog.create({
       event_type: 'POS_BATCH_CLOSED',
       description: `POSBatch ${batch_id} closed by ${user.email}. Total Sales: $${totalSales.toFixed(2)}. Discrepancy: $${discrepancy.toFixed(2)}.`,
       actor_email: user.email,
@@ -99,7 +123,7 @@ Deno.serve(async (req) => {
     });
 
     // Append-only differential audit trail (ActivityLog) — feeds the Accounting Diff panel
-    await base44.asServiceRole.entities.ActivityLog.create({
+    await E.ActivityLog.create({
       timestamp: new Date().toISOString(),
       user_email: user.email,
       user_role: userRole,

@@ -82,14 +82,18 @@ function accountMode(account) {
   return account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
 }
 
-function accountMatchesGrant(account, grant, email, requireReal = false) {
+function accountIdentityMatchesGrant(account, grant, email, requireReal = false) {
   return Boolean(
-    account?.status === 'active'
+    account
     && normalizeEmail(account.platform_email) === normalizeEmail(email)
     && account.venue_id === grant.venue_id
     && accountMode(account) === grant.mode
     && (!requireReal || (grant.mode === 'REAL' && accountMode(account) === 'REAL'))
   );
+}
+
+function accountMatchesGrant(account, grant, email, requireReal = false) {
+  return account?.status === 'active' && accountIdentityMatchesGrant(account, grant, email, requireReal);
 }
 
 function isExpiredDecisionClaim(request) {
@@ -155,6 +159,29 @@ async function getDecisionReplayResponse(base44, request, decision, idempotencyK
       ? await base44.asServiceRole.entities.NUPSUser.get(request.nups_user_id).catch(() => null)
       : null;
     if (!accountMatchesGrant(account, request, request.email)) {
+      if (
+        request.status === 'APPROVED'
+        && account?.status === 'suspended'
+        && accountIdentityMatchesGrant(account, request, request.email)
+      ) {
+        const claimed = await claimDecision(base44, request, idempotencyKey, actorEmail);
+        if (!claimed) {
+          return Response.json({ error: 'Approval reconciliation is already processing. Retry with the same idempotency key.' }, { status: 409 });
+        }
+        let claimHeld = true;
+        try {
+          await base44.asServiceRole.entities.NUPSUser.update(account.id, { status: 'active' });
+          const recovered = await base44.asServiceRole.entities.NUPSAccessRequest.update(request.id, {
+            decision_claim_active: false,
+          });
+          claimHeld = false;
+          return Response.json({ success: true, idempotent_replay: true, reconciled: true, request: safeRequest(recovered) });
+        } finally {
+          if (claimHeld) {
+            await releaseDecisionClaim(base44, request.id, idempotencyKey, actorEmail).catch(() => null);
+          }
+        }
+      }
       return Response.json({ error: 'The prior approval did not finish activating its bound account. Owner reconciliation is required.' }, { status: 409 });
     }
   }
@@ -266,26 +293,33 @@ Deno.serve(async (req) => {
 
     // ─── CHECK BACK-OFFICE ACCESS (§6–7) ────────────────────────────────────
     if (action === 'checkAccess') {
+      const requestedMode = ['REAL', 'TEST', 'DEMO', 'SANDBOX'].includes(body.mode) ? body.mode : null;
+      let requestedVenueId = String(body.venue_id || '').trim() || null;
+      if (requestedVenueId) {
+        const requestedVenue = await getActiveVenue(base44, requestedVenueId);
+        if (!requestedVenue) return Response.json({ authorized: false, reason: 'The requested venue is not active.' });
+        requestedVenueId = canonicalVenueId(requestedVenue);
+      }
       // DACO-NUPS-RBAC-CORRECTION-20260717 §5 — no implicit platform-admin ownership.
       // Back office requires Carlo's protected Owner identity or an explicit APPROVED grant.
       if (SOVEREIGN_EMAILS.includes(email)) {
-        return Response.json({ authorized: true, granted_role: 'OWNER', decision_tier: 'SOVEREIGN', mode: 'REAL', venue_id: null, destination: '/NUPSAdminPortal', full_name: user.full_name, actor_email: email });
+        return Response.json({ authorized: true, granted_role: 'OWNER', decision_tier: 'SOVEREIGN', mode: requestedMode || 'REAL', venue_id: requestedVenueId, destination: '/NUPSAdminPortal', full_name: user.full_name, actor_email: email });
       }
-      const authority = (await getDecisionAuthorities(base44, email))[0];
-      if (authority) {
-        return Response.json({
-          authorized: true,
-          granted_role: authority.tier,
-          decision_tier: authority.tier,
-          mode: authority.mode,
-          venue_id: authority.venue_id,
-          destination: '/NUPSAdminPortal',
-          full_name: user.full_name,
-          actor_email: email,
-        });
+      const mine = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 50);
+      let grant = null;
+      let nu = null;
+      for (const candidate of (mine || [])) {
+        if (requestedVenueId && candidate.venue_id !== requestedVenueId) continue;
+        if (requestedMode && candidate.mode !== requestedMode) continue;
+        if (['ADMINISTRATOR', 'OWNER'].includes(candidate.granted_role) && candidate.mode !== 'REAL') continue;
+        if (!candidate.nups_user_id) continue;
+        const account = await base44.asServiceRole.entities.NUPSUser.get(candidate.nups_user_id).catch(() => null);
+        if (accountMatchesGrant(account, candidate, email)) {
+          grant = candidate;
+          nu = account;
+          break;
+        }
       }
-      const mine = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 5);
-      const grant = (mine || [])[0];
       if (!grant) {
         const pending = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email }, '-created_date', 1);
         const p = (pending || [])[0];
@@ -294,11 +328,7 @@ Deno.serve(async (req) => {
           reason: p ? `Access request status: ${p.status}` : 'No approved owner/administrator access for this account.',
         });
       }
-      // Verify the linked NUPS account is still active (revocation takes effect immediately).
-      if (!grant.nups_user_id) {
-        return Response.json({ authorized: false, reason: 'Approved access is missing its linked NUPS account.' });
-      }
-      const nu = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
+      // Recheck the selected tuple before returning it to a route guard.
       if (!accountMatchesGrant(nu, grant, email)) {
         return Response.json({ authorized: false, reason: 'Account has been suspended, revoked, or is not bound to this approval.' });
       }

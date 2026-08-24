@@ -80,7 +80,7 @@ const usesBoundedShortTtl = /let\s+expiresIn\s*=\s*120/.test(protectedRetrieval)
   && /CreateFileSignedUrl\s*\(\s*\{[^}]*expires_in:\s*expiresIn[^}]*\}\s*\)/s.test(protectedRetrieval)
   && /expires_in:\s*expiresIn/.test(protectedRetrieval)
   && /requestedTestTtl\s*<\s*5\s*\|\|\s*requestedTestTtl\s*>\s*15/.test(protectedRetrieval)
-  && /evidence\.mode\s*===\s*['"]SANDBOX['"]/.test(protectedRetrieval);
+  && /(?:evidence\.mode|evidenceMode)\s*===\s*['"]SANDBOX['"]/.test(protectedRetrieval);
 assert.ok(
   usesFixedShortTtl || usesBoundedShortTtl,
   'Protected-evidence retrieval must default to 120 seconds, with any reduced test TTL bounded to SANDBOX evidence.',
