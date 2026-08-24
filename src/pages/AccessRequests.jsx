@@ -15,8 +15,8 @@ const STATUS_COLORS = {
 
 // DACO-NUPS-ROLE-VIP-BUILD-20260717 §5 — Owner approval console.
 // Route is ADMIN-guarded; every action is re-verified server-side.
-// Decision authority (directive 2026-08-21): sovereign owners plus approved
-// OWNER/ADMINISTRATOR grants — self-approval permitted for owner/admin.
+// Decision authority is re-verified server-side. Self-approval is forbidden,
+// and administrators cannot grant Owner access.
 
 const STAFF_ROLES = ["ENTERTAINER", "HOSTESS", "DOORMAN", "DOOR_GIRL", "BARTENDER", "DJ", "SECURITY", "MANAGER"];
 
@@ -25,11 +25,20 @@ export default function AccessRequests() {
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState("");
   const [canDecide, setCanDecide] = useState(false);
+  const [actor, setActor] = useState({ email: "", role: "" });
+  const [statusFilter, setStatusFilter] = useState("PENDING");
 
   useEffect(() => {
     base44.functions.invoke("nupsAccessControl", { action: "checkAccess" })
-      .then((res) => setCanDecide(res.data?.authorized === true && ["OWNER", "ADMINISTRATOR"].includes(res.data?.granted_role)))
-      .catch(() => setCanDecide(false));
+      .then((res) => {
+        const authorized = res.data?.authorized === true && ["OWNER", "ADMINISTRATOR"].includes(res.data?.granted_role);
+        setCanDecide(authorized);
+        setActor({ email: String(res.data?.actor_email || "").toLowerCase(), role: res.data?.granted_role || "" });
+      })
+      .catch(() => {
+        setCanDecide(false);
+        setActor({ email: "", role: "" });
+      });
   }, []);
 
   const load = useCallback(async () => {
@@ -71,7 +80,7 @@ export default function AccessRequests() {
         <ShieldCheck className="w-7 h-7 text-violet-400" />
         <div>
           <h1 className="text-xl font-bold">NUPS Access Requests</h1>
-          <p className="text-sm text-slate-500">Approval authority: owners and administrators — including their own requests.</p>
+          <p className="text-sm text-slate-400">Mobile approval center · self-approval blocked · only owners can grant Owner access.</p>
         </div>
       </header>
 
@@ -80,8 +89,21 @@ export default function AccessRequests() {
       {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
       {!error && requests.length === 0 && <p className="text-slate-500">No access requests.</p>}
 
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1" role="group" aria-label="Request status filter">
+        {["PENDING", "APPROVED", "HISTORY", "ALL"].map((value) => (
+          <Button key={value} size="sm" onClick={() => setStatusFilter(value)} variant={statusFilter === value ? "default" : "outline"} className="min-h-[44px] shrink-0">
+            {value === "PENDING" ? `Pending (${requests.filter((r) => ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status)).length})` : value}
+          </Button>
+        ))}
+      </div>
+
       <div className="space-y-3 max-w-3xl">
-        {requests.map((r) => (
+        {requests.filter((r) => {
+          if (statusFilter === "ALL") return true;
+          if (statusFilter === "PENDING") return ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status);
+          if (statusFilter === "APPROVED") return r.status === "APPROVED";
+          return ["REJECTED", "REVOKED"].includes(r.status);
+        }).map((r) => (
           <div key={r.id} className="bg-slate-900 border border-slate-800 rounded-xl p-4">
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="font-semibold">{r.full_legal_name}</span>
@@ -99,7 +121,7 @@ export default function AccessRequests() {
               {r.decision_note && <> · "{r.decision_note}"</>}
             </p>
             <div className="flex flex-wrap gap-2 mt-3">
-              {canDecide && ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status) && (
+              {canDecide && String(r.email || "").toLowerCase() !== actor.email && ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION", "SUSPENDED"].includes(r.status) && (
                 <>
                   {r.requested_role === "ENTERTAINER" && <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ENTERTAINER")} className="bg-pink-700 hover:bg-pink-600 min-h-[44px]">Approve as Entertainer</Button>}
                   {STAFF_ROLES.includes(r.requested_role) && r.requested_role !== "ENTERTAINER" && (
@@ -108,19 +130,20 @@ export default function AccessRequests() {
                     </Button>
                   )}
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_ADMIN")} className="bg-emerald-700 hover:bg-emerald-600 min-h-[44px]">Approve as Administrator</Button>
-                  <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_OWNER")} className="bg-violet-700 hover:bg-violet-600 min-h-[44px]">Approve as Owner</Button>
+                  {actor.role === "OWNER" && <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "APPROVE_OWNER")} className="bg-violet-700 hover:bg-violet-600 min-h-[44px]">Approve as Owner</Button>}
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "REJECT")} variant="destructive" className="min-h-[44px]">Reject</Button>
                   {r.status !== "NEEDS_INFORMATION" && (
                     <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "REQUEST_INFO")} variant="outline" className="border-slate-600 text-slate-300 min-h-[44px]">Request Info</Button>
                   )}
                 </>
               )}
-              {canDecide && r.status === "APPROVED" && (
+              {canDecide && String(r.email || "").toLowerCase() !== actor.email && r.status === "APPROVED" && (
                 <>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "SUSPEND")} className="bg-orange-800 hover:bg-orange-700 min-h-[44px]">Suspend</Button>
                   <Button size="sm" disabled={busyId === r.id} onClick={() => decide(r.id, "REVOKE")} variant="destructive" className="min-h-[44px]">Revoke</Button>
                 </>
               )}
+              {canDecide && String(r.email || "").toLowerCase() === actor.email && <p className="text-xs text-amber-300 w-full">Your own request must be decided by another authorized owner or administrator.</p>}
               {busyId === r.id && <Loader2 className="w-5 h-5 animate-spin text-slate-400 self-center" />}
             </div>
           </div>
