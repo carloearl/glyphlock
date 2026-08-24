@@ -15,19 +15,44 @@ async function resolveAuthorizedVenue(base44, user, requestedVenueId) {
   const email = String(user?.email || '').trim().toLowerCase();
   const requested = String(requestedVenueId || '');
   const sovereign = SOVEREIGN_EMAILS.has(email);
-  const accounts = sovereign ? [] : await E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 20).catch(() => []);
-  const grants = sovereign ? [] : await E.NUPSAccessRequest.filter({ email, status: 'APPROVED' }, '-created_date', 20).catch(() => []);
-  const nups = sovereign ? null : (accounts || []).find((account) => {
-    const accountMode = account.access_mode || (account.is_demo ? 'DEMO' : 'REAL');
-    if (accountMode !== 'REAL' || !BILL_ISSUER_ROLES.has(account.role)) return false;
-    if (requested && account.venue_id !== requested) return false;
-    return (grants || []).some((grant) =>
-      grant.mode === 'REAL'
-      && grant.nups_user_id === account.id
-      && grant.venue_id === account.venue_id
-      && ['MANAGER', 'ADMINISTRATOR', 'OWNER'].includes(grant.granted_role)
-    );
-  }) || null;
+  const grantQuery = {
+    email,
+    status: 'APPROVED',
+    mode: 'REAL',
+    ...(requested ? { venue_id: requested } : {}),
+  };
+  const grants = sovereign
+    ? []
+    : await E.NUPSAccessRequest.filter(grantQuery, '-created_date', 500).catch(() => []);
+
+  let nups = null;
+  if (!sovereign) {
+    for (const grant of grants || []) {
+      if (
+        grant.mode !== 'REAL'
+        || !grant.nups_user_id
+        || !['MANAGER', 'ADMINISTRATOR', 'OWNER'].includes(grant.granted_role)
+        || (requested && grant.venue_id !== requested)
+      ) continue;
+
+      const account = await E.NUPSUser.get(grant.nups_user_id).catch(() => null);
+      const accountMode = account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+      if (
+        !account
+        || account.status !== 'active'
+        || String(account.platform_email || '').trim().toLowerCase() !== email
+        || accountMode !== 'REAL'
+        || !BILL_ISSUER_ROLES.has(account.role)
+        || account.venue_id !== grant.venue_id
+      ) continue;
+
+      if (grant.nups_user_id === account.id) {
+        nups = account;
+        break;
+      }
+    }
+  }
+
   if (!sovereign && !nups) throw new Error('Approved REAL NUPS manager identity required.');
   const venueId = sovereign && requested ? requested : String(nups?.venue_id || '');
   if (!venueId) throw new Error('Authorized venue could not be resolved.');
