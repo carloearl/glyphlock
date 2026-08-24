@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
   canAuthorityActOnRequest,
+  canRequestRoleInMode,
   decisionMatchesRequestedRole,
   isDecisionAllowedFromStatus,
   isValidIdempotencyKey,
@@ -9,10 +10,14 @@ import {
 
 const access = fs.readFileSync("base44/functions/nupsAccessControl/entry.ts", "utf8");
 const ui = fs.readFileSync("src/pages/AccessRequests.jsx", "utf8");
+const requestForm = fs.readFileSync("src/components/nups/kiosk/AccessRequestForm.jsx", "utf8");
 const owner = fs.readFileSync("src/pages/NUPSOwner.jsx", "utf8");
 const auth = fs.readFileSync("src/lib/AuthContext.jsx", "utf8");
 const guard = fs.readFileSync("src/components/nups/RoleClassGuard.jsx", "utf8");
 const client = fs.readFileSync("src/lib/nups/accessRequestClient.js", "utf8");
+const roleSelector = fs.readFileSync("src/components/nups/kiosk/AccessRoleSelector.jsx", "utf8");
+const clockIn = fs.readFileSync("base44/functions/nupsClockInV2/entry.ts", "utf8");
+const vipWorkflow = fs.readFileSync("base44/functions/vipWorkflow/entry.ts", "utf8");
 const manifest = JSON.parse(fs.readFileSync(".base44/ci-checks.json", "utf8"));
 
 const scopedStaffRequest = {
@@ -43,11 +48,20 @@ const checks = [
     assert.equal(canAuthorityActOnRequest(adminAuthority, scopedStaffRequest, "APPROVE_STAFF"), true);
     assert.equal(canAuthorityActOnRequest(adminAuthority, { ...scopedStaffRequest, venue_id: "other" }, "APPROVE_STAFF"), false);
     assert.equal(canAuthorityActOnRequest(adminAuthority, { ...scopedStaffRequest, mode: "REAL" }, "APPROVE_STAFF"), false);
+    assert.match(access, /decisionAuthorities\.some\(\(authority\) =>\s*r\.venue_id === authority\.venue_id && r\.mode === authority\.mode/);
+    assert.match(access, /decisionAuthorities\.some\(\(authority\) => canAuthorityActOnRequest\(authority, r, decision\)\)/);
   }],
   ["approval must match the requested role", () => {
     assert.equal(decisionMatchesRequestedRole("DJ", "APPROVE_STAFF"), true);
     assert.equal(decisionMatchesRequestedRole("DJ", "APPROVE_ADMIN"), false);
     assert.equal(decisionMatchesRequestedRole("ADMINISTRATOR", "APPROVE_ADMIN"), true);
+  }],
+  ["non-live requests cannot provision privileged authority", () => {
+    assert.equal(canRequestRoleInMode("ADMINISTRATOR", "DEMO"), false);
+    assert.equal(canRequestRoleInMode("OWNER", "SANDBOX"), false);
+    assert.equal(canRequestRoleInMode("DJ", "DEMO"), true);
+    assert.match(access, /accountMode\(account\) === grant\.mode/);
+    assert.match(roleSelector, /allowPrivileged = false/);
   }],
   ["decision state transitions are bounded", () => {
     assert.equal(isDecisionAllowedFromStatus("PENDING_OWNER_APPROVAL", "APPROVE_STAFF"), true);
@@ -76,6 +90,23 @@ const checks = [
   ["mobile submission includes the active venue", () => {
     assert.match(client, /venue_id: venueId/);
     assert.match(ui, /min-h-\[44px\]/);
+  }],
+  ["mobile request blockers are scoped by venue and mode", () => {
+    assert.match(requestForm, /r\.mode === requestedMode/);
+    assert.match(requestForm, /activeVenueRefs\.has\(r\.venue_id\)/);
+    assert.match(requestForm, /scopedRequests\.some/);
+  }],
+  ["revocation fails closed when account deactivation fails", () => {
+    assert.doesNotMatch(access, /NUPSUser\.update\(r\.nups_user_id,[\s\S]{0,180}\.catch\(\(\) => null\)/);
+  }],
+  ["downstream privileged grant consumers require real scoped identities", () => {
+    for (const source of [clockIn, vipWorkflow]) {
+      assert.match(source, /\['OWNER', 'ADMINISTRATOR'\]\.includes\(candidate\.granted_role\)/);
+      assert.match(source, /candidate\.mode === 'REAL'/);
+      assert.match(source, /accountMode === 'REAL'/);
+    }
+    assert.match(clockIn, /Cross-venue PIN provisioning denied/);
+    assert.match(vipWorkflow, /Back-office grant is bound to another venue/);
   }],
   ["approval status filters and owner route exist", () => {
     for (const label of ["PENDING", "APPROVED", "HISTORY", "ALL"]) assert.match(ui, new RegExp(label));

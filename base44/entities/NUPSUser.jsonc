@@ -143,6 +143,16 @@
       "default": false,
       "description": "True = demo/test account for underwriters, licensees, partners. Routes to NUPSSandbox."
     },
+    "access_mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "TEST",
+        "DEMO",
+        "SANDBOX"
+      ],
+      "description": "Exact operating mode authorized by the linked owner-approved access grant."
+    },
     "demo_tier": {
       "type": "string",
       "enum": [

@@ -56,6 +56,10 @@ export function decisionMatchesRequestedRole(requestedRole, decision) {
   return false;
 }
 
+export function canRequestRoleInMode(requestedRole, mode) {
+  return !PRIVILEGED_ROLES.has(requestedRole) || mode === 'REAL';
+}
+
 export function isDecisionAllowedFromStatus(status, decision) {
   return Boolean(ALLOWED_SOURCE_STATUSES[decision]?.has(status));
 }

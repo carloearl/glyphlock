@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       } catch { return null; }
     };
 
-    let user = null, backOffice = false, operator = null;
+    let user = null, backOffice = false, operator = null, backOfficeGrant = null;
     if (body.kiosk_session) {
       operator = await verifyKiosk(body.kiosk_session);
       if (!operator) return Response.json({ error: 'Kiosk session invalid, expired, or revoked.' }, { status: 401 });
@@ -55,7 +55,23 @@ Deno.serve(async (req) => {
       if (email === OWNER_EMAIL) backOffice = true;
       else {
         const grants = (await E.NUPSAccessRequest.filter({ email, status: 'APPROVED' })) || [];
-        backOffice = grants.length > 0;
+        for (const grant of grants.filter((candidate) =>
+          ['OWNER', 'ADMINISTRATOR'].includes(candidate.granted_role) && candidate.mode === 'REAL'
+        )) {
+          if (!grant.nups_user_id) continue;
+          const account = await E.NUPSUser.get(grant.nups_user_id).catch(() => null);
+          const accountMode = account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+          if (
+            account?.status === 'active'
+            && String(account.platform_email || '').toLowerCase() === email
+            && account.venue_id === grant.venue_id
+            && accountMode === 'REAL'
+          ) {
+            backOffice = true;
+            backOfficeGrant = grant;
+            break;
+          }
+        }
       }
       if (!backOffice) return Response.json({ error: 'NUPS back-office authorization required.' }, { status: 403 });
       user = platformUser;
@@ -75,6 +91,9 @@ Deno.serve(async (req) => {
 
     const VENUE = String(body.venue_id || '').trim();
     if (!VENUE) return Response.json({ error: 'Active venue is required.' }, { status: 400 });
+    if (backOfficeGrant && backOfficeGrant.venue_id !== VENUE) {
+      return Response.json({ error: 'Back-office grant is bound to another venue.' }, { status: 403 });
+    }
     if (operator && String(operator.venue || '') !== VENUE) {
       return Response.json({ error: 'Kiosk session is bound to another venue.' }, { status: 403 });
     }

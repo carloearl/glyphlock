@@ -69,7 +69,9 @@ export default function AccessRequestForm({ requestedMode = "SANDBOX" }) {
     );
   }
 
-  const hasOpen = myRequests.some((r) => ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION"].includes(r.status));
+  const activeVenueRefs = new Set([activeVenue?.id, activeVenue?.venue_id].filter(Boolean));
+  const scopedRequests = myRequests.filter((r) => r.mode === requestedMode && activeVenueRefs.has(r.venue_id));
+  const hasOpen = scopedRequests.some((r) => ["PENDING_OWNER_APPROVAL", "NEEDS_INFORMATION"].includes(r.status));
 
   return (
     <div className="space-y-4">
@@ -89,13 +91,13 @@ export default function AccessRequestForm({ requestedMode = "SANDBOX" }) {
           ))}
         </div>
       )}
-      {!hasOpen && !myRequests.some((r) => r.status === "APPROVED") && (
+      {!hasOpen && !scopedRequests.some((r) => r.status === "APPROVED") && (
         <>
           <Input placeholder="Full legal name" value={form.full_legal_name}
             onChange={(e) => setForm({ ...form, full_legal_name: e.target.value })} className="h-12 bg-slate-900 border-slate-700 text-white" />
           <Input placeholder="Mobile number" value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })} className="h-12 bg-slate-900 border-slate-700 text-white" />
-          <AccessRoleSelector value={form.requested_role} onSelect={(r) => setForm({ ...form, requested_role: r })} />
+          <AccessRoleSelector value={form.requested_role} onSelect={(r) => setForm({ ...form, requested_role: r })} allowPrivileged={requestedMode === "REAL"} />
           {PRIVILEGED_ROLES.includes(form.requested_role) && (
             <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-[11px] text-amber-200">
               Administrator and Owner access is reserved for the sovereign owner accounts. Anyone else

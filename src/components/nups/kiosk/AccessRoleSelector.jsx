@@ -30,7 +30,7 @@ const RoleButton = ({ role, selected, onSelect, tone }) => (
 
 /** Role picker for the NUPS access request — all staff roles plus the two
  *  privileged tiers, which are owner-approval-only. */
-export default function AccessRoleSelector({ value, onSelect }) {
+export default function AccessRoleSelector({ value, onSelect, allowPrivileged = false }) {
   return (
     <div className="space-y-2">
       <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Staff Roles</p>
@@ -39,14 +39,22 @@ export default function AccessRoleSelector({ value, onSelect }) {
           <RoleButton key={r} role={r} selected={value === r} onSelect={onSelect} />
         ))}
       </div>
-      <p className="text-[11px] font-bold uppercase tracking-wide text-amber-400/80">
-        Privileged — Owner Approval Only
-      </p>
-      <div className="grid grid-cols-2 gap-2">
-        {PRIVILEGED_ROLES.map((r) => (
-          <RoleButton key={r} role={r} selected={value === r} onSelect={onSelect} tone="privileged" />
-        ))}
-      </div>
+      {allowPrivileged ? (
+        <>
+          <p className="text-[11px] font-bold uppercase tracking-wide text-amber-400/80">
+            Privileged — Owner Approval Only
+          </p>
+          <div className="grid grid-cols-2 gap-2">
+            {PRIVILEGED_ROLES.map((r) => (
+              <RoleButton key={r} role={r} selected={value === r} onSelect={onSelect} tone="privileged" />
+            ))}
+          </div>
+        </>
+      ) : (
+        <p className="text-[11px] text-amber-300/80">
+          Administrator and Owner access require separate live owner provisioning and are unavailable in training or sandbox mode.
+        </p>
+      )}
     </div>
   );
 }
