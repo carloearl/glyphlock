@@ -21,6 +21,7 @@ test('matches protected paths case-insensitively', () => {
     '/admin%255Cpayment-reconciliation',
     '/NUPSAdminPortal',
     '/ProviderConsole',
+    '/OHIPReadiness',
     '/IntegrationTests',
     '/SiteBuilderTest',
     '/EmergencyBackup',
