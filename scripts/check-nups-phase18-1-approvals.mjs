@@ -166,6 +166,12 @@ const checks = [
       assert.match(source, /grant\.nups_user_id === (?:manager|account)\.id/);
       assert.match(source, /accountMode.*'REAL'/s);
     }
+    for (const source of [venueTerminal, vipBills]) {
+      assert.match(source, /NUPSAccessRequest\.filter\(grantQuery, '-created_date', 500\)/);
+      assert.match(source, /NUPSUser\.get\(grant\.nups_user_id\)/);
+      assert.match(source, /\.\.\.\(requested(?:Venue)? \? \{ venue_id: requested(?:Venue)? \} : \{\}\)/);
+      assert.doesNotMatch(source, /NUPSUser\.filter\(\{ platform_email:[\s\S]{0,180}, 20\)/);
+    }
     assert.doesNotMatch(staffOnboarding, /caller\.role === 'admin'/);
     assert.doesNotMatch(venueTerminal, /user\.role === 'admin'/);
   }],
