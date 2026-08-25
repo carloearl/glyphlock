@@ -1833,9 +1833,14 @@ export default function NUPSLanding() {
                 <p>No Oracle secret, OAuth token, guest record, reservation, or raw response is exposed publicly.</p>
               </div>
               <div className="integration-proof-card">
-                <span className="kicker">Oracle Marketplace</span>
-                <strong>Agreement Under Review</strong>
-                <p>The Oracle Cloud Marketplace Agreement was submitted August 24, 2026 under subscription 1655445. Oracle review is pending; no publisher or listing approval is claimed.</p>
+                <span className="kicker">Oracle Cloud Marketplace</span>
+                <strong>Program Enrollment Active</strong>
+                <p>Oracle approved and activated GlyphLock’s Cloud Services / Oracle Cloud Marketplace enrollment #1655445 on August 25, 2026. Publisher-account status and a published NUPS listing remain separate gates.</p>
+              </div>
+              <div className="integration-proof-card">
+                <span className="kicker">Oracle Simphony</span>
+                <strong>Formal Request Submitted</strong>
+                <p>GlyphLock submitted the Simphony Integration Partner Program request on August 25, 2026. Oracle’s Partner Integration Team is reviewing the request; onboarding and Solution Validation have not begun.</p>
               </div>
             </div>
 
@@ -1857,13 +1862,13 @@ export default function NUPSLanding() {
             </div>
 
             <p className="integration-disclaimer">
-              Current status: Level 0 OPN membership is active, and the August 24, 2026 read-only
-              Partner Sandbox test reached response validated maturity. The Oracle Cloud Marketplace
-              Agreement is submitted under subscription 1655445 and remains under Oracle review. These
-              milestones do not represent Marketplace publisher approval, listing acceptance, Oracle
-              certification or endorsement, a production customer connection, or an executed commercial
-              partnership. Production access still requires the applicable Oracle application,
-              environment, hotel authorization, and production credentials.
+              Current status: Level 0 OPN membership is active, the August 24, 2026 read-only Partner
+              Sandbox test reached response validated maturity, Oracle Cloud Marketplace program enrollment
+              #1655445 is approved and active, and the formal Simphony integration request is under Oracle review.
+              These milestones do not represent a published NUPS Marketplace listing, Oracle certification or
+              endorsement, Simphony Solution Validation, a production customer connection, or an executed commercial
+              partnership. Production access still requires the applicable Oracle application, environment,
+              hotel authorization, and production credentials.
             </p>
           </section>
 
