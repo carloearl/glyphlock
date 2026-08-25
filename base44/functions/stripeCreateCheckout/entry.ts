@@ -1,5 +1,9 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
+<<<<<<< HEAD
+import Stripe from 'npm:stripe@14.14.0';
+=======
 import Stripe from 'npm:stripe@22.5.0';
+>>>>>>> 27a82df5414d70bd72c5dbc1a6a90a2f6cf26b66
 
 /**
  * Create a Stripe-hosted subscription checkout using server-owned pricing.
@@ -55,12 +59,15 @@ async function resolveStripeSecretKey(base44) {
   }
 }
 
+<<<<<<< HEAD
+=======
 function integrationIdentifier() {
   const bytes = crypto.getRandomValues(new Uint8Array(8));
   const suffix = Array.from(bytes, (value) => String.fromCharCode(97 + (value % 26))).join('');
   return `glyphlock_subscription_${suffix}`;
 }
 
+>>>>>>> 27a82df5414d70bd72c5dbc1a6a90a2f6cf26b66
 function getAllowedOrigin(req) {
   const candidates = [Deno.env.get('APP_BASE_URL'), req.headers.get('origin')].filter(Boolean);
 

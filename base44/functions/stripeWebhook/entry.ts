@@ -99,8 +99,16 @@ Deno.serve(async (req) => {
     return Response.json({ error: 'Method not allowed' }, { status: 405 });
   }
 
+<<<<<<< HEAD
+  const stripeSecretKey = Deno.env.get('STRIPE_SECRET_KEY');
+  const webhookSecrets = [
+    Deno.env.get('STRIPE_WEBHOOK_SECRET'),
+    Deno.env.get('STRIPE_CONNECT_WEBHOOK_SECRET'),
+  ].filter(Boolean);
+=======
   const base44 = createClientFromRequest(req);
   const { stripeSecretKey, webhookSecrets } = await resolveStripeConnection(base44);
+>>>>>>> 27a82df5414d70bd72c5dbc1a6a90a2f6cf26b66
   const signature = req.headers.get('stripe-signature');
 
   // Fail closed before constructing a Stripe client. Platform-account and
