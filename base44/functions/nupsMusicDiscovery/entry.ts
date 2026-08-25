@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
         const validationResponse = await base44.functions.invoke("nupsClockInV2", {
           action: "validateSession",
           kiosk_session: body.kiosk_session,
-          allowed_roles: ["DJ"],
+          allowed_roles: ["DJ", "VENUE_MANAGER", "VENUE_OWNER", "PLATFORM_ADMIN", "SOVEREIGN"],
         });
         const validation = validationResponse?.data || validationResponse || {};
         authorized = validation.valid === true;
