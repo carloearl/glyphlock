@@ -26,6 +26,10 @@ const [
   app,
   navigationTracker,
   lazyPages,
+  publicMixer,
+  publicTeaser,
+  soundboard,
+  playerDeck,
 ] = await Promise.all([
   source("src/pages/DJHome.jsx"),
   source("src/components/mixer/UnifiedMusicConsole.jsx"),
@@ -47,9 +51,23 @@ const [
   source("src/App.jsx"),
   source("src/lib/NavigationTracker.jsx"),
   source("src/lazyPagesConfig.js"),
+  source("src/pages/GlyphBotMixer.jsx"),
+  source("src/components/mixer/PublicDJTeaser.jsx"),
+  source("src/components/mixer/DJSoundboard.jsx"),
+  source("src/components/mixer/PlayerDeck.jsx"),
 ]);
 
 assert.match(home, /<DJSessionProvider>/, "DJ route must own one persistent session provider");
+assert.match(publicMixer, /<PublicDJTeaser\s*\/>/, "the public DJ route must render a locked teaser");
+assert.doesNotMatch(publicMixer, /<UnifiedMusicConsole/, "the public route must never mount operational DJ controls");
+assert.match(publicTeaser, /NUPSKiosk\?panel=clockIn/, "the teaser must route operators into the existing NUPS authorization flow");
+assert.match(consoleSource, /<DJSoundboard\s*\/>/, "the authorized console must expose the DJ soundboard");
+assert.match(soundboard, /indexedDB\.open/, "uploaded booth sounds must persist locally");
+assert.match(soundboard, /accept=\"audio\/\*\"/, "soundboard uploads must be limited to audio files");
+assert.match(soundboard, /ORIGINAL_PADS/, "rights-safe original starter pads are required");
+assert.match(playerDeck, /PITCH \/ TEMPO/, "direct-audio decks must expose pitch and tempo control");
+assert.match(playerDeck, /setDeckAudioPerformance/, "direct-audio pan and trim must use the canonical deck graph");
+assert.match(playerDeck, /CUE \{index \+ 1\}/, "direct-audio decks must expose cue points");
 assert.doesNotMatch(consoleSource, /left-\[-200vw\]/, "off-screen playback workaround must stay removed");
 assert.equal((consoleSource.match(/<MixerModuleView/g) || []).length, 1, "mixer/player subtree must mount exactly once");
 assert.match(consoleSource, /<FableVisualizerTab/, "same-screen Fable surface is required");
