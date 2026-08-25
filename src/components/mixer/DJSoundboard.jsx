@@ -18,14 +18,23 @@ const STORE_NAME = "samples";
 const DB_VERSION = 1;
 
 const ORIGINAL_PADS = [
-  { id: "gl-air-horn", name: "Air Horn", category: "DJ / Hype", generator: "airHorn", shortcut: "1", color: "from-fuchsia-600 to-violet-700" },
+  { id: "gl-air-horn", name: "Air Horn Stack", category: "DJ / Hype", generator: "airHorn", shortcut: "1", color: "from-fuchsia-600 to-violet-700" },
   { id: "gl-siren", name: "Club Siren", category: "DJ / Hype", generator: "siren", shortcut: "2", color: "from-red-600 to-rose-800" },
-  { id: "gl-riser", name: "Riser", category: "DJ / Hype", generator: "riser", shortcut: "3", color: "from-cyan-600 to-blue-800" },
-  { id: "gl-scratch", name: "Scratch Hit", category: "DJ / Hype", generator: "scratch", shortcut: "4", color: "from-violet-600 to-indigo-800" },
-  { id: "gl-buzzer", name: "Buzzer", category: "Comedy", generator: "buzzer", shortcut: "5", color: "from-amber-600 to-orange-800" },
-  { id: "gl-impact", name: "Impact", category: "Action", generator: "impact", shortcut: "6", color: "from-slate-600 to-slate-900" },
-  { id: "gl-party", name: "Party Horn", category: "Events", generator: "party", shortcut: "7", color: "from-emerald-600 to-teal-800" },
-  { id: "gl-firework", name: "Firework", category: "Events", generator: "firework", shortcut: "8", color: "from-pink-600 to-purple-800" },
+  { id: "gl-riser", name: "Festival Riser", category: "Transitions", generator: "riser", shortcut: "3", color: "from-cyan-600 to-blue-800" },
+  { id: "gl-scratch", name: "Vinyl Scratch", category: "Transitions", generator: "scratch", shortcut: "4", color: "from-violet-600 to-indigo-800" },
+  { id: "gl-buzzer", name: "Game Buzzer", category: "Comedy", generator: "buzzer", shortcut: "5", color: "from-amber-600 to-orange-800" },
+  { id: "gl-impact", name: "Cinema Impact", category: "Action", generator: "impact", shortcut: "6", color: "from-slate-600 to-slate-900" },
+  { id: "gl-party", name: "Party Horn Run", category: "Events", generator: "party", shortcut: "7", color: "from-emerald-600 to-teal-800" },
+  { id: "gl-firework", name: "Firework Burst", category: "Events", generator: "firework", shortcut: "8", color: "from-pink-600 to-purple-800" },
+  { id: "gl-fog-horn", name: "Fog Horn", category: "DJ / Hype", generator: "fogHorn", shortcut: "9", color: "from-blue-700 to-slate-900" },
+  { id: "gl-bass-drop", name: "Sub Bass Drop", category: "Transitions", generator: "bassDrop", shortcut: "q", color: "from-purple-700 to-slate-950" },
+  { id: "gl-jet", name: "Jet Flyby", category: "Action", generator: "jet", shortcut: "w", color: "from-sky-700 to-slate-900" },
+  { id: "gl-crash", name: "Crash Hit", category: "Action", generator: "crash", shortcut: "e", color: "from-orange-700 to-red-950" },
+  { id: "gl-shot", name: "Impact Shot", category: "Action", generator: "shot", shortcut: "r", color: "from-zinc-700 to-black" },
+  { id: "gl-rewind", name: "Record Rewind", category: "Transitions", generator: "rewind", shortcut: "t", color: "from-indigo-700 to-fuchsia-900" },
+  { id: "gl-bells", name: "Holiday Bells", category: "Holiday", generator: "bells", shortcut: "y", color: "from-emerald-700 to-red-900" },
+  { id: "gl-countdown", name: "Countdown Sting", category: "Events", generator: "countdown", shortcut: "u", color: "from-cyan-700 to-purple-900" },
+  { id: "gl-cheer", name: "Crowd Hype", category: "Crowd", generator: "cheer", shortcut: "i", color: "from-rose-700 to-purple-950" },
 ];
 
 function openDatabase() {
@@ -156,6 +165,41 @@ function playGeneratedSample(ctx, kind, volume = 0.8) {
   } else if (kind === "firework") {
     oscillator("sine", 180, 1100, 0.58, 0.2);
     noise(0.72, 0.5, 4200, 0.58);
+  } else if (kind === "fogHorn") {
+    oscillator("sawtooth", 92, 86, 1.35, 0.34);
+    oscillator("sawtooth", 116, 108, 1.35, 0.2, 0.02);
+    oscillator("sine", 58, 52, 1.45, 0.38);
+  } else if (kind === "bassDrop") {
+    oscillator("sine", 105, 28, 1.05, 0.7);
+    oscillator("triangle", 210, 48, 0.82, 0.22);
+    noise(0.24, 0.2, 800);
+  } else if (kind === "jet") {
+    noise(1.8, 0.32, 5200);
+    oscillator("sawtooth", 165, 720, 0.82, 0.11);
+    oscillator("sawtooth", 720, 120, 0.96, 0.1, 0.82);
+  } else if (kind === "crash") {
+    noise(0.95, 0.62, 3600);
+    oscillator("sine", 130, 34, 0.9, 0.52);
+    oscillator("square", 420, 80, 0.28, 0.12, 0.02);
+  } else if (kind === "shot") {
+    noise(0.16, 0.9, 5000);
+    oscillator("sine", 190, 42, 0.34, 0.62);
+    noise(0.5, 0.16, 1200, 0.08);
+  } else if (kind === "rewind") {
+    oscillator("sawtooth", 130, 1900, 0.62, 0.28);
+    noise(0.62, 0.13, 2800);
+  } else if (kind === "bells") {
+    [0, 0.18, 0.36, 0.54].forEach((delay, index) => {
+      oscillator("sine", 660 + (index % 2) * 220, 640 + (index % 2) * 220, 0.42, 0.22, delay);
+      oscillator("sine", 990 + (index % 2) * 110, 960 + (index % 2) * 110, 0.36, 0.12, delay + 0.02);
+    });
+  } else if (kind === "countdown") {
+    [0, 0.32, 0.64, 0.96].forEach((delay) => oscillator("square", 820, 780, 0.14, 0.2, delay));
+    oscillator("sine", 140, 42, 0.55, 0.58, 1.28);
+    noise(0.22, 0.22, 2200, 1.28);
+  } else if (kind === "cheer") {
+    noise(1.35, 0.3, 5200);
+    [0.08, 0.24, 0.43, 0.67, 0.9].forEach((delay, index) => oscillator("triangle", 420 + index * 55, 620 + index * 70, 0.24, 0.08, delay));
   }
 
   return {
@@ -322,7 +366,7 @@ export default function DJSoundboard() {
           <Radio className="h-4 w-4 text-fuchsia-300" />
           <div>
             <h3 className="text-sm font-black text-white">DJ Soundboard</h3>
-            <p className="text-[10px] text-slate-500">Original procedural pads + booth uploads</p>
+            <p className="text-[10px] text-slate-500">Performance FX rack · layered procedural pads · booth uploads</p>
           </div>
         </div>
         <label className="ml-auto inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-3 text-xs font-bold text-cyan-200 hover:bg-cyan-500/15">
@@ -411,9 +455,9 @@ export default function DJSoundboard() {
 
       <div className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] p-3 text-[11px] leading-5 text-slate-400">
         <RotateCcw className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
-        Starter pads are generated in the browser from original synthesized tones and noise. No Nintendo,
-        Mario, movie, television or other third-party copyrighted clips are bundled. Authorized operators
-        may upload sounds they have the right to use.
+        Starter FX are generated live in the browser from layered synthesized tones and noise, including hype,
+        transition, action, crowd, event and holiday sounds. No third-party copyrighted clips are bundled.
+        Authorized operators can upload their own licensed drops, ad-libs, countdowns and custom samples.
       </div>
     </section>
   );
