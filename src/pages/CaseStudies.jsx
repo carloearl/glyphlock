@@ -134,6 +134,32 @@ export default function CaseStudies() {
           </p>
         </div>
 
+        {/* Latest company news */}
+        <Card className="mb-10 border-cyan-500/40 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-slate-900/60 backdrop-blur-sm max-w-6xl mx-auto">
+          <CardContent className="grid gap-6 p-6 md:grid-cols-[1fr_auto] md:items-center md:p-8">
+            <div>
+              <div className="mb-3 flex flex-wrap items-center gap-3">
+                <FileText className="h-6 w-6 text-cyan-300" />
+                <Badge className="border border-cyan-400/40 bg-cyan-400/10 text-cyan-100">
+                  Company News · August 25, 2026
+                </Badge>
+              </div>
+              <h2 className="text-2xl font-bold text-white md:text-3xl">
+                GlyphLock advances NUPS through an Oracle OHIP Partner Sandbox milestone
+              </h2>
+              <p className="mt-3 max-w-4xl leading-7 text-blue-100">
+                Read the claims-safe public announcement and view the verified relationship map separating completed work, active Oracle reviews and locked production gates.
+              </p>
+            </div>
+            <Link to={createPageUrl('OracleOHIPMilestone')}>
+              <Button className="w-full bg-cyan-600 text-white hover:bg-cyan-500 md:w-auto">
+                Read the story
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12 max-w-4xl mx-auto">
           <StatCard number="5" label="Case Studies" />
