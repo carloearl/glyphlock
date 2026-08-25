@@ -212,9 +212,6 @@ async function getDecisionReplayResponse(base44, request, decision, idempotencyK
       && request.decision_claim_key === idempotencyKey
       && normalizeEmail(request.decision_claimed_by) === actorEmail
     ) {
-      if (!isExpiredDecisionClaim(request)) {
-        return Response.json({ error: 'Approval is still finalizing. Retry safely with the same idempotency key.' }, { status: 409 });
-      }
       const released = await releaseDecisionClaim(
         base44, request.id, idempotencyKey, actorEmail, request.decision_claimed_at,
       );

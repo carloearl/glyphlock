@@ -112,7 +112,7 @@ const checks = [
     assert.match(access, /const claimTimestamp = claimed\.decision_claimed_at/);
     assert.doesNotMatch(access, /releaseDecisionClaim\([^)]*actorEmail\s*\)/);
     assert.doesNotMatch(access, /updateClaimedRequest\([^)]*actorEmail,\s*\{/);
-    assert.match(access, /if \(!isExpiredDecisionClaim\(request\)\)[\s\S]*?Approval is still finalizing/);
+    assert.match(access, /request\.decision_claim_active[\s\S]*?releaseDecisionClaim\([\s\S]*?request\.decision_claimed_at/);
     assert.match(access, /const committedGrant = await updateClaimedRequest/);
     assert.match(access, /const updated = await updateClaimedRequest\([\s\S]*?decision_claim_active:\s*false/);
     assert.doesNotMatch(access, /NUPSAccessRequest\.update\(request_id,\s*\{[\s\S]{0,240}?decision_claim_active:\s*false/);
