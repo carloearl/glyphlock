@@ -31,5 +31,24 @@ export async function invokeDJGateway(action, payload = {}) {
 
   const status = Number(lastError?.response?.status || lastError?.status || 0);
   const detail = lastError?.response?.data?.error || lastError?.response?.data?.message || lastError?.message || "Unknown gateway error";
+  // The snapshot action is also consumed by the public mixer surface. A 403
+  // means the caller has no authorized DJ / NUPS-manager identity — expected
+  // for public visitors. Return an empty snapshot so suite tabs render their
+  // natural empty states instead of throwing an unhandled authorization error.
+  if (action === "snapshot" && (status === 403 || /authorized|identity required|nups manager/i.test(detail))) {
+    return {
+      success: true,
+      snapshot_at: new Date().toISOString(),
+      data_scope: "unauthorized-local-only",
+      tracks: [],
+      jukebox_requests: [],
+      personas: [],
+      crowd_metrics: [],
+      performance_analytics: [],
+      entertainers: [],
+      active_entertainer_shifts: [],
+      quality: { raw_track_count: 0, unique_track_count: 0, duplicate_track_count: 0 },
+    };
+  }
   throw new Error(status ? `DJ gateway ${action} failed (${status}): ${detail}` : `DJ gateway ${action} failed: ${detail}`);
 }
