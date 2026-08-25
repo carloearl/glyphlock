@@ -196,9 +196,9 @@ if (llmsText) {
 // ── 6. Home / About regression (exact canonical values, apostrophe-normalized) ──
 if (seoData) {
   const n = norm(seoData);
-  const HOME_TITLE = 'GlyphLock | Evidence Infrastructure for Identity, Operations & Proof';
+  const HOME_TITLE = 'GlyphLock | Evidence Infrastructure for Identity & Proof';
   const HOME_DESC = 'Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.';
-  const HOME_OG_TITLE = 'GlyphLock | Evidence Infrastructure for Identity, Operations & Proof';
+  const HOME_OG_TITLE = 'GlyphLock | Evidence Infrastructure for Identity & Proof';
   const HOME_OG_DESC = 'Evidence infrastructure for identity, operations, and proof. Secure QR, verified access, and financial accountability in one auditable system.';
   const ABOUT_TITLE = 'About GlyphLock | Technology, NUPS & Evidence Architecture';
   const ABOUT_DESC = 'GlyphLock builds evidence infrastructure connecting identity, permissions, and financial accountability. Founded 2025 in El Mirage, Arizona.';
@@ -290,8 +290,8 @@ if (seoData) {
     else if (entry.description !== expected) fail(`Supplied route description changed: ${url}`);
   }
   for (const entry of entries.filter((candidate) => !suppliedRouteCopy.has(candidate.url))) {
-    if (entry.description.length < 140 || entry.description.length > 160) {
-      fail(`Buyer description must be 140–160 characters for ${entry.url} (found ${entry.description.length})`);
+    if (entry.description.length < 140 || entry.description.length > 155) {
+      fail(`Buyer description must be 140–155 characters for ${entry.url} (found ${entry.description.length})`);
     }
   }
 }
@@ -389,7 +389,7 @@ for (const [path, content] of robotsSources) {
     }
   }
   for (const route of ['/nupsadminportal', '/providerconsole']) {
-    if (!content.includes(`Disallow: ${route}`) && !content.includes(`'${route}'`)) {
+    if (!content.includes(`Disallow: ${route}`) && !content.includes(`'${route}'`) && !content.includes(`"${route}"`)) {
       fail(`${path} missing lowercase protected-route block: ${route}`);
     }
   }
