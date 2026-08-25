@@ -488,58 +488,19 @@ export default function DJPlayerSection({
 
   return (
     <div ref={sectionRef} className="flex-shrink-0 border-t border-slate-700/50 bg-slate-900/60">
-      <div className="flex items-center justify-between px-4 py-1 border-b border-slate-700/30">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">DJ Player</span>
-          {autoDj && (
-            <span className={`text-[9px] font-mono flex items-center gap-1 ${transitioning ? "text-amber-300" : "text-emerald-400"}`}>
-              <WandSparkles className="w-3 h-3" /> {transitioning ? `CROSSFADING → ${activeDeck === "A" ? "B" : "A"}` : `LIVE DECK ${activeDeck}`}
-            </span>
-          )}
+      <div className="flex min-h-11 items-center justify-between gap-3 border-b border-slate-700/30 px-4 py-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Performance Decks</span>
+          <span className={`rounded-full border px-2 py-1 text-[9px] font-mono ${transitioning ? "border-amber-500/40 text-amber-300" : "border-emerald-500/30 text-emerald-300"}`}>
+            {transitioning ? `BLENDING → ${activeDeck === "A" ? "B" : "A"}` : `LIVE · DECK ${activeDeck}`}
+          </span>
         </div>
-        <div className="flex flex-wrap items-center justify-end gap-1">
-          <DJMasterAudioControls
-            volume={masterVolume}
-            muted={masterMuted}
-            onPlay={handlePlayLive}
-            onMute={() => {
-              if (masterMuted) {
-                setMasterMuted(false);
-                if (masterVolume === 0) setMasterVolume(1);
-              } else {
-                setMasterMuted(true);
-              }
-            }}
-            onVolumeChange={(value) => { setMasterVolume(value); setMasterMuted(value === 0); }}
-          />
-          <Button
-            size="sm"
-            variant="outline"
-            className="min-h-10 text-[10px] gap-1 border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-500/10"
-            onClick={() => openClubTVWindow()}
-            title="Open Fable X visualizer — drag onto the TV display or cast the tab"
-          >
-            <Tv className="w-3 h-3" /> Open Visualizer
-          </Button>
-          <Button size="sm" variant="ghost" className="min-h-10 text-[10px] gap-1 text-slate-400" onClick={handleCueNext}>
-            Cue Next
-          </Button>
-          <Button size="icon" variant="ghost" className="h-10 w-10" onClick={handleSwap} aria-label="Promote cue deck" title="Promote cue deck">
-            <ArrowLeftRight className="w-3 h-3 text-slate-400" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-10 w-10 hover:bg-red-500/15 hover:text-red-300"
-            onClick={() => setConfirmStop(true)}
-            title="Stop playback (Esc)"
-          >
-            <X className="w-3 h-3 text-slate-400" />
-          </Button>
-        </div>
+        <span className="hidden text-[9px] font-medium uppercase tracking-wider text-slate-600 sm:block">
+          Deck A · Mixer · Deck B
+        </span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 p-2">
+      <div className="grid grid-cols-1 gap-3 p-3 xl:grid-cols-[minmax(0,1fr)_minmax(240px,0.38fr)_minmax(0,1fr)]">
         <PlayerDeck
           ref={deckARef}
           song={deckASong}
@@ -564,6 +525,78 @@ export default function DJPlayerSection({
             if (activeDeck === "A") onPlay?.(id);
           }}
         />
+
+        <aside className="flex min-w-0 flex-col gap-3 rounded-xl border border-violet-500/25 bg-gradient-to-b from-slate-950 via-violet-950/20 to-slate-950 p-3 shadow-[0_16px_50px_rgba(15,23,42,0.35)]" aria-label="Center mixer">
+          <div className="text-center">
+            <div className="text-[9px] font-black uppercase tracking-[0.28em] text-violet-300">Center Mixer</div>
+            <div className="mt-1 text-xs font-bold text-white">Master bus & transition</div>
+          </div>
+
+          <DJMasterAudioControls
+            volume={masterVolume}
+            muted={masterMuted}
+            onPlay={handlePlayLive}
+            onMute={() => {
+              if (masterMuted) {
+                setMasterMuted(false);
+                if (masterVolume === 0) setMasterVolume(1);
+              } else {
+                setMasterMuted(true);
+              }
+            }}
+            onVolumeChange={(value) => { setMasterVolume(value); setMasterMuted(value === 0); }}
+          />
+
+          <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-800 bg-slate-900/80 p-2">
+            <label className="space-y-1 text-[9px] font-bold uppercase tracking-wider text-cyan-300">
+              Channel A
+              <input type="range" min="0" max="1" step="0.01" value={deckABaseVol}
+                onChange={(event) => setDeckABaseVol(Number(event.target.value))}
+                className="w-full accent-cyan-400" />
+              <span className="block text-right font-mono text-slate-400">{Math.round(deckABaseVol * 100)}%</span>
+            </label>
+            <label className="space-y-1 text-[9px] font-bold uppercase tracking-wider text-pink-300">
+              Channel B
+              <input type="range" min="0" max="1" step="0.01" value={deckBBaseVol}
+                onChange={(event) => setDeckBBaseVol(Number(event.target.value))}
+                className="w-full accent-pink-400" />
+              <span className="block text-right font-mono text-slate-400">{Math.round(deckBBaseVol * 100)}%</span>
+            </label>
+          </div>
+
+          <Crossfader
+            value={crossfade}
+            onChange={setCrossfade}
+            autoMix={autoBlend}
+            onToggleAutoMix={() => setAutoBlend((value) => !value)}
+            blendSeconds={blendSeconds}
+            onBlendSecondsChange={(seconds) => setBlendSeconds(Math.max(2, seconds))}
+            onBlendNow={handleSwap}
+            transitioning={transitioning}
+            cueAvailable={Boolean(inactiveSongId)}
+            compact
+          />
+
+          <div className="grid grid-cols-2 gap-2">
+            <Button size="sm" variant="outline" className="min-h-10 gap-1 border-slate-700 text-[10px] text-slate-300" onClick={handleCueNext}>
+              Cue Next
+            </Button>
+            <Button size="sm" variant="outline" className="min-h-10 gap-1 border-violet-500/40 text-[10px] text-violet-300" onClick={handleSwap} disabled={!inactiveSongId || transitioning}>
+              <ArrowLeftRight className="h-3 w-3" /> Swap
+            </Button>
+            <Button size="sm" variant="outline" className="min-h-10 gap-1 border-fuchsia-500/40 text-[10px] text-fuchsia-300" onClick={() => openClubTVWindow()}>
+              <Tv className="h-3 w-3" /> Visualizer
+            </Button>
+            <Button size="sm" variant="outline" className="min-h-10 gap-1 border-red-500/30 text-[10px] text-red-300" onClick={() => setConfirmStop(true)}>
+              <X className="h-3 w-3" /> Stop
+            </Button>
+          </div>
+
+          <div className="rounded-lg border border-slate-800 bg-black/20 px-3 py-2 text-center text-[9px] font-mono uppercase tracking-wider text-slate-500">
+            {autoDj ? <><WandSparkles className="mr-1 inline h-3 w-3 text-emerald-300" /> Auto-DJ armed</> : "Manual control · Auto Mix available"}
+          </div>
+        </aside>
+
         <PlayerDeck
           ref={deckBRef}
           song={deckBSong}
@@ -584,18 +617,6 @@ export default function DJPlayerSection({
           }}
         />
       </div>
-
-      <Crossfader
-        value={crossfade}
-        onChange={setCrossfade}
-        autoMix={autoBlend}
-        onToggleAutoMix={() => setAutoBlend((value) => !value)}
-        blendSeconds={blendSeconds}
-        onBlendSecondsChange={(seconds) => setBlendSeconds(Math.max(2, seconds))}
-        onBlendNow={handleSwap}
-        transitioning={transitioning}
-        cueAvailable={Boolean(inactiveSongId)}
-      />
 
       {confirmStop && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
