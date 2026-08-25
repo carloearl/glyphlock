@@ -16,7 +16,58 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 // first, then Base44's managed Stripe connector. Non-Stripe paths never depend
 // on Stripe configuration.
 
-const ALLOWED_ROLES = ['admin', 'manager', 'staff'];
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+const PAYMENT_GRANT_ROLES = new Set([
+  'HOSTESS', 'DOORMAN', 'DOOR_GIRL', 'BARTENDER', 'SECURITY',
+  'MANAGER', 'ADMINISTRATOR', 'OWNER',
+]);
+const PAYMENT_ACCOUNT_ROLE_BY_GRANT = {
+  HOSTESS: 'HOSTESS',
+  DOORMAN: 'DOORMAN',
+  DOOR_GIRL: 'DOOR_GIRL',
+  BARTENDER: 'BARTENDER',
+  SECURITY: 'SECURITY',
+  MANAGER: 'VENUE_MANAGER',
+  ADMINISTRATOR: 'PLATFORM_ADMIN',
+  OWNER: 'VENUE_OWNER',
+};
+const MANAGER_ACCOUNT_ROLES = new Set(['VENUE_MANAGER', 'PLATFORM_ADMIN', 'VENUE_OWNER', 'SOVEREIGN']);
+
+function normalizeEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+async function requireRealPaymentAuthority(base44, user, venue_id) {
+  const email = normalizeEmail(user?.email);
+  if (!email || !venue_id) return null;
+  if (SOVEREIGN_EMAILS.has(email)) {
+    return { account: { role: 'SOVEREIGN', platform_email: email, venue_id, status: 'active', access_mode: 'REAL' }, grant: null };
+  }
+
+  const grants = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED', venue_id, mode: 'REAL' }, '-created_date', 500);
+  for (const grant of (grants || [])) {
+    if (
+      grant.email?.toLowerCase() !== email
+      || grant.status !== 'APPROVED'
+      || grant.venue_id !== venue_id
+      || grant.mode !== 'REAL'
+      || !grant.nups_user_id
+      || !PAYMENT_GRANT_ROLES.has(grant.granted_role)
+    ) continue;
+    const account = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
+    const accountMode = account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+    if (
+      account?.status !== 'active'
+      || accountMode !== 'REAL'
+      || normalizeEmail(account.platform_email) !== email
+      || account.venue_id !== venue_id
+      || account.id !== grant.nups_user_id
+      || account.role !== PAYMENT_ACCOUNT_ROLE_BY_GRANT[grant.granted_role]
+    ) continue;
+    return { account, grant };
+  }
+  return null;
+}
 
 async function sha256(text) {
   const data = new TextEncoder().encode(text);
@@ -120,10 +171,6 @@ Deno.serve(async (req) => {
     if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    if (!ALLOWED_ROLES.includes(user.role)) {
-      return Response.json({ error: 'Forbidden: Staff access required' }, { status: 403 });
-    }
-
     let venue_id;
     try {
       const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
@@ -134,6 +181,12 @@ Deno.serve(async (req) => {
     } catch (_) {
       return Response.json({ error: 'Venue access denied' }, { status: 403 });
     }
+
+    const paymentAuthority = await requireRealPaymentAuthority(base44, user, venue_id);
+    if (!paymentAuthority) {
+      return Response.json({ error: 'Forbidden: active REAL venue grant required' }, { status: 403 });
+    }
+    const actorRole = paymentAuthority.account.role;
 
     let payload;
     try {
@@ -221,8 +274,8 @@ Deno.serve(async (req) => {
       }
     });
 
-    await logVerificationStep(base44, record_id, venue_id, 'record_created', resolvedProvider, null, 'PENDING', user.email, user.role, mode, null, null);
-    await logVerificationStep(base44, record_id, venue_id, 'provider_routed', resolvedProvider, 'PENDING', 'PENDING', user.email, user.role, mode, `Routed to ${resolvedProvider} adapter`, null);
+    await logVerificationStep(base44, record_id, venue_id, 'record_created', resolvedProvider, null, 'PENDING', user.email, actorRole, mode, null, null);
+    await logVerificationStep(base44, record_id, venue_id, 'provider_routed', resolvedProvider, 'PENDING', 'PENDING', user.email, actorRole, mode, `Routed to ${resolvedProvider} adapter`, null);
 
     // ── ADAPTER ROUTING ──────────────────────────────────────────
 
@@ -248,7 +301,7 @@ Deno.serve(async (req) => {
           const { default: Stripe } = await import('npm:stripe@22.5.0');
           const stripe = new Stripe(stripeKey, { apiVersion: '2026-06-24.dahlia' });
 
-          await logVerificationStep(base44, record_id, venue_id, 'api_call_made', resolvedProvider, 'PENDING', 'PENDING', user.email, user.role, mode, `Retrieving PI ${processor_reference}`, null);
+          await logVerificationStep(base44, record_id, venue_id, 'api_call_made', resolvedProvider, 'PENDING', 'PENDING', user.email, actorRole, mode, `Retrieving PI ${processor_reference}`, null);
 
           const connectedAccountId = venueConfig.stripe_connected_account_id || null;
           const paymentIntent = connectedAccountId
@@ -261,7 +314,7 @@ Deno.serve(async (req) => {
             stripe_connected_account_id: connectedAccountId
           }));
 
-          await logVerificationStep(base44, record_id, venue_id, 'api_response_received', resolvedProvider, 'PENDING', 'PENDING', user.email, user.role, mode, null, rawResponseHash);
+          await logVerificationStep(base44, record_id, venue_id, 'api_response_received', resolvedProvider, 'PENDING', 'PENDING', user.email, actorRole, mode, null, rawResponseHash);
 
           if (paymentIntent.status !== 'succeeded') {
             verificationError = `Payment ${paymentIntent.status}`;
@@ -321,7 +374,7 @@ Deno.serve(async (req) => {
         if (!manager_pin) {
           verificationError = 'Manager PIN required for manual external payment';
           confirmedStatus = 'FAILED';
-        } else if (user.role === 'staff') {
+        } else if (!MANAGER_ACCOUNT_ROLES.has(actorRole)) {
           verificationError = 'Staff cannot confirm a manual external override without manager authorization';
           confirmedStatus = 'FAILED';
         } else {
@@ -361,14 +414,14 @@ Deno.serve(async (req) => {
       raw_response_hash: rawResponseHash
     };
 
-    if (confirmedStatus === 'EXTERNAL_CONFIRMED' && (user.role === 'manager' || user.role === 'admin')) {
+    if (confirmedStatus === 'EXTERNAL_CONFIRMED' && MANAGER_ACCOUNT_ROLES.has(actorRole)) {
       updateData.manager_authorized_by = user.email;
     }
 
     await base44.asServiceRole.entities.PaymentRecord.update(paymentRecord.id, updateData);
 
     if (confirmedStatus === 'FAILED') {
-      await logVerificationStep(base44, record_id, venue_id, 'record_failed', resolvedProvider, 'PENDING', 'FAILED', user.email, user.role, mode, verificationError, rawResponseHash);
+      await logVerificationStep(base44, record_id, venue_id, 'record_failed', resolvedProvider, 'PENDING', 'FAILED', user.email, actorRole, mode, verificationError, rawResponseHash);
 
       try {
         await base44.asServiceRole.entities.SystemAuditLog.create({
@@ -380,7 +433,7 @@ Deno.serve(async (req) => {
           status: 'failure',
           metadata: {
             venue_id,
-            actor_role: user.role,
+            actor_role: actorRole,
             provider_code: resolvedProvider,
           },
         });
@@ -394,7 +447,7 @@ Deno.serve(async (req) => {
       }, { status: 400 });
     }
 
-    await logVerificationStep(base44, record_id, venue_id, 'record_confirmed', resolvedProvider, 'PENDING', confirmedStatus, user.email, user.role, mode, null, rawResponseHash);
+    await logVerificationStep(base44, record_id, venue_id, 'record_confirmed', resolvedProvider, 'PENDING', confirmedStatus, user.email, actorRole, mode, null, rawResponseHash);
 
     // ── OPTIONAL CREATE / UPDATE GlyphBucksOrder ────────────────
     // Some full contract flows create their richer order record themselves.
@@ -433,7 +486,7 @@ Deno.serve(async (req) => {
           });
         }
       } catch (orderErr) {
-        await logVerificationStep(base44, record_id, venue_id, 'record_failed', resolvedProvider, confirmedStatus, confirmedStatus, user.email, user.role, mode, `Order link failed: ${orderErr.message}`, null);
+        await logVerificationStep(base44, record_id, venue_id, 'record_failed', resolvedProvider, confirmedStatus, confirmedStatus, user.email, actorRole, mode, `Order link failed: ${orderErr.message}`, null);
       }
     }
 
@@ -453,7 +506,7 @@ Deno.serve(async (req) => {
         status: 'success',
         metadata: {
           venue_id,
-          actor_role: user.role,
+          actor_role: actorRole,
           provider_code: resolvedProvider,
           verification_method: verificationMethod,
         },
