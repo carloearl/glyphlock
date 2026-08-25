@@ -25,7 +25,7 @@ const DREAM_TEAM = [
     quote: 'Every deal and deployment stays traceable and enforceable.',
     binding: {
       method: 'Protected: Vision, IP, and original covenant language.',
-      mechanism: 'Bound via: Master Covenant + CAB + QR-anchored proof.',
+      mechanism: 'Recorded via: signed agreements, QR-linked evidence, and timestamps.',
       protocol: 'Result: Every deal and deployment stays traceable and enforceable.'
     },
     cryptoSignature: {
@@ -53,7 +53,7 @@ const DREAM_TEAM = [
     quote: 'Synthetic fraud and forged evidence are blocked in real time.',
     binding: {
       method: 'Protected: high-value policies, claims data, audit trails.',
-      mechanism: 'Bound via: PQC glyphs, signed audits, and velocity-verified scans.',
+      mechanism: 'Recorded via: signed audit events and scan metadata.',
       protocol: 'Result: Synthetic fraud and forged evidence are blocked in real time.'
     },
     cryptoSignature: {
@@ -81,7 +81,7 @@ const DREAM_TEAM = [
     quote: 'No ghost charges, no lost payouts, every shift auditable.',
     binding: {
       method: 'Protected: in-venue payments, dancer payouts, tip streams, and receipts.',
-      mechanism: 'Bound via: dynamic QR vouchers + NUPS ledger + Master Covenant terms.',
+      mechanism: 'Recorded via: QR vouchers, the NUPS ledger, and explicit agreement records.',
       protocol: 'Result: No ghost charges, no lost payouts, every shift auditable.'
     },
     cryptoSignature: {
@@ -100,7 +100,7 @@ const DREAM_TEAM = [
     name: 'Creator',
     number: '#4',
     position: 'Artists, Devs, Writers, Engineers',
-    series: 'Work is logged, bound, and credited',
+    series: 'Work is logged, attributed, and credited',
     team: 'GlyphLock',
     frontImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/be936400a_2dcae465-c2a0-4301-940f-400933d21ebd.jpg',
     bindingType: 'CREATOR_BINDING',
@@ -109,7 +109,7 @@ const DREAM_TEAM = [
     quote: 'If it\'s scanned, its origin and rights are provable.',
     binding: {
       method: 'Protected: art, code, media, and concept proofs.',
-      mechanism: 'Bound via: glyph-signed timestamps and CAB auto-binding.',
+      mechanism: 'Recorded via: glyph-signed timestamps and explicit rights metadata.',
       protocol: 'Result: If it\'s scanned, its origin and rights are provable.'
     },
     cryptoSignature: {
@@ -155,7 +155,7 @@ export default function DreamTeamHero() {
           </h2>
           
           <p className="text-lg md:text-xl text-violet-200 max-w-2xl mx-auto leading-relaxed mb-6">
-            Four personas bound by the Master Covenant — from founders to creators, every role is secured and traceable.
+            Four personas illustrating how roles, permissions, and records can stay traceable across GlyphLock workflows.
           </p>
 
           <div className="flex justify-center gap-6">
