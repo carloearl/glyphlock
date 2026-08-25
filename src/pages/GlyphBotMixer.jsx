@@ -1,16 +1,6 @@
 import React from "react";
-import UnifiedMusicConsole from "@/components/mixer/UnifiedMusicConsole";
+import PublicDJTeaser from "@/components/mixer/PublicDJTeaser";
 
 export default function GlyphBotMixer() {
-  return (
-    <div className="max-w-[1600px] mx-auto px-3 md:px-6 py-4">
-      <div className="mb-3">
-        <h1 className="text-2xl md:text-3xl font-black text-white">DJ Pro Mixer</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          AI-driven dual-deck mixing, crowd-reactive playlists and tip-weighted jukebox.
-        </p>
-      </div>
-      <UnifiedMusicConsole />
-    </div>
-  );
+  return <PublicDJTeaser />;
 }
