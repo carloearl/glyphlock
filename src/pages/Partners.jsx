@@ -103,9 +103,9 @@ const PROOF = [
     icon: Network,
   },
   {
-    label: "Integration evidence",
-    value: "OHIP sandbox",
-    detail: "Controlled read-only Oracle Hospitality Partner Sandbox evidence",
+    label: "Oracle integration progress",
+    value: "3 tracked workstreams",
+    detail: "OHIP Partner Sandbox response validated · Cloud Marketplace program enrollment active · Simphony formal request under Oracle review",
     icon: ScanLine,
   },
   {
@@ -214,8 +214,8 @@ export default function Partners() {
                 </div>
 
                 <p className="mt-5 max-w-2xl text-xs leading-5 text-slate-500">
-                  Public materials are informational. Production access, Oracle Marketplace listing, and
-                  Oracle Simphony certification are not represented as approved.
+                  Public materials are informational. Oracle Cloud Marketplace program enrollment is active, but a published NUPS listing,
+                  production OPERA Cloud access, and Simphony Solution Validation or certification are not represented as approved.
                 </p>
               </div>
 
@@ -329,7 +329,7 @@ export default function Partners() {
                       <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-200">Flagship integration record</p>
                       <h3 className="mt-2 font-space text-2xl font-black text-white">NUPS × Oracle Hospitality</h3>
                       <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-                        Review the controlled, read-only OHIP Partner Sandbox evidence, its identifiers, test result, and explicit production boundary.
+                        Review the controlled OHIP Partner Sandbox evidence plus the August 25 Marketplace program approval and formal Simphony integration-request status, with production and listing boundaries kept explicit.
                       </p>
                     </div>
                     <Link to={createPageUrl("CaseStudyOracleOHIP")}>
