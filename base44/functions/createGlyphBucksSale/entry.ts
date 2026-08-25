@@ -120,7 +120,8 @@ Deno.serve(async (req) => {
 
     const existingBatch = await base44.asServiceRole.entities.GlyphBucksBatch.filter({
       processor_reference,
-      venue_id
+      venue_id,
+      mode: 'REAL'
     }, null, 1);
 
     if (existingBatch.length > 0) {
@@ -157,6 +158,7 @@ Deno.serve(async (req) => {
       const records = await base44.asServiceRole.entities.PaymentRecord.filter({
         processor_reference,
         venue_id,
+        mode: 'REAL',
         status: { $in: ['CONFIRMED', 'EXTERNAL_CONFIRMED', 'CAPTURED'] }
       }, null, 1);
       confirmedRecord = records?.[0] || null;
@@ -170,6 +172,7 @@ Deno.serve(async (req) => {
         const orders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
           card_token: processor_reference,
           venue_id,
+          mode: 'REAL',
           status: 'COMPLETE'
         }, null, 1);
         legacyOrder = orders?.[0] || null;
@@ -212,17 +215,9 @@ Deno.serve(async (req) => {
 
     }
 
-    // W3-007: Resolve mode from SystemConfig — never trust client for mode
-    let resolvedMode = 'REAL';
-    try {
-      const venueConfig = await base44.asServiceRole.entities.SystemConfig.filter(
-        { config_key: 'venue', venue_id }, null, 1
-      );
-      const globalConfig = await base44.asServiceRole.entities.SystemConfig.filter(
-        { config_key: 'global' }, null, 1
-      );
-      resolvedMode = venueConfig?.[0]?.mode || globalConfig?.[0]?.mode || 'REAL';
-    } catch (_) { /* default to REAL on config fetch failure */ }
+    // This is the production sale endpoint. Its authority and all referenced
+    // payment evidence are explicitly bound to REAL mode above.
+    const resolvedMode = 'REAL';
 
     const batch_id = `GB-${Date.now()}-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
 
