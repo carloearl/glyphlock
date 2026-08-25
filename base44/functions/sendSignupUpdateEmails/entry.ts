@@ -28,14 +28,14 @@ What's new on the platform:
 • Security Operations Center — Real-time threat monitoring, blockchain verification, and hash tools.
 • Account Security — Multi-factor authentication, API key vault, and trusted device management.
 
-Your account is active and ready to explore. Simply log in at https://glyphlock.com and head to the Command Center to get started.
+Your account is active and ready to explore. Simply log in at https://glyphlock.io and head to the Command Center to get started.
 
 If you have any questions, reply to this email or message our support team at carloearl@glyphlock.com.
 
 Thanks again for being part of GlyphLock.
 
 — The GlyphLock Team
-https://glyphlock.com`;
+https://glyphlock.io`;
 }
 
 Deno.serve(async (req) => {
