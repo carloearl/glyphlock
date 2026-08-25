@@ -57,7 +57,9 @@ import Blockchain from './pages/Blockchain';
 import CaseStudies from './pages/CaseStudies';
 import CaseStudyAIBinding from './pages/CaseStudyAIBinding';
 import CaseStudyCovenantVictory from './pages/CaseStudyCovenantVictory';
-import CaseStudyTruthStrike from './pages/CaseStudyTruthStrike';
+import CaseStudyNUPS from './pages/CaseStudyNUPS';
+import ProvenanceMethodology from './pages/ProvenanceMethodology';
+import TechnicalEvidence from './pages/TechnicalEvidence';
 import ClubCurrencyPress from './pages/ClubCurrencyPress';
 import CommandCenter from './pages/CommandCenter';
 import Consultation from './pages/Consultation';
@@ -150,7 +152,9 @@ export const PAGES = {
     "CaseStudies": CaseStudies,
     "CaseStudyAIBinding": CaseStudyAIBinding,
     "CaseStudyCovenantVictory": CaseStudyCovenantVictory,
-    "CaseStudyTruthStrike": CaseStudyTruthStrike,
+    "CaseStudyNUPS": CaseStudyNUPS,
+    "ProvenanceMethodology": ProvenanceMethodology,
+    "TechnicalEvidence": TechnicalEvidence,
     "ClubCurrencyPress": ClubCurrencyPress,
     "CommandCenter": CommandCenter,
     "Consultation": Consultation,
