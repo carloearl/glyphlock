@@ -12,7 +12,7 @@ import PlayerDeck from "@/components/mixer/PlayerDeck";
 import Crossfader from "@/components/mixer/Crossfader";
 import DJMasterAudioControls from "@/components/mixer/DJMasterAudioControls";
 import { Button } from "@/components/ui/button";
-import { ArrowLeftRight, Tv, WandSparkles, X } from "lucide-react";
+import { ArrowLeftRight, Play, Tv, WandSparkles, X } from "lucide-react";
 import { getClubTVSender, openClubTVWindow } from "@/components/mixer/ClubBroadcastChannel";
 import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 import { useDJSession } from "@/components/mixer/session/DJSessionProvider";
@@ -432,13 +432,34 @@ export default function DJPlayerSection({
   }, [activeDeck, blending, deckASongId, deckBSongId, performTransition, onSkip, activeSongId]);
 
   const handleCueNext = useCallback(() => {
-    if (!profileSongs.length || !activeSongId) return;
-    const idx = profileSongs.findIndex((song) => song.id === activeSongId);
+    if (!profileSongs.length) {
+      toast.info("No playable library tracks are available to cue yet.");
+      return;
+    }
+    const idx = activeSongId ? profileSongs.findIndex((song) => song.id === activeSongId) : -1;
     const next = profileSongs[idx + 1] || profileSongs[0];
     if (!next) return;
+    if (!activeSongId) {
+      // With an empty booth, seed the LIVE deck from the same library pool used
+      // by Auto-DJ. The following effect will automatically fill the cue deck.
+      onPlay?.(next.id);
+      toast.success(`Playing ${next.title || "library track"}`);
+      return;
+    }
     if (activeDeck === "A") setDeckBSongId(next.id);
     else setDeckASongId(next.id);
-  }, [profileSongs, activeSongId, activeDeck]);
+    toast.success(`Cued ${next.title || "next track"}`);
+  }, [profileSongs, activeSongId, activeDeck, onPlay]);
+
+  const handlePlayFromLibrary = useCallback(() => {
+    if (!profileSongs.length) {
+      toast.info("No playable library tracks are available yet.");
+      return;
+    }
+    const currentIndex = activeSongId ? profileSongs.findIndex((song) => song.id === activeSongId) : -1;
+    const next = profileSongs[currentIndex + 1] || profileSongs[0];
+    if (next) onPlay?.(next.id);
+  }, [profileSongs, activeSongId, onPlay]);
 
   const handleSwap = useCallback(() => {
     const targetDeck = activeDeck === "A" ? "B" : "A";
@@ -578,17 +599,20 @@ export default function DJPlayerSection({
           />
 
           <div className="grid grid-cols-2 gap-2">
-            <Button size="sm" variant="outline" className="min-h-10 gap-1 border-slate-700 text-[10px] text-slate-300" onClick={handleCueNext}>
+            <Button size="sm" className="min-h-10 gap-1 bg-emerald-600 text-[10px] font-black text-white hover:bg-emerald-500" onClick={handlePlayFromLibrary} disabled={!profileSongs.length}>
+              <Play className="h-3 w-3" /> Play Library
+            </Button>
+            <Button size="sm" variant="outline" className="min-h-10 gap-1 border-cyan-500/40 text-[10px] font-black text-cyan-300" onClick={handleCueNext} disabled={!profileSongs.length}>
               Cue Next
             </Button>
             <Button size="sm" variant="outline" className="min-h-10 gap-1 border-violet-500/40 text-[10px] text-violet-300" onClick={handleSwap} disabled={!inactiveSongId || transitioning}>
-              <ArrowLeftRight className="h-3 w-3" /> Swap
+              <ArrowLeftRight className="h-3 w-3" /> Blend / Swap
             </Button>
             <Button size="sm" variant="outline" className="min-h-10 gap-1 border-fuchsia-500/40 text-[10px] text-fuchsia-300" onClick={() => openClubTVWindow()}>
               <Tv className="h-3 w-3" /> Visualizer
             </Button>
-            <Button size="sm" variant="outline" className="min-h-10 gap-1 border-red-500/30 text-[10px] text-red-300" onClick={() => setConfirmStop(true)}>
-              <X className="h-3 w-3" /> Stop
+            <Button size="sm" variant="outline" className="col-span-2 min-h-10 gap-1 border-red-500/30 text-[10px] text-red-300" onClick={() => setConfirmStop(true)}>
+              <X className="h-3 w-3" /> Stop Playback
             </Button>
           </div>
 
