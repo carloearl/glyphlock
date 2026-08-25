@@ -572,15 +572,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   const handleAIBulkAddSongs = useCallback((songDataArray) => {
     const newSongs = songDataArray.map((d) => createSongEntry(d));
     if (!newSongs.length) return;
-    setSongs((prev) => {
-      const existingEntityIds = new Set(prev.map((song) => song._entityTrackId).filter(Boolean));
-      const existingMedia = new Set(prev.map((song) => song.youtubeUrl || song.uploadUrl).filter(Boolean));
-      const additions = newSongs.filter((song) =>
-        !(song._entityTrackId && existingEntityIds.has(song._entityTrackId)) &&
-        !((song.youtubeUrl || song.uploadUrl) && existingMedia.has(song.youtubeUrl || song.uploadUrl))
-      );
-      return additions.length ? [...prev, ...additions] : prev;
-    });
+    setSongs((prev) => [...prev, ...newSongs]);
     const newIds = newSongs.map((s) => s.id);
     if (activeProfile) {
       setProfiles((prev) => prev.map((p) =>
