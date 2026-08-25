@@ -14,7 +14,7 @@
 - Status: **Partner Sandbox technical validation complete.** The non-production NUPS application is registered, required server settings are present, Oracle OAuth succeeds, and controlled read-only OHIP requests return successfully.
 - Partner Sandbox hotel: **OHIPSB02** (shared Oracle sandbox; never treat its data as production inventory).
 - OPN status: **approved and active**. Oracle activated GlyphLock LLC’s Level 0 membership on August 19, 2026. OPN Company ID: **4-463913260838**; enrollment: **1654123**; term: **August 19, 2026–August 18, 2027**.
-- Oracle Marketplace listing: **next workstream; not yet approved or published**. OPN activation clears the membership prerequisite but does not itself establish publisher approval, a listing OCID, supplier onboarding, or production access.
+- Oracle Cloud Marketplace program enrollment: **approved and active**. Oracle activated GlyphLock LLC’s Cloud Services / Oracle Cloud Marketplace enrollment **1655445** on August 25, 2026, active through August 24, 2028. This does **not** establish a Publisher Account, published NUPS listing, listing OCID, supplier onboarding, or production access.
 - Production OHIP application/customer environment: **not yet authorized**.
 - Do not attach or copy this subscription into the separate Free Tier account `glyphlockdev`.
 
@@ -93,10 +93,10 @@ Build the lowest-risk proof first:
 
 ## Production path
 
-Partner Sandbox validation proves transport/authentication only; it is not Oracle certification, endorsement, Marketplace approval, or production customer authorization.
+Partner Sandbox validation proves transport/authentication only; it is not Oracle certification, endorsement, a published Marketplace listing, or production customer authorization. The separate Oracle Cloud Marketplace program enrollment is approved and active.
 
 1. **Oracle PartnerNetwork membership verified.** Preserve the August 19, 2026 approval and activation notice as the controlling evidence; the OHIP Store order, Cloud subscription, Support account, and OPERA Digital Learning activation are supporting systems, not the membership proof.
-2. Prepare the NUPS Oracle Cloud Marketplace listing under the applicable OHIP/Hospitality category and complete the publisher-registration workflow. Do not describe the listing as published until Oracle accepts it and issues the listing record or OCID.
+2. **Oracle Cloud Marketplace program enrollment verified.** Preserve the August 25, 2026 approval for enrollment 1655445. Confirm the separate Publisher Account state, then prepare the NUPS listing under the applicable OHIP/Hospitality category. Do not describe the listing as published until Oracle accepts it and issues the listing record or OCID.
 3. Provide the Marketplace listing ID and OPN reference to `hospitality-integrations_ww@oracle.com` when Oracle's process calls for them.
 4. Register a separate **Production** OHIP application and application key.
 5. Add/connect only an authorized OPERA Cloud customer environment after customer approval.
@@ -106,4 +106,4 @@ Partner Sandbox validation proves transport/authentication only; it is not Oracl
 
 ## Separate Simphony track
 
-Simphony integration is a distinct program and must not be mixed into the OPERA Cloud/OHIP application. Continue that process with `fbgbu-integrations_ww@oracle.com` after the OHIP sandbox proof is stable.
+Simphony integration is a distinct program and must not be mixed into the OPERA Cloud/OHIP application. On August 25, 2026, GlyphLock submitted the formal Simphony Integration Partner Program request using its active OPN Company ID. Oracle’s Partner Integration Team stated that it will verify OPN standing, review the submission, and contact the submitted email within 10 business days. Request approval, onboarding, Solution Validation, Simphony Cloud Marketplace publication, certification, and go-live are not yet complete.
