@@ -63,6 +63,9 @@ export function getDeckAudioGraph(audioEl) {
     feedback.gain.value = 0;
     const wet = context.createGain();
     wet.gain.value = 0;
+    const trim = context.createGain();
+    trim.gain.value = 1;
+    const panner = typeof context.createStereoPanner === "function" ? context.createStereoPanner() : context.createGain();
     const analyser = context.createAnalyser();
     analyser.fftSize = 512;
     analyser.smoothingTimeConstant = 0.75;
@@ -72,12 +75,14 @@ export function getDeckAudioGraph(audioEl) {
     mid.connect(high);
     high.connect(sweep);
     sweep.connect(dry);
-    dry.connect(analyser);
+    dry.connect(trim);
     sweep.connect(delay);
     delay.connect(feedback);
     feedback.connect(delay);
     delay.connect(wet);
-    wet.connect(analyser);
+    wet.connect(trim);
+    trim.connect(panner);
+    panner.connect(analyser);
     analyser.connect(context.destination);
 
     const entry = {
@@ -92,6 +97,8 @@ export function getDeckAudioGraph(audioEl) {
       delay,
       feedback,
       wet,
+      trim,
+      panner,
     };
     graphs.set(audioEl, entry);
     return entry;
@@ -123,6 +130,25 @@ export function setDeckAudioFx(audioEl, fx = {}) {
   ramp(entry.wet.gain, echo * 0.7);
   ramp(entry.feedback.gain, echo * 0.62);
   ramp(entry.delay.delayTime, Math.max(0.08, Math.min(0.72, Number(fx.delay ?? 0.28))));
+  return true;
+}
+
+export function setDeckAudioPerformance(audioEl, performance = {}) {
+  const entry = getDeckAudioGraph(audioEl);
+  if (!entry) return false;
+  resumeDeckAudioContext();
+  const now = entry.context.currentTime;
+  const smooth = (param, value) => {
+    if (!param) return;
+    try {
+      param.cancelScheduledValues(now);
+      param.setTargetAtTime(value, now, 0.02);
+    } catch {
+      param.value = value;
+    }
+  };
+  smooth(entry.trim.gain, Math.max(0, Math.min(1.5, Number(performance.gain ?? 1))));
+  smooth(entry.panner.pan, Math.max(-1, Math.min(1, Number(performance.pan ?? 0))));
   return true;
 }
 
