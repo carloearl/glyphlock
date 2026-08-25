@@ -165,6 +165,23 @@ async function updateClaimedRequest(base44, requestId, idempotencyKey, actorEmai
   return base44.asServiceRole.entities.NUPSAccessRequest.get(requestId);
 }
 
+async function updateAccountForClaim(base44, accountId, claimedAt, patch, expectedStatus = null) {
+  if (!claimedAt) return false;
+  const result = await base44.asServiceRole.entities.NUPSUser.updateMany({
+    $and: [
+      { id: accountId },
+      ...(expectedStatus ? [{ status: expectedStatus }] : []),
+      { $or: [
+        { access_claimed_at: { $exists: false } },
+        { access_claimed_at: { $lte: claimedAt } },
+      ] },
+    ],
+  }, {
+    $set: { ...patch, access_claimed_at: claimedAt },
+  });
+  return result?.updated === 1;
+}
+
 async function getDecisionReplayResponse(base44, request, decision, idempotencyKey, actorEmail) {
   const prior = (request?.decision_log || []).find((entry) => entry.idempotency_key === idempotencyKey);
   if (!prior) return null;
@@ -188,7 +205,12 @@ async function getDecisionReplayResponse(base44, request, decision, idempotencyK
         const claimTimestamp = claimed.decision_claimed_at;
         let claimHeld = true;
         try {
-          await base44.asServiceRole.entities.NUPSUser.update(account.id, { status: 'active' });
+          const activated = await updateAccountForClaim(
+            base44, account.id, claimTimestamp, { status: 'active' }, 'suspended',
+          );
+          if (!activated) {
+            return Response.json({ error: 'Approval reconciliation lost its account claim. Retry with the same idempotency key.' }, { status: 409 });
+          }
           const recovered = await updateClaimedRequest(
             base44, request.id, idempotencyKey, actorEmail, claimTimestamp, { decision_claim_active: false },
           );
@@ -501,11 +523,14 @@ Deno.serve(async (req) => {
             if (linkedUser.status === 'active') {
               return Response.json({ error: 'A pre-existing active account cannot be rebound by this approval. Owner reconciliation is required.' }, { status: 409 });
             }
-            await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, {
+            const prepared = await updateAccountForClaim(base44, nupsUserId, claimTimestamp, {
               status: 'suspended', role: nupsRole, approved_by: email,
               platform_email: normalizeEmail(r.email), venue_id: resolvedVenueId,
               access_mode: r.mode, is_demo: r.mode !== 'REAL',
             });
+            if (!prepared) {
+              return Response.json({ error: 'The linked NUPS account changed during approval. Retry with the same idempotency key.' }, { status: 409 });
+            }
           } else {
             const nu = await base44.asServiceRole.entities.NUPSUser.create({
               username: r.email,
@@ -517,6 +542,7 @@ Deno.serve(async (req) => {
               status: 'suspended',
               is_demo: ['SANDBOX', 'DEMO', 'TEST'].includes(r.mode),
               access_mode: r.mode,
+              access_claimed_at: claimTimestamp,
               created_note: `Approved via NUPSAccessRequest ${r.id} (${decision})`,
             });
             nupsUserId = nu.id;
@@ -532,7 +558,12 @@ Deno.serve(async (req) => {
           if (!committedGrant) {
             return Response.json({ error: 'Approval lost its decision claim before the grant committed.' }, { status: 409 });
           }
-          await base44.asServiceRole.entities.NUPSUser.update(nupsUserId, { status: 'active' });
+          const activated = await updateAccountForClaim(
+            base44, nupsUserId, claimTimestamp, { status: 'active' }, 'suspended',
+          );
+          if (!activated) {
+            return Response.json({ error: 'Approval lost its account claim before activation.' }, { status: 409 });
+          }
           const updated = await updateClaimedRequest(
             base44, request_id, idempotency_key, email, claimTimestamp, { decision_claim_active: false },
           );
@@ -547,9 +578,12 @@ Deno.serve(async (req) => {
         const newStatus = statusMap[decision];
         // Revocation / suspension deactivates the linked account immediately.
         if ((decision === 'REVOKE' || decision === 'SUSPEND') && r.nups_user_id) {
-          await base44.asServiceRole.entities.NUPSUser.update(r.nups_user_id, {
+          const deactivated = await updateAccountForClaim(base44, r.nups_user_id, claimTimestamp, {
             status: decision === 'REVOKE' ? 'terminated' : 'suspended',
           });
+          if (!deactivated) {
+            return Response.json({ error: 'The linked NUPS account changed during deactivation. Retry with the same idempotency key.' }, { status: 409 });
+          }
         }
         const updated = await updateClaimedRequest(base44, request_id, idempotency_key, email, claimTimestamp, {
           ...patch, status: newStatus, granted_role: '', decision_claim_active: false,

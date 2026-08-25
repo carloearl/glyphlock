@@ -153,6 +153,11 @@
       ],
       "description": "Exact operating mode authorized by the linked owner-approved access grant."
     },
+    "access_claimed_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Newest access-decision generation allowed to change this account's authorization status."
+    },
     "demo_tier": {
       "type": "string",
       "enum": [

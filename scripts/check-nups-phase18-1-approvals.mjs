@@ -10,6 +10,7 @@ import {
 
 const access = fs.readFileSync("base44/functions/nupsAccessControl/entry.ts", "utf8");
 const requestSchema = fs.readFileSync("base44/entities/NUPSAccessRequest.jsonc", "utf8");
+const userSchema = fs.readFileSync("base44/entities/NUPSUser.jsonc", "utf8");
 const ui = fs.readFileSync("src/pages/AccessRequests.jsx", "utf8");
 const requestForm = fs.readFileSync("src/components/nups/kiosk/AccessRequestForm.jsx", "utf8");
 const owner = fs.readFileSync("src/pages/NUPSOwner.jsx", "utf8");
@@ -121,11 +122,15 @@ const checks = [
     const replacement = { ...expiredWorker, claimedAt: "2026-08-25T00:05:01.000Z" };
     assert.equal(claimGenerationMatches(replacement, expiredWorker), false);
     assert.equal(claimGenerationMatches(replacement, replacement), true);
+    assert.match(access, /async function updateAccountForClaim[\s\S]*?access_claimed_at:\s*\{\s*\$lte:\s*claimedAt\s*\}/);
+    assert.match(access, /\$set:\s*\{\s*\.\.\.patch, access_claimed_at:\s*claimedAt\s*\}/);
+    assert.doesNotMatch(access, /NUPSUser\.update\(nupsUserId,\s*\{\s*status:\s*'active'/);
+    assert.match(userSchema, /"access_claimed_at"[\s\S]*?"format":\s*"date-time"/);
   }],
   ["approval activates an account only after its grant commits", () => {
-    const suspendedCreate = access.indexOf("status: 'suspended'");
+    const suspendedCreate = access.indexOf("const nu = await base44.asServiceRole.entities.NUPSUser.create");
     const approvedWrite = access.indexOf("...patch, status: 'APPROVED'");
-    const activeWrite = access.indexOf("NUPSUser.update(nupsUserId, { status: 'active' }");
+    const activeWrite = access.indexOf("const activated = await updateAccountForClaim", approvedWrite);
     assert.ok(suspendedCreate > -1 && approvedWrite > suspendedCreate && activeWrite > approvedWrite);
     assert.match(access, /prior approval did not finish activating its bound account/);
     assert.match(access, /reconciled: true/);
