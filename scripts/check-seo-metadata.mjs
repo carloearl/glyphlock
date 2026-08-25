@@ -265,7 +265,7 @@ if (seoData) {
     const value = (field) => block.match(new RegExp(`^    ${field}:\\s*"([^"]+)"`, 'm'))?.[1] || '';
     return { key: match[1], title: value('title'), description: value('description'), url: value('url'), ogTitle: value('ogTitle'), ogDescription: value('ogDescription') };
   });
-  if (entries.length !== 40) fail(`SEO_DATA must contain 40 approved public routes including the Oracle OHIP evidence page (found ${entries.length})`);
+  if (entries.length !== 40) fail(`SEO_DATA must contain 41 approved public routes including the Oracle OHIP evidence page (found ${entries.length})`);
   const descriptions = entries.map((entry) => entry.description);
   if (new Set(descriptions).size !== descriptions.length) fail('Every public route description must be distinct');
   for (const entry of entries) {
