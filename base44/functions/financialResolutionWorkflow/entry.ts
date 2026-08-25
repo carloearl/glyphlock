@@ -70,9 +70,9 @@ function determineApprovalChain(amount, resolutionType) {
 // Role → approval level mapping
 function roleCanApprove(role, level) {
   const roleMap = {
-    "corporate_accounting": ["ADMIN", "CORPORATE", "ACCOUNTING"],
-    "compliance": ["ADMIN", "COMPLIANCE"],
-    "ownership": ["ADMIN", "OWNER", "SOVEREIGN"]
+    "corporate_accounting": ["PLATFORM_ADMIN", "SOVEREIGN"],
+    "compliance": ["PLATFORM_ADMIN", "SOVEREIGN"],
+    "ownership": ["PLATFORM_ADMIN", "VENUE_OWNER", "SOVEREIGN"]
   };
   const allowed = roleMap[level] || [];
   return allowed.includes(role?.toUpperCase());
@@ -168,6 +168,8 @@ async function captureExecutionSnapshot(base44, linkedRecords, venueId) {
 }
 
 const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+const CREATE_REQUEST_ROLES = new Set(['MANAGER', 'ADMINISTRATOR', 'OWNER']);
+const APPROVAL_ROLES = new Set(['ADMINISTRATOR', 'OWNER']);
 const EXECUTE_ROLES = new Set(['MANAGER', 'ADMINISTRATOR', 'OWNER']);
 const ROLLBACK_ROLES = new Set(['MANAGER', 'ADMINISTRATOR', 'OWNER']);
 const FINANCIAL_ACCOUNT_ROLE_BY_GRANT = {
@@ -256,6 +258,11 @@ Deno.serve(async (req) => {
       if (!VALID_RESOLUTION_TYPES.includes(resolution_type)) {
         return Response.json({ error: "Invalid resolution type" }, { status: 400 });
       }
+      const requestAuthority = await requireRealFinancialAuthority(base44, user, venue_id, CREATE_REQUEST_ROLES);
+      if (!requestAuthority) {
+        return Response.json({ error: "Forbidden: active REAL financial authority required" }, { status: 403 });
+      }
+      actor.role = requestAuthority.role;
 
       // Fetch the exception to validate it exists and is unresolved
       const exceptions = await base44.asServiceRole.entities.ReconciliationException.filter(
@@ -265,6 +272,9 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Referenced exception not found" }, { status: 404 });
       }
       const exception = exceptions[0];
+      if (exception.venue_id !== venue_id || exception.mode !== "REAL") {
+        return Response.json({ error: "Referenced exception is outside the active REAL venue scope" }, { status: 403 });
+      }
       if (exception.status === "RESOLVED" || exception.status === "ARCHIVED") {
         return Response.json({ error: "Exception is already resolved or archived" }, { status: 409 });
       }
@@ -363,6 +373,14 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Resolution request not found" }, { status: 404 });
       }
       const resolution = reqs[0];
+      if (resolution.mode !== "REAL") {
+        return Response.json({ error: "Only REAL resolution requests can be approved" }, { status: 409 });
+      }
+      const approvalAuthority = await requireRealFinancialAuthority(base44, user, resolution.venue_id, APPROVAL_ROLES);
+      if (!approvalAuthority) {
+        return Response.json({ error: "Forbidden: active REAL approval authority required" }, { status: 403 });
+      }
+      actor.role = approvalAuthority.role;
 
       if (resolution.approval_status === "EXECUTED" || resolution.approval_status === "ROLLED_BACK") {
         return Response.json({ error: "Resolution already executed" }, { status: 409 });
@@ -454,6 +472,14 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Resolution request not found" }, { status: 404 });
       }
       const resolution = reqs[0];
+      if (resolution.mode !== "REAL") {
+        return Response.json({ error: "Only REAL resolution requests can be rejected" }, { status: 409 });
+      }
+      const approvalAuthority = await requireRealFinancialAuthority(base44, user, resolution.venue_id, APPROVAL_ROLES);
+      if (!approvalAuthority) {
+        return Response.json({ error: "Forbidden: active REAL approval authority required" }, { status: 403 });
+      }
+      actor.role = approvalAuthority.role;
 
       if (resolution.approval_status === "EXECUTED" || resolution.approval_status === "ROLLED_BACK") {
         return Response.json({ error: "Resolution already executed — use rollback" }, { status: 409 });
@@ -505,6 +531,18 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Resolution request not found" }, { status: 404 });
       }
       const resolution = reqs[0];
+      if (resolution.mode !== "REAL") {
+        return Response.json({ error: "Only REAL resolution requests can be changed" }, { status: 409 });
+      }
+      const approvalAuthority = await requireRealFinancialAuthority(base44, user, resolution.venue_id, APPROVAL_ROLES);
+      if (!approvalAuthority) {
+        return Response.json({ error: "Forbidden: active REAL approval authority required" }, { status: 403 });
+      }
+      actor.role = approvalAuthority.role;
+      const currentLevel = resolution.current_approval_level;
+      if (currentLevel && !roleCanApprove(actor.role, currentLevel)) {
+        return Response.json({ error: "Not authorized to request changes at this level" }, { status: 403 });
+      }
 
       const now = new Date().toISOString();
       const transitionHistory = resolution.transition_history || [];
@@ -540,6 +578,9 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Resolution request not found" }, { status: 404 });
       }
       const resolution = reqs[0];
+      if (resolution.mode !== "REAL") {
+        return Response.json({ error: "Only REAL resolution requests can be executed" }, { status: 409 });
+      }
       const executionAuthority = await requireRealFinancialAuthority(base44, user, resolution.venue_id, EXECUTE_ROLES);
       if (!executionAuthority) {
         return Response.json({ error: "Forbidden: active REAL financial authority required" }, { status: 403 });
@@ -731,6 +772,9 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Resolution request not found" }, { status: 404 });
       }
       const resolution = reqs[0];
+      if (resolution.mode !== "REAL") {
+        return Response.json({ error: "Only REAL resolution requests can be rolled back" }, { status: 409 });
+      }
       const rollbackAuthority = await requireRealFinancialAuthority(base44, user, resolution.venue_id, ROLLBACK_ROLES);
       if (!rollbackAuthority) {
         return Response.json({ error: "Forbidden: active REAL financial authority required" }, { status: 403 });
