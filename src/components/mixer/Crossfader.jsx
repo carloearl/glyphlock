@@ -17,9 +17,10 @@ export default function Crossfader({
   onBlendNow,
   transitioning = false,
   cueAvailable = true,
+  compact = false,
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-3 px-4 py-2">
+    <div className={`flex flex-wrap items-center gap-3 ${compact ? "px-2 py-2" : "px-4 py-2"}`}>
       <span className={`text-[10px] font-bold uppercase tracking-wider transition-colors ${value < 50 ? 'text-cyan-400' : 'text-slate-600'}`}>
         A
       </span>
@@ -41,7 +42,7 @@ export default function Crossfader({
       </span>
 
       {/* Auto Mix — smooth blend controls live right on the fader */}
-      <div className="flex items-center gap-2 border-l border-slate-700/50 pl-3">
+      <div className={`flex items-center gap-2 ${compact ? "w-full flex-col border-t border-slate-700/50 pt-3" : "border-l border-slate-700/50 pl-3"}`}>
         <Button
           size="sm"
           variant="outline"
@@ -55,7 +56,7 @@ export default function Crossfader({
           Auto Mix {autoMix ? "ON" : "OFF"}
         </Button>
 
-        <label className="flex items-center gap-1.5 text-[9px] font-mono text-slate-500">
+        <label className="flex w-full items-center justify-center gap-1.5 text-[9px] font-mono text-slate-500">
           BLEND
           <input
             type="range"
@@ -64,7 +65,7 @@ export default function Crossfader({
             step={1}
             value={blendSeconds}
             onChange={(e) => onBlendSecondsChange?.(Number(e.target.value))}
-            className="w-20 accent-emerald-500"
+            className={`${compact ? "flex-1" : "w-20"} accent-emerald-500`}
           />
           <span className="text-slate-300 w-6">{blendSeconds}s</span>
         </label>
