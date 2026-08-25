@@ -20,20 +20,31 @@ export default function EntertainerPlaylistDock({ activeProfileName, profileSong
   const [roster, setRoster] = useState([]);
   const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState(null);
+  const [authDenied, setAuthDenied] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!venueId) {
       setRoster([]);
+      setAuthDenied(false);
       return;
     }
     setLoading(true);
+    setAuthDenied(false);
     try {
       const list = await loadCheckedInEntertainers(venueId);
       const withPlaylists = await Promise.all(list.map(async (person) => {
-        const playlist = await loadEntertainerPlaylist(person.entertainerId, venueId);
+        const playlist = await loadEntertainerPlaylist(person.entertainerId, venueId).catch(() => null);
         return { ...person, trackCount: playlist?.ordered_tracks?.length || 0, playlistName: playlist?.name || "" };
       }));
       setRoster(withPlaylists);
+    } catch (error) {
+      // The DJ gateway enforces server-side RBAC (authorized DJ or NUPS
+      // manager). On the public mixer page a caller without that identity
+      // receives a 403 — surface a helpful empty state instead of throwing
+      // an unhandled rejection.
+      setRoster([]);
+      const message = String(error?.message || "");
+      setAuthDenied(/403|authorized|identity required|manager/i.test(message));
     } finally {
       setLoading(false);
     }
@@ -95,7 +106,11 @@ export default function EntertainerPlaylistDock({ activeProfileName, profileSong
       <div className="overflow-y-auto max-h-56 p-2 space-y-1">
         {!loading && roster.length === 0 && (
           <p className="text-[11px] text-slate-500 text-center py-4">
-            {venueId ? <>No entertainers checked in.<br />Playlists appear here at check-in.</> : <>Select an active venue to use entertainer playlists.</>}
+            {authDenied
+              ? <>Sign in as a DJ or NUPS manager to use entertainer playlists.</>
+              : venueId
+                ? <>No entertainers checked in.<br />Playlists appear here at check-in.</>
+                : <>Select an active venue to use entertainer playlists.</>}
           </p>
         )}
         {roster.map((person) => (
