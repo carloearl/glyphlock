@@ -1,55 +1,19 @@
 # GlyphLock LLC — robots.txt
 # Canonical origin: https://glyphlock.io
-# NUPS = Nexus Unified POS System
-# Generated: 2026-08-22
+# Public marketing and Technical Evidence routes are crawlable.
+# Generated: 2026-08-25
 
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: anthropic-ai
+User-agent: PerplexityBot
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
 User-agent: *
 Allow: /
-
-# ── Public indexable pages (actual route casing) ──
-Allow: /$
-Allow: /About
-Allow: /AboutCarlo
-Allow: /Services
-Allow: /Solutions
-Allow: /Pricing
-Allow: /Contact
-Allow: /Consultation
-Allow: /SecureQRStudio
-Allow: /ImageLab
-Allow: /ImageGenerator
-Allow: /InteractiveImageStudio
-Allow: /GlyphBot
-Allow: /GlyphBotMixer
-Allow: /SecurityTools
-Allow: /SecurityOperationsCenter
-Allow: /Blockchain
-Allow: /SDKDocs
-Allow: /SecurityDocs
-Allow: /Roadmap
-Allow: /Partners
-Allow: /DreamTeam
-Allow: /FAQ
-Allow: /GovernanceHub
-Allow: /MasterCovenant
-Allow: /TrustSecurity
-Allow: /NISTChallenge
-Allow: /TechnicalEvidence
-Allow: /CaseStudyOracleOHIP
-Allow: /OracleOHIPMilestone
-Allow: /CaseStudyNUPS
-Allow: /ProvenanceMethodology
-Allow: /CaseStudyCovenantVictory
-Allow: /GlyphLockFinancial
-Allow: /NUPSLanding
-Allow: /VideoUpload
-Allow: /Privacy
-Allow: /Terms
-Allow: /Cookies
-Allow: /Accessibility
-Allow: /CodeOfEthics
-
-# ── Noindex: admin / private / authenticated / payment-result / test / sandbox / internal audit ──
 Disallow: /Dashboard
 Disallow: /CommandCenter
 Disallow: /ProjectUpdates
@@ -131,7 +95,7 @@ Disallow: /mobilescanner
 Disallow: /clubtv
 Disallow: /fablestage
 
-# ── Duplicate-case route variants (noindex to avoid canonical duplication) ──
+# Duplicate-case aliases remain blocked to avoid canonical duplication.
 Disallow: /about
 Disallow: /aboutcarlo
 Disallow: /services
@@ -158,17 +122,14 @@ Disallow: /governancehub
 Disallow: /mastercovenant
 Disallow: /trustsecurity
 Disallow: /nistchallenge
-Disallow: /casestudies
+Disallow: /technicalevidence
+Disallow: /caseStudyoracleohip
+Disallow: /casestudynups
+Disallow: /provenancemethodology
+Disallow: /casestudycovenantvictory
 Disallow: /oracleohipmilestone
 Disallow: /glyphlockfinancial
 Disallow: /nupslanding
 Disallow: /ohipreadiness
 
-# ── Discovery ──
 Sitemap: https://glyphlock.io/sitemap.xml
-
-# Crawl-delay for politeness
-Crawl-delay: 1
-
-# All crawlers inherit the wildcard policy above. No agent-specific group may
-# reopen protected paths with a broader Allow rule.
