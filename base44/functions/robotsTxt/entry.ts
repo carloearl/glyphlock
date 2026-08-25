@@ -14,7 +14,7 @@ const PUBLIC_ALLOW = [
   '/SecurityOperationsCenter', '/Blockchain', '/SDKDocs', '/SecurityDocs',
   '/Roadmap', '/Partners', '/DreamTeam', '/FAQ', '/GovernanceHub',
   '/MasterCovenant', '/TrustSecurity', '/NISTChallenge', '/CaseStudies',
-  '/CaseStudyOracleOHIP', '/CaseStudyTruthStrike', '/CaseStudyAIBinding', '/CaseStudyCovenantVictory',
+  '/CaseStudyOracleOHIP', '/OracleOHIPMilestone', '/CaseStudyTruthStrike', '/CaseStudyAIBinding', '/CaseStudyCovenantVictory',
   '/GlyphLockFinancial', '/NUPSLanding', '/VideoUpload',
   '/Privacy', '/Terms', '/Cookies', '/Accessibility', '/CodeOfEthics',
 ];
@@ -47,7 +47,7 @@ const DUP_CASE = [
   '/interactiveimagestudio', '/glyphbot', '/glyphbotmixer', '/securitytools',
   '/securityoperationscenter', '/blockchain', '/sdkdocs', '/securitydocs',
   '/roadmap', '/partners', '/dreamteam', '/faq', '/governancehub',
-  '/mastercovenant', '/trustsecurity', '/nistchallenge', '/casestudies',
+  '/mastercovenant', '/trustsecurity', '/nistchallenge', '/casestudies', '/oracleohipmilestone',
   '/glyphlockfinancial', '/nupslanding', '/ohipreadiness',
 ];
 
