@@ -71,7 +71,7 @@ export const NAV_SECTIONS = [
       { label: "Protocol Verification", page: "Consultation", visibility: "public" },
       { label: "Trust & Security", page: "TrustSecurity", visibility: "public" },
       { label: "NIST Challenge", page: "NISTChallenge", visibility: "public" },
-      { label: "Case Studies", page: "CaseStudies", visibility: "public" }
+      { label: "Technical Evidence", page: "TechnicalEvidence", visibility: "public" }
     ]
   },
   {
@@ -132,7 +132,7 @@ export const FOOTER_LINKS = {
     { label: "Protocol Verification", page: "Consultation", visibility: "public" },
     { label: "Trust & Security", page: "TrustSecurity", visibility: "public" },
     { label: "NIST Challenge", page: "NISTChallenge", visibility: "public" },
-    { label: "Case Studies", page: "CaseStudies", visibility: "public" }
+    { label: "Technical Evidence", page: "TechnicalEvidence", visibility: "public" }
   ],
   resources: [
     { label: "Documentation", page: "SecurityDocs", visibility: "public" },
