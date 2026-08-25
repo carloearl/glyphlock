@@ -239,12 +239,12 @@ export default function OracleOHIPMilestone() {
             GlyphLock LLC · El Mirage, Arizona
           </p>
           <h1 className="mt-5 max-w-5xl text-4xl font-black leading-tight tracking-tight sm:text-6xl">
-            GlyphLock advances NUPS through a controlled Oracle OHIP Partner Sandbox milestone
+            GlyphLock advances NUPS across Oracle OHIP, Cloud Marketplace and Simphony tracks
           </h1>
           <p className="mt-7 max-w-4xl text-xl leading-8 text-slate-300">
-            The owner-controlled integration path progressed through authenticated request success and
-            sanitized response validation without exposing credentials, access tokens or raw Oracle payloads
-            to the browser.
+            OHIP Partner Sandbox response validation is complete, Oracle Cloud Marketplace program enrollment
+            is approved and active, and the formal Simphony Integration Partner Program request has been submitted.
+            Production access, a published NUPS listing and Simphony Solution Validation remain Oracle-controlled gates.
           </p>
         </div>
       </header>
@@ -254,9 +254,10 @@ export default function OracleOHIPMilestone() {
           <div className="space-y-7 text-base leading-8 text-slate-300">
             <p className="text-lg leading-8 text-slate-200">
               <strong className="text-white">EL MIRAGE, Ariz., Aug. 25, 2026 —</strong> GlyphLock LLC
-              announced that the Oracle Hospitality Integration Platform pathway for its Nexus Unified POS
-              System, or NUPS, reached <strong className="text-emerald-300">response validated</strong> in
-              the Oracle OHIP Partner Sandbox on August 24.
+              announced that its Nexus Unified POS System, or NUPS, has advanced across three separate Oracle
+              workstreams: <strong className="text-emerald-300">response validated</strong> in the OHIP Partner
+              Sandbox, an approved and active Oracle Cloud Marketplace program enrollment, and a formally submitted
+              Simphony Integration Partner Program request now awaiting Oracle review.
             </p>
 
             <p>
