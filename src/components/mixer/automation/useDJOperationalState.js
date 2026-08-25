@@ -30,7 +30,22 @@ export default function useDJOperationalState({ pollMs = 10000, enabled = true }
       }
       return data;
     } catch (err) {
-      if (mounted.current) setError(err?.response?.data?.error || err?.message || "DJ operational snapshot failed.");
+      if (mounted.current) {
+        // The DJ gateway enforces server-side RBAC (authorized DJ or NUPS
+        // manager). A 403 means the caller has no DJ/manager identity — on the
+        // public mixer page this is expected. Treat it as a silent empty
+        // snapshot so the mixer keeps running in local-only mode rather than
+        // surfacing a scary error banner. Polling continues, so the console
+        // recovers automatically once an authorized session is established.
+        const message = String(err?.response?.data?.error || err?.message || "");
+        const authDenied = /403|authorized|identity required|manager/i.test(message);
+        if (!authDenied) {
+          setError(message || "DJ operational snapshot failed.");
+        } else {
+          setError(null);
+          setSnapshot(EMPTY);
+        }
+      }
       return null;
     } finally {
       if (mounted.current) setLoading(false);
