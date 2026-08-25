@@ -1,405 +1,150 @@
-/**
- * Master Covenant Litigation Simulation - Full Case Study
- * Internal research / simulation documentation
- */
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  ArrowLeft, Trophy, Scale, Shield, CheckCircle, XCircle, 
-  Calendar, Download, Share2, FileText 
-} from 'lucide-react';
+import { ArrowLeft, CheckCircle2, FileWarning, Scale, XCircle } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
-import { toast } from 'sonner';
+import { createPageUrl } from '@/utils';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 
-const TABS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'findings', label: 'Simulation Findings' },
-  { id: 'timeline', label: 'Proceedings' },
-  { id: 'verdict', label: 'Simulation Result' },
-  { id: 'implications', label: 'Implications' }
+const LIKELY_ENFORCEABLE = [
+  {
+    title: 'Internal governance charter',
+    analysis: 'An organization can adopt internal policies that assign responsibilities, approval paths, documentation duties, and review controls to its own officers, staff, and agents, subject to applicable law and existing agreements.',
+  },
+  {
+    title: 'Express incorporation into signed agreements',
+    analysis: 'Provisions are stronger when the referenced terms are available before assent, clearly identified, and incorporated into an agreement accepted by the relevant party.',
+  },
+  {
+    title: 'Evidence-preservation and notice provisions',
+    analysis: 'Timestamped records, hashes, access logs, delivery records, and documented notice can support later factual analysis, authentication, or dispute resolution when collected lawfully.',
+  },
+  {
+    title: 'Operator duties created by actual agreement or law',
+    analysis: 'Confidentiality, data-use, security, and handling duties may be enforceable when they arise from a signed agreement, accepted terms, statute, or other recognized source—not from processing alone.',
+  },
 ];
 
-export default function CaseStudyCovenantVictory() {
-  const [activeTab, setActiveTab] = useState('overview');
+const LIKELY_UNENFORCEABLE = [
+  {
+    title: 'Passive-exposure contract formation',
+    analysis: 'Mere viewing, receipt, indexing, model processing, or other passive exposure generally does not supply the notice and objective assent required for contract formation.',
+  },
+  {
+    title: 'Symbolic or narrative supremacy',
+    analysis: 'Private declarations cannot override statutes, regulations, court authority, intellectual-property limits, or an existing agreement that controls the parties.',
+  },
+  {
+    title: 'Automatic nullification of other agreements',
+    analysis: 'A unilateral document cannot void another agreement without a recognized contractual or legal basis. Priority and conflict questions depend on the actual instruments and applicable law.',
+  },
+];
 
-  const handleDownload = () => {
-    const content = `GLYPHLOCK RESEARCH NOTE\n\nMaster Covenant Litigation Simulation\n\nEl Mirage, AZ — December 3, 2025\n\nThis case study documents an internal multi-round courtroom simulation used to stress-test the GlyphLock Master Covenant of Sovereign IP & Constructive Binding (CAB). It is not a court judgment, judicial opinion, or representation that a court validated the framework.\n\nSIMULATION FINDINGS:\n✓ Internal governance charter theory tested\n✓ Conventional incorporation into signed agreements analyzed\n✓ Operator-liability theories stress-tested\n✓ Evidentiary-notice concepts evaluated\n\nRESULT: INTERNAL SIMULATION COMPLETED\n\nFor current details, visit glyphlock.io`;
-    
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'GlyphLock_Victory_Press_Release.txt';
-    a.click();
-    window.URL.revokeObjectURL(url);
-    toast.success('Press release downloaded');
-  };
-
-  const handleShare = () => {
-    const text = 'GlyphLock Master Covenant Litigation Simulation - internal research stress-test of governance and contract theories. Learn more at glyphlock.io';
-    
-    if (navigator.share) {
-      navigator.share({ title: 'GlyphLock Legal Victory', text, url: window.location.href })
-        .then(() => toast.success('Shared successfully'))
-        .catch(() => {});
-    } else {
-      navigator.clipboard.writeText(`${text} ${window.location.href}`);
-      toast.success('Link copied to clipboard');
-    }
-  };
-
+function Finding({ item, positive }) {
+  const Icon = positive ? CheckCircle2 : XCircle;
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a1324] via-[#1a244b] to-[#1e293b] py-20">
-      <SEOHead
-        title="Master Covenant Litigation Simulation - GlyphLock Case Study"
-        description="Documentation of GlyphLock's internal courtroom simulation stress-testing Master Covenant governance, contract-incorporation, operator-liability, and evidentiary-notice theories. Not a court ruling."
-        keywords={['Master Covenant litigation', 'GlyphLock legal victory', 'IP sovereignty', 'AI accountability law', 'operator liability']}
-      />
-
-      <div className="container mx-auto px-4 max-w-6xl">
-        {/* Back Button */}
-        <Link to={createPageUrl('CaseStudies')} className="inline-flex items-center gap-2 text-blue-300 hover:text-blue-200 mb-8 transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Case Studies</span>
-        </Link>
-
-        {/* Header */}
-        <header className="text-center mb-12 pb-8 border-b-2 border-blue-700/40">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Scale className="w-8 h-8 text-blue-400" />
-            <h1 className="text-3xl md:text-5xl font-bold text-white">
-              Master Covenant Litigation Simulation
-            </h1>
+    <Card className={positive ? 'border-emerald-400/25 bg-emerald-400/[0.05]' : 'border-rose-400/25 bg-rose-400/[0.05]'}>
+      <CardContent className="flex gap-4 p-6">
+        <Icon className={`mt-1 h-5 w-5 flex-none ${positive ? 'text-emerald-300' : 'text-rose-300'}`} />
+        <div>
+          <div className="flex flex-wrap items-center gap-3">
+            <h3 className="font-bold text-white">{item.title}</h3>
+            <Badge className={positive ? 'bg-emerald-500/15 text-emerald-200' : 'bg-rose-500/15 text-rose-200'}>
+              {positive ? 'Likely enforceable' : 'Likely unenforceable'}
+            </Badge>
           </div>
-
-          <div className="inline-block bg-gradient-to-r from-green-600 to-green-700 text-white px-8 py-4 rounded-lg mb-4">
-            <div className="flex items-center gap-3">
-              <Trophy className="w-6 h-6" />
-              <span className="text-xl font-bold">DEFENDANT PREVAILS</span>
-            </div>
-          </div>
-
-          <p className="text-blue-200 text-sm">FOR IMMEDIATE RELEASE • December 3, 2025</p>
-        </header>
-
-        {/* Tabs */}
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 border-b-2 border-blue-700/40">
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-3 rounded-t-lg font-semibold whitespace-nowrap transition-all ${
-                activeTab === tab.id
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-blue-900/30 text-blue-300 hover:bg-blue-900/50'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div className="space-y-6">
-          {activeTab === 'overview' && <OverviewTab />}
-          {activeTab === 'findings' && <FindingsTab />}
-          {activeTab === 'timeline' && <TimelineTab />}
-          {activeTab === 'verdict' && <VerdictTab />}
-          {activeTab === 'implications' && <ImplicationsTab handleDownload={handleDownload} handleShare={handleShare} />}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function OverviewTab() {
-  return (
-    <>
-      <Card className="bg-blue-900/30 border-blue-700/40 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <FileText className="w-6 h-6 text-blue-400" />
-            Executive Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-blue-100 space-y-4">
-          <p>This case study documents an internal multi-round courtroom simulation involving adversarial argument, cross-examination scenarios, and legal-analysis prompts concerning the GlyphLock Master Covenant of Sovereign IP & Constructive Binding (CAB).</p>
-          <p className="font-bold text-white">Result: The simulation identified theories that may be stronger when incorporated into conventional signed agreements and theories that require narrowing. This is research output, not a judicial determination.</p>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-green-900/20 border-green-700/40 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <CheckCircle className="w-6 h-6 text-green-400" />
-            What the Simulation Supported
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Finding
-            title="Internal Governance Charter"
-            description="The Covenant is legally enforceable as an internal governance framework governing GlyphLock officers, agents, operators, and controlled entities."
-            status="upheld"
-          />
-          <Finding
-            title="Operator Liability Framework"
-            description="Valid binding of AI system operators, trainers, dataset controllers, and platform handlers who process GlyphLock IP."
-            status="upheld"
-          />
-          <Finding
-            title="Incorporation Into Contracts"
-            description="Enforceable when explicitly referenced in signed NDAs, ToS, DPAs, and operator agreements."
-            status="upheld"
-          />
-          <Finding
-            title="Evidentiary IP Notice"
-            description="Admissible as evidence in misappropriation, trademark, and confidentiality disputes—strengthening GlyphLock's IP defense posture."
-            status="upheld"
-          />
-        </CardContent>
-      </Card>
-
-      <Card className="bg-red-900/20 border-red-700/40 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-white">
-            <XCircle className="w-6 h-6 text-red-400" />
-            What the Simulation Narrowed
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Finding
-            title="Universal Exposure Auto-Binding"
-            description="The simulation flagged provisions attempting to bind viewers or passive observers by mere exposure as legally vulnerable under ordinary contract-formation principles."
-            status="void"
-          />
-          <Finding
-            title="Symbolic Supremacy Claims"
-            description="Language asserting 'narrative jurisdiction' or 'symbolic override' of statutory law was deemed aspirational, not enforceable."
-            status="void"
-          />
-          <Finding
-            title="Self-Nullification of Other Agreements"
-            description="The simulation rejected treating the Covenant as capable of unilaterally voiding conflicting agreements; enforceability depends on applicable law and actual agreements."
-            status="void"
-          />
-        </CardContent>
-      </Card>
-
-      <QuoteBox
-        quote="The simulation suggests the strongest path is conventional: clear notice, actual assent, signed incorporation, and evidence preservation."
-        author="Internal Simulation Summary"
-      />
-    </>
-  );
-}
-
-function FindingsTab() {
-  return (
-    <>
-      <Card className="bg-blue-900/30 border-blue-700/40 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="text-white">Enforceable Provisions (UPHELD)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b-2 border-blue-700">
-                  <th className="text-left p-3 text-blue-200 font-bold">Provision</th>
-                  <th className="text-center p-3 text-blue-200 font-bold">Status</th>
-                  <th className="text-left p-3 text-blue-200 font-bold">Legal Basis</th>
-                </tr>
-              </thead>
-              <tbody className="text-blue-100">
-                <TableRow 
-                  provision="Internal Governance Charter"
-                  status="upheld"
-                  basis="Valid corporate authority to define internal operations"
-                />
-                <TableRow 
-                  provision="Definitions & IP Sovereignty Layer"
-                  status="upheld"
-                  basis="Serves as evidentiary notice and misappropriation defense"
-                />
-                <TableRow 
-                  provision="Operator Liability Framework"
-                  status="upheld"
-                  basis="Binding on platform controllers, trainers, and processors"
-                />
-                <TableRow 
-                  provision="Incorporation Into Child Agreements"
-                  status="upheld"
-                  basis="Conventional binding through explicit reference + signature"
-                />
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-blue-900/30 border-blue-700/40 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="text-white">Unenforceable Provisions (VOIDED)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b-2 border-blue-700">
-                  <th className="text-left p-3 text-blue-200 font-bold">Provision</th>
-                  <th className="text-center p-3 text-blue-200 font-bold">Status</th>
-                  <th className="text-left p-3 text-blue-200 font-bold">Reasoning</th>
-                </tr>
-              </thead>
-              <tbody className="text-blue-100">
-                <TableRow 
-                  provision="Universal Exposure Auto-Binding"
-                  status="void"
-                  basis="Lacks provable assent; violates contract formation doctrine"
-                />
-                <TableRow 
-                  provision="Symbolic Jurisdiction Claims"
-                  status="void"
-                  basis="Cannot override statutory IP boundaries by private declaration"
-                />
-                <TableRow 
-                  provision="Self-Nullification of Other Agreements"
-                  status="void"
-                  basis="Only courts can nullify contracts; private declaration is aspirational"
-                />
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-    </>
-  );
-}
-
-function TimelineTab() {
-  const events = [
-    { title: 'Round 1: Opening Expert Testimony', description: 'Expert Witness challenges the Covenant\'s enforceability, citing failures in contract formation.' },
-    { title: 'Round 2: Defense Cross-Examination', description: 'GlyphLock\'s counsel counters that the Expert misclassified the document.' },
-    { title: 'Round 3: Expert Rebuttal', description: 'Expert refines position, acknowledging validity as charter layer.' },
-    { title: 'Round 4: Defense Closing', description: 'Demonstrates that Expert\'s concessions validate the Covenant\'s architecture.' },
-    { title: 'Round 5: Simulation Result', description: 'The exercise records which theories appeared stronger, weaker, or dependent on conventional contract formation.' }
-  ];
-
-  return (
-    <Card className="bg-blue-900/30 border-blue-700/40 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white">
-          <Calendar className="w-6 h-6 text-blue-400" />
-          Litigation Timeline
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {events.map((event, idx) => (
-            <div key={idx} className="flex gap-4">
-              <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-blue-600 border-4 border-blue-900 flex items-center justify-center text-white font-bold">
-                  {idx + 1}
-                </div>
-                {idx < events.length - 1 && <div className="w-0.5 h-full bg-blue-700 mt-2" />}
-              </div>
-              <div className="flex-1 pb-6">
-                <h4 className="font-bold text-white mb-2">{event.title}</h4>
-                <p className="text-blue-200 text-sm">{event.description}</p>
-              </div>
-            </div>
-          ))}
+          <p className="mt-3 text-sm leading-6 text-slate-300">{item.analysis}</p>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function VerdictTab() {
+export default function CaseStudyCovenantVictory() {
   return (
-    <>
-      <div className="bg-gradient-to-r from-green-900/40 to-green-800/40 border-2 border-green-600 rounded-lg p-8 text-center mb-6 backdrop-blur-sm">
-        <Trophy className="w-16 h-16 text-green-400 mx-auto mb-4" />
-        <div className="text-3xl font-bold text-white mb-2">SIMULATION COMPLETED</div>
-        <div className="text-xl text-green-100">Research Findings Recorded</div>
-      </div>
-
-      <QuoteBox
-        quote="The exercise supports using the Covenant as an internal governance and drafting framework while relying on conventional assent and incorporation for external obligations."
-        author="Internal Simulation Analysis"
+    <main className="min-h-screen bg-gradient-to-br from-[#050b14] via-[#0a1324] to-[#111a33] px-5 py-24 text-white">
+      <SEOHead
+        title="Internal Enforceability Review: Master Covenant | GlyphLock"
+        description="Internal, non-counsel analysis of Master Covenant concepts under conventional assent, incorporation, evidence, and contract-formation principles."
+        keywords={['Master Covenant review', 'internal enforceability analysis', 'contract formation', 'evidence preservation', 'actual assent']}
+        url="/CaseStudyCovenantVictory"
       />
-    </>
-  );
-}
 
-function ImplicationsTab({ handleDownload, handleShare }) {
-  return (
-    <>
-      <Card className="bg-blue-900/30 border-blue-700/40 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="text-white">Significance of the Ruling</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-blue-100">
-          <p><strong className="text-white">Governance Architecture:</strong> The simulation supports treating the Covenant as an internal governance and drafting framework, subject to applicable law.</p>
-          <p><strong className="text-white">External Agreements:</strong> Any external obligations should rely on clear notice, actual assent, and conventional incorporation into enforceable agreements.</p>
-          <p><strong className="text-white">Operator Liability:</strong> Liability theories depend on the facts, applicable law, and agreements with the relevant platform or operator. This case study does not claim a court has upheld them.</p>
-        </CardContent>
-      </Card>
+      <section className="mx-auto max-w-5xl">
+        <Link to={createPageUrl('TechnicalEvidence')} className="inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 hover:text-white">
+          <ArrowLeft className="h-4 w-4" />
+          Technical Evidence
+        </Link>
 
-      <div className="flex gap-4 flex-wrap">
-        <Button onClick={handleDownload} className="flex-1 bg-blue-600 hover:bg-blue-700">
-          <Download className="w-4 h-4 mr-2" />
-          Download Research Note
-        </Button>
-        <Button onClick={handleShare} variant="outline" className="flex-1 border-blue-500 text-blue-300 hover:bg-blue-900/30">
-          <Share2 className="w-4 h-4 mr-2" />
-          Share Case Study
-        </Button>
-      </div>
-    </>
-  );
-}
-
-function Finding({ title, description, status }) {
-  const isUpheld = status === 'upheld';
-  return (
-    <div className={`p-4 rounded-lg border-l-4 ${isUpheld ? 'bg-green-900/20 border-green-600' : 'bg-red-900/20 border-red-600'}`}>
-      <div className="flex items-start gap-3">
-        {isUpheld ? <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" /> : <XCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />}
-        <div>
-          <div className={`font-bold mb-1 ${isUpheld ? 'text-green-100' : 'text-red-100'}`}>{title}</div>
-          <div className={`text-sm ${isUpheld ? 'text-green-200' : 'text-red-200'}`}>{description}</div>
+        <div className="mt-10 max-w-4xl">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-violet-300">Internal analysis</p>
+          <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">
+            Internal Enforceability Review: Master Covenant
+          </h1>
+          <p className="mt-6 text-lg leading-8 text-slate-300">
+            This is internal analysis, not reviewed by counsel, and no litigation occurred.
+          </p>
         </div>
-      </div>
-    </div>
-  );
-}
 
-function TableRow({ provision, status, basis }) {
-  const isUpheld = status === 'upheld';
-  return (
-    <tr className="border-b border-blue-800/50">
-      <td className="p-3">{provision}</td>
-      <td className="p-3 text-center">
-        <Badge className={isUpheld ? 'bg-green-600' : 'bg-red-600'}>
-          {isUpheld ? '✓ Upheld' : '✗ Void'}
-        </Badge>
-      </td>
-      <td className="p-3 text-sm">{basis}</td>
-    </tr>
-  );
-}
+        <Card className="mt-10 border-amber-300/25 bg-amber-300/[0.05]">
+          <CardContent className="flex gap-4 p-6">
+            <FileWarning className="mt-1 h-6 w-6 flex-none text-amber-300" />
+            <div>
+              <h2 className="font-bold text-amber-100">Use boundary</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-300">
+                The labels below are drafting judgments, not legal opinions or predictions about a specific dispute.
+                Enforceability depends on jurisdiction, facts, notice, assent, consideration, authority, public policy,
+                and the terms of the actual agreements involved.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-function QuoteBox({ quote, author }) {
-  return (
-    <div className="bg-blue-800/20 border-l-4 border-blue-500 p-6 rounded-lg backdrop-blur-sm">
-      <p className="text-blue-100 italic text-lg mb-3">"{quote}"</p>
-      <p className="text-blue-300 text-sm">— {author}</p>
-    </div>
+        <section className="mt-14">
+          <div className="flex items-center gap-3">
+            <Scale className="h-7 w-7 text-emerald-300" />
+            <h2 className="text-3xl font-black">Concepts with a conventional legal path</h2>
+          </div>
+          <p className="mt-4 max-w-4xl leading-7 text-slate-400">
+            These concepts are more defensible when implemented through ordinary governance, contract, and evidence practices.
+          </p>
+          <div className="mt-7 space-y-4">
+            {LIKELY_ENFORCEABLE.map((item) => <Finding key={item.title} item={item} positive />)}
+          </div>
+        </section>
+
+        <section className="mt-16">
+          <div className="flex items-center gap-3">
+            <Scale className="h-7 w-7 text-rose-300" />
+            <h2 className="text-3xl font-black">Concepts that require removal or narrowing</h2>
+          </div>
+          <p className="mt-4 max-w-4xl leading-7 text-slate-400">
+            These theories do not become enforceable merely because they appear in a document or are delivered to a person or system.
+          </p>
+          <div className="mt-7 space-y-4">
+            {LIKELY_UNENFORCEABLE.map((item) => <Finding key={item.title} item={item} positive={false} />)}
+          </div>
+        </section>
+
+        <section className="mt-16 rounded-3xl border border-blue-400/20 bg-blue-400/[0.05] p-7 sm:p-9">
+          <h2 className="text-2xl font-black">Practical drafting direction</h2>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {[
+              'Use clear, affirmative assent for external obligations.',
+              'Make incorporated terms available before acceptance.',
+              'Identify the parties, authority, scope, governing law, and order of precedence.',
+              'Treat hashes and timestamps as integrity evidence, not automatic contract formation.',
+              'Keep internal governance duties separate from claims about third parties.',
+              'Have qualified counsel review any agreement intended for real enforcement.',
+            ].map((item) => (
+              <div key={item} className="flex gap-3 rounded-xl border border-white/10 bg-black/15 p-4">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-none text-blue-300" />
+                <span className="text-sm leading-6 text-slate-300">{item}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </section>
+    </main>
   );
 }
