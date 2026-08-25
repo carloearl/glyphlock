@@ -150,11 +150,11 @@ export default function CaseStudyOracleOHIP() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(6,182,212,0.2),transparent_38%),radial-gradient(circle_at_80%_20%,rgba(59,130,246,0.16),transparent_32%)]" />
         <div className="relative mx-auto max-w-6xl px-5 pb-20 pt-28">
           <Link
-            to={createPageUrl('CaseStudies')}
+            to={createPageUrl('TechnicalEvidence')}
             className="mb-8 inline-flex items-center gap-2 text-sm font-semibold text-cyan-300 transition hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
-            Case Studies
+            Technical Evidence
           </Link>
 
           <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -181,7 +181,7 @@ export default function CaseStudyOracleOHIP() {
                 </span>
               </h1>
               <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300">
-                GlyphLock built a controlled server-to-server bridge between NUPS and the Oracle
+                GlyphLock built a controlled server-to-server bridge between the Nexus Unified POS System (NUPS) and the Oracle
                 Hospitality Integration Platform, then progressed the Partner Sandbox path through
                 protected configuration, OCIM authentication, request success and sanitized response validation.
               </p>
@@ -219,9 +219,10 @@ export default function CaseStudyOracleOHIP() {
               </Card>
             ))}
           </div>
-          <p className="mt-5 text-sm leading-6 text-slate-400">
-            Historical baseline: the August 12 Partner Sandbox record shows OCIM OAuth, a read-only OHIP request, HTTP success and 921 ms latency. The 921 ms value is not attributed to the August 24 test.
-          </p>
+          <div className="mt-5 space-y-2 text-sm leading-6 text-slate-400">
+            <p>Historical baseline: the August 12 Partner Sandbox record shows OCIM OAuth, a read-only OHIP request, HTTP success and 921 ms latency. The 921 ms value is not attributed to the August 24 test.</p>
+            <p>The 250 scanned records were sanitized Oracle Partner Sandbox room-configuration rows. Every row failed at least one local mapping-preflight rule—such as room-number formatting, a missing room-type code, or inactive status—so all 250 were flagged for human review and no write was attempted.</p>
+          </div>
         </section>
 
         <section className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
@@ -358,9 +359,9 @@ export default function CaseStudyOracleOHIP() {
             <p className="mt-1 text-sm text-slate-500">Evidence-backed Partner Sandbox integration milestone.</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <Link to={createPageUrl('CaseStudies')}>
+            <Link to={createPageUrl('TechnicalEvidence')}>
               <Button variant="outline" className="border-slate-600 bg-transparent text-white hover:bg-slate-800">
-                All case studies
+                All technical evidence
               </Button>
             </Link>
             <Link to={createPageUrl('OracleOHIPMilestone')}>
