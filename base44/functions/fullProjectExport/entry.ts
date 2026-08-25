@@ -18,7 +18,7 @@ const PROJECT_STRUCTURE = {
     'Qr', 'ImageLab', 'GlyphBot', 'Blockchain', 'HotzoneMapper', 'HSSS',
     'CommandCenter', 'Dashboard', 'Consultation', 'ConsultationSuccess',
     'SDKDocs', 'FAQ', 'Roadmap', 'DreamTeam', 'NISTChallenge', 'MasterCovenant',
-    'TrustSecurity', 'CaseStudies', 'Partners', 'PartnerPortal',
+    'TrustSecurity', 'TechnicalEvidence', 'Partners', 'PartnerPortal',
     'AccountSecurity', 'BillingAndPayments', 'PaymentSuccess', 'PaymentCancel',
     'ManageSubscription', 'Privacy', 'Terms', 'Cookies', 'Accessibility',
     'SiteBuilder', 'SiteAudit', 'ProviderConsole', 'GovernanceHub',
