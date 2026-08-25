@@ -224,6 +224,12 @@ Deno.serve(async (req) => {
       }, { status: 403 });
     }
     const mode = venueConfig.mode || await resolveMode(base44, venue_id);
+    if (String(mode).toUpperCase() !== 'REAL') {
+      return Response.json({
+        error: 'REAL_MODE_REQUIRED',
+        message: 'Production payment records require an active REAL venue configuration.',
+      }, { status: 409 });
+    }
 
     if (!processor_reference) {
       return Response.json({ error: 'Missing processor_reference' }, { status: 400 });
@@ -231,7 +237,7 @@ Deno.serve(async (req) => {
 
     // Idempotency
     const existing = await base44.asServiceRole.entities.PaymentRecord.filter(
-      { provider_code: resolvedProvider, processor_reference, venue_id }, null, 1
+      { provider_code: resolvedProvider, processor_reference, venue_id, mode: 'REAL' }, null, 1
     );
     if (existing && existing.length > 0) {
       const existingRecord = existing[0];
@@ -457,7 +463,7 @@ Deno.serve(async (req) => {
     if (create_linked_order) {
       try {
         const existingOrders = await base44.asServiceRole.entities.GlyphBucksOrder.filter({
-          card_token: processor_reference, venue_id
+          card_token: processor_reference, venue_id, mode: 'REAL'
         }, null, 1);
 
         if (existingOrders && existingOrders.length > 0) {
@@ -467,12 +473,14 @@ Deno.serve(async (req) => {
             grand_total: verifiedAmount,
             approval_code: verifiedApprovalCode,
             card_last_four: verifiedCardLast4,
-            payment_type: resolvedProvider.toUpperCase()
+            payment_type: resolvedProvider.toUpperCase(),
+            mode: 'REAL'
           });
         } else {
           linkedOrder = await base44.asServiceRole.entities.GlyphBucksOrder.create({
             order_number: order_number || processor_reference,
             venue_id,
+            mode: 'REAL',
             status: 'COMPLETE',
             card_token: processor_reference,
             approval_code: verifiedApprovalCode,
