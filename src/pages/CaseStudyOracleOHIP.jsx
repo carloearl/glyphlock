@@ -363,6 +363,12 @@ export default function CaseStudyOracleOHIP() {
                 All case studies
               </Button>
             </Link>
+            <Link to={createPageUrl('OracleOHIPMilestone')}>
+              <Button variant="outline" className="border-cyan-500/60 bg-cyan-500/10 text-cyan-100 hover:bg-cyan-500/20">
+                Read the public story
+                <FileCheck2 className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
             <Link to="/NUPSLanding#nups-integrations">
               <Button className="bg-cyan-600 text-white hover:bg-cyan-500">
                 View public integration overview
