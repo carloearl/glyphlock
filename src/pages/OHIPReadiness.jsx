@@ -453,7 +453,7 @@ export default function OHIPReadiness() {
               );
             })}
             <p className="text-xs leading-5 text-slate-500">
-              Current evidence confirms active Level 0 OPN membership and an August 24, 2026 Partner Sandbox result at the response validated maturity level. Marketplace publisher approval, listing acceptance, production access, customer authorization, and Oracle supplier or banking setup remain separate gates.
+              Current evidence confirms active Level 0 OPN membership, an August 24, 2026 Partner Sandbox result at the response validated maturity level, and an approved Oracle Cloud Marketplace program enrollment. Publisher-account activation, NUPS listing acceptance, production access, customer authorization, Simphony Solution Validation, and Oracle supplier or banking setup remain separate gates.
             </p>
           </CardContent>
         </Card>
@@ -467,10 +467,10 @@ export default function OHIPReadiness() {
                   Oracle Marketplace &amp; Production Handoff
                 </CardTitle>
                 <CardDescription className="mt-2 text-slate-400">
-                  The next controlled workstream after OPN activation. Completed evidence is separated from Oracle-controlled approvals and production credentials.
+                  Marketplace program enrollment is complete. Publisher/listing work and all production credentials remain separate Oracle-controlled gates.
                 </CardDescription>
               </div>
-              <Badge className="bg-amber-500 text-slate-950">Agreement Under Review</Badge>
+              <Badge className="bg-emerald-600 text-white">Marketplace Program Active</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
