@@ -164,7 +164,7 @@ System Timestamp: ${new Date().toISOString()}
     }
   });
 
-  const contractUrl = `https://glyphlock.com/VIPContract?token=${contractUUID}`;
+  const contractUrl = `https://glyphlock.io/VIPContract?token=${contractUUID}`;
   const expiresAt = new Date(Date.now() + 15 * 60000).toISOString();
 
   return Response.json({
