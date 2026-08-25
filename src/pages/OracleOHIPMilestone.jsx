@@ -50,16 +50,22 @@ const ROADMAP = [
     oracle: 'The Partner Sandbox accepted OAuth and the August 24 room-configuration request; the sanitized response was validated.',
   },
   {
-    status: 'active',
-    stage: 'Marketplace entry',
-    glyphlock: 'The Oracle Cloud Marketplace Agreement was submitted under subscription 1655445 and a claims-safe listing package was prepared.',
-    oracle: 'Agreement review and publisher registration remain Oracle-controlled. No listing OCID exists yet.',
+    status: 'complete',
+    stage: 'Marketplace program',
+    glyphlock: 'GlyphLock completed the Oracle Cloud Marketplace program enrollment under enrollment 1655445.',
+    oracle: 'Oracle approved and activated the Cloud Services / Oracle Cloud Marketplace enrollment on August 25, 2026. Publisher-account activation and a NUPS listing remain separate gates.',
   },
   {
     status: 'active',
-    stage: 'Simphony pathway',
-    glyphlock: 'GlyphLock sent its active OPN details and requested the temporary sandbox onboarding procedure.',
-    oracle: 'The Simphony Integrations Team must provide the sandbox, prerequisites and validation scope.',
+    stage: 'Simphony formal intake',
+    glyphlock: 'GlyphLock submitted the formal Simphony Integration Partner Program request on August 25 using its active OPN Company ID.',
+    oracle: 'Oracle’s Partner Integration Team is reviewing the request and states it will contact the submitted email within 10 business days. Onboarding and Solution Validation have not begun.',
+  },
+  {
+    status: 'active',
+    stage: 'Marketplace publisher & listing',
+    glyphlock: 'A claims-safe NUPS listing package can now be prepared while publisher-account status is confirmed.',
+    oracle: 'A published NUPS listing or listing OCID has not yet been established. Simphony Cloud Marketplace publication requires Oracle Solution Validation.',
   },
   {
     status: 'locked',
@@ -105,7 +111,7 @@ function RelationshipMap() {
           The relationship is advancing through separate Oracle-controlled tracks
         </h2>
         <p className="mt-4 leading-7 text-slate-300">
-          Technical progress, OPN membership, Marketplace access and Simphony validation are related,
+          Technical progress, OPN membership, Marketplace program enrollment, publisher/listing work and Simphony validation are related,
           but none substitutes for the approval required in another track.
         </p>
       </div>
@@ -197,8 +203,8 @@ export default function OracleOHIPMilestone() {
   return (
     <div className="min-h-screen bg-[#050b14] text-white">
       <SEOHead
-        title="GlyphLock Advances Oracle OHIP Partner Sandbox Integration | News"
-        description="GlyphLock NUPS reached response validated in an authenticated, read-only Oracle OHIP Partner Sandbox test while Marketplace, production and Simphony gates remain pending."
+        title="GlyphLock Advances Oracle OHIP, Marketplace & Simphony Integration | News"
+        description="GlyphLock NUPS reached response validated in Oracle’s OHIP Partner Sandbox, activated its Oracle Cloud Marketplace program enrollment, and submitted a formal Simphony integration request while production and listing gates remain pending."
         keywords={[
           'GlyphLock',
           'NUPS',
@@ -299,16 +305,18 @@ export default function OracleOHIPMilestone() {
             </p>
 
             <p>
-              The Oracle Marketplace workstream is also underway. GlyphLock submitted the Oracle Cloud Marketplace
-              Agreement under subscription 1655445 on August 24. Oracle review and publisher registration remain
-              pending, and no listing OCID has been issued.
+              The Oracle Marketplace workstream also advanced. Oracle approved and activated GlyphLock’s
+              Cloud Services / Oracle Cloud Marketplace program enrollment 1655445 on August 25, 2026. That
+              approval is a real program milestone, but it is not a published NUPS listing. Publisher-account
+              status, listing submission, listing acceptance and any listing OCID remain separate Oracle-controlled gates.
             </p>
 
             <p>
-              The Simphony workstream is separate. Oracle invited GlyphLock to proceed through the Simphony
-              integration-validation pathway, and GlyphLock has requested the temporary sandbox onboarding
-              procedure. Temporary sandbox access, technical validation, certification and go-live have not yet
-              been completed.
+              The Simphony workstream is separate. After Oracle confirmed the formal request path, GlyphLock
+              submitted its Simphony Integration Partner Program request on August 25, 2026. Oracle’s Partner
+              Integration Team states that it will verify active OPN standing, review the submission, and contact
+              the submitted email within 10 business days. Approval, onboarding, Solution Validation, Marketplace
+              publication, certification and go-live have not yet been completed.
             </p>
 
             <h2 className="pt-4 text-3xl font-black text-white">About GlyphLock NUPS</h2>
@@ -388,9 +396,10 @@ export default function OracleOHIPMilestone() {
         <section className="border-t border-slate-800 pt-8 text-sm leading-6 text-slate-500">
           <p>
             Oracle, OPERA Cloud, OHIP and Simphony are trademarks or product names of Oracle and/or its
-            affiliates. GlyphLock is an active Oracle PartnerNetwork member. This company announcement does
-            not state or imply Oracle certification, endorsement, Marketplace approval, production approval,
-            completed Simphony integration or a separate commercial or strategic partnership.
+            affiliates. GlyphLock is an active Oracle PartnerNetwork member and its Oracle Cloud Marketplace
+            program enrollment is approved and active. This company announcement does not state or imply a
+            published NUPS Marketplace listing, Oracle certification or endorsement, production approval,
+            completed Simphony Solution Validation, completed integration, or a separate commercial or strategic partnership.
           </p>
         </section>
       </main>
