@@ -271,6 +271,7 @@ if (seoData) {
   for (const entry of entries) {
     if (!entry.title || !entry.description || !entry.url) fail(`Incomplete SEO record: ${entry.key}`);
     if (entry.title.length >= 60) fail(`Public title must stay under 60 characters for ${entry.url} (found ${entry.title.length})`);
+    if (entry.description.length > 155) fail(`Public description must stay at or below 155 characters for ${entry.url} (found ${entry.description.length})`);
     if (entry.ogTitle !== entry.title) fail(`ogTitle must mirror title for ${entry.key}`);
     if (entry.ogDescription !== entry.description) fail(`ogDescription must mirror description for ${entry.key}`);
   }
