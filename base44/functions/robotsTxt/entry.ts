@@ -1,91 +1,115 @@
-/**
- * robots.txt endpoint — canonical same-origin robots for glyphlock.io
- * NUPS = Nexus Unified POS System.
- * Noindex: admin / private / authenticated / payment-result / test / sandbox / internal audit
- * plus duplicate-case route variants to avoid canonical duplication.
- */
-
 const SITE_URL = 'https://glyphlock.io';
 
-const PUBLIC_ALLOW = [
-  '/About', '/AboutCarlo', '/Services', '/Solutions', '/Pricing',
-  '/Contact', '/Consultation', '/SecureQRStudio', '/ImageLab', '/ImageGenerator',
-  '/InteractiveImageStudio', '/GlyphBot', '/GlyphBotMixer', '/SecurityTools',
-  '/SecurityOperationsCenter', '/Blockchain', '/SDKDocs', '/SecurityDocs',
-  '/Roadmap', '/Partners', '/DreamTeam', '/FAQ', '/GovernanceHub',
-  '/MasterCovenant', '/TrustSecurity', '/NISTChallenge', '/CaseStudies',
-  '/CaseStudyOracleOHIP', '/OracleOHIPMilestone', '/CaseStudyTruthStrike', '/CaseStudyAIBinding', '/CaseStudyCovenantVictory',
-  '/GlyphLockFinancial', '/NUPSLanding', '/VideoUpload',
-  '/Privacy', '/Terms', '/Cookies', '/Accessibility', '/CodeOfEthics',
+const USER_AGENTS = [
+  "Googlebot",
+  "Bingbot",
+  "GPTBot",
+  "ClaudeBot",
+  "anthropic-ai",
+  "PerplexityBot",
+  "Google-Extended",
+  "Applebot-Extended",
+  "CCBot",
+  "*"
+];
+const PRIVATE_ROUTES = [
+  "/Dashboard",
+  "/CommandCenter",
+  "/ProjectUpdates",
+  "/AccountSecurity",
+  "/BillingAndPayments",
+  "/ManageSubscription",
+  "/PaymentSuccess",
+  "/PaymentCancel",
+  "/ConsultationSuccess",
+  "/EmergencyBackup",
+  "/FullExport",
+  "/GlyphLockAudit",
+  "/GlyphLockPlayground",
+  "/IntegrationTests",
+  "/SystemAudit",
+  "/SettlementReports",
+  "/AnalyticsDashboard",
+  "/NUPSDemoManager",
+  "/NUPSOwner",
+  "/NUPSPostLogin",
+  "/NUPSReport",
+  "/NUPSSandbox",
+  "/NUPSStaff",
+  "/NUPSAudit",
+  "/NUPSInfrastructurePage",
+  "/SiteBuilder",
+  "/SiteBuilderTest",
+  "/SiteAudit",
+  "/Sie",
+  "/ClubCurrencyPress",
+  "/ContractArchive",
+  "/ContractSearch",
+  "/StrategicScale",
+  "/OHIPReadiness",
+  "/VIPContract",
+  "/Sitemap",
+  "/SitemapApp",
+  "/SitemapDynamic",
+  "/SitemapImages",
+  "/SitemapInteractive",
+  "/SitemapQr",
+  "/sitemap-qr",
+  "/Robots",
+  "/NotFound",
+  "/api/",
+  "/functions/",
+  "/admin/",
+  "/demo/",
+  "/unauthorized",
+  "/ProviderConsole",
+  "/providerconsole",
+  "/NUPSAdminPortal",
+  "/nupsadminportal",
+  "/nupskiosk",
+  "/nupshub",
+  "/register",
+  "/registerconsole",
+  "/barregister",
+  "/receipts",
+  "/driverpayouts",
+  "/glyphbucks",
+  "/accounting",
+  "/tonight",
+  "/contracts",
+  "/contractshub",
+  "/vipbillprinter",
+  "/managerconsole",
+  "/peoplearchive",
+  "/ledgertrialbalance",
+  "/frontdoor",
+  "/entertainercheckin",
+  "/djhome",
+  "/vipsale",
+  "/vipcommand",
+  "/vipshowcontracts",
+  "/v/",
+  "/offlineverify",
+  "/mobilescanner",
+  "/clubtv",
+  "/fablestage"
 ];
 
-const NOINDEX = [
-  '/Dashboard', '/CommandCenter', '/ProjectUpdates', '/AccountSecurity',
-  '/BillingAndPayments', '/ManageSubscription', '/PaymentSuccess', '/PaymentCancel',
-  '/ConsultationSuccess', '/EmergencyBackup', '/FullExport', '/GlyphLockAudit',
-  '/GlyphLockPlayground', '/IntegrationTests', '/SystemAudit', '/SettlementReports',
-  '/AnalyticsDashboard', '/NUPSDemoManager', '/NUPSOwner', '/NUPSPostLogin',
-  '/NUPSReport', '/NUPSSandbox', '/NUPSStaff', '/NUPSAudit', '/NUPSInfrastructurePage',
-  '/SiteBuilder', '/SiteBuilderTest', '/SiteAudit', '/Sie', '/ClubCurrencyPress',
-  '/ContractArchive', '/ContractSearch', '/StrategicScale', '/OHIPReadiness',
-  '/VIPContract', '/Sitemap', '/SitemapApp', '/SitemapDynamic', '/SitemapImages',
-  '/SitemapInteractive', '/SitemapQr', '/sitemap-qr', '/Robots', '/NotFound',
-  '/api/', '/functions/', '/admin/', '/NUPSAdminPortal', '/nupsadminportal',
-  '/ProviderConsole', '/providerconsole', '/unauthorized', '/demo/',
-  '/nupskiosk', '/nupshub', '/register', '/registerconsole', '/barregister',
-  '/receipts', '/driverpayouts', '/glyphbucks', '/accounting', '/tonight',
-  '/contracts', '/contractshub', '/vipbillprinter', '/managerconsole',
-  '/peoplearchive', '/ledgertrialbalance', '/frontdoor', '/entertainercheckin',
-  '/djhome', '/vipsale', '/vipcommand', '/vipshowcontracts', '/v/',
-  '/offlineverify', '/mobilescanner', '/clubtv', '/fablestage',
-];
-
-// Duplicate-case variants of public routes (noindex to avoid canonical duplication).
-const DUP_CASE = [
-  '/about', '/aboutcarlo', '/services', '/solutions', '/pricing', '/contact',
-  '/consultation', '/secureqrstudio', '/imagelab', '/imagegenerator',
-  '/interactiveimagestudio', '/glyphbot', '/glyphbotmixer', '/securitytools',
-  '/securityoperationscenter', '/blockchain', '/sdkdocs', '/securitydocs',
-  '/roadmap', '/partners', '/dreamteam', '/faq', '/governancehub',
-  '/mastercovenant', '/trustsecurity', '/nistchallenge', '/casestudies', '/oracleohipmilestone',
-  '/glyphlockfinancial', '/nupslanding', '/ohipreadiness',
-];
-
-Deno.serve(async () => {
-  const allowLines = PUBLIC_ALLOW.map((p) => `Allow: ${p}`).join('\n');
-  const noindexLines = NOINDEX.map((p) => `Disallow: ${p}`).join('\n');
-  const dupCaseLines = DUP_CASE.map((p) => `Disallow: ${p}`).join('\n');
-
-  const robotsContent = `# GlyphLock LLC — robots.txt
-# Canonical origin: ${SITE_URL}
-# NUPS = Nexus Unified POS System
-# Generated: ${new Date().toISOString()}
-
-User-agent: *
-Allow: /
-Allow: /$
-${allowLines}
-
-# Noindex: admin / private / authenticated / payment-result / test / sandbox / internal audit
-${noindexLines}
-
-# Duplicate-case route variants (noindex to avoid canonical duplication)
-${dupCaseLines}
-
-# Discovery
-Sitemap: ${SITE_URL}/sitemap.txt
-Sitemap: ${SITE_URL}/sitemap.xml
-
-Crawl-delay: 1
-
-# All crawlers inherit this single wildcard policy.
-`;
-
-  return new Response(robotsContent, {
+Deno.serve(() => {
+  const lines = [
+    '# GlyphLock LLC — canonical crawler policy',
+    '# Public marketing and Technical Evidence routes are crawlable.',
+    ...USER_AGENTS.map((agent) => `User-agent: ${agent}`),
+    'Allow: /',
+    ...PRIVATE_ROUTES.map((route) => `Disallow: ${route}`),
+    `Sitemap: ${SITE_URL}/sitemap.xml`,
+    '',
+  ];
+  return new Response(lines.join('\n'), {
     status: 200,
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
-      'Cache-Control': 'public, max-age=86400',
+      'Cache-Control': 'public, max-age=3600',
       'Access-Control-Allow-Origin': '*',
     },
   });
