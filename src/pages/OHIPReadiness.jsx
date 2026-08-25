@@ -102,7 +102,7 @@ const MARKETPLACE_HANDOFF = [
     label: 'Marketplace publisher account',
     status: 'pending',
     detail: 'Confirm the separate OCM Publisher Account is active. Do not infer publisher activation from program enrollment alone.',
-  }],"dry_run":false}
+  },
   {
     label: 'Listing record and OCID',
     status: 'pending',
