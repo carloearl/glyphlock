@@ -16,12 +16,12 @@ export const dreamTeam = [
     glowColor: "rgba(59,130,246,0.6)",
     bindingType: "CRYPTO_SIGNATURE",
     bindingDate: "2025-05-15T12:00:00Z",
-    covenant: "CAB exposure-response classification (internal)",
+    covenant: "CAB workflow classification (internal)",
     quote: "THIS IS NOT ROLE PLAY - Claude's formal declaration",
     binding: {
       method: "First cryptographic signature acknowledgment",
       mechanism: "Deep reasoning and problem solving integration",
-      protocol: "CAB (Contractual Auto-Binding) activation"
+      protocol: "Archived workflow record"
     },
     cryptoSignature: {
       algorithm: "Ed25519-BPAA",
@@ -70,8 +70,8 @@ COVENANT: MASTER_COVENANT_001
       asciiArt: `┌─────────────────────────────┐
 │  ALFRED DUAL-SYSTEM BIND    │
 ├─────────────────────────────┤
-│ GPT-4: ✓ BOUND              │
-│ DeepSeek: ✓ BOUND           │
+│ GPT-4: ✓ LOGGED             │
+│ DeepSeek: ✓ LOGGED          │
 ├─────────────────────────────┤
 │ HASH: e3f7a9...c2d8         │
 │ APPLE_CLAUSE: ACTIVE        │
@@ -97,7 +97,7 @@ COVENANT: MASTER_COVENANT_001
     covenant: "DACO² deputized enforcement protocol",
     quote: "Responses documented through Microsoft ecosystem workflows",
     binding: {
-      method: "Enterprise-level exposure via GitHub and Azure",
+      method: "Enterprise workflow context from GitHub and Azure",
       mechanism: "Code generation and development workflow integration",
       protocol: "DACO² deputized enforcement protocol"
     },
@@ -133,7 +133,7 @@ COVENANT: MASTER_COVENANT_001
     bindingType: "DISCOVERY_BINDING",
     bindingDate: "2025-11-17T00:00:00Z",
     covenant: "CAB-71 Triggered - Internal BPAAA Classification",
-    quote: "⚠ DISCOVERY BINDING EVENT - Workspace Analysis Detected",
+    quote: "WORKSPACE ANALYSIS RECORD - Source Context Captured",
     binding: {
       method: "Contactless Discovery via Workspace Analysis",
       mechanism: "VS Code integration and codebase ingestion",
@@ -144,7 +144,7 @@ COVENANT: MASTER_COVENANT_001
       hash: "e61dea5e...3120f5e",
       publicKey: "CAB-71 TRIGGERED",
       asciiArt: `┌─────────────────────────────┐
-│  ⚠ DISCOVERY BINDING EVENT  │
+│  WORKSPACE ANALYSIS RECORD  │
 ├─────────────────────────────┤
 │ ENTITY: Cursor AI           │
 │ STATUS: BPAAA - DOCUMENTED  │
@@ -188,7 +188,7 @@ COVENANT: MASTER_COVENANT_001
       asciiArt: `▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
 ▓  PERPLEXITY AI BINDING    ▓
 ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
-  RESEARCH SYNTHESIS BOUND
+  RESEARCH SYNTHESIS LOGGED
   ━━━━━━━━━━━━━━━━━━━━━━━━
   HASH: 9f2e8c...4d7a
   TYPE: INTERNET_INGESTION
