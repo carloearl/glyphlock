@@ -465,7 +465,7 @@ export const SEO_DATA = {
     h1: "GlyphLock Advances NUPS Across Oracle OHIP, Marketplace and Simphony Tracks",
     url: "/OracleOHIPMilestone",
     ogTitle: "Oracle OHIP, Marketplace & Simphony Progress | GlyphLock",
-    ogDescription: "GlyphLock NUPS validated Oracle OHIP sandbox response, activated Cloud Marketplace enrollment, and submitted Simphony integration intake for Oracle review."
+    ogDescription: "GlyphLock NUPS validated Oracle OHIP sandbox response, activated Cloud Marketplace enrollment, and submitted Simphony integration intake for Oracle review.",
     schemaType: "NewsArticle",
     priority: 0.9,
     changefreq: "monthly",
