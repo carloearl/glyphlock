@@ -24,6 +24,7 @@ Allow: /GovernanceHub
 Allow: /MasterCovenant
 Allow: /CaseStudies
 Allow: /CaseStudyOracleOHIP
+Allow: /OracleOHIPMilestone
 Allow: /Roadmap
 Allow: /Partners
 Allow: /DreamTeam
