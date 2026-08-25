@@ -32,6 +32,7 @@ const ACTIVE_SOURCES = [
   'src/Layout.jsx',
   'public/robots.txt',
   'public/sitemap.xml',
+  'public/llms.txt',
   'public/nups.webmanifest',
   'base44/functions/robotsTxt/entry.ts',
   'base44/functions/llmsTxt/entry.ts',
@@ -44,7 +45,10 @@ const ACTIVE_SOURCES = [
   'src/pages/Robots.jsx',
   'src/pages/sitemap-qr.jsx',
   'src/pages/SDKDocs.jsx',
-  'src/pages/CaseStudyTruthStrike.jsx',
+  'src/pages/CaseStudyOracleOHIP.jsx',
+  'src/pages/CaseStudyNUPS.jsx',
+  'src/pages/ProvenanceMethodology.jsx',
+  'src/pages/CaseStudyCovenantVictory.jsx',
   'src/components/about/carlo/FounderStoryNarrative.jsx',
   'src/components/sdk/SDKFiles.jsx',
   'src/components/console/SDKDownloadCenter.jsx',
@@ -172,6 +176,21 @@ if (sitemapXml) {
   const locs = [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
   const dupes = locs.filter((l, i) => locs.indexOf(l) !== i);
   if (dupes.length) fail(`Duplicate <loc> in public/sitemap.xml: ${[...new Set(dupes)].join(', ')}`);
+  const lastmods = [...sitemapXml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
+  if (lastmods.length !== locs.length) fail('Every sitemap URL must have one lastmod date');
+  for (const date of lastmods) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) fail(`Invalid sitemap lastmod date: ${date}`);
+  }
+}
+
+const llmsText = sourceContents['public/llms.txt'];
+if (llmsText) {
+  for (const required of ['107857124', '17363', '4-463913260838', '1654123', '1655445', 'Production access', 'Marketplace listing', 'Simphony certification']) {
+    if (!llmsText.includes(required)) fail(`public/llms.txt missing required boundary or identifier: ${required}`);
+  }
+  for (const stale of ['/CaseStudies', '/CaseStudyTruthStrike', '/CaseStudyAIBinding']) {
+    if (llmsText.includes(stale)) fail(`public/llms.txt contains retired route: ${stale}`);
+  }
 }
 
 // ── 6. Home / About regression (exact canonical values, apostrophe-normalized) ──
@@ -363,9 +382,11 @@ const robotsSources = [
 ];
 for (const [path, content] of robotsSources) {
   if (!content) continue;
-  const userAgentCount = (content.match(/^User-agent:/gm) || []).length;
-  if (userAgentCount !== 1) {
-    fail(`${path} must use one wildcard User-agent group so later Allow rules cannot reopen protected paths (found ${userAgentCount})`);
+  const requiredAgents = ['Googlebot', 'Bingbot', 'GPTBot', 'ClaudeBot', 'anthropic-ai', 'PerplexityBot', 'Google-Extended', 'Applebot-Extended', 'CCBot', '*'];
+  for (const agent of requiredAgents) {
+    if (!content.includes(`User-agent: ${agent}`) && !content.includes(`'${agent}'`) && !content.includes(`"${agent}"`)) {
+      fail(`${path} missing crawler policy for: ${agent}`);
+    }
   }
   for (const route of ['/nupsadminportal', '/providerconsole']) {
     if (!content.includes(`Disallow: ${route}`) && !content.includes(`'${route}'`)) {
