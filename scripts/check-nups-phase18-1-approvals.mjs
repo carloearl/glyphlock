@@ -255,6 +255,12 @@ const checks = [
 
     assert.match(financialResolution, /async function requireRealFinancialAuthority/);
     assert.match(financialResolution, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED', venue_id: venueId, mode: 'REAL' \}/);
+    assert.match(financialResolution, /if \(action === "create_request"\)[\s\S]*?requireRealFinancialAuthority\(base44, user, venue_id, CREATE_REQUEST_ROLES\)/);
+    assert.match(financialResolution, /exception\.venue_id !== venue_id/);
+    for (const action of ['approve', 'reject', 'request_changes']) {
+      assert.match(financialResolution, new RegExp(`if \\(action === "${action}"\\)[\\s\\S]*?requireRealFinancialAuthority\\(base44, user, resolution\\.venue_id, APPROVAL_ROLES\\)`));
+    }
+    assert.match(financialResolution, /resolution\.mode !== "REAL"/);
     assert.match(financialResolution, /if \(action === "execute"\)[\s\S]*?requireRealFinancialAuthority\(base44, user, resolution\.venue_id, EXECUTE_ROLES\)/);
     assert.match(financialResolution, /if \(action === "rollback"\)[\s\S]*?requireRealFinancialAuthority\(base44, user, resolution\.venue_id, ROLLBACK_ROLES\)/);
   }],
