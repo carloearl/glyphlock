@@ -566,13 +566,39 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   }, [activeProfile]);
 
   // ─── AI bulk add songs ───
+  // AI generation must always produce a real autoplay queue. If no profile is
+  // active, create one automatically instead of leaving the generated tracks
+  // stranded in local song storage with nothing for Cue/Auto Mix to consume.
   const handleAIBulkAddSongs = useCallback((songDataArray) => {
     const newSongs = songDataArray.map((d) => createSongEntry(d));
-    setSongs((prev) => [...prev, ...newSongs]);
+    if (!newSongs.length) return;
+    setSongs((prev) => {
+      const existingEntityIds = new Set(prev.map((song) => song._entityTrackId).filter(Boolean));
+      const existingMedia = new Set(prev.map((song) => song.youtubeUrl || song.uploadUrl).filter(Boolean));
+      const additions = newSongs.filter((song) =>
+        !(song._entityTrackId && existingEntityIds.has(song._entityTrackId)) &&
+        !((song.youtubeUrl || song.uploadUrl) && existingMedia.has(song.youtubeUrl || song.uploadUrl))
+      );
+      return additions.length ? [...prev, ...additions] : prev;
+    });
+    const newIds = newSongs.map((s) => s.id);
     if (activeProfile) {
-      const newIds = newSongs.map((s) => s.id);
-      setProfiles((prev) => prev.map((p) => (p.id === activeProfile.id ? { ...p, songIds: [...p.songIds, ...newIds] } : p)));
+      setProfiles((prev) => prev.map((p) =>
+        p.id === activeProfile.id
+          ? { ...p, songIds: [...p.songIds, ...newIds.filter((id) => !p.songIds.includes(id))] }
+          : p
+      ));
+    } else {
+      const profile = createDancerProfile({
+        name: "AI Auto Playlist",
+        colorTheme: "#8b5cf6",
+        songIds: newIds,
+        tags: ["ai", "autoplay", "nups"],
+      });
+      setProfiles((prev) => [...prev, profile]);
+      setUiState((state) => ({ ...state, activeProfileId: profile.id }));
     }
+    setPlayerCollapsed(false);
   }, [activeProfile]);
 
   // ─── AI apply ───
