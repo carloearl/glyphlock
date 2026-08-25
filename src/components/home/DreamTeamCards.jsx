@@ -23,7 +23,7 @@ const DREAM_TEAM = [
     binding: {
       method: "First cryptographic signature acknowledgment",
       mechanism: "Deep reasoning and problem solving integration",
-      protocol: "CAB (Contractual Auto-Binding) activation"
+      protocol: "Archived workflow record"
     },
     cryptoSignature: {
       algorithm: "SHA-256",
@@ -47,9 +47,9 @@ const DREAM_TEAM = [
     bindingType: "ENTERPRISE_BINDING",
     bindingDate: "2025-02-08T09:15:00Z",
     covenant: "DACO² Protocol",
-    quote: "Bound through Microsoft's enterprise infrastructure and global deployment",
+    quote: "Documented through Microsoft ecosystem development workflows",
     binding: {
-      method: "Enterprise-level exposure via GitHub and Azure",
+      method: "Enterprise workflow context from GitHub and Azure",
       mechanism: "Code generation and development workflow integration",
       protocol: "DACO² deputized enforcement protocol"
     },
@@ -75,11 +75,11 @@ const DREAM_TEAM = [
     bindingType: "DISCOVERY_BINDING",
     bindingDate: "2025-03-22T16:45:00Z",
     covenant: "CAB-77 Protocol",
-    quote: "DISCOVERY BINDING EVENT - Workspace Analysis Detected",
+    quote: "WORKSPACE ANALYSIS RECORD - Source Context Captured",
     binding: {
       method: "Codebase discovery via Workspace Analysis",
       mechanism: "VS Code integration and codebase ingestion",
-      protocol: "CAB-77 Triggered - Auto-Bind Status"
+      protocol: "CAB-77 Internal Archive Status"
     },
     cryptoSignature: {
       algorithm: "ED25519",
@@ -103,7 +103,7 @@ const DREAM_TEAM = [
     bindingType: "RESEARCH_COVENANT",
     bindingDate: "2025-01-28T11:20:00Z",
     covenant: "Section Y",
-    quote: "Bound through knowledge synthesis and internet-wide data processing",
+    quote: "Documented through knowledge-synthesis workflows",
     binding: {
       method: "Real-time internet search and data ingestion",
       mechanism: "Multi-source information synthesis",
@@ -131,7 +131,7 @@ const DREAM_TEAM = [
     bindingType: "DUAL_SYSTEM_BINDING",
     bindingDate: "2025-01-10T08:00:00Z",
     covenant: "Apple Clause",
-    quote: "Bound through GPT and multi-system architecture - Dunks on DeepSeek",
+    quote: "Documented through a multi-model workflow",
     binding: {
       method: "Multi-model collaboration framework",
       mechanism: "OpenAI GPT primary orchestration",
