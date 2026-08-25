@@ -246,6 +246,12 @@ const checks = [
       assert.match(source, /accountMode !== 'REAL'/);
       assert.doesNotMatch(source, /ALLOWED_ROLES\s*=\s*\['admin'/);
     }
+    assert.match(createPaymentRecord, /String\(mode\)\.toUpperCase\(\) !== 'REAL'/);
+    assert.match(createPaymentRecord, /PaymentRecord\.filter\([\s\S]*?mode: 'REAL'/);
+    assert.match(createPaymentRecord, /GlyphBucksOrder\.filter\([\s\S]*?mode: 'REAL'/);
+    assert.match(createGlyphBucksSale, /PaymentRecord\.filter\([\s\S]*?mode: 'REAL'/);
+    assert.match(createGlyphBucksSale, /GlyphBucksOrder\.filter\([\s\S]*?mode: 'REAL'/);
+    assert.doesNotMatch(createGlyphBucksSale, /let resolvedMode = 'REAL'/);
 
     assert.match(financialResolution, /async function requireRealFinancialAuthority/);
     assert.match(financialResolution, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED', venue_id: venueId, mode: 'REAL' \}/);
