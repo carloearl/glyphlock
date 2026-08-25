@@ -175,6 +175,12 @@ const ROUTES = [
     "priority": "0.9"
   },
   {
+    "path": "/OracleOHIPMilestone",
+    "lastmod": "2026-08-25",
+    "changefreq": "monthly",
+    "priority": "0.9"
+  },
+  {
     "path": "/CaseStudyNUPS",
     "lastmod": "2026-08-25",
     "changefreq": "monthly",
