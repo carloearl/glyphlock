@@ -290,6 +290,7 @@ export default function SEOHead({
       ],
       "sameAs": [
         "https://github.com/carloearl/glyphlock",
+        "https://linkedin.com/company/glyphlock",
         "https://instagram.com/glyphlock",
         "https://tiktok.com/@glyphlock"
       ],
@@ -397,9 +398,24 @@ export default function SEOHead({
             "description": resolvedDescription,
             "url": fullUrl,
             "mainEntityOfPage": fullUrl,
+            ...(resolvedSchemaType === "TechArticle" ? {
+              "datePublished": autoData.datePublished,
+              "dateModified": autoData.dateModified || autoData.datePublished,
+              "author": {
+                "@type": "Organization",
+                "name": "GlyphLock LLC",
+                "url": siteUrl
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "GlyphLock LLC",
+                "url": siteUrl,
+                "logo": { "@type": "ImageObject", "url": image }
+              }
+            } : {}),
             "provider": {
-                 "@type": "Organization",
-                 "name": "GlyphLock LLC"
+              "@type": "Organization",
+              "name": "GlyphLock LLC"
             }
         });
     } else {
