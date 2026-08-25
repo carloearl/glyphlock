@@ -35,6 +35,7 @@ Allow: /MasterCovenant
 Allow: /TrustSecurity
 Allow: /NISTChallenge
 Allow: /CaseStudies
+Allow: /CaseStudyOracleOHIP
 Allow: /CaseStudyTruthStrike
 Allow: /CaseStudyAIBinding
 Allow: /CaseStudyCovenantVictory
@@ -159,6 +160,7 @@ Disallow: /nistchallenge
 Disallow: /casestudies
 Disallow: /glyphlockfinancial
 Disallow: /nupslanding
+Disallow: /ohipreadiness
 
 # ── Discovery ──
 Sitemap: https://glyphlock.io/sitemap.xml

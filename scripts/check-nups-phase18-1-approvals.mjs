@@ -45,6 +45,12 @@ const sovereign = { tier: "SOVEREIGN", venue_id: null, mode: null };
 const ownerAuthority = { tier: "OWNER", venue_id: "dream_palace", mode: "DEMO" };
 const adminAuthority = { tier: "ADMINISTRATOR", venue_id: "dream_palace", mode: "DEMO" };
 
+function claimGenerationMatches(activeClaim, workerClaim) {
+  return activeClaim.key === workerClaim.key
+    && activeClaim.actor === workerClaim.actor
+    && activeClaim.claimedAt === workerClaim.claimedAt;
+}
+
 const checks = [
   ["server blocks self approval", () => {
     assert.match(access, /cannot approve, reject, suspend, or revoke your own access request/);
@@ -98,14 +104,23 @@ const checks = [
     assert.match(access, /r = await claimDecision\(base44, r, idempotency_key, email\)/);
     assert.match(access, /Another decision is already processing/);
     assert.match(access, /completedAfterClaim/);
-    assert.match(access, /releaseDecisionClaim\(base44, request_id, idempotency_key, email\)/);
+    assert.match(access, /releaseDecisionClaim\([\s\S]*?base44, request_id, idempotency_key, email, claimTimestamp/);
     assert.match(access, /decision_claim_active:\s*false/);
-    assert.match(access, /async function updateClaimedRequest[\s\S]*?decision_claim_key:\s*idempotencyKey[\s\S]*?decision_claimed_by:\s*actorEmail/);
+    assert.match(access, /async function updateClaimedRequest[\s\S]*?decision_claim_key:\s*idempotencyKey[\s\S]*?decision_claimed_by:\s*actorEmail[\s\S]*?decision_claimed_at:\s*claimedAt/);
+    assert.match(access, /async function releaseDecisionClaim[\s\S]*?decision_claimed_at:\s*claimedAt/);
+    assert.match(access, /const claimTimestamp = r\.decision_claimed_at/);
+    assert.match(access, /const claimTimestamp = claimed\.decision_claimed_at/);
+    assert.doesNotMatch(access, /releaseDecisionClaim\([^)]*actorEmail\s*\)/);
+    assert.doesNotMatch(access, /updateClaimedRequest\([^)]*actorEmail,\s*\{/);
     assert.match(access, /if \(!isExpiredDecisionClaim\(request\)\)[\s\S]*?Approval is still finalizing/);
     assert.match(access, /const committedGrant = await updateClaimedRequest/);
     assert.match(access, /const updated = await updateClaimedRequest\([\s\S]*?decision_claim_active:\s*false/);
     assert.doesNotMatch(access, /NUPSAccessRequest\.update\(request_id,\s*\{[\s\S]{0,240}?decision_claim_active:\s*false/);
     assert.match(requestSchema, /"decision_claim_active"[\s\S]*?"default": false/);
+    const expiredWorker = { key: "approval:1234567890abcdef", actor: "owner@example.com", claimedAt: "2026-08-25T00:00:00.000Z" };
+    const replacement = { ...expiredWorker, claimedAt: "2026-08-25T00:05:01.000Z" };
+    assert.equal(claimGenerationMatches(replacement, expiredWorker), false);
+    assert.equal(claimGenerationMatches(replacement, replacement), true);
   }],
   ["approval activates an account only after its grant commits", () => {
     const suspendedCreate = access.indexOf("status: 'suspended'");

@@ -15,20 +15,21 @@ import SEOHead from '@/components/SEOHead';
 const CASE_STUDIES = [
   {
     id: 'nups-oracle-ohip',
-    title: 'NUPS × Oracle Hospitality: Verified OHIP Connection',
-    date: 'August 12, 2026',
+    title: 'NUPS × Oracle Hospitality: Response-Validated OHIP Path',
+    date: 'August 24, 2026',
     category: 'Hospitality Integration',
     icon: Network,
-    badge: 'Live Sandbox Proof',
+    badge: 'Response Validated',
     badgeColor: 'bg-emerald-600',
     summary: 'How GlyphLock NUPS established an owner-controlled, server-to-server connection to the Oracle Hospitality Integration Platform Partner Sandbox without exposing credentials or moving protected data into the browser.',
     keyPoints: [
-      'Seven server-side integration settings verified',
+      'Seven required server settings present without exposing values',
       'Oracle OCIM OAuth exchange accepted',
-      'Read-only OHIP Property API call completed',
-      'Traceable request finished in 921 milliseconds'
+      'August 24 read-only room-configuration response validated',
+      '250 rows scanned, 250 flagged for review, and no writes',
+      'Historical August 12 request completed in 921 milliseconds'
     ],
-    outcome: 'Sandbox Connection Verified',
+    outcome: 'Response Validated',
     url: 'CaseStudyOracleOHIP'
   },
   {

@@ -26,14 +26,14 @@ import { Card, CardContent } from '@/components/ui/card';
 const TEST_EVIDENCE = [
   { label: 'Server settings', value: '7 / 7 present', icon: LockKeyhole },
   { label: 'Authentication', value: 'OCIM accepted', icon: KeyRound },
-  { label: 'OHIP API', value: 'Read-only call passed', icon: CheckCircle2 },
-  { label: 'End-to-end latency', value: '921 ms', icon: Clock3 },
+  { label: 'August 24 maturity', value: 'Response validated', icon: CheckCircle2 },
+  { label: 'Historical August 12 latency', value: '921 ms', icon: Clock3 },
 ];
 
 const ARCHITECTURE = [
   {
     title: 'GlyphLock NUPS',
-    detail: 'Owner/admin-only integration control inside the Base44 application.',
+    detail: 'Exact integration-owner control inside the Base44 application.',
     icon: Building2,
   },
   {
@@ -48,13 +48,13 @@ const ARCHITECTURE = [
   },
   {
     title: 'OHIP Property API',
-    detail: 'One authorized, read-only List of Values request proved the API path.',
+    detail: 'Authorized, read-only property and room-configuration requests validated the sandbox response path.',
     icon: CloudCog,
   },
 ];
 
 const CONTROLS = [
-  'Owner/admin role enforcement before status or test execution',
+  'Exact integration-owner enforcement before status or test execution',
   'Seven required server settings checked without returning their values',
   'HTTPS-only OHIP gateway validation',
   'Unique request ID for OAuth and Property API traceability',
@@ -91,31 +91,41 @@ const TIMELINE = [
   },
   {
     step: '06',
-    title: 'Connection verified',
-    text: 'Oracle accepted the OAuth exchange and the subsequent read-only OHIP request completed successfully in 921 milliseconds.',
+    title: 'Historical sandbox request succeeded',
+    text: 'On August 12, Oracle accepted the OAuth exchange and a read-only OHIP request completed successfully in 921 milliseconds. This is historical evidence, not the August 24 result.',
+  },
+  {
+    step: '07',
+    title: 'Fresh response validated',
+    text: 'On August 24, the integration owner ran a new authenticated, read-only room-configuration request. The sanitized response was validated: 250 rows scanned, 250 flagged for review, and no writes.',
+  },
+  {
+    step: '08',
+    title: 'Marketplace agreement submitted',
+    text: 'On August 24, the Oracle Cloud Marketplace Agreement was submitted under subscription 1655445. Oracle review is pending; publisher and listing approval are not yet established.',
   },
 ];
 
 const NEXT_PHASE = [
   {
-    title: 'Reusable token broker',
-    text: 'Cache short-lived OAuth tokens server-side and refresh them safely before expiration.',
+    title: 'Oracle agreement review',
+    text: 'Wait for Oracle to decide OCMA subscription 1655445 and respond to any requested information.',
   },
   {
-    title: 'Property mapping',
-    text: 'Bind the Oracle sandbox hotel/property identity to the matching NUPS venue configuration.',
+    title: 'Publisher registration',
+    text: 'Complete the Oracle Marketplace publisher workflow only after the agreement review enables it.',
   },
   {
-    title: 'Read-only operational adapters',
-    text: 'Add scoped reservation, profile and property reads with explicit field mapping and audit events.',
+    title: 'Listing package',
+    text: 'Prepare claims-safe product copy, public legal URLs, support details, sanitized screenshots, pricing posture and the preferred custom suffix glyphlock-nups.',
   },
   {
-    title: 'Reconciliation telemetry',
-    text: 'Persist request IDs, latency, status and correlation metadata without retaining protected Oracle payloads.',
+    title: 'Authorized customer environment',
+    text: 'Obtain an authorized OPERA Cloud customer environment before planning controlled read-only production validation.',
   },
   {
     title: 'Simphony workstream',
-    text: 'Treat Simphony POS integration as a separate credential, scope, API and certification track.',
+    text: 'Request the temporary sandbox and validation procedure from the Simphony Integrations Team as a separate track.',
   },
 ];
 
@@ -149,7 +159,7 @@ export default function CaseStudyOracleOHIP() {
 
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <Badge className="border border-emerald-400/40 bg-emerald-400/10 text-emerald-200">
-              Verified August 12, 2026
+              Response validated August 24, 2026
             </Badge>
             <Badge className="border border-cyan-400/40 bg-cyan-400/10 text-cyan-200">
               Partner Sandbox
@@ -172,8 +182,8 @@ export default function CaseStudyOracleOHIP() {
               </h1>
               <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300">
                 GlyphLock built a controlled server-to-server bridge between NUPS and the Oracle
-                Hospitality Integration Platform, then proved the complete Partner Sandbox path:
-                protected configuration, OCIM authentication and an authorized read-only API call.
+                Hospitality Integration Platform, then progressed the Partner Sandbox path through
+                protected configuration, OCIM authentication, request success and sanitized response validation.
               </p>
             </div>
 
@@ -183,12 +193,12 @@ export default function CaseStudyOracleOHIP() {
                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-300">
                   Verified outcome
                 </p>
-                <h2 className="mt-2 text-2xl font-bold text-white">Sandbox connection passed</h2>
+                <h2 className="mt-2 text-2xl font-bold text-white">Response validated</h2>
                 <p className="mt-3 text-sm leading-6 text-slate-300">
-                  OAuth was accepted and one read-only OHIP Property API request completed successfully.
+                  On August 24, OAuth and a read-only room-configuration request succeeded; the sanitized response was validated.
                 </p>
                 <div className="mt-5 border-t border-emerald-300/20 pt-4 font-mono text-xs text-emerald-100/80">
-                  Request 277b1985-6965-4b4e-a309-2f9ab736de42
+                  250 scanned · 250 review · 0 writes
                 </div>
               </CardContent>
             </Card>
@@ -209,6 +219,9 @@ export default function CaseStudyOracleOHIP() {
               </Card>
             ))}
           </div>
+          <p className="mt-5 text-sm leading-6 text-slate-400">
+            Historical baseline: the August 12 Partner Sandbox record shows OCIM OAuth, a read-only OHIP request, HTTP success and 921 ms latency. The 921 ms value is not attributed to the August 24 test.
+          </p>
         </section>
 
         <section className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
@@ -226,7 +239,7 @@ export default function CaseStudyOracleOHIP() {
             </p>
             <p>
               The implementation separated presence checks from outbound testing, restricted both
-              operations to privileged roles and returned only operational metadata. The browser
+              operations to the designated integration owner and returned only operational metadata. The browser
               never received an OAuth token or Oracle response payload.
             </p>
           </div>
@@ -295,8 +308,8 @@ export default function CaseStudyOracleOHIP() {
               <div className="mt-6 rounded-xl border border-amber-300/20 bg-black/20 p-5">
                 <p className="text-sm font-semibold text-amber-200">What changed during the test</p>
                 <p className="mt-2 text-sm leading-6 text-slate-400">
-                  No business record changed. The validation requested one OAuth token and read one
-                  non-sensitive List of Values resource.
+                  No business record changed. The August 24 validation requested server-side OAuth and read
+                  sanitized property and room-configuration data from the shared Partner Sandbox.
                 </p>
               </div>
             </CardContent>
@@ -326,7 +339,7 @@ export default function CaseStudyOracleOHIP() {
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-blue-200">Next phase</p>
             </div>
             <h2 className="mt-4 max-w-3xl text-3xl font-black">
-              Convert verified connectivity into governed NUPS workflows
+              Complete Oracle-controlled gates before production work
             </h2>
             <div className="mt-8 grid gap-4 md:grid-cols-2">
               {NEXT_PHASE.map(({ title, text }) => (

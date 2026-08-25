@@ -1,3 +1,15 @@
+/OHIPReadiness
+  Cache-Control: private, no-store, max-age=0
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  Referrer-Policy: no-referrer
+  Vary: Cookie, Authorization
+
+/ohipreadiness
+  Cache-Control: private, no-store, max-age=0
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  Referrer-Policy: no-referrer
+  Vary: Cookie, Authorization
+
 /*
   Cache-Control: no-cache, no-store, must-revalidate
   Pragma: no-cache

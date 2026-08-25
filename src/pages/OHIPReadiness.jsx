@@ -27,13 +27,14 @@ import {
 const PORTAL_URL =
   'https://partner.hospitality-dev-portal.us-ashburn-1.ocs.oraclecloud.com/glyphlocknups/ui/';
 const PARTNER_HUB_URL = 'https://partners.oracle.com/';
+const MARKETPLACE_PARTNER_URL = 'https://marketplace.oracle.com/partnerHome';
 const INTEGRATION_OWNER_EMAIL = 'carloearl@glyphlock.com';
 
 const PRODUCTION_STAGES = [
   {
     label: 'Partner Sandbox',
     status: 'complete',
-    detail: 'OAuth and controlled read-only OHIP validation verified.',
+    detail: 'August 24, 2026: OAuth succeeded, a controlled read-only room-configuration request succeeded, and the sanitized response was validated. Highest maturity: response validated.',
   },
   {
     label: 'Oracle PartnerNetwork Membership',
@@ -48,10 +49,16 @@ const PRODUCTION_STAGES = [
       'Oracle accepted the submitted company-address evidence and subsequently approved and activated the OPN membership.',
   },
   {
-    label: 'Marketplace Listing',
+    label: 'Oracle Cloud Marketplace Agreement',
+    status: 'review',
+    detail:
+      'Submitted August 24, 2026 under subscription 1655445. Oracle review is pending; submission is not approval.',
+  },
+  {
+    label: 'Marketplace Publisher & Listing',
     status: 'next',
     detail:
-      'OPN membership is active. Marketplace publisher registration, listing submission, commercial terms, and any supplier or banking onboarding remain separate Oracle-controlled steps.',
+      'After Oracle completes the agreement review, finish publisher registration and prepare the listing. Listing acceptance, commercial terms, and supplier or banking onboarding remain separate Oracle-controlled steps.',
   },
   {
     label: 'Production Application',
@@ -84,12 +91,17 @@ const MARKETPLACE_HANDOFF = [
   {
     label: 'OHIP technical evidence',
     status: 'complete',
-    detail: 'OAuth plus controlled read-only property and room configuration calls passed in the Partner Sandbox.',
+    detail: 'August 24, 2026: OAuth and controlled read-only room-configuration calls succeeded in the Partner Sandbox; the sanitized response was validated.',
+  },
+  {
+    label: 'Oracle Cloud Marketplace Agreement',
+    status: 'pending',
+    detail: 'Submitted August 24, 2026 under subscription 1655445; Oracle review is pending.',
   },
   {
     label: 'Marketplace publisher registration',
-    status: 'next',
-    detail: 'Open Partner Hub and complete the applicable publisher-registration workflow.',
+    status: 'pending',
+    detail: 'Complete publisher registration after Oracle confirms the agreement review and enables the applicable workflow.',
   },
   {
     label: 'Listing record and OCID',
@@ -318,7 +330,7 @@ export default function OHIPReadiness() {
           <div className="mb-3 flex items-center gap-2 text-cyan-300">
             <ShieldCheck className="h-5 w-5" />
             <span className="text-sm font-semibold uppercase tracking-[0.18em]">
-              Owner/Admin Integration Control
+              Integration Owner Control
             </span>
           </div>
           <h1 className="text-3xl font-bold tracking-tight">
@@ -441,7 +453,7 @@ export default function OHIPReadiness() {
               );
             })}
             <p className="text-xs leading-5 text-slate-500">
-              Current evidence confirms active Level 0 OPN membership and successful Partner Sandbox validation. Marketplace publisher approval, listing acceptance, production access, customer authorization, and Oracle supplier or banking setup remain separate gates.
+              Current evidence confirms active Level 0 OPN membership and an August 24, 2026 Partner Sandbox result at the response validated maturity level. Marketplace publisher approval, listing acceptance, production access, customer authorization, and Oracle supplier or banking setup remain separate gates.
             </p>
           </CardContent>
         </Card>
@@ -458,7 +470,7 @@ export default function OHIPReadiness() {
                   The next controlled workstream after OPN activation. Completed evidence is separated from Oracle-controlled approvals and production credentials.
                 </CardDescription>
               </div>
-              <Badge className="bg-violet-600 text-white">Marketplace Next</Badge>
+              <Badge className="bg-amber-500 text-slate-950">Agreement Under Review</Badge>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -508,8 +520,16 @@ export default function OHIPReadiness() {
             ))}
             <div className="flex flex-wrap gap-3 pt-2">
               <Button
-                onClick={() => window.open(PARTNER_HUB_URL, '_blank', 'noopener,noreferrer')}
+                onClick={() => window.open(MARKETPLACE_PARTNER_URL, '_blank', 'noopener,noreferrer')}
                 className="bg-violet-600 text-white hover:bg-violet-500"
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Open Marketplace Partner Home
+              </Button>
+              <Button
+                onClick={() => window.open(PARTNER_HUB_URL, '_blank', 'noopener,noreferrer')}
+                variant="outline"
+                className="border-violet-500/50 text-violet-100 hover:bg-violet-950/40"
               >
                 <ExternalLink className="mr-2 h-4 w-4" />
                 Open Oracle Partner Hub

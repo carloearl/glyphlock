@@ -209,7 +209,7 @@ export const domains = [
     links: [
       { label: "SDK documentation", to: "/SDKDocs" },
       { label: "NUPS integrations", to: "/NUPSLanding#nups-integrations" },
-      { label: "OHIP readiness", to: "/OHIPReadiness" },
+      { label: "OHIP integration evidence", to: "/CaseStudyOracleOHIP" },
       { label: "Deployment services", to: "/Services" },
     ],
   },
@@ -293,7 +293,7 @@ export const technicalSystems = [
     links: [
       { label: "Read SDK documentation", to: "/SDKDocs" },
       { label: "See NUPS integrations", to: "/NUPSLanding#nups-integrations" },
-      { label: "Review OHIP readiness", to: "/OHIPReadiness" },
+      { label: "Review OHIP integration evidence", to: "/CaseStudyOracleOHIP" },
     ],
   },
 ];
