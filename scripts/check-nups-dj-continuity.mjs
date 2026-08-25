@@ -95,7 +95,8 @@ assert.doesNotMatch(playerSection, /cueRef\?\.play\?\.\(\)\)\.catch\(\(\) => \{\
 assert.match(playerSection, /session\.transportCommand/, "deck transport must consume the authoritative session command");
 assert.match(storage, /buildMixerStorageKey\(kind, scope\)/, "mixer cache must use the explicit full scoped key");
 assert.match(mixer, /addEventListener\(MODE_CHANGE_EVENT/, "mixer cache must rehydrate on operating-mode changes");
-assert.match(playerSection, /grid-cols-1 lg:grid-cols-2/, "both decks must remain mounted in the mobile layout");
+assert.match(playerSection, /grid-cols-1[^\n]*xl:grid-cols-\[minmax\(0,1fr\)_minmax\(240px,0\.38fr\)_minmax\(0,1fr\)\]/, "mobile must stack the decks and desktop must expose Deck A | Mixer | Deck B");
+assert.equal((playerSection.match(/<PlayerDeck\b/g) || []).length, 2, "both decks must remain mounted across responsive layouts");
 assert.doesNotMatch(app, /from "\.\/pages\.config"/, "App must not eagerly import every page");
 assert.doesNotMatch(navigationTracker, /from ["']@\/pages\.config/, "navigation tracking must not pull eager pages into the entry chunk");
 assert.match(lazyPages, /import\.meta\.glob/, "pages must be route-lazy");
