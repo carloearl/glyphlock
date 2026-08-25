@@ -240,7 +240,7 @@ export default function Layout({ children, currentPageName }) {
                   heading: 'Run Security Audits', 
                   text: 'How to audit a website: Go to GlyphBot page → select "Site Auditor" mode → type or paste website URL (e.g., "audit https://example.com") → press Enter → wait 2-5 minutes for comprehensive scan. What you get: Security vulnerabilities (SSL issues, exposed credentials, outdated software), Performance analysis (load time, resource size, optimization tips), SEO check (meta tags, mobile-friendliness, structured data), Accessibility report (WCAG compliance, screen reader support). How to download report: After audit completes → click "Download PDF" → save for compliance records or client presentations. How to save audits: Results auto-save to your account → view past audits in Audit History panel.',
                   tip: 'Run audits monthly on production sites. Export PDFs for compliance documentation required by insurance or regulators.',
-                  action: 'Try now: Go to GlyphBot → type "audit https://glyphlock.com" → wait for results → review findings → download PDF report.'
+                  action: 'Try now: Go to GlyphBot → type "audit https://glyphlock.io" → wait for results → review findings → download PDF report.'
                 },
                 { 
                   heading: 'GlyphBot Tips & Tricks', 
