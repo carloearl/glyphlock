@@ -21,6 +21,85 @@ const AUDIT_EVENT_TYPES = [
   'SystemError', 'PerformanceSnapshot', 'SelfAuditAlert',
 ];
 
+const GATEWAY_POLICIES = {
+  entertainer_contract_signed: {
+    entity: 'Entertainer',
+    operation: 'update',
+    fields: new Set(['contract_signed', 'contract_signature', 'contract_signed_date', 'contract_ip_address', 'contract_status', 'status', 'mode']),
+    grantRoles: new Set(['ENTERTAINER', 'MANAGER', 'ADMINISTRATOR', 'OWNER']),
+    performerSelfOnly: true,
+  },
+  'license_expired:payout_hold': {
+    entity: 'Entertainer',
+    operation: 'update',
+    fields: new Set(['payout_hold']),
+    grantRoles: new Set(['MANAGER', 'ADMINISTRATOR', 'OWNER']),
+  },
+  entertainer_check_in: {
+    entity: 'EntertainerShift',
+    operation: 'create',
+    fields: new Set(['entertainer_id', 'entertainer_type', 'stage_name', 'check_in_time', 'location', 'venue_id', 'status']),
+    grantRoles: new Set(['MANAGER', 'ADMINISTRATOR', 'OWNER']),
+  },
+  entertainer_check_out: {
+    entity: 'EntertainerShift',
+    operation: 'update',
+    fields: new Set(['check_out_time', 'status', 'shift_earnings']),
+    grantRoles: new Set(['MANAGER', 'ADMINISTRATOR', 'OWNER']),
+  },
+  entertainer_earnings_accrual: {
+    entity: 'Entertainer',
+    operation: 'update',
+    fields: new Set(['total_earnings']),
+    grantRoles: new Set(['MANAGER', 'ADMINISTRATOR', 'OWNER']),
+  },
+};
+
+const ACCOUNT_ROLE_BY_GRANT = {
+  ENTERTAINER: 'PERFORMER',
+  MANAGER: 'VENUE_MANAGER',
+  ADMINISTRATOR: 'PLATFORM_ADMIN',
+  OWNER: 'VENUE_OWNER',
+};
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+
+function normalizeEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+async function requireGatewayAuthority(base44, user, venueId, mode, policy) {
+  const email = normalizeEmail(user?.email);
+  if (!email || !venueId) return null;
+  if (SOVEREIGN_EMAILS.has(email)) return { role: 'SOVEREIGN', grant: null, account: null };
+
+  const grants = mode === 'REAL'
+    ? await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED', venue_id: venueId, mode: 'REAL' }, '-created_date', 500)
+    : await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED', venue_id: venueId, mode }, '-created_date', 500);
+
+  for (const grant of (grants || [])) {
+    if (
+      normalizeEmail(grant.email) !== email
+      || grant.status !== 'APPROVED'
+      || grant.venue_id !== venueId
+      || grant.mode !== mode
+      || !grant.nups_user_id
+      || !policy.grantRoles.has(grant.granted_role)
+    ) continue;
+    const account = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
+    const accountMode = account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+    if (
+      account?.status !== 'active'
+      || accountMode !== mode
+      || normalizeEmail(account.platform_email) !== email
+      || account.venue_id !== venueId
+      || account.id !== grant.nups_user_id
+      || account.role !== ACCOUNT_ROLE_BY_GRANT[grant.granted_role]
+    ) continue;
+    return { role: account.role, grant, account };
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -29,34 +108,61 @@ Deno.serve(async (req) => {
 
     const body = await req.json();
     const entity = String(body?.entity || '');
-    const operation = String(body?.operation || 'create');
+    const operation = String(body?.operation || '');
     const recordId = body?.id || null;
-    const data = body?.data || {};
-    const intent = String(body?.intent || `server:${entity}:${operation}`);
+    const data = body?.data && typeof body.data === 'object' && !Array.isArray(body.data) ? body.data : null;
+    const intent = String(body?.intent || '');
+    const policy = GATEWAY_POLICIES[intent];
 
-    if (!entity) return Response.json({ ok: false, error: 'entity is required' }, { status: 400 });
-    if (!['create', 'update'].includes(operation)) {
-      return Response.json({ ok: false, error: 'operation must be create or update' }, { status: 400 });
+    if (!policy || policy.entity !== entity || policy.operation !== operation) {
+      return Response.json({ ok: false, error: 'Unknown or mismatched gateway intent' }, { status: 403 });
     }
+    if (!data) return Response.json({ ok: false, error: 'data must be an object' }, { status: 400 });
     if (operation === 'update' && !recordId) {
       return Response.json({ ok: false, error: 'id is required for update' }, { status: 400 });
     }
-    const svc = base44.asServiceRole.entities[entity];
-    if (!svc) return Response.json({ ok: false, error: `Unknown entity: ${entity}` }, { status: 400 });
+    const unexpectedFields = Object.keys(data).filter((field) => !policy.fields.has(field));
+    if (unexpectedFields.length > 0) {
+      return Response.json({ ok: false, error: `Fields not allowed for ${intent}: ${unexpectedFields.join(', ')}` }, { status: 403 });
+    }
 
-    // Actor resolved from the live session only.
-    const nupsRows = await base44.asServiceRole.entities.NUPSUser.filter({ email: user.email });
-    const nupsUser = (nupsRows || [])[0] || null;
-    const actorRole = nupsUser?.role || (user.role === 'admin' ? 'PLATFORM_ADMIN' : (user.role || 'user'));
+    const svc = entity === 'Entertainer'
+      ? base44.asServiceRole.entities.Entertainer
+      : entity === 'EntertainerShift'
+        ? base44.asServiceRole.entities.EntertainerShift
+        : null;
+    if (!svc) return Response.json({ ok: false, error: 'Entity is not gateway-managed' }, { status: 403 });
 
-    const venueId = String(body?.venue_id || data?.venue_id || nupsUser?.venue_id || '');
+    const venueId = String(body?.venue_id || data?.venue_id || '');
     const mode = String(data?.mode || body?.mode || 'REAL').toUpperCase();
+    if (!venueId || !['REAL', 'TEST', 'DEMO', 'SANDBOX'].includes(mode)) {
+      return Response.json({ ok: false, error: 'A valid venue and mode are required' }, { status: 400 });
+    }
 
-    // Previous state for update audits.
     let before = null;
     if (operation === 'update') {
-      try { before = await svc.get(recordId); } catch { before = null; }
+      before = await svc.get(recordId).catch(() => null);
+      if (!before) return Response.json({ ok: false, error: 'Record not found' }, { status: 404 });
+      const recordVenue = String(before.venue_id || '');
+      if (recordVenue !== venueId) {
+        return Response.json({ ok: false, error: 'Record venue does not match the authorized venue' }, { status: 403 });
+      }
+    } else if (String(data.venue_id || '') !== venueId) {
+      return Response.json({ ok: false, error: 'Created record must use the authorized venue' }, { status: 403 });
     }
+
+    const authority = await requireGatewayAuthority(base44, user, venueId, mode, policy);
+    if (!authority) {
+      return Response.json({ ok: false, error: 'Active owner-approved NUPS authority required' }, { status: 403 });
+    }
+    if (
+      policy.performerSelfOnly
+      && authority.role === 'PERFORMER'
+      && normalizeEmail(before?.email) !== normalizeEmail(user.email)
+    ) {
+      return Response.json({ ok: false, error: 'Performer may update only their own contract' }, { status: 403 });
+    }
+    const actorRole = authority.role;
 
     const record = operation === 'create'
       ? await svc.create({ ...data, ...(venueId && !data.venue_id ? { venue_id: venueId } : {}) })

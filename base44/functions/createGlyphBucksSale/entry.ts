@@ -5,6 +5,58 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 // → postGlyphBucksToLedger automation → JournalEntry. Must be server-fixed.
 const SURCHARGE_RATE = 0.30;
 
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+const SALE_GRANT_ROLES = new Set([
+  'HOSTESS', 'DOORMAN', 'DOOR_GIRL', 'BARTENDER', 'SECURITY',
+  'MANAGER', 'ADMINISTRATOR', 'OWNER',
+]);
+const SALE_ACCOUNT_ROLE_BY_GRANT = {
+  HOSTESS: 'HOSTESS',
+  DOORMAN: 'DOORMAN',
+  DOOR_GIRL: 'DOOR_GIRL',
+  BARTENDER: 'BARTENDER',
+  SECURITY: 'SECURITY',
+  MANAGER: 'VENUE_MANAGER',
+  ADMINISTRATOR: 'PLATFORM_ADMIN',
+  OWNER: 'VENUE_OWNER',
+};
+
+function normalizeEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+async function requireRealSaleAuthority(base44, user, venue_id) {
+  const email = normalizeEmail(user?.email);
+  if (!email || !venue_id) return null;
+  if (SOVEREIGN_EMAILS.has(email)) {
+    return { account: { role: 'SOVEREIGN', platform_email: email, venue_id, status: 'active', access_mode: 'REAL' }, grant: null };
+  }
+
+  const grants = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED', venue_id, mode: 'REAL' }, '-created_date', 500);
+  for (const grant of (grants || [])) {
+    if (
+      grant.email?.toLowerCase() !== email
+      || grant.status !== 'APPROVED'
+      || grant.venue_id !== venue_id
+      || grant.mode !== 'REAL'
+      || !grant.nups_user_id
+      || !SALE_GRANT_ROLES.has(grant.granted_role)
+    ) continue;
+    const account = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
+    const accountMode = account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+    if (
+      account?.status !== 'active'
+      || accountMode !== 'REAL'
+      || normalizeEmail(account.platform_email) !== email
+      || account.venue_id !== venue_id
+      || account.id !== grant.nups_user_id
+      || account.role !== SALE_ACCOUNT_ROLE_BY_GRANT[grant.granted_role]
+    ) continue;
+    return { account, grant };
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
@@ -20,12 +72,6 @@ Deno.serve(async (req) => {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (!['admin', 'manager', 'staff'].includes(user.role)) {
-      return Response.json({ 
-        error: 'Forbidden: Staff access required to process GlyphBucks sales' 
-      }, { status: 403 });
-    }
-
     let venue_id;
     try {
       const sessionVenue = await base44.functions.invoke('getSessionVenueId', {});
@@ -37,6 +83,11 @@ Deno.serve(async (req) => {
       venue_id = sessionVenue.data.venue_id;
     } catch (_) {
       return Response.json({ error: 'Venue access denied' }, { status: 403 });
+    }
+
+    const saleAuthority = await requireRealSaleAuthority(base44, user, venue_id);
+    if (!saleAuthority) {
+      return Response.json({ error: 'Forbidden: active REAL venue grant required' }, { status: 403 });
     }
 
     const payload = await req.json();

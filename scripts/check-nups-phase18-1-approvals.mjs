@@ -32,6 +32,10 @@ const captureEvidence = fs.readFileSync("base44/functions/captureVerificationMed
 const vipContractGenerate = fs.readFileSync("base44/functions/vipContractGenerate/entry.ts", "utf8");
 const quickBooksExport = fs.readFileSync("base44/functions/exportQuickBooksIIF/entry.ts", "utf8");
 const closePOSBatch = fs.readFileSync("base44/functions/closePOSBatch/entry.ts", "utf8");
+const serverAuditGateway = fs.readFileSync("base44/functions/serverAuditGateway/entry.ts", "utf8");
+const createPaymentRecord = fs.readFileSync("base44/functions/createPaymentRecord/entry.ts", "utf8");
+const createGlyphBucksSale = fs.readFileSync("base44/functions/createGlyphBucksSale/entry.ts", "utf8");
+const financialResolution = fs.readFileSync("base44/functions/financialResolutionWorkflow/entry.ts", "utf8");
 const vipContractFlow = fs.readFileSync("src/components/nups/VIPContractFlow.jsx", "utf8");
 const manifest = JSON.parse(fs.readFileSync(".base44/ci-checks.json", "utf8"));
 
@@ -227,6 +231,26 @@ const checks = [
     assert.match(vipContractFlow, /venue_id: venueId/);
     assert.match(quickBooksExport, /venueEntertainerIds\.has\(p\.entertainer_id\)/);
     assert.match(quickBooksExport, /Entertainer\.filter\(venueFilter/);
+  }],
+  ["remaining production write consumers require exact REAL authority", () => {
+    assert.match(serverAuditGateway, /const GATEWAY_POLICIES =/);
+    assert.doesNotMatch(serverAuditGateway, /entities\[entity\]/);
+    assert.match(serverAuditGateway, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED', venue_id: venueId, mode: 'REAL' \}/);
+    assert.match(serverAuditGateway, /NUPSUser\.get\(grant\.nups_user_id\)/);
+    assert.match(serverAuditGateway, /recordVenue !== venueId/);
+
+    for (const source of [createPaymentRecord, createGlyphBucksSale]) {
+      assert.match(source, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED', venue_id, mode: 'REAL' \}/);
+      assert.match(source, /NUPSUser\.get\(grant\.nups_user_id\)/);
+      assert.match(source, /account\?\.status !== 'active'/);
+      assert.match(source, /accountMode !== 'REAL'/);
+      assert.doesNotMatch(source, /ALLOWED_ROLES\s*=\s*\['admin'/);
+    }
+
+    assert.match(financialResolution, /async function requireRealFinancialAuthority/);
+    assert.match(financialResolution, /NUPSAccessRequest\.filter\(\{ email, status: 'APPROVED', venue_id: venueId, mode: 'REAL' \}/);
+    assert.match(financialResolution, /if \(action === "execute"\)[\s\S]*?requireRealFinancialAuthority\(base44, user, resolution\.venue_id, EXECUTE_ROLES\)/);
+    assert.match(financialResolution, /if \(action === "rollback"\)[\s\S]*?requireRealFinancialAuthority\(base44, user, resolution\.venue_id, ROLLBACK_ROLES\)/);
   }],
   ["approval status filters and owner route exist", () => {
     for (const label of ["PENDING", "APPROVED", "HISTORY", "ALL"]) assert.match(ui, new RegExp(label));
