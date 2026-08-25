@@ -77,6 +77,12 @@ function UnifiedMusicConsoleInner() {
   const [performerOverrideId, setPerformerOverrideId] = useState("");
   const { snapshot, loading, error, lastUpdated, refresh } = useDJOperationalState({ pollMs: 10000 });
 
+  useEffect(() => {
+    const handleLibraryUpdated = () => refresh();
+    window.addEventListener("nups:dj-library-updated", handleLibraryUpdated);
+    return () => window.removeEventListener("nups:dj-library-updated", handleLibraryUpdated);
+  }, [refresh]);
+
   useEffect(() => { setAutoDjArmed(autoDj); }, [autoDj, setAutoDjArmed]);
   useEffect(() => { setView(active); }, [active, setView]);
 
