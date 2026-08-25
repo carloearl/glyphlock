@@ -97,25 +97,32 @@ export default function CaseStudyNUPS() {
             The comparison acknowledges current platform capabilities and identifies the narrower integration layer NUPS is designed to provide.
           </p>
 
-          <div className="mt-8 overflow-hidden rounded-2xl border border-slate-800">
-            <div className="hidden grid-cols-[180px_1fr_1fr] border-b border-slate-800 bg-slate-900/80 text-xs font-bold uppercase tracking-wider text-slate-400 md:grid">
-              <div className="p-4">Capability</div>
-              <div className="border-l border-slate-800 p-4">Modern payment platforms</div>
-              <div className="border-l border-slate-800 p-4 text-cyan-300">NUPS focus</div>
-            </div>
-            {COMPARISON_ROWS.map((row) => (
-              <div key={row.capability} className="grid gap-4 border-b border-slate-800 bg-slate-950/50 p-5 last:border-b-0 md:grid-cols-[180px_1fr_1fr] md:gap-0 md:p-0">
-                <div className="font-bold text-white md:p-5">{row.capability}</div>
-                <div className="text-sm leading-6 text-slate-400 md:border-l md:border-slate-800 md:p-5">
-                  <span className="mb-1 block text-xs font-bold uppercase text-slate-500 md:hidden">Modern payment platforms</span>
-                  {row.paymentPlatforms}
-                </div>
-                <div className="text-sm leading-6 text-cyan-100 md:border-l md:border-slate-800 md:p-5">
-                  <span className="mb-1 block text-xs font-bold uppercase text-cyan-400 md:hidden">NUPS focus</span>
-                  {row.nups}
-                </div>
-              </div>
-            ))}
+          <div className="mt-8 overflow-x-auto rounded-2xl border border-slate-800">
+            <table className="min-w-[760px] w-full border-collapse text-left">
+              <caption className="sr-only">
+                Comparison of modern payment-platform capabilities with the integration and evidence-packaging focus of NUPS.
+              </caption>
+              <thead className="border-b border-slate-800 bg-slate-900/80 text-xs font-bold uppercase tracking-wider text-slate-400">
+                <tr>
+                  <th scope="col" className="w-[180px] p-4">Capability</th>
+                  <th scope="col" className="border-l border-slate-800 p-4">Modern payment platforms</th>
+                  <th scope="col" className="border-l border-slate-800 p-4 text-cyan-300">NUPS focus</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON_ROWS.map((row) => (
+                  <tr key={row.capability} className="border-b border-slate-800 bg-slate-950/50 last:border-b-0">
+                    <th scope="row" className="p-5 align-top font-bold text-white">{row.capability}</th>
+                    <td className="border-l border-slate-800 p-5 align-top text-sm leading-6 text-slate-400">
+                      {row.paymentPlatforms}
+                    </td>
+                    <td className="border-l border-slate-800 p-5 align-top text-sm leading-6 text-cyan-100">
+                      {row.nups}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
 
