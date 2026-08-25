@@ -36,6 +36,7 @@ Allow: /TrustSecurity
 Allow: /NISTChallenge
 Allow: /CaseStudies
 Allow: /CaseStudyOracleOHIP
+Allow: /OracleOHIPMilestone
 Allow: /CaseStudyTruthStrike
 Allow: /CaseStudyAIBinding
 Allow: /CaseStudyCovenantVictory
@@ -158,6 +159,7 @@ Disallow: /mastercovenant
 Disallow: /trustsecurity
 Disallow: /nistchallenge
 Disallow: /casestudies
+Disallow: /oracleohipmilestone
 Disallow: /glyphlockfinancial
 Disallow: /nupslanding
 Disallow: /ohipreadiness
