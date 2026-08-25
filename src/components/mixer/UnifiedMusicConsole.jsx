@@ -28,6 +28,7 @@ import JukeboxTab from "@/components/mixer/suite/JukeboxTab";
 import RadioTab from "@/components/mixer/suite/RadioTab";
 import TrackHealthTab from "@/components/mixer/suite/TrackHealthTab";
 import FableVisualizerTab from "@/components/mixer/suite/FableVisualizerTab";
+import DJSoundboard from "@/components/mixer/DJSoundboard";
 import SuiteErrorBoundary from "@/components/mixer/suite/SuiteErrorBoundary";
 import DJAutomationDeck from "@/components/mixer/automation/DJAutomationDeck";
 import useDJOperationalState from "@/components/mixer/automation/useDJOperationalState";
@@ -42,6 +43,7 @@ import { createScopedLayoutKey } from "@/components/mixer/session/djLayout";
 
 const NAV = [
   { key: "mixer",    label: "Auto-DJ Mixer",  icon: Disc3,    accent: "from-purple-500 to-fuchsia-500", ring: "border-purple-500/60 bg-purple-500/15 text-purple-200" },
+  { key: "soundboard", label: "Soundboard", icon: Radio, accent: "from-fuchsia-500 to-violet-500", ring: "border-fuchsia-500/60 bg-fuchsia-500/15 text-fuchsia-200" },
   { key: "tracks",   label: "Track Library",  icon: Music,    accent: "from-indigo-500 to-purple-500",  ring: "border-indigo-500/60 bg-indigo-500/15 text-indigo-200" },
   { key: "radio",    label: "Live Radio",     icon: RadioTower, accent: "from-amber-500 to-orange-500", ring: "border-amber-500/60 bg-amber-500/15 text-amber-200" },
   { key: "search",   label: "YT Search",      icon: Youtube,  accent: "from-red-500 to-rose-500",       ring: "border-red-500/60 bg-red-500/15 text-red-200" },
@@ -320,6 +322,7 @@ function UnifiedMusicConsoleInner() {
             </div>
             <SuiteErrorBoundary>
               {active === "mixer"   && <DJDiagnosticsTimeline compact />}
+              {active === "soundboard" && <DJSoundboard />}
               {active === "tracks"  && <TracksTab />}
               {active === "radio"   && <RadioTab />}
               {active === "search"  && <MusicSearchTab onLoadToMixerDeck={handleLoadToMixerDeck} />}
