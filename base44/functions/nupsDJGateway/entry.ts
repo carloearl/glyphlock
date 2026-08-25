@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
         const validation = await base44.functions.invoke("nupsClockInV2", {
           action: "validateSession",
           kiosk_session: kioskSession,
-          allowed_roles: ["DJ"],
+          allowed_roles: Array.from(PLAYLIST_ROLES),
         });
         if (validation?.data?.valid) {
           authorized = true;
@@ -71,20 +71,33 @@ Deno.serve(async (req) => {
       const email = normalizeText(me?.email);
       let nupsUser = null;
       if (email) {
-        nupsUser = (await E.NUPSUser.filter({ platform_email: email, status: "active" }, null, 1).catch(() => []))?.[0]
-          || (await E.NUPSUser.filter({ username: email.split("@")[0], status: "active" }, null, 1).catch(() => []))?.[0]
-          || null;
+        const emailMatches = await E.NUPSUser.filter({ platform_email: email, status: "active" }, "-updated_date", 20).catch(() => []);
+        const usernameMatches = emailMatches?.length
+          ? []
+          : await E.NUPSUser.filter({ username: email.split("@")[0], status: "active" }, "-updated_date", 20).catch(() => []);
+        const candidates = [...(emailMatches || []), ...(usernameMatches || [])];
+        // Duplicate NUPSUser rows can exist during migrations/onboarding. Prefer
+        // an explicitly DJ/manager-capable active record instead of whichever
+        // record the database happens to return first.
+        nupsUser = candidates.find((candidate) => PLAYLIST_ROLES.has(candidate?.role)) || candidates[0] || null;
       }
       const ownerFallback = email === OWNER_EMAIL;
       const platformAdminFallback = me?.role === "admin";
-      const resolvedRole = nupsUser?.role || (ownerFallback ? "SOVEREIGN" : platformAdminFallback ? "PLATFORM_ADMIN" : null);
+      // Platform identity outranks a stale lower-privilege NUPSUser row. This is
+      // especially important for the sovereign owner account, which may also
+      // have venue-worker records for testing real kiosk workflows.
+      const resolvedRole = ownerFallback
+        ? "SOVEREIGN"
+        : platformAdminFallback
+          ? "PLATFORM_ADMIN"
+          : nupsUser?.role || null;
       if (me && resolvedRole && PLAYLIST_ROLES.has(resolvedRole)) {
         authorized = true;
         operator = {
           name: nupsUser?.full_name || me?.full_name || me?.name || me?.email || "NUPS Admin",
           email: me?.email || null,
           role: resolvedRole,
-          venue_id: nupsUser?.venue_id || null,
+          venue_id: (ownerFallback || platformAdminFallback) ? null : (nupsUser?.venue_id || null),
           shift_id: null,
         };
       }
