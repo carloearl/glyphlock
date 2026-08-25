@@ -22,9 +22,12 @@ Allow: /NUPSLanding
 Allow: /GlyphLockFinancial
 Allow: /GovernanceHub
 Allow: /MasterCovenant
-Allow: /CaseStudies
+Allow: /TechnicalEvidence
 Allow: /CaseStudyOracleOHIP
 Allow: /OracleOHIPMilestone
+Allow: /CaseStudyNUPS
+Allow: /ProvenanceMethodology
+Allow: /CaseStudyCovenantVictory
 Allow: /Roadmap
 Allow: /Partners
 Allow: /DreamTeam
