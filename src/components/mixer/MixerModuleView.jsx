@@ -664,7 +664,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   return (
     <div className="h-full min-h-0 flex flex-col bg-transparent overflow-y-auto overflow-x-hidden rounded-xl border border-slate-700/50">
       {/* Top bar */}
-      <div className="h-14 flex-shrink-0 flex items-center gap-3 px-4 border-b border-slate-700/50 bg-slate-900/80">
+      <div className="min-h-14 flex-shrink-0 flex flex-wrap items-center gap-2 px-3 py-2 md:px-4 border-b border-slate-700/50 bg-slate-900/80">
         <Disc3 className="w-5 h-5 text-purple-400 animate-spin" style={{ animationDuration: "3s" }} />
         <span className="text-sm font-bold text-white hidden sm:block">MIXER</span>
         <SearchBar value={uiState.searchQuery || ""} onChange={(q) => setUiState((s) => ({ ...s, searchQuery: q }))} />
@@ -717,11 +717,11 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
 
       {/* Performance decks remain dominant; library and secondary tools collapse below. */}
       {workspaceToolsOpen && (
-      <ResizablePanelGroup direction="horizontal" autoSaveId="mixer-panels-v3" className="h-[min(42vh,440px)] min-h-[260px] flex-shrink-0 overflow-hidden border-t border-slate-700/40">
+      <ResizablePanelGroup direction="horizontal" autoSaveId="mixer-panels-v3" className="h-[min(55vh,560px)] min-h-[340px] flex-shrink-0 overflow-hidden border-t border-slate-700/40">
         {/* Left: Track Library — scrollable browser sidebar */}
         {!isMobile && (
           <>
-            <ResizablePanel defaultSize={24} minSize={14} maxSize={40} collapsible collapsedSize={0} className="flex flex-col min-h-0 border-r border-slate-700/30">
+            <ResizablePanel defaultSize={24} minSize={16} maxSize={42} collapsible collapsedSize={0} className="flex flex-col min-h-0 overflow-y-auto overflow-x-hidden border-r border-slate-700/30">
               <div className="flex items-center gap-1.5 px-2 py-1.5 border-b border-slate-700/30 bg-slate-900/80">
                 <ListMusic className="w-3.5 h-3.5 text-emerald-400" />
                 <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400">Library</span>
@@ -739,7 +739,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         )}
 
         {/* Center: Song Deck (active playlist) */}
-        <ResizablePanel defaultSize={isMobile ? 100 : 44} minSize={25} className="flex min-h-0 overflow-hidden">
+        <ResizablePanel defaultSize={isMobile ? 100 : 44} minSize={30} className="flex min-h-0 overflow-y-auto overflow-x-hidden">
           <SongDeck
             songs={songs}
             profile={activeProfile}
@@ -766,7 +766,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         {!isMobile && (
           <>
             <ResizableHandle withHandle className="bg-slate-700/60 hover:bg-cyan-500/60 transition-colors" />
-            <ResizablePanel defaultSize={32} minSize={16} maxSize={50} collapsible collapsedSize={0} className="flex flex-col min-h-0 border-l border-slate-700/30">
+            <ResizablePanel defaultSize={32} minSize={18} maxSize={50} collapsible collapsedSize={0} className="flex flex-col min-h-0 overflow-y-auto overflow-x-hidden border-l border-slate-700/30">
               {/* Tab toggle between Profiles, AI and Search */}
               <div className="flex border-b border-slate-700/30 bg-slate-900/80">
                 {[
