@@ -54,7 +54,7 @@ export default function Terms() {
     },
     {
       title: "13. Oracle Hospitality Integration Platform (OHIP)",
-      content: "GlyphLock’s Oracle Hospitality Integration Cloud Service is provisioned. NUPS has completed an authenticated, controlled read-only request in the OHIP Partner Sandbox; this is sandbox technical evidence only. Oracle Marketplace acceptance, production access, customer authorization, production validation, certification, endorsement, and any commercial partnership are not complete or claimed. OHIP credentials are held server-side only. Until Oracle and an authorized OPERA Cloud customer provide the required production environment and credentials, and read-only production validation succeeds, NUPS does not exchange production guest, reservation, folio, payment, posting, token, or raw Oracle payload data. Card authorization is never routed through OHIP and remains with Stripe or the property’s certified terminal. Oracle and Oracle Hospitality are trademarks of Oracle Corporation, and Stripe is a trademark of Stripe, Inc.; use of these names describes integration work only, not affiliation or sponsorship."
+      content: "GlyphLock’s Oracle Hospitality Integration Cloud Service is provisioned. NUPS has completed an authenticated, controlled read-only request in the OHIP Partner Sandbox; this is sandbox technical evidence only. GlyphLock’s Oracle Cloud Marketplace program enrollment was approved and activated on August 25, 2026, and a formal Simphony Integration Partner Program request has been submitted for Oracle review. Those milestones do not establish a published NUPS Marketplace listing, production access, customer authorization, production validation, Simphony Solution Validation, certification, endorsement, or any separate commercial partnership. OHIP credentials are held server-side only. Until Oracle and an authorized OPERA Cloud customer provide the required production environment and credentials, and read-only production validation succeeds, NUPS does not exchange production guest, reservation, folio, payment, posting, token, or raw Oracle payload data. Card authorization is never routed through OHIP and remains with Stripe or the property’s certified terminal. Oracle and Oracle Hospitality are trademarks of Oracle Corporation, and Stripe is a trademark of Stripe, Inc.; use of these names describes integration work only, not affiliation or sponsorship."
     },
     {
       title: "14. Third-Party Service Dependencies",
@@ -80,7 +80,7 @@ export default function Terms() {
               TERMS OF <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent">SERVICE</span>
             </h1>
             <div className="inline-block px-4 py-2 glyph-glass border border-cyan-500/30 rounded-full">
-              <p className="text-cyan-300 text-sm font-bold uppercase tracking-widest">Last Updated: August 24, 2026</p>
+              <p className="text-cyan-300 text-sm font-bold uppercase tracking-widest">Last Updated: August 25, 2026</p>
             </div>
           </div>
 
