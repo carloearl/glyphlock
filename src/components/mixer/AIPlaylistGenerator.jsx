@@ -118,21 +118,10 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
   const handleAddSelected = async () => {
     if (!results?.playlist) return;
     const selectedSongs = results.playlist.filter((_, i) => selected.has(i));
-    const songs = selectedSongs.map(s => {
-      const media = s.resolvedMedia || {};
-      const videoId = media.source === "youtube" ? (media.source_id || media.youtube_video_id || String(media.id || "").replace(/^yt-/, "")) : "";
-      return {
-        title: s.title,
-        artist: s.artist,
-        vibeTag: s.vibeTag,
-        energyLevel: s.energyLevel,
-        youtubeUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : "",
-        uploadUrl: media.source !== "youtube" ? (media.audio_url || "") : "",
-      };
-    });
 
-    // Persist resolved AI picks into the authoritative Track Library as well as
-    // the local performance deck. The gateway de-duplicates by YouTube ID.
+    // Persist first, then hand the exact authoritative Track IDs to the mixer.
+    // That keeps AI-generated songs synchronized across the Track Library,
+    // local autoplay profile, Auto-DJ scoring and analytics immediately.
     const moodByVibe = {
       slow: "chill",
       seductive: "sensual",
@@ -141,12 +130,14 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
       crowdControl: "neutral",
       cooldown: "chill",
     };
-    await Promise.all(selectedSongs
-      .filter((song) => song.resolvedMedia)
-      .map((song) => {
-        const media = song.resolvedMedia || {};
-        const videoId = media.source === "youtube" ? (media.source_id || media.youtube_video_id || String(media.id || "").replace(/^yt-/, "")) : "";
-        return invokeDJGateway("createTrack", {
+    const persistedTracks = await Promise.all(selectedSongs.map(async (song) => {
+      const media = song.resolvedMedia || {};
+      if (!song.resolvedMedia) return null;
+      const videoId = media.source === "youtube"
+        ? (media.source_id || media.youtube_video_id || String(media.id || "").replace(/^yt-/, ""))
+        : "";
+      try {
+        const saved = await invokeDJGateway("createTrack", {
           track: {
             title: song.title,
             artist: song.artist,
@@ -160,11 +151,44 @@ Return REAL songs that actually exist. Mix energy levels for good flow.`,
             mood: moodByVibe[song.vibeTag] || "neutral",
             active: true,
           },
-        }).catch(() => null);
-      }));
+        });
+        return saved?.track || null;
+      } catch (error) {
+        console.warn("[AIPlaylistGenerator] Track library sync failed", song.title, error?.message || error);
+        return null;
+      }
+    }));
+
+    const songs = selectedSongs.map((song, index) => {
+      const media = song.resolvedMedia || {};
+      const videoId = media.source === "youtube"
+        ? (media.source_id || media.youtube_video_id || String(media.id || "").replace(/^yt-/, ""))
+        : "";
+      const persisted = persistedTracks[index];
+      return {
+        title: song.title,
+        artist: song.artist,
+        vibeTag: song.vibeTag,
+        energyLevel: song.energyLevel,
+        youtubeUrl: videoId ? `https://www.youtube.com/watch?v=${videoId}` : "",
+        uploadUrl: media.source !== "youtube" ? (media.audio_url || "") : "",
+        imageUrl: media.thumbnail || "",
+        genre: media.genre || "",
+        source: videoId ? "youtube" : (media.source || "manual"),
+        _entityTrackId: persisted?.id || media.library_track_id || null,
+      };
+    });
 
     onAddSongs(songs);
-    toast.success(`Added ${songs.length} playable songs from available sources to deck + NUPS library`);
+    const syncedCount = persistedTracks.filter(Boolean).length;
+    window.dispatchEvent(new CustomEvent("nups:dj-library-updated", {
+      detail: { requested: songs.length, synced: syncedCount },
+    }));
+    if (syncedCount === songs.length) {
+      toast.success(`Added ${songs.length} songs to autoplay + NUPS library`);
+    } else {
+      toast.warning(`Added ${songs.length} songs to autoplay; ${syncedCount}/${songs.length} synced to the NUPS library`);
+    }
     setResults(null);
     onClose();
   };
