@@ -111,7 +111,6 @@ import ProjectUpdates from './pages/ProjectUpdates';
 import ProviderConsole from './pages/ProviderConsole';
 import SecureQRStudio from './pages/SecureQRStudio';
 import Roadmap from './pages/Roadmap';
-import Robots from './pages/Robots';
 import SDKDocs from './pages/SDKDocs';
 import SecurityDocs from './pages/SecurityDocs';
 import SecurityOperationsCenter from './pages/SecurityOperationsCenter';
@@ -123,13 +122,6 @@ import Sie from './pages/Sie';
 import SiteAudit from './pages/SiteAudit';
 import SiteBuilder from './pages/SiteBuilder';
 import SiteBuilderTest from './pages/SiteBuilderTest';
-import Sitemap from './pages/Sitemap';
-import SitemapApp from './pages/SitemapApp';
-import SitemapDynamic from './pages/SitemapDynamic';
-import SitemapImages from './pages/SitemapImages';
-import SitemapInteractive from './pages/SitemapInteractive';
-import SitemapQr from './pages/SitemapQr';
-import SitemapXml from './pages/SitemapXml';
 import Solutions from './pages/Solutions';
 import StrategicScale from './pages/StrategicScale';
 import SystemAudit from './pages/SystemAudit';
@@ -137,7 +129,6 @@ import Terms from './pages/Terms';
 import TrustSecurity from './pages/TrustSecurity';
 import VIPContract from './pages/VIPContract';
 import VideoUpload from './pages/VideoUpload';
-import sitemapQr from './pages/sitemap-qr';
 import __Layout from './Layout.jsx';
 
 
@@ -206,7 +197,6 @@ export const PAGES = {
     "ProviderConsole": ProviderConsole,
     "SecureQRStudio": SecureQRStudio,
     "Roadmap": Roadmap,
-    "Robots": Robots,
     "SDKDocs": SDKDocs,
     "SecurityDocs": SecurityDocs,
     "SecurityOperationsCenter": SecurityOperationsCenter,
@@ -218,13 +208,6 @@ export const PAGES = {
     "SiteAudit": SiteAudit,
     "SiteBuilder": SiteBuilder,
     "SiteBuilderTest": SiteBuilderTest,
-    "Sitemap": Sitemap,
-    "SitemapApp": SitemapApp,
-    "SitemapDynamic": SitemapDynamic,
-    "SitemapImages": SitemapImages,
-    "SitemapInteractive": SitemapInteractive,
-    "SitemapQr": SitemapQr,
-    "SitemapXml": SitemapXml,
     "Solutions": Solutions,
     "StrategicScale": StrategicScale,
     "SystemAudit": SystemAudit,
@@ -232,7 +215,6 @@ export const PAGES = {
     "TrustSecurity": TrustSecurity,
     "VIPContract": VIPContract,
     "VideoUpload": VideoUpload,
-    "sitemap-qr": sitemapQr,
 }
 
 export const pagesConfig = {

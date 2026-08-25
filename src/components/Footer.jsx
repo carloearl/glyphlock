@@ -192,7 +192,6 @@ export default function Footer() {
                 <a href="https://glyphlock.io/llms.txt" className="text-slate-500 hover:text-blue-400 underline">llms.txt</a>
                 <a href="https://glyphlock.io/ai.txt" className="text-slate-500 hover:text-blue-400 underline">ai.txt</a>
                 <a href="https://glyphlock.io/api/glyphlockKnowledge" className="text-slate-500 hover:text-blue-400 underline">knowledge.json</a>
-                <Link to={createPageUrl('Sitemap')} className="text-slate-500 hover:text-blue-400 underline">HTML Sitemap</Link>
               </div>
             </nav>
           </details>

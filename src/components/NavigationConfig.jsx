@@ -81,8 +81,7 @@ export const NAV_SECTIONS = [
       { label: "Documentation", page: "SecurityDocs", visibility: "public" },
       { label: "Dream Team", page: "DreamTeam", visibility: "public" },
       { label: "FAQ", page: "FAQ", visibility: "public" },
-      { label: "Roadmap", page: "Roadmap", visibility: "public" },
-      { label: "Site Map", page: "SitemapXml", visibility: "public" }
+      { label: "Roadmap", page: "Roadmap", visibility: "public" }
     ]
   },
   {
@@ -138,8 +137,7 @@ export const FOOTER_LINKS = {
     { label: "Documentation", page: "SecurityDocs", visibility: "public" },
     { label: "Dream Team", page: "DreamTeam", visibility: "public" },
     { label: "FAQ", page: "FAQ", visibility: "public" },
-    { label: "Roadmap", page: "Roadmap", visibility: "public" },
-    { label: "Site Map", page: "SitemapXml", visibility: "public" }
+    { label: "Roadmap", page: "Roadmap", visibility: "public" }
   ],
   legal: [
     { label: "Privacy Policy", page: "Privacy", visibility: "public" },
