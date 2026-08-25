@@ -1,0 +1,40 @@
+# GlyphLock LLC
+
+GlyphLock LLC is an Arizona limited liability company founded on May 24, 2025, in El Mirage, Arizona. GlyphLock develops evidence infrastructure for identity, permission, secure QR, venue operations, financial accountability, APIs, hardware-assisted workflows, and governance.
+
+## NUPS
+
+NUPS means Nexus Unified POS System. It is venue-operations software that connects identity, role, contract, shift, register, payout, reconciliation, and audit records. NUPS can package references from payment and hospitality systems, but those source systems remain authoritative for the events they control.
+
+## Oracle Hospitality identifiers
+
+- OHIP subscription: 107857124
+- OHIP application: 17363
+- Oracle PartnerNetwork company ID: 4-463913260838
+- Enrollment: 1654123
+- Marketplace subscription: 1655445
+
+These identifiers document enrollment and development activity. Production access, an Oracle Marketplace listing, and Oracle Simphony certification are not approved as of August 25, 2026.
+
+## Public pages
+
+- Home: https://glyphlock.io/
+- About GlyphLock LLC: https://glyphlock.io/About
+- NUPS: https://glyphlock.io/NUPSLanding
+- Technical Evidence: https://glyphlock.io/TechnicalEvidence
+- Oracle OHIP evidence: https://glyphlock.io/CaseStudyOracleOHIP
+- NUPS positioning: https://glyphlock.io/CaseStudyNUPS
+- Provenance methodology: https://glyphlock.io/ProvenanceMethodology
+- Internal Master Covenant review: https://glyphlock.io/CaseStudyCovenantVictory
+- Security documentation: https://glyphlock.io/SecurityDocs
+- Contact: https://glyphlock.io/Contact
+- Privacy: https://glyphlock.io/Privacy
+- Terms: https://glyphlock.io/Terms
+
+## Discovery
+
+- Sitemap: https://glyphlock.io/sitemap.xml
+- Robots: https://glyphlock.io/robots.txt
+- Canonical origin: https://glyphlock.io
+
+Public descriptions are factual summaries, not certifications, legal opinions, or claims of third-party approval.
