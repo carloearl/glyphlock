@@ -30,6 +30,30 @@ const MATURITY = [
   { label: 'end-to-end verified', state: 'locked' },
 ];
 
+const ORACLE_TRACKS = [
+  {
+    label: 'OHIP / OPERA Cloud',
+    state: 'complete',
+    status: 'Partner Sandbox response validated',
+    proof: 'OAuth + controlled read-only room-configuration response validated on August 24.',
+    next: 'Authorized OPERA Cloud customer environment + production application + read-only production validation.',
+  },
+  {
+    label: 'Oracle Cloud Marketplace',
+    state: 'complete',
+    status: 'Program enrollment active',
+    proof: 'Cloud Services / Oracle Cloud Marketplace enrollment 1655445 approved August 25.',
+    next: 'Confirm Publisher Account status + submit NUPS listing + obtain listing OCID only after Oracle issues it.',
+  },
+  {
+    label: 'Oracle Simphony',
+    state: 'active',
+    status: 'Formal integration request submitted',
+    proof: 'Simphony Integration Partner Program request submitted August 25 using active OPN standing.',
+    next: 'Oracle review → onboarding → Solution Validation → eligible Marketplace publication path.',
+  },
+];
+
 const ROADMAP = [
   {
     status: 'complete',
@@ -123,6 +147,42 @@ function RelationshipMap() {
             {style.label}
           </Badge>
         ))}
+      </div>
+
+      <div className="rounded-3xl border border-violet-400/20 bg-slate-950/75 p-5 sm:p-7">
+        <div className="mx-auto mb-6 max-w-xl rounded-2xl border border-cyan-300/30 bg-cyan-300/[0.08] p-5 text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-300">GlyphLock LLC</p>
+          <h3 className="mt-2 text-2xl font-black text-white">NUPS Oracle Integration Program</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-400">One product, three independently gated Oracle workstreams.</p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          {ORACLE_TRACKS.map((track) => {
+            const style = statusStyles[track.state];
+            return (
+              <article key={track.label} className="relative rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+                <div className="mb-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">Oracle track</p>
+                    <h4 className="mt-2 text-lg font-black text-white">{track.label}</h4>
+                  </div>
+                  <span className={`mt-1 h-3 w-3 shrink-0 rounded-full ${style.dot}`} />
+                </div>
+                <Badge className={style.badge}>{track.status}</Badge>
+                <div className="mt-5 space-y-4 text-sm leading-6">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-emerald-300">Current evidence</p>
+                    <p className="mt-1 text-slate-300">{track.proof}</p>
+                  </div>
+                  <div className="border-t border-slate-800 pt-4">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-amber-300">Next Oracle-controlled gate</p>
+                    <p className="mt-1 text-slate-400">{track.next}</p>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </div>
 
       <div className="rounded-3xl border border-cyan-400/20 bg-slate-950/70 p-5 sm:p-7">
