@@ -34,11 +34,11 @@ Allow: /GovernanceHub
 Allow: /MasterCovenant
 Allow: /TrustSecurity
 Allow: /NISTChallenge
-Allow: /CaseStudies
+Allow: /TechnicalEvidence
 Allow: /CaseStudyOracleOHIP
 Allow: /OracleOHIPMilestone
-Allow: /CaseStudyTruthStrike
-Allow: /CaseStudyAIBinding
+Allow: /CaseStudyNUPS
+Allow: /ProvenanceMethodology
 Allow: /CaseStudyCovenantVictory
 Allow: /GlyphLockFinancial
 Allow: /NUPSLanding
