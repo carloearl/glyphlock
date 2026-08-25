@@ -19,7 +19,7 @@ const RECORDS = [
       'Seven required server settings present without exposing their values',
       'Oracle OCIM OAuth and a read-only OHIP request succeeded',
       '250 room-configuration rows were checked against local mapping rules',
-      'Production access, Marketplace acceptance, and Simphony validation remain separate gates',
+      'Oracle Cloud Marketplace program enrollment is active; a published NUPS listing, production access, and Simphony Solution Validation remain separate gates',
     ],
     route: 'CaseStudyOracleOHIP',
     cta: 'Review the Oracle evidence',
