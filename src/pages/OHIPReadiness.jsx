@@ -49,16 +49,16 @@ const PRODUCTION_STAGES = [
       'Oracle accepted the submitted company-address evidence and subsequently approved and activated the OPN membership.',
   },
   {
-    label: 'Oracle Cloud Marketplace Agreement',
-    status: 'review',
+    label: 'Oracle Cloud Marketplace Program',
+    status: 'complete',
     detail:
-      'Submitted August 24, 2026 under subscription 1655445. Oracle review is pending; submission is not approval.',
+      'Oracle approved and activated GlyphLock LLC’s Cloud Services / Oracle Cloud Marketplace enrollment #1655445 on August 25, 2026, active through August 24, 2028.',
   },
   {
     label: 'Marketplace Publisher & Listing',
     status: 'next',
     detail:
-      'After Oracle completes the agreement review, finish publisher registration and prepare the listing. Listing acceptance, commercial terms, and supplier or banking onboarding remain separate Oracle-controlled steps.',
+      'Confirm the separate Publisher Account status and prepare the NUPS listing. Program enrollment does not establish a published listing, listing OCID, commercial terms, supplier onboarding, or production access.',
   },
   {
     label: 'Production Application',
@@ -94,15 +94,15 @@ const MARKETPLACE_HANDOFF = [
     detail: 'August 24, 2026: OAuth and controlled read-only room-configuration calls succeeded in the Partner Sandbox; the sanitized response was validated.',
   },
   {
-    label: 'Oracle Cloud Marketplace Agreement',
-    status: 'pending',
-    detail: 'Submitted August 24, 2026 under subscription 1655445; Oracle review is pending.',
+    label: 'Oracle Cloud Marketplace program enrollment',
+    status: 'complete',
+    detail: 'Approved and activated August 25, 2026 under enrollment #1655445; active through August 24, 2028.',
   },
   {
-    label: 'Marketplace publisher registration',
+    label: 'Marketplace publisher account',
     status: 'pending',
-    detail: 'Complete publisher registration after Oracle confirms the agreement review and enables the applicable workflow.',
-  },
+    detail: 'Confirm the separate OCM Publisher Account is active. Do not infer publisher activation from program enrollment alone.',
+  }],"dry_run":false}
   {
     label: 'Listing record and OCID',
     status: 'pending',
