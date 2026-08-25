@@ -127,8 +127,8 @@ export default function TechnicalFooter() {
               <Link to={createPageUrl('MasterCovenant')} className="text-blue-300 hover:text-blue-200 transition-colors">
                 Master Covenant Spec
               </Link>
-              <Link to={createPageUrl('CaseStudies')} className="text-blue-300 hover:text-blue-200 transition-colors">
-                Case Studies
+              <Link to={createPageUrl('TechnicalEvidence')} className="text-blue-300 hover:text-blue-200 transition-colors">
+                Technical Evidence
               </Link>
             </div>
           </div>
