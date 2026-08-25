@@ -47,7 +47,7 @@ export default function Privacy() {
             <h1 className="mt-6 text-5xl md:text-7xl font-black tracking-[-.045em] leading-[.9]">
               PRIVACY <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400">POLICY</span>
             </h1>
-            <p className="mt-5 text-sm text-slate-400">Last updated: August 24, 2026</p>
+            <p className="mt-5 text-sm text-slate-400">Last updated: August 25, 2026</p>
             <p className="mt-5 mx-auto max-w-3xl text-base md:text-lg leading-relaxed text-slate-300">
               This policy explains how GlyphLock LLC handles personal information across GlyphLock websites, applications, APIs, developer tools, AI-assisted services, QR and verification tools, financial workflows, and the NUPS venue operations platform.
             </p>
@@ -162,14 +162,14 @@ export default function Privacy() {
             </InfoCard>
 
             <InfoCard icon={Building2} title="Oracle Hospitality Integration Platform (OHIP)" accent="blue">
-              <p>GlyphLock&apos;s <strong className="text-white">Oracle Hospitality Integration Cloud Service (OHIP)</strong> is provisioned. NUPS has completed an authenticated, controlled read-only request in the OHIP Partner Sandbox. This is sandbox technical evidence only; it is not Marketplace acceptance, production approval, certification, endorsement, or a commercial partnership.</p>
+              <p>GlyphLock&apos;s <strong className="text-white">Oracle Hospitality Integration Cloud Service (OHIP)</strong> is provisioned. NUPS has completed an authenticated, controlled read-only request in the OHIP Partner Sandbox. Oracle separately approved and activated GlyphLock&apos;s Oracle Cloud Marketplace program enrollment on August 25, 2026, and GlyphLock submitted a formal Simphony Integration Partner Program request for review. These are documented program and intake milestones, not a published NUPS Marketplace listing, production approval, Simphony Solution Validation, certification, endorsement, or a separate commercial partnership.</p>
               <p>No authorized OPERA Cloud customer environment is currently connected. Until Oracle and an authorized customer provide the required production environment and credentials, and read-only production validation succeeds, NUPS does not exchange production guest, reservation, folio, payment, posting, token, or raw Oracle payload data.</p>
               <div className="grid md:grid-cols-2 gap-4">
                 {[
                   ["Customer-controlled", "A future production workflow requires an authorized OPERA Cloud customer environment. The customer determines which approved workflows are enabled and controls the records held in its Oracle environment."],
                   ["Credential handling", "OHIP client identifiers, secrets, hotel and enterprise identifiers, application keys, and access tokens remain in server-side secret storage and are never exposed to client code."],
                   ["Current scope", "Current validation is read-only in the Partner Sandbox. No guest, reservation, payment, token, or raw Oracle payload is returned to the browser, and no production write workflow is enabled."],
-                  ["Separate Oracle gates", "Marketplace publisher registration, listing acceptance, production access, customer authorization, production validation, Simphony validation, and supplier or banking onboarding are separate processes."],
+                  ["Separate Oracle gates", "The Cloud Marketplace program enrollment is active, while Publisher Account status, listing submission and acceptance, production access, customer authorization, production validation, Simphony request approval/onboarding/Solution Validation, and supplier or banking onboarding remain separate processes."],
                 ].map(([name, text]) => (
                   <div key={name} className="rounded-xl border border-blue-300/15 bg-blue-300/[.035] p-4">
                     <h3 className="font-bold text-white">{name}</h3>
