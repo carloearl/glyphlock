@@ -28,7 +28,7 @@ export default function DJHome() {
   return (
     <DJSessionProvider>
       <NUPSActionSafety />
-    <div className="h-[100dvh] flex flex-col overflow-hidden bg-slate-950 text-white">
+    <div className="min-h-[100dvh] flex flex-col overflow-x-hidden overflow-y-auto bg-slate-950 text-white">
       <header className="flex-shrink-0 border-b border-violet-900/50 bg-slate-900/80 px-4 py-3 flex flex-wrap items-center gap-3">
         <Disc3 className="w-6 h-6 text-violet-400 animate-spin" style={{ animationDuration: "5s" }} />
         <div>
@@ -70,7 +70,7 @@ export default function DJHome() {
         runId={diagnosticsRunId}
       />
 
-      <main className="flex-1 min-h-0 overflow-hidden p-4 max-w-[1600px] mx-auto w-full">
+      <main className="flex-1 min-h-[calc(100dvh-84px)] overflow-visible p-3 md:p-4 max-w-[1600px] mx-auto w-full">
         <UnifiedMusicConsole />
       </main>
     </div>
