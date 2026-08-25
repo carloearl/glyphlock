@@ -24,7 +24,7 @@ const NAV_CONFIG = [
     { label: "Master Covenant", path: "/GovernanceHub", visibility: "public" },
     { label: "Trust & Security", path: "/TrustSecurity", visibility: "public" },
     { label: "NIST Challenge", path: "/NISTChallenge", visibility: "public" },
-    { label: "Case Studies", path: "/CaseStudies", visibility: "public" },
+    { label: "Technical Evidence", path: "/TechnicalEvidence", visibility: "public" },
     { label: "Documentation", path: "/SecurityDocs", visibility: "public" },
     { label: "FAQ", path: "/FAQ", visibility: "public" },
     { label: "Roadmap", path: "/Roadmap", visibility: "public" },
