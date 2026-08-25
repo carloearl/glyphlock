@@ -4,7 +4,7 @@
  */
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
-import { Disc3, Sparkles, ListMusic } from "lucide-react";
+import { ChevronDown, Disc3, SlidersHorizontal, Sparkles, ListMusic } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { createSongEntry, createDancerProfile, DialogMode, ViewMode } from "@/components/mixer/types/mixerTypes";
@@ -57,6 +57,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showAIPlaylist, setShowAIPlaylist] = useState(false);
   const [rightTab, setRightTab] = useState("profiles"); // "profiles" | "ai" | "search"
+  const [workspaceToolsOpen, setWorkspaceToolsOpen] = useState(false);
 
   const activeProfile = useMemo(() => profiles.find((p) => p.id === uiState.activeProfileId), [profiles, uiState.activeProfileId]);
 
@@ -643,7 +644,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
   const isMobile = useMediaQuery("(max-width: 767px)");
 
   return (
-    <div className="h-full min-h-0 flex flex-col bg-transparent overflow-hidden rounded-xl border border-slate-700/50">
+    <div className="h-full min-h-0 flex flex-col bg-transparent overflow-y-auto overflow-x-hidden rounded-xl border border-slate-700/50">
       {/* Top bar */}
       <div className="h-14 flex-shrink-0 flex items-center gap-3 px-4 border-b border-slate-700/50 bg-slate-900/80">
         <Disc3 className="w-5 h-5 text-purple-400 animate-spin" style={{ animationDuration: "3s" }} />
@@ -660,6 +661,18 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
           onOpenArchive={() => setDialogMode(DialogMode.archive)}
           onOpenShortcuts={() => setDialogMode(DialogMode.shortcuts)}
         />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className={`min-h-10 flex-shrink-0 gap-1.5 border-slate-700 text-[10px] font-bold ${workspaceToolsOpen ? "bg-slate-800 text-white" : "text-slate-400"}`}
+          onClick={() => setWorkspaceToolsOpen((open) => !open)}
+          aria-expanded={workspaceToolsOpen}
+        >
+          <SlidersHorizontal className="h-3.5 w-3.5" />
+          <span className="hidden lg:inline">{workspaceToolsOpen ? "Hide library" : "Library & tools"}</span>
+          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${workspaceToolsOpen ? "rotate-180" : ""}`} />
+        </Button>
         {isMobile && (
           <Button size="icon" variant="ghost" className="h-9 w-9" onClick={() => setShowAIMobile(true)}>
             <Sparkles className="w-4 h-4 text-purple-400" />
@@ -667,8 +680,26 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
         )}
       </div>
 
-      {/* Main panels — VirtualDJ-style: Library on the left, decks stay anchored */}
-      <ResizablePanelGroup direction="horizontal" autoSaveId="mixer-panels-v2" className="flex-1 min-h-0 max-h-[48vh] min-h-[240px] overflow-hidden">
+      {/* DJ Player with crossfader */}
+      <DJPlayerSection
+        playingSongId={playingSongId}
+        songs={songs}
+        profileSongs={cuePool}
+        onSkip={handleSkip}
+        collapsed={playerCollapsed}
+        onToggleCollapse={() => setPlayerCollapsed((c) => !c)}
+        onPlay={handlePlay}
+        autoDj={autoDj}
+        automationNextSongId={automationNextSong?.id || null}
+        onActiveSongChange={handleAutomationTransition}
+        onPlaybackError={handlePlaybackError}
+        onRegisterSong={handleRegisterSong}
+        transitionSeconds={automationPlan?.transition?.fade_seconds || 6}
+      />
+
+      {/* Performance decks remain dominant; library and secondary tools collapse below. */}
+      {workspaceToolsOpen && (
+      <ResizablePanelGroup direction="horizontal" autoSaveId="mixer-panels-v3" className="h-[min(42vh,440px)] min-h-[260px] flex-shrink-0 overflow-hidden border-t border-slate-700/40">
         {/* Left: Track Library — scrollable browser sidebar */}
         {!isMobile && (
           <>
@@ -801,23 +832,7 @@ export default function MixerModuleView({ autoDj = false, automationPlan = null,
           </>
         )}
       </ResizablePanelGroup>
-
-      {/* DJ Player with crossfader */}
-      <DJPlayerSection
-        playingSongId={playingSongId}
-        songs={songs}
-        profileSongs={cuePool}
-        onSkip={handleSkip}
-        collapsed={playerCollapsed}
-        onToggleCollapse={() => setPlayerCollapsed((c) => !c)}
-        onPlay={handlePlay}
-        autoDj={autoDj}
-        automationNextSongId={automationNextSong?.id || null}
-        onActiveSongChange={handleAutomationTransition}
-        onPlaybackError={handlePlaybackError}
-        onRegisterSong={handleRegisterSong}
-        transitionSeconds={automationPlan?.transition?.fade_seconds || 6}
-      />
+      )}
 
       {/* Mobile profiles */}
       {isMobile && (
