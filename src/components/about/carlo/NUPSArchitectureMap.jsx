@@ -2,6 +2,7 @@ import React from "react";
 
 const STATUS = {
   live: { label: "Live workflow", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-400/40" },
+  verified: { label: "Verified milestone", cls: "bg-violet-500/15 text-violet-300 border-violet-400/40" },
   evaluation: { label: "Controlled evaluation", cls: "bg-cyan-500/15 text-cyan-300 border-cyan-400/40" },
   development: { label: "In development", cls: "bg-blue-500/15 text-blue-300 border-blue-400/40" },
   partner: { label: "Partner-dependent", cls: "bg-amber-500/15 text-amber-300 border-amber-400/40" },
@@ -10,6 +11,7 @@ const STATUS = {
 
 const LEGEND = [
   ["live", "Used in an actual venue environment"],
+  ["verified", "Documented external milestone or approval; not production operation"],
   ["evaluation", "Working but still being tested or hardened"],
   ["development", "Actively being built"],
   ["partner", "Requires processor, acquirer, Oracle, or customer authorization"],
@@ -51,8 +53,10 @@ const LAYERS = [
     items: [
       ["Card processing through the venue's own processor", "partner"],
       ["Automated payout disbursement and split routing", "roadmap"],
-      ["Oracle partner and OHIP integration path", "partner"],
-      ["Property-management and hotel system connectivity", "partner"]
+      ["Oracle PartnerNetwork + Cloud Marketplace program enrollment", "verified"],
+      ["Oracle OHIP Partner Sandbox — authenticated read-only response validated", "evaluation"],
+      ["Oracle Simphony formal integration request — under Oracle review", "partner"],
+      ["OPERA Cloud production customer connectivity", "partner"]
     ]
   },
   {
@@ -117,9 +121,10 @@ export default function NUPSArchitectureMap() {
 
       <p className="mt-6 text-xs text-blue-300/60 max-w-3xl mx-auto text-center leading-relaxed">
         Payment processing depends on the venue's own processor and acquirer relationships.
-        Oracle partner and OHIP work follows a documented integration path and does not
-        represent certification, validation, or endorsement. Compliance-related capability
-        is scoped per deployment and confirmed in writing.
+        Oracle PartnerNetwork membership and the Oracle Cloud Marketplace program enrollment are documented milestones.
+        OHIP Partner Sandbox response validation is non-production technical evidence, and the Simphony integration request is under Oracle review.
+        None of these statements represents a published NUPS Marketplace listing, Oracle certification or endorsement, production OPERA Cloud access,
+        or completed Simphony Solution Validation. Compliance-related capability is scoped per deployment and confirmed in writing.
       </p>
     </section>
   );
