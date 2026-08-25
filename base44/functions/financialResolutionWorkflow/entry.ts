@@ -167,6 +167,51 @@ async function captureExecutionSnapshot(base44, linkedRecords, venueId) {
   return snapshot;
 }
 
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
+const EXECUTE_ROLES = new Set(['MANAGER', 'ADMINISTRATOR', 'OWNER']);
+const ROLLBACK_ROLES = new Set(['MANAGER', 'ADMINISTRATOR', 'OWNER']);
+const FINANCIAL_ACCOUNT_ROLE_BY_GRANT = {
+  MANAGER: 'VENUE_MANAGER',
+  ADMINISTRATOR: 'PLATFORM_ADMIN',
+  OWNER: 'VENUE_OWNER',
+};
+
+function normalizeEmail(value) {
+  return String(value || '').trim().toLowerCase();
+}
+
+async function requireRealFinancialAuthority(base44, user, venueId, allowedRoles) {
+  const email = normalizeEmail(user?.email);
+  if (!email || !venueId) return null;
+  if (SOVEREIGN_EMAILS.has(email)) {
+    return { role: 'SOVEREIGN', account: null, grant: null };
+  }
+
+  const grants = await base44.asServiceRole.entities.NUPSAccessRequest.filter({ email, status: 'APPROVED', venue_id: venueId, mode: 'REAL' }, '-created_date', 500);
+  for (const grant of (grants || [])) {
+    if (
+      grant.email?.toLowerCase() !== email
+      || grant.status !== 'APPROVED'
+      || grant.venue_id !== venueId
+      || grant.mode !== 'REAL'
+      || !grant.nups_user_id
+      || !allowedRoles.has(grant.granted_role)
+    ) continue;
+    const account = await base44.asServiceRole.entities.NUPSUser.get(grant.nups_user_id).catch(() => null);
+    const accountMode = account?.access_mode || (account?.is_demo ? 'DEMO' : 'REAL');
+    if (
+      account?.status !== 'active'
+      || accountMode !== 'REAL'
+      || normalizeEmail(account.platform_email) !== email
+      || account.venue_id !== venueId
+      || account.id !== grant.nups_user_id
+      || account.role !== FINANCIAL_ACCOUNT_ROLE_BY_GRANT[grant.granted_role]
+    ) continue;
+    return { role: account.role, account, grant };
+  }
+  return null;
+}
+
 Deno.serve(async (req) => {
   try {
     const body = await req.json();
@@ -495,6 +540,11 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Resolution request not found" }, { status: 404 });
       }
       const resolution = reqs[0];
+      const executionAuthority = await requireRealFinancialAuthority(base44, user, resolution.venue_id, EXECUTE_ROLES);
+      if (!executionAuthority) {
+        return Response.json({ error: "Forbidden: active REAL financial authority required" }, { status: 403 });
+      }
+      actor.role = executionAuthority.role;
 
       // Validate: must be APPROVED
       if (resolution.approval_status !== "APPROVED") {
@@ -681,6 +731,11 @@ Deno.serve(async (req) => {
         return Response.json({ error: "Resolution request not found" }, { status: 404 });
       }
       const resolution = reqs[0];
+      const rollbackAuthority = await requireRealFinancialAuthority(base44, user, resolution.venue_id, ROLLBACK_ROLES);
+      if (!rollbackAuthority) {
+        return Response.json({ error: "Forbidden: active REAL financial authority required" }, { status: 403 });
+      }
+      actor.role = rollbackAuthority.role;
 
       if (resolution.approval_status !== "EXECUTED") {
         return Response.json({ error: "Can only rollback executed resolutions" }, { status: 409 });
