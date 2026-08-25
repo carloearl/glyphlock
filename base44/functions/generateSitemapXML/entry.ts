@@ -36,6 +36,7 @@ const PUBLIC_ROUTES = [
   { path: '/NISTChallenge', priority: 0.8, changefreq: 'monthly' },
   { path: '/CaseStudies', priority: 0.95, changefreq: 'weekly' },
   { path: '/CaseStudyOracleOHIP', priority: 0.9, changefreq: 'monthly' },
+  { path: '/OracleOHIPMilestone', priority: 0.9, changefreq: 'monthly' },
   { path: '/CaseStudyTruthStrike', priority: 0.9, changefreq: 'monthly' },
   { path: '/CaseStudyAIBinding', priority: 0.9, changefreq: 'monthly' },
   { path: '/CaseStudyCovenantVictory', priority: 0.9, changefreq: 'monthly' },
