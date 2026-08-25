@@ -343,23 +343,26 @@ export default function FounderStoryNarrative() {
         <Section eyebrow="The enterprise path" title="Progress without pretending we have already arrived.">
           <p>
             On August 19, 2026, GlyphLock's Oracle PartnerNetwork membership was
-            approved and activated. NUPS is developing against the Oracle
-            Hospitality Integration Platform partner environment, and Oracle's
-            Simphony integration team has encouraged completion of its formal
-            integration-validation process.
+            approved and activated. On August 25, Oracle separately approved and
+            activated GlyphLock's Cloud Services / Oracle Cloud Marketplace program
+            enrollment. NUPS has also reached response-validated status in the OHIP
+            Partner Sandbox, and GlyphLock submitted its formal Simphony Integration
+            Partner Program request for Oracle review.
           </p>
           <div className="my-8 flex gap-4 rounded-2xl border border-amber-300/25 bg-amber-400/[0.06] p-6 text-amber-50">
             <ShieldCheck className="mt-1 h-6 w-6 shrink-0 text-amber-300" />
             <p className="leading-7">
-              This is a meaningful step. It is not an Oracle endorsement, a
-              completed validation, or a Marketplace listing.
+              These are meaningful, documented milestones. They are not an Oracle
+              endorsement, a published NUPS Marketplace listing, production OPERA
+              access, completed Simphony Solution Validation, or certification.
             </p>
           </div>
           <p>
-            The next gates are clear: complete the technical work, validate the
-            integration, prepare the listing, secure the right customer
-            environment, and prove that the system can exchange data safely at
-            enterprise scale.
+            The next gates are clear: confirm Marketplace publisher status, prepare
+            the NUPS listing, complete Oracle-controlled Simphony onboarding and
+            Solution Validation if the request is approved, secure the right OPERA
+            Cloud customer environment, and prove the authorized production path
+            safely at enterprise scale.
           </p>
           <p>
             That is how GlyphLock will describe progress: by the gate actually
