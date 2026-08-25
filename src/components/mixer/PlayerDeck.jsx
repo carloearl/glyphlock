@@ -11,6 +11,7 @@ import { parseYoutubeUrl } from "@/components/mixer/services/validation";
 import AudioEngine from "@/components/mixer/AudioEngine";
 import YouTubePlayer from "@/components/mixer/YouTubePlayer";
 import AudioVisualizer, { setDeckAudioFx } from "@/components/mixer/AudioVisualizer";
+import { setDeckAudioPerformance } from "@/components/mixer/deckAudioGraph";
 
 function extractVideoId(url) {
   if (!url) return null;
@@ -30,6 +31,8 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, deckId, volume,
   const [audioEl, setAudioEl] = useState(null);
   const [fxOpen, setFxOpen] = useState(false);
   const [fx, setFx] = useState({ low: 0, mid: 0, high: 0, filter: 100, echo: 0, delay: 0.28 });
+  const [performance, setPerformance] = useState({ tempo: 1, pan: 0, gain: 1 });
+  const [cuePoints, setCuePoints] = useState([null, null, null]);
   const youtubeRef = useRef(null);
   const videoId = song?.youtubeUrl ? extractVideoId(song.youtubeUrl) : null;
   const isUpload = song?.uploadUrl && !videoId;
@@ -64,12 +67,39 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, deckId, volume,
   // Reset audio element reference when source changes
   useEffect(() => {
     if (!isUpload) setAudioEl(null);
+    setCuePoints([null, null, null]);
+    setPerformance({ tempo: 1, pan: 0, gain: 1 });
   }, [isUpload, song?.uploadUrl]);
 
   useEffect(() => {
     if (!audioEl || !isUpload) return;
     setDeckAudioFx(audioEl, fx);
   }, [audioEl, isUpload, fx]);
+
+  useEffect(() => {
+    if (!audioEl || !isUpload) return;
+    audioEl.playbackRate = performance.tempo;
+    setDeckAudioPerformance(audioEl, performance);
+  }, [audioEl, isUpload, performance]);
+
+  const nudge = (seconds) => {
+    if (!audioEl) return;
+    const duration = Number.isFinite(audioEl.duration) ? audioEl.duration : Infinity;
+    audioEl.currentTime = Math.max(0, Math.min(duration, audioEl.currentTime + seconds));
+  };
+
+  const useCuePoint = (index, event) => {
+    if (!audioEl) return;
+    if (event.shiftKey && cuePoints[index] != null) {
+      setCuePoints((current) => current.map((point, cueIndex) => cueIndex === index ? null : point));
+      return;
+    }
+    if (cuePoints[index] == null) {
+      setCuePoints((current) => current.map((point, cueIndex) => cueIndex === index ? audioEl.currentTime : point));
+      return;
+    }
+    audioEl.currentTime = cuePoints[index];
+  };
 
   const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; setDragOver(true); };
   const handleDragLeave = () => setDragOver(false);
@@ -198,6 +228,56 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, deckId, volume,
               </div>
             </div>
           )}
+          <div className="border-b border-cyan-500/15 bg-slate-950/65 p-2">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-300">Performance</span>
+                <span className="ml-2 text-[9px] font-mono text-slate-500">BPM {song.bpm || "—"}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPerformance({ tempo: 1, pan: 0, gain: 1 })}
+                className="rounded border border-slate-700 px-2 py-1 text-[9px] font-bold text-slate-400 hover:border-cyan-500/50 hover:text-cyan-200"
+              >
+                RESET
+              </button>
+            </div>
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <label className="text-[8px] font-mono text-slate-500">
+                <span className="mb-1 flex justify-between"><b className="text-slate-300">PITCH / TEMPO</b><span>{performance.tempo >= 1 ? "+" : ""}{Math.round((performance.tempo - 1) * 100)}%</span></span>
+                <input type="range" min="0.84" max="1.16" step="0.01" value={performance.tempo}
+                  onChange={(event) => setPerformance((current) => ({ ...current, tempo: Number(event.target.value) }))}
+                  className="w-full accent-cyan-400" />
+              </label>
+              <label className="text-[8px] font-mono text-slate-500">
+                <span className="mb-1 flex justify-between"><b className="text-slate-300">PAN</b><span>{performance.pan === 0 ? "C" : performance.pan < 0 ? "L" + Math.round(Math.abs(performance.pan) * 100) : "R" + Math.round(performance.pan * 100)}</span></span>
+                <input type="range" min="-1" max="1" step="0.05" value={performance.pan}
+                  onChange={(event) => setPerformance((current) => ({ ...current, pan: Number(event.target.value) }))}
+                  className="w-full accent-violet-400" />
+              </label>
+              <label className="text-[8px] font-mono text-slate-500">
+                <span className="mb-1 flex justify-between"><b className="text-slate-300">TRIM</b><span>{Math.round(performance.gain * 100)}%</span></span>
+                <input type="range" min="0" max="1.5" step="0.01" value={performance.gain}
+                  onChange={(event) => setPerformance((current) => ({ ...current, gain: Number(event.target.value) }))}
+                  className="w-full accent-fuchsia-400" />
+              </label>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <button type="button" onClick={() => nudge(-2)} className="min-h-9 rounded-lg border border-slate-700 px-3 text-[9px] font-bold text-slate-300 hover:border-cyan-500/50">JOG −2s</button>
+              <button type="button" onClick={() => nudge(2)} className="min-h-9 rounded-lg border border-slate-700 px-3 text-[9px] font-bold text-slate-300 hover:border-cyan-500/50">JOG +2s</button>
+              {cuePoints.map((point, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={(event) => useCuePoint(index, event)}
+                  className={`min-h-9 rounded-lg border px-3 text-[9px] font-black ${point == null ? "border-slate-700 text-slate-500" : "border-amber-500/50 bg-amber-500/10 text-amber-200"}`}
+                  title={point == null ? "Set cue " + (index + 1) : "Jump to cue " + (index + 1) + "; Shift-click to clear"}
+                >
+                  CUE {index + 1}{point == null ? "" : " · " + Math.floor(point / 60) + ":" + String(Math.floor(point % 60)).padStart(2, "0")}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="p-3">
             <AudioEngine
               src={song.uploadUrl}
