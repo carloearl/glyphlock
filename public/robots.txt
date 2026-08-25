@@ -123,7 +123,7 @@ Disallow: /mastercovenant
 Disallow: /trustsecurity
 Disallow: /nistchallenge
 Disallow: /technicalevidence
-Disallow: /caseStudyoracleohip
+Disallow: /casestudyoracleohip
 Disallow: /casestudynups
 Disallow: /provenancemethodology
 Disallow: /casestudycovenantvictory
