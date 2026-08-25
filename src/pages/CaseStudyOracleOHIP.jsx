@@ -101,31 +101,32 @@ const TIMELINE = [
   },
   {
     step: '08',
-    title: 'Marketplace agreement submitted',
-    text: 'On August 24, the Oracle Cloud Marketplace Agreement was submitted under subscription 1655445. Oracle review is pending; publisher and listing approval are not yet established.',
+    title: 'Marketplace program enrollment approved',
+    text: 'On August 25, Oracle approved and activated GlyphLock’s Cloud Services / Oracle Cloud Marketplace program enrollment 1655445. This is program enrollment, not a published NUPS listing or listing OCID.',
+  },
+  {
+    step: '09',
+    title: 'Formal Simphony request submitted',
+    text: 'On August 25, GlyphLock submitted the Simphony Integration Partner Program request. Oracle’s Partner Integration Team is reviewing active OPN standing and the request, with follow-up stated within 10 business days.',
   },
 ];
 
 const NEXT_PHASE = [
   {
-    title: 'Oracle agreement review',
-    text: 'Wait for Oracle to decide OCMA subscription 1655445 and respond to any requested information.',
+    title: 'Marketplace publisher account',
+    text: 'Confirm whether the Oracle Cloud Marketplace Publisher Account is active under the newly approved program enrollment; do not treat program enrollment alone as publisher activation.',
   },
   {
-    title: 'Publisher registration',
-    text: 'Complete the Oracle Marketplace publisher workflow only after the agreement review enables it.',
-  },
-  {
-    title: 'Listing package',
-    text: 'Prepare claims-safe product copy, public legal URLs, support details, sanitized screenshots, pricing posture and the preferred custom suffix glyphlock-nups.',
+    title: 'NUPS listing package',
+    text: 'Prepare and submit claims-safe product copy, public legal URLs, support details, sanitized screenshots, pricing posture and the preferred custom suffix glyphlock-nups. Record a listing OCID only after Oracle issues one.',
   },
   {
     title: 'Authorized customer environment',
     text: 'Obtain an authorized OPERA Cloud customer environment before planning controlled read-only production validation.',
   },
   {
-    title: 'Simphony workstream',
-    text: 'Request the temporary sandbox and validation procedure from the Simphony Integrations Team as a separate track.',
+    title: 'Simphony review & onboarding',
+    text: 'Wait for Oracle’s Partner Integration Team to decide the submitted request and provide onboarding steps. Solution Validation, Marketplace publication and go-live remain future gates.',
   },
 ];
 
