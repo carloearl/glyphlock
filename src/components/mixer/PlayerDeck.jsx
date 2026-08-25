@@ -88,7 +88,7 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, deckId, volume,
     audioEl.currentTime = Math.max(0, Math.min(duration, audioEl.currentTime + seconds));
   };
 
-  const useCuePoint = (index, event) => {
+  const handleCuePoint = (index, event) => {
     if (!audioEl) return;
     if (event.shiftKey && cuePoints[index] != null) {
       setCuePoints((current) => current.map((point, cueIndex) => cueIndex === index ? null : point));
@@ -269,7 +269,7 @@ const PlayerDeck = forwardRef(function PlayerDeck({ song, label, deckId, volume,
                 <button
                   key={index}
                   type="button"
-                  onClick={(event) => useCuePoint(index, event)}
+                  onClick={(event) => handleCuePoint(index, event)}
                   className={`min-h-9 rounded-lg border px-3 text-[9px] font-black ${point == null ? "border-slate-700 text-slate-500" : "border-amber-500/50 bg-amber-500/10 text-amber-200"}`}
                   title={point == null ? "Set cue " + (index + 1) : "Jump to cue " + (index + 1) + "; Shift-click to clear"}
                 >
