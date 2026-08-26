@@ -75,8 +75,8 @@ export default function AccessRequestForm({ requestedMode = "SANDBOX" }) {
 
   return (
     <div className="space-y-4">
-      <div className={`rounded-lg border px-3 py-2 text-center text-xs font-bold tracking-wide ${requestedMode === "DEMO" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-indigo-500/40 bg-indigo-500/10 text-indigo-300"}`}>
-        {requestedMode === "DEMO" ? "TRAINING ACCESS REQUEST" : "SANDBOX TEST ACCESS REQUEST"}
+      <div className={`rounded-lg border px-3 py-2 text-center text-xs font-bold tracking-wide ${requestedMode === "REAL" ? "border-rose-500/40 bg-rose-500/10 text-rose-300" : requestedMode === "DEMO" ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" : "border-indigo-500/40 bg-indigo-500/10 text-indigo-300"}`}>
+        {requestedMode === "REAL" ? "LIVE ACCESS REQUEST" : requestedMode === "DEMO" ? "TRAINING ACCESS REQUEST" : "SANDBOX TEST ACCESS REQUEST"}
       </div>
       <p className="text-xs text-slate-500 text-center">
         Venue: {activeVenue?.name || "Loading active venue…"}
@@ -85,7 +85,7 @@ export default function AccessRequestForm({ requestedMode = "SANDBOX" }) {
         <div className="space-y-2">
           {myRequests.map((r) => (
             <div key={r.id} className="p-3 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-between gap-2">
-              <div className="text-sm text-slate-300">{r.requested_role} · {r.mode === "DEMO" ? "TRAINING" : (r.mode === "TEST" ? "SANDBOX (LEGACY TEST)" : r.mode || "SANDBOX")} — {new Date(r.created_date).toLocaleDateString()}</div>
+              <div className="text-sm text-slate-300">{r.requested_role} · {r.mode === "REAL" ? "LIVE" : r.mode === "DEMO" ? "TRAINING" : (r.mode === "TEST" ? "SANDBOX (LEGACY TEST)" : r.mode || "SANDBOX")} — {new Date(r.created_date).toLocaleDateString()}</div>
               <Badge className={`${STATUS_COLORS[r.status] || "bg-slate-600"} text-white`}>{r.status.replaceAll("_", " ")}</Badge>
             </div>
           ))}
