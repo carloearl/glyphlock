@@ -45,9 +45,16 @@ const PANELS = [
     color: "from-violet-700 to-violet-900",
   },
   {
+    key: "liveRequest",
+    label: "Request Live Access",
+    hint: "Staff, manager, admin, or owner — owner approval required",
+    icon: UserPlus,
+    color: "from-rose-700 to-rose-950",
+  },
+  {
     key: "testRequest",
     label: "Request Test Access",
-    hint: "New account — reviewed by the owner",
+    hint: "Sandbox account — reviewed by the owner",
     icon: UserPlus,
     color: "from-indigo-700 to-indigo-900",
   },
@@ -93,7 +100,7 @@ export default function NUPSKiosk() {
     setSecureDisplay(ok || isSecureDisplayActive());
     if (!ok && !isSecureDisplayActive()) {
       setDisplayError(
-        "Fullscreen was blocked. Open the published NUPS app directly or launch the installed NUPS app."
+        "Fullscreen is not available in this browser. Access requests and sign-in still work; use the installed app for a browser-free station view."
       );
     }
     setEntering(false);
@@ -143,7 +150,7 @@ export default function NUPSKiosk() {
           <h1 className="text-4xl font-black tracking-[0.3em] bg-gradient-to-r from-cyan-300 via-white to-violet-300 bg-clip-text text-transparent">NUPS</h1>
         </div>
 
-        {!secureDisplay ? (
+        {!secureDisplay && (panel === "clockIn" || panel === "clockOut") ? (
           <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/90 p-7 text-center shadow-2xl">
             <LockKeyhole className="w-12 h-12 mx-auto text-cyan-300 mb-4" />
             <h2 className="text-2xl font-black">Enter Secure NUPS</h2>
@@ -228,6 +235,7 @@ export default function NUPSKiosk() {
             {panel === "clockIn" && <KioskPinPad mode="clockIn" onSuccess={onClockIn} />}
             {panel === "clockOut" && <KioskPinPad mode="clockOut" onSuccess={onClockOut} />}
             {panel === "admin" && <OwnerAdminSignIn />}
+            {panel === "liveRequest" && <AccessRequestForm requestedMode="REAL" />}
             {panel === "testRequest" && <AccessRequestForm requestedMode="SANDBOX" />}
             {panel === "trainingRequest" && <AccessRequestForm requestedMode="DEMO" />}
           </div>
