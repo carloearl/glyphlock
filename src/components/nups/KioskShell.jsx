@@ -7,6 +7,7 @@ import { enterKioskMode, exitKioskMode, isKioskMode } from "@/lib/nups/kioskMode
 import {
   exitSecureDisplay,
   isEmbeddedPreview,
+  isFullscreenAvailable,
   isSecureDisplayActive,
   requestSecureDisplay,
 } from "@/lib/nups/secureDisplay";
@@ -26,11 +27,12 @@ export default function KioskShell({ children }) {
   const location = useLocation();
   const isPublicLanding = PUBLIC_LANDING_PATHS.has(location.pathname.toLowerCase());
   const preview = isEmbeddedPreview();
+  const fullscreenAvailable = isFullscreenAvailable();
 
   const [showExit, setShowExit] = useState(false);
   const [kiosk, setKiosk] = useState(isKioskMode());
   const [secureDisplay, setSecureDisplay] = useState(
-    preview || isSecureDisplayActive()
+    preview || !fullscreenAvailable || isSecureDisplayActive()
   );
   const [resuming, setResuming] = useState(false);
 
@@ -42,10 +44,12 @@ export default function KioskShell({ children }) {
     setKiosk(true);
   }, [isPublicLanding]);
 
-  // Freeze operational data whenever browser fullscreen is left. Managed kiosk
-  // and installed standalone displays do not need this browser-level check.
+  // Freeze operational data whenever browser fullscreen is left on browsers
+  // that actually support the Fullscreen API. iPhone Safari and other clients
+  // without that API remain usable; server-side auth/RBAC is the security
+  // boundary, while fullscreen is only presentation hardening.
   useEffect(() => {
-    if (preview) return undefined;
+    if (preview || !fullscreenAvailable) return undefined;
     const sync = () => setSecureDisplay(isSecureDisplayActive());
     document.addEventListener("fullscreenchange", sync);
     window.addEventListener("focus", sync);
@@ -54,7 +58,7 @@ export default function KioskShell({ children }) {
       document.removeEventListener("fullscreenchange", sync);
       window.removeEventListener("focus", sync);
     };
-  }, [preview]);
+  }, [preview, fullscreenAvailable]);
 
   // Heartbeat keeps an authenticated operator shift alive while NUPS is open.
   // DACO-SIP-001 NUPS-HIGH-004 remediation (2026-07-31): a rejected heartbeat
@@ -109,7 +113,7 @@ export default function KioskShell({ children }) {
   };
 
   const showOperationalChrome = kiosk && !isPublicLanding;
-  const displayPaused = showOperationalChrome && !secureDisplay && !preview;
+  const displayPaused = showOperationalChrome && fullscreenAvailable && !secureDisplay && !preview;
 
   return (
     <div className="min-h-screen bg-black text-white">
