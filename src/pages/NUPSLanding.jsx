@@ -1425,6 +1425,7 @@ export default function NUPSLanding() {
             <button type="button" onClick={() => navigate('/privacy')}>Privacy</button>
             <button type="button" onClick={() => scrollToSection('nups-protection')}>Protection</button>
             <button type="button" onClick={() => scrollToSection('nups-revenue')}>Revenue</button>
+            <button type="button" onClick={() => navigate('/NUPSKiosk?panel=liveRequest')}>Request Access</button>
             <button type="button" className="enter-tab" onClick={() => navigate('/NUPSKiosk')}>Enter NUPS →</button>
           </div>
         </nav>
