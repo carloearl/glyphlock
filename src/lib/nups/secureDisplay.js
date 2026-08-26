@@ -23,6 +23,17 @@ export function isSecureDisplayActive() {
   return isStandaloneDisplay() || Boolean(document.fullscreenElement);
 }
 
+// Browser fullscreen is a presentation enhancement, not an authentication
+// boundary. iPhone Safari and some embedded/mobile browsers do not expose the
+// Fullscreen API at all; those clients must still be able to sign in, request
+// access, and use NUPS according to the normal server-side role/venue gates.
+export function isFullscreenAvailable() {
+  if (typeof document === "undefined") return false;
+  if (isStandaloneDisplay()) return true;
+  const root = document.documentElement;
+  return document.fullscreenEnabled === true && typeof root?.requestFullscreen === "function";
+}
+
 export async function requestSecureDisplay() {
   if (typeof document === "undefined") return false;
   if (isStandaloneDisplay() || document.fullscreenElement) return true;
