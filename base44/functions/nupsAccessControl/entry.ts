@@ -290,7 +290,7 @@ Deno.serve(async (req) => {
       const venue = await getActiveVenue(base44, venue_id);
       if (!venue) return Response.json({ error: 'Select an active venue before requesting access.' }, { status: 400 });
       const resolvedVenueId = canonicalVenueId(venue);
-      const resolvedMode = ['SANDBOX', 'DEMO'].includes(mode) ? mode : 'SANDBOX';
+      const resolvedMode = ['REAL', 'SANDBOX', 'DEMO'].includes(mode) ? mode : 'SANDBOX';
       if (!canRequestRoleInMode(requested_role, resolvedMode)) {
         return Response.json({
           error: 'Administrator and Owner access cannot be provisioned from DEMO or SANDBOX requests.',
