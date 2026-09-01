@@ -115,7 +115,7 @@ export default function TechnicalEvidence() {
     <main className="min-h-screen bg-gradient-to-br from-[#050b14] via-[#0a1324] to-[#111a33] px-5 py-24 text-white">
       <SEOHead
         title="Technical Evidence | GlyphLock"
-        description="Read the flagship AI Business story on GlyphLock, then review integration evidence, reproducible technical methods, technical positioning, and clearly labeled internal analysis."
+        description="AI Business features GlyphLock’s evidence-first venue technology and human-controlled AI boundaries, followed by its public technical evidence library."
         keywords={['GlyphLock AI Business story', 'GlyphLock technical evidence', 'Oracle OHIP evidence', 'NUPS architecture', 'AI governance boundaries', 'evidence preservation']}
         url="/TechnicalEvidence"
       />
