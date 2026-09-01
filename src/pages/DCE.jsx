@@ -57,8 +57,8 @@ export default function DCE() {
       <main className="relative min-h-screen overflow-hidden bg-transparent text-white">
         {/* HERO */}
         <section className="relative flex min-h-[78vh] items-center justify-center px-5 py-20 md:py-28">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_18%,rgba(236,72,153,.28),transparent_55%),radial-gradient(circle_at_20%_80%,rgba(245,158,11,.16),transparent_55%)]" />
-          <div className="absolute inset-0 -z-10 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(236,72,153,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.10) 1px,transparent 1px)', backgroundSize: '44px 44px' }} />
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_14%,rgba(236,72,153,.22),transparent_58%)]" />
+          <div className="absolute inset-0 -z-10 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(236,72,153,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,.12) 1px,transparent 1px)', backgroundSize: '44px 44px' }} />
           <motion.div
             animate={{ x: ['-25%', '125%'] }}
             transition={{ duration: 6.5, repeat: Infinity, ease: 'linear' }}
