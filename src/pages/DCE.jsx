@@ -58,7 +58,7 @@ export default function DCE() {
         {/* HERO */}
         <section className="relative flex min-h-[78vh] items-center justify-center px-5 py-20 md:py-28">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_18%,rgba(236,72,153,.28),transparent_55%),radial-gradient(circle_at_20%_80%,rgba(245,158,11,.16),transparent_55%)]" />
-          <div className="absolute inset-0 -z-10 opacity-25" style={{ backgroundImage: 'linear-gradient(rgba(236,72,153,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.10) 1px,transparent 1px)', backgroundSize: '44px 44px', maskImage: 'linear-gradient(to bottom,black,transparent 90%)' }} />
+          <div className="absolute inset-0 -z-10 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(236,72,153,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(245,158,11,.10) 1px,transparent 1px)', backgroundSize: '44px 44px' }} />
           <motion.div
             animate={{ x: ['-25%', '125%'] }}
             transition={{ duration: 6.5, repeat: Infinity, ease: 'linear' }}
@@ -89,7 +89,7 @@ export default function DCE() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12, duration: 0.8 }}
-              className="mt-10 text-[clamp(2.1rem,6vw,4.4rem)] font-black leading-[.92] tracking-[-.045em]"
+              className="mt-10 text-[clamp(2.1rem,6vw,4.4rem)] font-black leading-[.92] tracking-[-.045em] text-white drop-shadow-[0_4px_18px_rgba(0,0,0,.9)]"
             >
               ONE SWIPE. ONE CONTRACT.
               <br />
@@ -102,7 +102,7 @@ export default function DCE() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.22, duration: 0.8 }}
-              className="mx-auto mt-7 max-w-3xl text-base leading-relaxed text-slate-200 md:text-xl"
+              className="mx-auto mt-7 max-w-3xl text-base leading-relaxed text-white/95 drop-shadow-[0_3px_12px_rgba(0,0,0,.92)] md:text-xl"
             >
               DCE Evidence is the digital contract and evidence application in the GlyphLock ecosystem. It turns a card
               transaction into a complete, reviewable record: the agreement the customer actually accepted, who handled it,
@@ -138,7 +138,7 @@ export default function DCE() {
         <section id="how-it-works" className="relative mx-auto max-w-7xl px-5 py-16 md:py-24">
           <div className="mb-12 max-w-4xl">
             <div className="mb-4 font-mono text-[10px] tracking-[.28em] text-pink-300 md:text-xs">// WHAT DCE DOES</div>
-            <h2 className="text-3xl font-black leading-[.95] tracking-[-.04em] md:text-5xl lg:text-6xl">
+            <h2 className="text-3xl font-black leading-[.95] tracking-[-.04em] text-white drop-shadow-[0_4px_16px_rgba(0,0,0,.9)] md:text-5xl lg:text-6xl">
               THE AGREEMENT, THE IDENTITY, THE MONEY,
               <br />
               <span className="bg-gradient-to-r from-pink-300 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">AND THE PROOF — IN ONE RECORD.</span>
@@ -156,7 +156,7 @@ export default function DCE() {
                   viewport={{ once: true, amount: 0.2 }}
                   transition={{ delay: index * 0.07, duration: 0.6 }}
                   whileHover={{ y: -6 }}
-                  className="relative overflow-hidden rounded-[24px] border border-white/10 bg-[#0a0512]/60 p-7 backdrop-blur-2xl"
+                  className="relative overflow-hidden rounded-[24px] border border-white/15 bg-[#0a0512]/85 p-7"
                   style={{ boxShadow: `0 0 30px ${item.accent}22, inset 0 0 60px ${item.accent}0d` }}
                 >
                   <div className="absolute -right-16 -top-16 h-44 w-44 rounded-full blur-[70px] opacity-25" style={{ background: item.accent }} />
@@ -165,14 +165,14 @@ export default function DCE() {
                       <Icon className="h-6 w-6" style={{ color: item.accent, filter: `drop-shadow(0 0 9px ${item.accent})` }} />
                     </span>
                     <h3 className="mt-6 text-lg font-black tracking-wide text-white md:text-xl">{item.title}</h3>
-                    <p className="mt-3 text-sm leading-relaxed text-slate-300">{item.text}</p>
+                    <p className="mt-3 text-sm leading-relaxed text-slate-100">{item.text}</p>
                   </div>
                 </motion.article>
               );
             })}
           </div>
 
-          <div className="mt-6 rounded-2xl border border-white/10 bg-white/[.035] px-5 py-4 font-mono text-[9px] leading-relaxed tracking-[.14em] text-slate-400 md:text-[10px]">
+          <div className="mt-6 rounded-2xl border border-white/15 bg-black/60 px-5 py-4 font-mono text-[9px] leading-relaxed tracking-[.14em] text-slate-200 md:text-[10px]">
             BOUNDARY: A MODEL MAY HELP SUMMARIZE A PACKAGE. IT CANNOT CREATE ASSENT, SIGN FOR ANYONE, CHANGE AN AMOUNT,
             SHORTEN A PURCHASED SERVICE WINDOW, OR REWRITE AUDIT HISTORY. DCE IS OPERATED UNDER CONTROLLED VENUE USE.
           </div>
@@ -180,13 +180,13 @@ export default function DCE() {
 
         {/* CTA */}
         <section className="relative mx-auto max-w-7xl px-5 pb-24">
-          <div className="relative overflow-hidden rounded-[30px] border border-pink-200/35 bg-[#0a0512]/55 px-6 py-12 text-center backdrop-blur-2xl shadow-[0_0_50px_rgba(236,72,153,.18)] md:px-12 md:py-16">
+          <div className="relative overflow-hidden rounded-[30px] border border-pink-200/40 bg-[#0a0512]/85 px-6 py-12 text-center shadow-[0_0_50px_rgba(236,72,153,.18)] md:px-12 md:py-16">
             <div className="absolute -top-28 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-fuchsia-600/20 blur-[110px]" />
             <div className="relative">
-              <h2 className="text-3xl font-black leading-[.95] tracking-[-.04em] md:text-5xl">
+              <h2 className="text-3xl font-black leading-[.95] tracking-[-.04em] text-white md:text-5xl">
                 SEE THE LIVE DCE APPLICATION.
               </h2>
-              <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-300 md:text-lg">
+              <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-100 md:text-lg">
                 DCE runs as its own application at dce.glyphlock.io, supported by NUPS and powered by GlyphLock.
               </p>
               <a
