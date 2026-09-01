@@ -381,6 +381,89 @@ function AIWorkflowIntro() {
   );
 }
 
+function EvidenceBoundaryShowcase() {
+  const assist = [
+    ['GlyphBot', 'Multi-provider assistance for research, code analysis, site audits, support, and workflow drafting.'],
+    ['Image Lab + QR Studio', 'Models help generate or analyze media and draft risk context; payload signing, scan records, and verification stay deterministic.'],
+    ['NUPS + DJ', 'AI suggests playlists and uses configured genre, BPM, persona, and crowd inputs; operators keep final control.'],
+  ];
+
+  const forbidden = [
+    'Approve or deny entry, clear an age check, or grant a role',
+    'Sign, execute, alter, or void a contract',
+    'Post a ledger entry, authorize a payment, or move money',
+    'Alter or delete preserved evidence or append-only audit events',
+    'Accuse a worker, impose discipline, or change payroll',
+    'Turn a sandbox result, model score, or draft into a proven fact',
+  ];
+
+  return (
+    <section id="ai-boundaries" className="gl-home-section relative max-w-7xl mx-auto px-5 py-20 md:py-28">
+      <div className="absolute left-[8%] top-[18%] h-72 w-72 rounded-full bg-violet-500/10 blur-[110px] pointer-events-none" />
+      <div className="relative mb-10 max-w-5xl">
+        <div className="font-mono text-violet-300 text-[10px] md:text-xs tracking-[.28em] mb-4">// AI CAPABILITY + EVIDENCE BOUNDARY</div>
+        <h2 className="text-4xl md:text-6xl lg:text-7xl font-black text-white tracking-[-.045em] leading-[.9]">
+          THE MODEL CAN ASSIST.
+          <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400">IT CANNOT MAKE THE RECORD TRUE.</span>
+        </h2>
+        <p className="mt-6 max-w-4xl text-base md:text-lg leading-relaxed text-slate-300">
+          GlyphLock uses Base44 InvokeLLM and server-side provider adapters for Anthropic, OpenAI, and Gemini across supported product surfaces. Identity, permissions, contracts, ledgers, payments, signatures, and preserved evidence remain controlled by deterministic code and authorized people.
+        </p>
+      </div>
+
+      <div className="relative grid gap-4 lg:grid-cols-3">
+        <article className="rounded-[24px] border border-emerald-300/25 bg-emerald-400/[.045] p-6 md:p-8">
+          <div className="font-mono text-[9px] tracking-[.2em] text-emerald-300">AI MAY ASSIST</div>
+          <div className="mt-5 space-y-5">
+            {assist.map(([title, text]) => (
+              <div key={title}>
+                <h3 className="text-lg font-black text-white">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-300">{text}</p>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="rounded-[24px] border border-rose-300/25 bg-rose-400/[.045] p-6 md:p-8">
+          <div className="font-mono text-[9px] tracking-[.2em] text-rose-300">AI IS FORBIDDEN TO</div>
+          <ul className="mt-5 space-y-3 text-sm leading-relaxed text-slate-300">
+            {forbidden.map((item) => (
+              <li key={item} className="flex gap-3">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-300 shadow-[0_0_10px_#fda4af]" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        <article className="rounded-[24px] border border-cyan-300/30 bg-cyan-400/[.05] p-6 md:p-8 shadow-[0_0_38px_rgba(34,211,238,.10)]">
+          <div className="font-mono text-[9px] tracking-[.2em] text-cyan-300">DCE · CONTROLLED VENUE USE</div>
+          <h3 className="mt-5 text-2xl font-black text-white">One swipe. One contract. One reviewable evidence chain.</h3>
+          <p className="mt-4 text-sm leading-relaxed text-slate-300">
+            NUPS DCE is the separate digital-contract and evidence application. It captures a fresh agreement for each card transaction, clickwrap assent, receipt and processor references, role-scoped staff actions, manager review, and linked PDF/JSON evidence exports. PDF417 ID assist can auto-fill fields, but the operator confirms the record.
+          </p>
+          <p className="mt-4 text-sm leading-relaxed text-slate-300">
+            DCE is proof of the boundary: a model may help summarize the package, but it cannot create assent, sign for anyone, change the amount, shorten the purchased service window, or rewrite the audit history.
+          </p>
+          <a
+            href="https://dce.glyphlock.io"
+            target="_blank"
+            rel="noreferrer"
+            className="gl-energy-button mt-6 inline-flex items-center gap-2 rounded-xl border border-cyan-200/55 bg-cyan-300/[.12] px-5 py-3 font-black text-cyan-50 transition-all hover:-translate-y-1 hover:bg-cyan-200 hover:text-slate-950"
+          >
+            OPEN NUPS DCE <ArrowRight className="h-4 w-4" />
+          </a>
+        </article>
+      </div>
+
+      <div className="relative mt-4 rounded-2xl border border-white/10 bg-white/[.035] px-5 py-4 font-mono text-[9px] md:text-[10px] tracking-[.14em] text-slate-400">
+        CURRENT CLAIM: IMPLEMENTED AI ASSISTANCE + IMPLEMENTED DETERMINISTIC EVIDENCE CONTROLS · NOT CLAIMED: AUTONOMOUS AGE, ENTRY, FINANCIAL, DISCIPLINARY, OR EVIDENCE AUTHORITY
+      </div>
+    </section>
+  );
+}
+
 function CommandCTA() {
   return (
     <section id="start-project" className="gl-home-section max-w-7xl mx-auto px-5 py-12 md:py-20">
@@ -538,6 +621,7 @@ export default function Home() {
         <PlatformUniverse />
 
         <AIWorkflowIntro />
+        <EvidenceBoundaryShowcase />
         <section className="gl-home-stage relative py-8 md:py-12">
           <DeferredRender minHeight={520}><HomeDreamTeamCTA /></DeferredRender>
         </section>
