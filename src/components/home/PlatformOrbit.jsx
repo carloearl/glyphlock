@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { QrCode, Bot, Building2, Image, DollarSign, Radio, ShieldCheck } from 'lucide-react';
+import { QrCode, Bot, Building2, Image, Music2, FileSignature, ShieldCheck } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 
 const LOGO = 'https://media.base44.com/images/public/697a087fb354faebb72df54b/9f98e49a1_c867401ee_GLLogo.png';
@@ -13,21 +13,22 @@ const nodes = [
   { icon: Building2, label: 'NUPS', link: 'NUPSLanding', accent: '#22d3ee' },
   { icon: QrCode, label: 'QR STUDIO', link: 'SecureQRStudio', accent: '#38bdf8' },
   { icon: Image, label: 'IMAGE LAB', link: 'ImageLab', accent: '#d946ef' },
-  { icon: Radio, label: 'SECURITY', link: 'SecurityOperationsCenter', accent: '#f43f5e' },
+  { icon: FileSignature, label: 'DCE EVIDENCE', link: 'DCE', accent: '#ec4899' },
   { icon: ShieldCheck, label: 'GOVERNANCE', link: 'GovernanceHub', accent: '#8b5cf6' },
-  { icon: DollarSign, label: 'FINANCIAL', link: 'GlyphLockFinancial', accent: '#10b981' },
+  { icon: Music2, label: 'DJ MIXER', link: 'GlyphBotMixer', accent: '#f59e0b' },
   { icon: Bot, label: 'GLYPHBOT', link: 'GlyphBot', accent: '#818cf8' },
 ];
 
 export default function PlatformOrbit() {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.86 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.3, duration: 1, ease: [0.16, 1, 0.3, 1] }}
-      className="gl-orbit relative hidden lg:block h-[560px] w-full max-w-[560px] justify-self-end"
-      aria-label="GlyphLock platform orbit"
-    >
+    <div className="gl-orbit-frame relative flex w-full items-center justify-center lg:justify-self-end">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.86 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.3, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="gl-orbit relative h-[560px] w-[560px] max-w-none flex-shrink-0"
+        aria-label="GlyphLock platform orbit"
+      >
       {/* Deep field glow */}
       <div className="absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(34,211,238,.10),rgba(124,58,237,.08)_55%,transparent_72%)] blur-[2px]" />
 
@@ -116,7 +117,19 @@ export default function PlatformOrbit() {
         @media (prefers-reduced-motion: reduce) {
           .gl-orbit .gl-orbit-track { animation: none !important; }
         }
+        /* Visible on mobile + tablet: scale the whole 560px stage down to fit. */
+        .gl-orbit-frame { height: 360px; overflow: hidden; }
+        .gl-orbit { transform-origin: center center; zoom: .6; }
+        @media (min-width: 640px) {
+          .gl-orbit-frame { height: 470px; }
+          .gl-orbit { zoom: .8; }
+        }
+        @media (min-width: 1024px) {
+          .gl-orbit-frame { height: 560px; overflow: visible; }
+          .gl-orbit { zoom: 1; }
+        }
       `}</style>
-    </motion.div>
+      </motion.div>
+    </div>
   );
 }

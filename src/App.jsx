@@ -10,6 +10,7 @@ import { pagesConfig } from './lazyPagesConfig'
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
+import DCE from './pages/DCE';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { recordNavigation } from '@/lib/nups/navStack';
 import { isCanonicalPublicSeoPath } from '@/components/seo/seoData';
@@ -307,6 +308,8 @@ const AuthenticatedApp = () => {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/SecureQRStudio" element={<SecureQRStudio />} />
+        <Route path="/DCE" element={<DCE />} />
+        <Route path="/dce" element={<DCE />} />
         <Route path="/Qr" element={<Navigate to="/SecureQRStudio" replace />} />
         <Route path="/qr" element={<Navigate to="/SecureQRStudio" replace />} />
         {Object.entries(Pages).map(([path, Page]) => (
