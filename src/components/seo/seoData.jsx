@@ -432,12 +432,12 @@ export const SEO_DATA = {
   // ─────────────────────────── TECHNICAL EVIDENCE ───────────────────────────
   "TechnicalEvidence": {
     title: "Technical Evidence | GlyphLock LLC",
-    description: "Read the flagship AI Business story on GlyphLock, then review integration evidence, AI governance boundaries, reproducible methods, and labeled internal analysis.",
+    description: "AI Business features GlyphLock’s evidence-first venue technology and human-controlled AI boundaries, followed by its public technical evidence library.",
     keywords: ["GlyphLock AI Business story", "GlyphLock technical evidence", "AI governance boundaries", "Oracle OHIP evidence", "NUPS positioning", "evidence preservation"],
     h1: "Technical Evidence",
     url: "/TechnicalEvidence",
     ogTitle: "Technical Evidence | GlyphLock LLC",
-    ogDescription: "AI Business features GlyphLock’s evidence-first venue technology and human-controlled AI boundaries, followed by the public technical evidence library.",
+    ogDescription: "AI Business features GlyphLock’s evidence-first venue technology and human-controlled AI boundaries, followed by its public technical evidence library.",
     schemaType: "CollectionPage",
     priority: 0.95,
     changefreq: "weekly",
