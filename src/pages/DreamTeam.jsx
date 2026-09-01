@@ -404,12 +404,6 @@ export default function DreamTeamPage() {
     setIsFlipped(prev => !prev);
   }, []);
 
-  const handleTouch = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFlipped(prev => !prev);
-  }, []);
-
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-US', { 
       year: 'numeric', month: 'short', day: 'numeric' 
@@ -444,11 +438,10 @@ export default function DreamTeamPage() {
         style={{ 
           perspective: '2000px', 
           isolation: 'isolate',
-          touchAction: 'manipulation',
+          touchAction: 'pan-y',
           WebkitTapHighlightColor: 'transparent'
         }}
         onClick={handleFlip}
-        onTouchEnd={handleTouch}
         role="button"
         tabIndex={0}
         onKeyDown={(e) => e.key === 'Enter' && handleFlip(e)}

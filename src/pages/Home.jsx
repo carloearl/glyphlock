@@ -32,7 +32,6 @@ import DeferredRender from '@/components/shared/DeferredRender';
 
 const FlagshipNUPSShowcase = lazy(() => import('@/components/home/FlagshipNUPSShowcase'));
 const FeaturedIntegrationsMarquee = lazy(() => import('@/components/home/FeaturedIntegrationsMarquee'));
-const HomeDreamTeamCTA = lazy(() => import('@/components/home/HomeDreamTeamCTA'));
 const ServicesGrid = lazy(() => import('@/components/home/ServicesGrid'));
 const TechnologyMarquee = lazy(() => import('@/components/TechnologyMarquee'));
 const TechServicesPreview = lazy(() => import('@/components/home/TechServicesPreview'));
@@ -621,9 +620,6 @@ export default function Home() {
         <PlatformUniverse />
 
         <AIWorkflowIntro />
-        <section className="gl-home-stage relative py-8 md:py-12">
-          <DeferredRender minHeight={520}><HomeDreamTeamCTA /></DeferredRender>
-        </section>
         <EvidenceBoundaryShowcase />
 
         <section id="services" className="gl-home-section gl-home-stage relative py-8 md:py-14">
