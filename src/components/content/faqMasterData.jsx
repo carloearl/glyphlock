@@ -55,6 +55,17 @@ export const FAQ_MASTER_DATA = [
     ]
   },
   {
+    id: "what-is-dce",
+    category: "Verification Modules",
+    icon: "FileCheck",
+    q: "What is DCE (Distributed Contract Evidence)?",
+    a: [
+      "DCE is the digital contract and evidence layer of the GlyphLock ecosystem.",
+      "It binds a card transaction to the identity, the signed agreement the customer actually accepted, and the supporting evidence captured at the time of sale.",
+      "The result is a reviewable, exportable evidence package that can be produced when a charge is questioned or disputed. See the DCE page for details."
+    ]
+  },
+  {
     id: "trust-security-center",
     category: "Compliance",
     icon: "ShieldCheck",

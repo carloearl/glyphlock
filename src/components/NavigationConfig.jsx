@@ -60,6 +60,7 @@ export const NAV_SECTIONS = [
     visibility: "public",
     items: [
       { label: "Open NUPS Portal", page: "NUPSLanding", visibility: "public" },
+      { label: "DCE Evidence", page: "DCE", visibility: "public" },
       { label: "Oracle OHIP Integration", page: "NUPSLanding#nups-integrations", visibility: "public" },
     ]
   },
@@ -112,7 +113,8 @@ export const FOOTER_LINKS = {
     { label: "Media Processing Hub", page: "VideoUpload", visibility: "public" },
     { label: "Security Tools", page: "SecurityTools", visibility: "public" },
     { label: "SDK Documentation", page: "SDKDocs", visibility: "public" },
-    { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" }
+    { label: "DJ Pro Mixer", page: "GlyphBotMixer", visibility: "public" },
+    { label: "DCE Evidence", page: "DCE", visibility: "public" }
   ],
   financial: [
     { label: "GlyphLock Financial", page: "GlyphLockFinancial", visibility: "public" },
@@ -124,6 +126,7 @@ export const FOOTER_LINKS = {
     // Receipts, Driver Payouts, Front Door, Tonight, Accounting,
     // Contracts) lives inside the NUPS sidebar after authentication.
     { label: "Open NUPS Portal", page: "NUPSLanding", visibility: "public" },
+    { label: "DCE Evidence", page: "DCE", visibility: "public" },
     { label: "Oracle OHIP Integration", page: "NUPSLanding#nups-integrations", visibility: "public" },
   ],
   protocols: [
