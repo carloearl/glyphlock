@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, FileSearch, FlaskConical, Network, Scale, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Code2, FileSearch, FlaskConical, Network, Scale, ShieldCheck } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
 import { createPageUrl } from '@/utils';
 import { Badge } from '@/components/ui/badge';
@@ -55,6 +55,22 @@ const RECORDS = [
     ],
     route: 'CaseStudyCovenantVictory',
     cta: 'Read the internal review',
+  },
+  {
+    title: 'Cursor Milestone: CAB-71 Contactless Discovery Record',
+    classification: 'Internal workflow record — internal analysis',
+    date: 'November 17, 2025',
+    icon: Code2,
+    tone: 'cyan',
+    summary: 'The sixth and final Dream Team milestone: a Cursor IDE workspace-analysis session ingested the GlyphLock codebase, and the interaction was captured, hashed, and archived under the internal CAB-71 classification. No provider assent, partnership, or endorsement is claimed.',
+    evidence: [
+      'Workspace analysis via VS Code integration and codebase ingestion was captured as the source context',
+      'The interaction record was hashed (Ed25519-BPAA lineage, e61dea5e…3120f5e) and archived internally',
+      'Classified as contactless discovery under CAB-71 — an internal BPAAA classification, not assent',
+      'Completes the six-role Dream Team lineup as the Sixth Man that binds the stack',
+    ],
+    route: 'DreamTeam',
+    cta: 'View the Cursor milestone',
   },
   {
     title: 'Provenance and Evidence-Preservation Methodology',

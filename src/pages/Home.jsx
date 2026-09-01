@@ -621,10 +621,10 @@ export default function Home() {
         <PlatformUniverse />
 
         <AIWorkflowIntro />
-        <EvidenceBoundaryShowcase />
         <section className="gl-home-stage relative py-8 md:py-12">
           <DeferredRender minHeight={520}><HomeDreamTeamCTA /></DeferredRender>
         </section>
+        <EvidenceBoundaryShowcase />
 
         <section id="services" className="gl-home-section gl-home-stage relative py-8 md:py-14">
           <DeferredRender minHeight={640}><ServicesGrid /></DeferredRender>
