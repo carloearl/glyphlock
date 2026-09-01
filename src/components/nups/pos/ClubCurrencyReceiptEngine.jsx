@@ -10,7 +10,7 @@ export default function ClubCurrencyReceiptEngine({ transaction, batch, onPrint 
   const receiptRef = React.useRef();
   const activeVenue = useActiveVenue();
 
-  const venueName = activeVenue?.name || 'N.U.P.S. Register';
+  const venueName = activeVenue?.name || 'NUPS Portal';
   const venueAddress = [activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || '';
   const venuePhone = activeVenue?.phone || '';
   const currencyName = activeVenue?.currency_name || 'Club Currency';

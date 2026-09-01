@@ -80,7 +80,7 @@ export default function GlyphBucksReceipt({ doc }) {
         <table style={{ borderCollapse: "collapse", width: "100%" }}><tbody><tr>
           <td style={{ borderBottom: "3px solid #16181d", paddingBottom: 9, width: 158, verticalAlign: "top" }}>
             <div style={{ fontFamily: "Georgia,serif", fontSize: 30, letterSpacing: 2, color: NAVY, fontWeight: 700, lineHeight: 1 }}>NUPS<span style={{ fontSize: 13, verticalAlign: "super" }}>®</span></div>
-            <div style={{ fontSize: 8.5, letterSpacing: 1.5, color: MUTE, marginTop: 3, textTransform: "uppercase" }}>Nexus Unified Portal</div>
+            <div style={{ fontSize: 8.5, letterSpacing: 1.5, color: MUTE, marginTop: 3, textTransform: "uppercase" }}>Nexus Unified Portal System</div>
           </td>
           <td style={{ borderBottom: "3px solid #16181d", paddingBottom: 9, textAlign: "center", verticalAlign: "top" }}>
             <h1 style={{ fontFamily: "Georgia,serif", fontSize: 23, letterSpacing: 1.2, color: NAVY, lineHeight: 1, margin: 0 }}>{doc.issuer_name || "LIBERTY HOLDINGS LLC"}</h1>

@@ -114,7 +114,7 @@ function printAuditReport(events, filters) {
     <thead><tr><th>Timestamp</th><th>Actor</th><th>Action</th><th>Entity</th><th>Severity</th><th>Description</th><th>IP</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>
-  <div class="footer">N.U.P.S. Register — GlyphLock Financial LLC — Confidential compliance record. Unauthorized disclosure is prohibited.</div>
+  <div class="footer">NUPS Portal — GlyphLock Financial LLC — Confidential compliance record. Unauthorized disclosure is prohibited.</div>
   </body></html>`;
 
   const w = window.open("", "_blank", "width=1100,height=800");

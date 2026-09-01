@@ -413,7 +413,7 @@ export default function NUPSSandbox() {
         .footer { text-align: center; font-size: 9px; color: #666; margin-top: 16px; }
         @media print { button { display: none; } }
       </style></head><body>
-      <h1>N.U.P.S. Register — Z-REPORT<br/><span style='font-size:12px;font-weight:normal;'>DREAM PALACE — DEMO BATCH CLOSE</span></h1>
+      <h1>NUPS Portal — Z-REPORT<br/><span style='font-size:12px;font-weight:normal;'>DREAM PALACE — DEMO BATCH CLOSE</span></h1>
       <div class='demo'>⚠ SANDBOX DEMO — This report uses seeded demo contract data. No real transactions.</div>
       <h2>REPORT HEADER</h2>
       <div class='row'><span>Report ID:</span><span>${reportId}</span></div>
@@ -454,7 +454,7 @@ export default function NUPSSandbox() {
         <div><label>MANAGER SIGNATURE</label><div class='line'></div></div>
         <div><label>DATE / TIME</label><div class='line'></div></div>
       </div>
-      <div class='footer'>N.U.P.S. Register — GlyphLock Financial LLC — ${now.toLocaleString()} — DEMO BATCH</div>
+      <div class='footer'>NUPS Portal — GlyphLock Financial LLC — ${now.toLocaleString()} — DEMO BATCH</div>
       <br/><button onclick='window.print()' style='padding:8px 20px;font-size:13px;cursor:pointer;'>🖨️ Print</button>
       </body></html>
     `);

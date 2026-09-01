@@ -79,7 +79,7 @@ ADMIN-ONLY ROUTES:
   /governance-hub → pages/GovernanceHub.js
   /integration-tests → pages/IntegrationTests.js
 
-NUPS Register ROUTES:
+NUPS Portal ROUTES:
   /nups-login → pages/NUPSLogin.js
   /nups-staff → pages/NUPSStaff.js (staff role)
   /nups-owner → pages/NUPSOwner.js (owner/admin role)

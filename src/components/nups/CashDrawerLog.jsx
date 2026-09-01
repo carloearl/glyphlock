@@ -43,7 +43,7 @@ export default function CashDrawerLog() {
       <table><tr style="font-weight:bold;"><td>Denom</td><td style="text-align:center;">Count</td><td style="text-align:right;">Total</td></tr>${rows}</table>
       <hr style="margin:8px 0;border-top:2px solid #000;"/>
       <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:bold;"><span>DRAWER TOTAL:</span><span>$${total.toFixed(2)}</span></div>
-      <div style="text-align:center;font-size:8px;color:#666;margin-top:12px;">N.U.P.S. Register v2.0 — Secured by GlyphLock</div>
+      <div style="text-align:center;font-size:8px;color:#666;margin-top:12px;">NUPS Portal v2.0 — Secured by GlyphLock</div>
     </body></html>`;
     const w = window.open('','_blank','width=350,height=600');
     w.document.write(html); w.document.close();

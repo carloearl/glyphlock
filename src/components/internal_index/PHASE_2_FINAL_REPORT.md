@@ -566,7 +566,7 @@ Line 18-19:
 1. ✅ QR Studio → `/qr` loads Qr.jsx
 2. ✅ Image Lab → `/image-lab` loads ImageLab.jsx
 3. ✅ GlyphBot AI → `/glyphbot` loads GlyphBot.jsx
-4. ✅ NUPS Register → `/nups-login` loads NUPSLogin.jsx
+4. ✅ NUPS Portal → `/nups-login` loads NUPSLogin.jsx
 5. ✅ Security Tools → `/security-tools` loads SecurityTools.jsx
 
 **Resources Dropdown (7 items):**
@@ -615,7 +615,7 @@ Line 18-19:
 1. ✅ QR Studio → `/qr`
 2. ✅ Image Lab → `/image-lab`
 3. ✅ GlyphBot AI → `/glyphbot`
-4. ✅ NUPS Register → `/nups-login`
+4. ✅ NUPS Portal → `/nups-login`
 5. ✅ Security Tools → `/security-tools`
 
 **Resources Links (7 items):**
@@ -844,7 +844,7 @@ Navbar (Desktop)
 │   │   ├── QR Studio ✅ (Fixed to use Qr not QrGenerator)
 │   │   ├── Image Lab
 │   │   ├── GlyphBot AI
-│   │   ├── NUPS Register
+│   │   ├── NUPS Portal
 │   │   └── Security Tools
 │   └── Resources (7) ✅ (Added FAQ, Roadmap)
 │       ├── Documentation

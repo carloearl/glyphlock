@@ -13,7 +13,7 @@ import { printCurrentNupsView } from '@/lib/nups/receiptService';
 export default function GlyphBucksReceiptEngine({ transaction, batch, bills, currentUser, onPrint }) {
   const receiptRef = React.useRef();
   const activeVenue = useActiveVenue();
-  const venueName = activeVenue?.name || 'N.U.P.S. Register';
+  const venueName = activeVenue?.name || 'NUPS Portal';
   const venueAddress = activeVenue?.address || '';
   const venueCity = [activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || '';
   const venuePhone = activeVenue?.phone || '';

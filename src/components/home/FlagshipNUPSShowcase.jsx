@@ -5,7 +5,7 @@ import { ArrowRight, Play, Radio, CreditCard, FileSignature, Fingerprint, ScanLi
 import { createPageUrl } from '@/utils';
 
 const features = [
-  [CreditCard, 'Register + Registers', 'Cash/card workflows, catalogs, void logging and shift-close controls.'],
+  [CreditCard, 'Portal + Registers', 'Cash/card workflows, catalogs, void logging and shift-close controls.'],
   [FileSignature, 'Contracts', 'VIP contract workflows, printing, signing, rescanning and record retention.'],
   [Fingerprint, 'Staff + Identity', 'Role-aware access, shift logs and supported biometric workflows.'],
   [ScanLine, 'QR Operations', 'Guest, driver and operational QR issuance tied to auditable records.'],

@@ -94,9 +94,9 @@
 **Changes:**
 - Removed `Hotzone Mapper` from NAV_SECTIONS (it's an Image Suite tool)
 - Renamed `Solutions` → `Products` 
-- Added `NUPS Register` to Products
+- Added `NUPS Portal` to Products
 - Restructured `Company` section: About, Partners, Contact, Accessibility
-- Restructured `Products` section: QR Studio, Image Lab, GlyphBot AI, NUPS Register, Security Tools
+- Restructured `Products` section: QR Studio, Image Lab, GlyphBot AI, NUPS Portal, Security Tools
 - Restructured `Resources` section: Documentation, SDK Docs, Dream Team, Pricing, FAQ, Roadmap
 - Restructured `Legal` section: Privacy, Terms, Cookies (removed Accessibility - moved to Company)
 - Footer now uses `products` key instead of `solutions`
@@ -172,7 +172,7 @@
 | Section | Links |
 |---------|-------|
 | Company | About, Partners, Contact, Accessibility |
-| Products | QR Studio, Image Lab, GlyphBot AI, NUPS Register, Security Tools |
+| Products | QR Studio, Image Lab, GlyphBot AI, NUPS Portal, Security Tools |
 | Resources | Documentation, SDK Docs, Dream Team, Pricing, FAQ, Roadmap |
 | Legal | Privacy, Terms, Cookies |
 

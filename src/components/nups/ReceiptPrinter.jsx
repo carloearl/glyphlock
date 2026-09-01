@@ -11,7 +11,7 @@ import { logActivity } from "@/lib/nups/activityLog";
 import { markTrainingStep } from "@/lib/nups/operatingMode";
 import { toast } from "sonner";
 
-const BIZ_SYSTEM = "N.U.P.S. Register v2.0 — Secured by GlyphLock";
+const BIZ_SYSTEM = "NUPS Portal v2.0 — Secured by GlyphLock";
 
 const escapeHtml = (value) => String(value ?? '')
   .replaceAll('&', '&amp;')
@@ -79,7 +79,7 @@ export default function ReceiptPrinter({
   const dv = isDemo ? DEMO_RECEIPT_VENUE : null;
 
   const VENUE_BRAND = dv?.name || activeVenue?.name || transaction?.venue_name || '';
-  const BIZ_LEGAL = dv?.legal_name || rates?.receipt_legal_name || VENUE_BRAND || 'N.U.P.S. Register';
+  const BIZ_LEGAL = dv?.legal_name || rates?.receipt_legal_name || VENUE_BRAND || 'NUPS Portal';
   const BIZ_NAME = VENUE_BRAND || BIZ_LEGAL;
   const BIZ_ADDRESS = dv
     ? [dv.address, dv.city, dv.state].filter(Boolean).join(', ')
