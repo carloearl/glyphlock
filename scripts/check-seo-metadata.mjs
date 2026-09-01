@@ -7,15 +7,15 @@
 //   - retired/misleading strings
 //   - stale app IDs
 //   - preview URLs
-//   - wrong NUPS expansion ("Nexus Unified Portal System", "Nightclub & Unique Venue")
+//   - retired NUPS expansions and sales-system terminology
 //   - duplicate canonical/schema patterns
 //   - Home/About metadata regression
 // Active SEO sources are the runtime source of truth (SEOHead + seoData) plus
 // every active metadata/schema/crawler emitter.
 // ============================================================================
 
-import { readFileSync, existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { extname, join, relative } from 'node:path';
 
 const ROOT = process.cwd();
 let failures = [];
@@ -61,13 +61,48 @@ for (const p of ACTIVE_SOURCES) {
   else sourceContents[p] = c;
 }
 
+// Public-facing terminology is audited across every page, component, content
+// source, crawler document, agent knowledge source, and generated copy source.
+const TERMINOLOGY_ROOTS = [
+  'index.html', 'public', 'src/pages', 'src/components', 'src/content',
+  'src/constants', 'src/functions', 'src/glyphbucks', 'src/entities',
+  'base44/agents', 'base44/functions', 'base44/entities',
+];
+const TEXT_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx', '.json', '.jsonc', '.md', '.html', '.txt', '.xml', '.webmanifest']);
+const terminologyFiles = [];
+function collectTerminologyFiles(path) {
+  const full = join(ROOT, path);
+  if (!existsSync(full)) return;
+  const stat = statSync(full);
+  if (stat.isDirectory()) {
+    for (const name of readdirSync(full)) collectTerminologyFiles(join(path, name));
+    return;
+  }
+  if (path === 'index.html' || TEXT_EXTENSIONS.has(extname(path))) terminologyFiles.push(path);
+}
+for (const root of TERMINOLOGY_ROOTS) collectTerminologyFiles(root);
+
+const RETIRED_NUPS_EXPANSION = 'Nexus Unified ' + 'P' + 'OS System';
+const RETIRED_TERMINOLOGY_PATTERNS = [
+  { label: 'retired NUPS expansion', pattern: new RegExp(RETIRED_NUPS_EXPANSION, 'i') },
+  { label: 'retired sales acronym', pattern: /\bP(?:OS)\b/ },
+  { label: 'retired point-of-sale phrase', pattern: /point[- ]of[- ]sale/i },
+  { label: 'retired universal sales expansion', pattern: /Nexus Universal (?:Point[- ]of[- ]Sale|P(?:OS))/i },
+];
+for (const path of terminologyFiles) {
+  const content = read(path) || '';
+  for (const { label, pattern } of RETIRED_TERMINOLOGY_PATTERNS) {
+    if (pattern.test(content)) fail(`${label} present in ${relative(ROOT, join(ROOT, path))}`);
+  }
+}
+
 // Normalize apostrophes (curly ↔ straight) for resilient exact-value checks.
 const norm = (s) => (s || '').replace(/[\u2019\u2018]/g, "'");
 
 // ── 1. Retired/misleading strings (case-insensitive) ──
 const RETIRED_STRINGS = [
   'What If an Image Could Carry Proof',
-  'Nexus Unified Portal System',
+  RETIRED_NUPS_EXPANSION,
   'Dream Dollars',
   'banking-grade',
   'Quantum-Grade',
@@ -120,7 +155,7 @@ for (const [path, content] of Object.entries(sourceContents)) {
 }
 
 // ── 4. Wrong NUPS expansion ──
-const WRONG_NUPS = ['Nexus Unified Portal System', 'Nightclub & Unique Venue', 'Nightclub and Unique Venue'];
+const WRONG_NUPS = [RETIRED_NUPS_EXPANSION, 'Nightclub & Unique Venue', 'Nightclub and Unique Venue'];
 for (const [path, content] of Object.entries(sourceContents)) {
   const lower = content.toLowerCase();
   for (const wrong of WRONG_NUPS) {
@@ -276,7 +311,7 @@ if (seoData) {
     ['/Pricing', 'GlyphLock pricing for Secure QR, NUPS venue operations, and API access. Plans for single venues through multi-site operators.'],
     ['/Solutions', 'Identity and permission workflows, secure QR carriers, venue operations, and API integration — built on a single evidence architecture.'],
     ['/SDKDocs', 'GlyphLock SDK documentation: authentication, QR generation and verification, webhooks, and error handling.'],
-    ['/NUPSLanding', 'NUPS: venue operations software for check-in, floor status, VIP contracts, POS, and nightly settlement.'],
+    ['/NUPSLanding', 'NUPS: venue operations software for check-in, floor status, VIP contracts, registers, and nightly settlement.'],
     ['/SecureQRStudio', 'Generate and manage verifiable secure QR codes with permission binding and offline verification.'],
     ['/Contact', 'Contact GlyphLock LLC in El Mirage, Arizona for demos, partnerships, and integration questions.'],
   ]);
