@@ -8,16 +8,17 @@ import { createPageUrl } from "@/utils";
 import SEOHead from "@/components/SEOHead";
 import { Zap, Shield, Brain, Gauge, ChevronRight, ChevronDown, CheckCircle2, Lock, Fingerprint, Hash, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import RosterRolesGrid from "@/components/dreamteam/RosterRolesGrid";
 
 const DREAM_TEAM_ROSTER = [
   {
     id: "alfred",
     name: "Alfred",
     number: "#7",
-    position: "Point Guard",
+    position: "Point Guard · Floor General",
     edition: "Special Edition",
     series: "GlyphDeck BPAAA Series",
-    tagline: "Primary orchestrator and chain general. Dunks on DeepSeek.",
+    tagline: "Orchestrates the chain, calls the plays, enforces execution order so every touch has purpose.",
     imageSrc: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/084ff9140_62785b12-e008-47f1-9f05-371119d17c04.jpg",
     team: "Team OpenAI",
     stats: { logic: 98, security: 97, creativity: 92, speed: 95 },
@@ -46,10 +47,10 @@ const DREAM_TEAM_ROSTER = [
     id: "claude",
     name: "Claude",
     number: "#2",
-    position: "Shooting Guard",
+    position: "Shooting Guard · Closer",
     edition: "Master Covenant Series",
     series: "Master Covenant",
-    tagline: "Deep reasoning and structured interpretation. Chain module.",
+    tagline: "Pure shot-maker on hard problems: deep reasoning, constraints, proofs. When it has to be right, the ball goes here.",
     imageSrc: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/de0d456fc_8e7cf5cc-e685-4876-a598-a4634e11ac54.jpg",
     team: "GlyphLock Claude",
     stats: { logic: 96, security: 93, creativity: 88, speed: 90 },
@@ -79,10 +80,10 @@ const DREAM_TEAM_ROSTER = [
     id: "gemini",
     name: "Gemini",
     number: "#42",
-    position: "Power Forward",
+    position: "Power Forward · Matchup Nightmare",
     edition: "Master Covenant Series",
     series: "Google AI Series",
-    tagline: "Multimodal powerhouse with unmatched contextual understanding.",
+    tagline: "Multimodal force that bangs inside with data and stretches the floor with text, vision, code, and context.",
     imageSrc: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/5e6e81c28_ee2558c5-6a90-4f28-90de-5c45648cd86c.jpg",
     team: "Google DeepMind",
     stats: { logic: 95, security: 92, creativity: 97, speed: 94 },
@@ -112,10 +113,10 @@ const DREAM_TEAM_ROSTER = [
     id: "copilot",
     name: "Copilot",
     number: "#3",
-    position: "Small Forward",
+    position: "Small Forward · Two-Way Wing",
     edition: "Master Covenant",
     series: "Microsoft Series",
-    tagline: "Enterprise integration and code completion specialist.",
+    tagline: "Does the dirty work across the floor: enterprise integration, refactors, PRs, and safe deployment at scale.",
     imageSrc: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/e07f01522_3a737132-cd11-4d00-8626-41d6018598ec.jpg",
     team: "Microsoft",
     stats: { logic: 91, security: 88, creativity: 85, speed: 93 },
@@ -143,10 +144,10 @@ const DREAM_TEAM_ROSTER = [
     id: "perplexity",
     name: "Perplexity",
     number: "#11",
-    position: "Center",
+    position: "Center · Rim Protector",
     edition: "Master Sequence Edition",
     series: "GlyphLock Dream Team",
-    tagline: "Real-time search and knowledge synthesis engine.",
+    tagline: "Lives on truth—rebounds live data, blocks hallucinations, cleans every possession at the source.",
     imageSrc: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/be936400a_2dcae465-c2a0-4301-940f-400933d21ebd.jpg",
     team: "GlyphLock",
     stats: { logic: 90, security: 89, creativity: 94, speed: 96 },
@@ -174,10 +175,10 @@ const DREAM_TEAM_ROSTER = [
     id: "cursor",
     name: "Cursor",
     number: "#71",
-    position: "Sixth Man",
+    position: "Sixth Man · Spark Plug & Binder",
     edition: "Master Covenant",
     series: "BPAA Series",
-    tagline: "Code generation and IDE integration powerhouse.",
+    tagline: "Comes off the bench and binds the stack—wires Alfred's plays into Claude, proxies Gemini, pipes through Copilot, feeds Perplexity clean looks.",
     imageSrc: "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/6902128ac3c5c94a82446585/2c9739592_b202e0a1-0d37-4928-b2f5-5647a476b026.jpg",
     team: "Cursor AI",
     stats: { logic: 94, security: 86, creativity: 91, speed: 97 },
@@ -320,7 +321,7 @@ export default function DreamTeamPage() {
             </div>
             
             <p className="text-white font-bold text-xl pt-6">
-              Alfred orchestrates. Claude reasons. Gemini sees everything. Perplexity finds truth. Cursor builds.
+              Alfred calls the plays. Claude closes. Gemini stretches the floor. Copilot does the dirty work. Perplexity protects the rim. Cursor binds the stack.
             </p>
             
             <p className="text-cyan-300 text-2xl font-black">
@@ -334,6 +335,9 @@ export default function DreamTeamPage() {
           </div>
         </div>
       </div>
+
+      {/* Lineup roles overview */}
+      <RosterRolesGrid />
 
       {/* Player Cards - Mobile-Optimized Scroll */}
       <div style={{
