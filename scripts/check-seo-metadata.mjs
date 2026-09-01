@@ -311,7 +311,7 @@ if (seoData) {
     ['/Pricing', 'GlyphLock pricing for Secure QR, NUPS venue operations, and API access. Plans for single venues through multi-site operators.'],
     ['/Solutions', 'Identity and permission workflows, secure QR carriers, venue operations, and API integration — built on a single evidence architecture.'],
     ['/SDKDocs', 'GlyphLock SDK documentation: authentication, QR generation and verification, webhooks, and error handling.'],
-    ['/NUPSLanding', 'NUPS: venue operations software for check-in, floor status, VIP contracts, registers, and nightly settlement.'],
+    ['/NUPSLanding', 'NUPS: venue operations software for check-in, floor status, VIP contracts, register operations, and nightly settlement.'],
     ['/SecureQRStudio', 'Generate and manage verifiable secure QR codes with permission binding and offline verification.'],
     ['/Contact', 'Contact GlyphLock LLC in El Mirage, Arizona for demos, partnerships, and integration questions.'],
   ]);
