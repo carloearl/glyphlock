@@ -247,8 +247,8 @@ function buildIIF(settlements, drivers, payroll, glyphBucks) {
   const L = [];
 
   L.push('!ACCNT\tNAME\tACCNTTYPE\tDESC');
-  L.push('ACCNT\tNUPS Cash Sales\tINC\tCash POS receipts');
-  L.push('ACCNT\tNUPS Card Sales\tINC\tCard POS receipts');
+  L.push('ACCNT\tNUPS Cash Sales\tINC\tCash Register receipts');
+  L.push('ACCNT\tNUPS Card Sales\tINC\tCard Register receipts');
   L.push('ACCNT\tNUPS GlyphBucks Surcharge\tINC\tGB processing surcharge revenue');
   L.push('ACCNT\tNUPS GlyphBucks Liability\tOCLIAB\tOutstanding GlyphBucks face-value liability');
   L.push('ACCNT\tNUPS Driver Payouts\tEXP\tContract driver disbursements');

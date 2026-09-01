@@ -11,7 +11,7 @@ import { logActivity } from "@/lib/nups/activityLog";
 import { markTrainingStep } from "@/lib/nups/operatingMode";
 import { toast } from "sonner";
 
-const BIZ_SYSTEM = "N.U.P.S. POS v2.0 — Secured by GlyphLock";
+const BIZ_SYSTEM = "N.U.P.S. Register v2.0 — Secured by GlyphLock";
 
 const escapeHtml = (value) => String(value ?? '')
   .replaceAll('&', '&amp;')
@@ -79,7 +79,7 @@ export default function ReceiptPrinter({
   const dv = isDemo ? DEMO_RECEIPT_VENUE : null;
 
   const VENUE_BRAND = dv?.name || activeVenue?.name || transaction?.venue_name || '';
-  const BIZ_LEGAL = dv?.legal_name || rates?.receipt_legal_name || VENUE_BRAND || 'N.U.P.S. POS';
+  const BIZ_LEGAL = dv?.legal_name || rates?.receipt_legal_name || VENUE_BRAND || 'N.U.P.S. Register';
   const BIZ_NAME = VENUE_BRAND || BIZ_LEGAL;
   const BIZ_ADDRESS = dv
     ? [dv.address, dv.city, dv.state].filter(Boolean).join(', ')
@@ -178,7 +178,7 @@ export default function ReceiptPrinter({
           <tr class="info-row"><td>Cashier:</td><td class="right">${escapeHtml(cashierDisplay)}</td></tr>
           ${transaction.customer_id ? `<tr class="info-row"><td>Customer:</td><td class="right">${escapeHtml(transaction.customer_id)}</td></tr>` : ''}
           <tr class="info-row"><td>Batch:</td><td class="right">${escapeHtml(transaction.batch_id || 'N/A')}</td></tr>
-          <tr class="info-row"><td>Terminal:</td><td class="right">${escapeHtml(transaction.station?.toUpperCase() || transaction.terminal_name || 'POS')}</td></tr>
+          <tr class="info-row"><td>Terminal:</td><td class="right">${escapeHtml(transaction.station?.toUpperCase() || transaction.terminal_name || 'Register')}</td></tr>
         </table>
         ${vipSection}
         <div class="divider"></div>
@@ -329,7 +329,7 @@ export default function ReceiptPrinter({
           <div className="flex justify-between"><span>Date:</span><span>{txDate.toLocaleDateString()}</span></div>
           <div className="flex justify-between"><span>Time:</span><span>{txDate.toLocaleTimeString()}</span></div>
           <div className="flex justify-between"><span>Cashier:</span><span className="text-white">{cashierDisplay}</span></div>
-          <div className="flex justify-between"><span>Terminal:</span><span>{transaction.station?.toUpperCase() || transaction.terminal_name || 'POS'}</span></div>
+          <div className="flex justify-between"><span>Terminal:</span><span>{transaction.station?.toUpperCase() || transaction.terminal_name || 'Register'}</span></div>
         </div>
 
         <div className="border-t border-dashed border-gray-700 pt-2 mb-2">

@@ -409,7 +409,7 @@ const validTabs = ["create", "preview", "customize", "hotzones", "stego", "secur
 | QRThreatLog | incident_id, attack_type, severity | None | ✅ |
 | QrScanEvent | qrAssetId, scannedAt, deviceHint | None | ✅ |
 
-### POS Entities
+### Register Entities
 
 | Entity | Key Fields | RLS | Status |
 |--------|------------|-----|--------|
@@ -507,7 +507,7 @@ const validTabs = ["create", "preview", "customize", "hotzones", "stego", "secur
 9. ✅ Verified paywall guards on premium pages
 10. ✅ Confirmed QR Studio tab routing
 11. ✅ Reviewed qrRedirect.js function logic
-12. ✅ Verified entity schemas for QR/POS/Media
+12. ✅ Verified entity schemas for QR/Register/Media
 
 ---
 

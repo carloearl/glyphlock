@@ -270,12 +270,12 @@ export const SEO_DATA = {
   // ─────────────────────────── NUPS / FINANCIAL ───────────────────────────
   "NUPSLanding": {
     title: "NUPS | Nexus Unified Portal System for Venue Operations",
-    description: "NUPS: venue operations software for check-in, floor status, VIP contracts, POS, and nightly settlement.",
+    description: "NUPS: venue operations software for check-in, floor status, VIP contracts, Register, and nightly settlement.",
     keywords: ["NUPS", "Nexus Unified Portal System", "venue operations software", "guest check-in", "identity verification workflow", "digital contracts", "venue ledger", "reconciliation", "payout records"],
     h1: "NUPS Connected Venue Operations",
     url: "/NUPSLanding",
     ogTitle: "NUPS | Nexus Unified Portal System for Venue Operations",
-    ogDescription: "NUPS: venue operations software for check-in, floor status, VIP contracts, POS, and nightly settlement.",
+    ogDescription: "NUPS: venue operations software for check-in, floor status, VIP contracts, Register, and nightly settlement.",
     schemaType: "SoftwareApplication",
     priority: 0.9,
     changefreq: "weekly",

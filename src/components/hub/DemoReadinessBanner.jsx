@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
  *
  * Built specifically for Vinnie's tonight walkthrough so he can see
  * at a glance:
- *   • Open POS batch exists
+ *   • Open Register batch exists
  *   • Settlements posting cash + card only
  *   • Driver disbursements separate from revenue
  *   • GlyphBucks liability tracked (issued vs redeemed)
@@ -57,7 +57,7 @@ export default function DemoReadinessBanner() {
 
   const checks = [
     {
-      label: "POS Batch",
+      label: "Register Batch",
       ok: !!openBatch,
       detail: openBatch ? `Active · ${(openBatch.batch_id || "").slice(-6).toUpperCase()}` : "No open batch",
       tone: "emerald",

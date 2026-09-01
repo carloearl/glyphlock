@@ -13,7 +13,7 @@ GlyphLock application
     ├── Identity & onboarding
     ├── Front door / check-in
     ├── Staff & RBAC
-    ├── POS / batches / Z reports
+    ├── Register / batches / Z reports
     ├── VIP / contracts
     ├── GlyphBucks liability system
     ├── Drivers / payouts
@@ -174,7 +174,7 @@ Current production creation paths resolve or create `GuestProfile` first and do 
 
 Frontend role policy: `src/config/roles.js`.
 
-Key permission groups include POS, VIP rooms, Z reports, batch management, financial overview, staff/entertainer management, DJ app, discounts, voids, audit, inventory, marketing, payroll, and RBAC.
+Key permission groups include Register, VIP rooms, Z reports, batch management, financial overview, staff/entertainer management, DJ app, discounts, voids, audit, inventory, marketing, payroll, and RBAC.
 
 Persistent role models are distributed among:
 

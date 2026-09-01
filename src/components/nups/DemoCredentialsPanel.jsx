@@ -9,7 +9,7 @@ export default function DemoCredentialsPanel() {
 
   const demoAccounts = [
     { username: "demo_manager", pin: "1111", role: "VENUE_MANAGER", tier: "Manager (Owner View)" },
-    { username: "demo_bartender", pin: "2222", role: "BARTENDER", tier: "POS Staff" },
+    { username: "demo_bartender", pin: "2222", role: "BARTENDER", tier: "Register Staff" },
     { username: "demo_door", pin: "3333", role: "SECURITY", tier: "Door / Security" },
     { username: "demo_hostess", pin: "4444", role: "FLOOR_HOST", tier: "Hostess / VIP" },
     { username: "demo_entertainer", pin: "5555", role: "PERFORMER", tier: "Entertainer" },

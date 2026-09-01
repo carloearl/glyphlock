@@ -1309,7 +1309,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
              onClick={() => setShowManagerOverride(true)}
              className="w-full rounded-xl text-xs font-bold text-gray-400 border border-gray-700 hover:border-gray-600 py-2 flex items-center justify-center gap-1 transition-all mt-2"
            >
-             <RotateCw className="w-3.5 h-3.5" /> Refresh POS (Manager)
+             <RotateCw className="w-3.5 h-3.5" /> Refresh Register (Manager)
            </button>
           )}
           </div>
@@ -1382,7 +1382,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
               <button onClick={handleManagerRefresh}
                 className="flex-1 h-10 rounded-xl text-sm font-black text-white"
                 style={{ background: 'linear-gradient(135deg, #3b82f6, #1e40af)' }}>
-                Clear POS
+                Clear Register
               </button>
             </div>
 
@@ -1400,7 +1400,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
                   style={{ background: 'linear-gradient(135deg, #dc2626, #991b1b)', boxShadow: '0 0 20px rgba(239,68,68,0.35)' }}
                 >
                   <Lock className="w-4 h-4" />
-                  Admin Override — Clear POS
+                  Admin Override — Clear Register
                 </button>
                 <p className="text-[10px] text-red-400/80 text-center">
                   Signed in as {user?.full_name || user?.email} · session-only

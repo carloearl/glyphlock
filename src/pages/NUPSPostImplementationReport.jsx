@@ -114,8 +114,8 @@ const STEPS = [
     items: [
       "Fully isolated — zero real entity reads or writes",
       "Mock users, managers, entertainers, shifts, transactions, contracts, payroll",
-      "Demonstrates: POS, Clock-In, Entertainer, Contracts, Payroll",
-      "Interactive: demo POS cart completes sales against mock data",
+      "Demonstrates: Register, Clock-In, Entertainer, Contracts, Payroll",
+      "Interactive: demo Register cart completes sales against mock data",
       "Accessible from Gateway without authentication",
     ]
   },

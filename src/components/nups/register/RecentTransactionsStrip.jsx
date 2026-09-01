@@ -68,7 +68,7 @@ export default function RecentTransactionsStrip({ onViewAll }) {
                 <div className="font-mono text-slate-300 truncate">{transaction.transaction_id || transaction.id}</div>
                 <div className="mt-0.5 flex gap-2 text-[10px] text-slate-500">
                   <span>{transaction.payment_method || "—"}</span>
-                  <span className="uppercase">{transaction.station || "POS"}</span>
+                  <span className="uppercase">{transaction.station || "Register"}</span>
                   <span>
                     {transaction.created_date
                       ? new Date(transaction.created_date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })

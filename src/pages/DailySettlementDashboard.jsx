@@ -433,7 +433,7 @@ export default function DailySettlementDashboard() {
                 <span className="text-sm text-amber-300">Outstanding (PENDING) · {metrics.pending_count}</span>
                 <span className="font-bold text-amber-300">${metrics.driver_payouts_outstanding.toFixed(2)}</span>
               </div>
-              <p className="text-[10px] text-slate-500 pt-1">Only PROCESSED rolls into settlement total. Toggle status in Front Door POS.</p>
+              <p className="text-[10px] text-slate-500 pt-1">Only PROCESSED rolls into settlement total. Toggle status in Front Door Register.</p>
             </CardContent>
           </Card>
 

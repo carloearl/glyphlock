@@ -8,7 +8,7 @@ import { useActiveVenue } from "@/hooks/useActiveVenue";
 
 /**
  * Bar register uses the same transaction, batch, receipt, tender, audit, and
- * mode-isolation engine as the door register. Keeping one POS engine prevents
+ * mode-isolation engine as the door register. Keeping one Register engine prevents
  * bar sales from bypassing the ledger gateway or inventing card approvals.
  */
 export default function POSBarRegister({ user }) {
@@ -36,7 +36,7 @@ export default function POSBarRegister({ user }) {
                 </span>
               </div>
               <p className="mt-1 text-xs leading-relaxed text-slate-400">
-                One POS engine handles bar products, tender confirmation, batch totals, receipts, audit events, and live/non-live separation.
+                One Register engine handles bar products, tender confirmation, batch totals, receipts, audit events, and live/non-live separation.
               </p>
             </div>
           </div>

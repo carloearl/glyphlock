@@ -304,7 +304,7 @@ export default function TipBreakdown({ transactions = [] }) {
       <div style="flex:1;"><div style="font-size:10px;font-weight:bold;margin-bottom:4px;">MANAGER SIGNATURE</div><div style="border-bottom:1px solid #000;height:28px;"></div></div>
       <div style="flex:1;"><div style="font-size:10px;font-weight:bold;margin-bottom:4px;">DATE / TIME</div><div style="border-bottom:1px solid #000;height:28px;"></div></div>
     </div>
-    <div style="text-align:center;font-size:9px;color:#888;margin-top:16px;">N.U.P.S. POS v2.0 | Printed: ${new Date().toLocaleString()}</div>
+    <div style="text-align:center;font-size:9px;color:#888;margin-top:16px;">N.U.P.S. Register v2.0 | Printed: ${new Date().toLocaleString()}</div>
     </body></html>`;
     const w = window.open('', '_blank', 'width=800,height=900');
     w.document.write(html); w.document.close();

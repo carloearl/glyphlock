@@ -14,7 +14,7 @@ const flowSteps = [
   { id: "2", title: "Contracts", text: "Digital agreement routing, acceptance, and storage." },
   { id: "3", title: "Shift Check-In", text: "Start-of-shift flow with venue-aware access controls." },
   { id: "4", title: "Currency", text: "Internal currency issuance, redemption, and audit linkage." },
-  { id: "5", title: "POS", text: "Sales execution across stations with controlled reconciliation." },
+  { id: "5", title: "Register", text: "Sales execution across stations with controlled reconciliation." },
   { id: "6", title: "Reporting", text: "Operational analytics, summaries, and compliance snapshots." },
   { id: "7", title: "Reconcile", text: "Settlement validation and financial closeout workflows." },
   { id: "8", title: "Archive", text: "Permanent audit trail retention and historical retrieval." },
@@ -207,7 +207,7 @@ export default function NUPSUnifiedOverview() {
             <CardContent>
               <ul className="space-y-3 text-sm leading-6 text-slate-300">
                 <li>• Multi-station and multi-venue deployment readiness</li>
-                <li>• Integrated contracts, POS, currency, and reconciliation</li>
+                <li>• Integrated contracts, Register, currency, and reconciliation</li>
                 <li>• Audit trail and archival support for historical review</li>
                 <li>• Role-based permissions and owner-facing dashboard controls</li>
                 <li>• Operational reporting aligned to compliance infrastructure</li>

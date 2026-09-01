@@ -221,9 +221,9 @@ export default function NUPSMISReport() {
         <section>
           <SectionHeader title="Executive Summary" color="text-cyan-400" />
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            <StatCard icon={DollarSign} label="POS Revenue" value={`$${totalRevenue.toFixed(0)}`} sub={qLabel} color="green" />
+            <StatCard icon={DollarSign} label="Register Revenue" value={`$${totalRevenue.toFixed(0)}`} sub={qLabel} color="green" />
             <StatCard icon={Coins} label="GlyphBucks Liability" value={`$${totalDDRevenue.toFixed(0)}`} sub="Face value — liability, not revenue" color="amber" />
-            <StatCard icon={ShoppingCart} label="POS Transactions" value={qTransactions.length} sub={`Avg $${avgTransaction.toFixed(0)}`} color="purple" />
+            <StatCard icon={ShoppingCart} label="Register Transactions" value={qTransactions.length} sub={`Avg $${avgTransaction.toFixed(0)}`} color="purple" />
             <StatCard icon={Clock} label="Staff Hours" value={totalShiftHours.toFixed(0)} sub={`${qShifts.length} shifts`} color="blue" />
             <StatCard icon={DoorOpen} label="VIP Rooms" value={vipRooms.length} sub="configured" color="green" />
           </div>
@@ -296,7 +296,7 @@ export default function NUPSMISReport() {
                     <td className="p-3 text-right text-gray-400">{totalRevenue > 0 ? ((qTransactions.filter(t => ['Credit Card','Debit Card','Digital Wallet','Gift Card','Tab'].includes(t.payment_method)).reduce((s,t) => s+((t.total||0)-(t.tip||0)),0) / totalRevenue) * 100).toFixed(1) : '0'}%</td>
                   </tr>
                   <tr className="bg-gray-800/50 font-bold">
-                    <td className="p-3 text-white">POS Total</td>
+                    <td className="p-3 text-white">Register Total</td>
                     <td className="p-3 text-right text-green-400 font-mono">${totalRevenue.toFixed(2)}</td>
                     <td className="p-3 text-right text-gray-400">{qTransactions.length}</td>
                     <td className="p-3 text-right text-green-400">100%</td>
@@ -321,7 +321,7 @@ export default function NUPSMISReport() {
         <section>
           <SectionHeader title="GlyphBucks Liability — not venue revenue" color="text-amber-400" />
           <div className="bg-amber-900/20 border border-amber-500/30 rounded-lg p-3 mb-4 text-xs text-amber-400">
-            ⚠️ GlyphBucks are a stored-value liability instrument. These figures are never counted as venue revenue and are never combined with POS sales totals.
+            ⚠️ GlyphBucks are a stored-value liability instrument. These figures are never counted as venue revenue and are never combined with Register sales totals.
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             <StatCard icon={Coins} label="GB Face Value Issued" value={`$${gbLiabilityFaceValue.toFixed(0)}`} color="amber" />

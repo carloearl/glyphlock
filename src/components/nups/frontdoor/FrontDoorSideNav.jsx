@@ -38,7 +38,7 @@ const STEPS = [
     label: "Ring Up",
     hint: "Cover, drinks, payouts",
     color: "emerald",
-    // In-place tab — POS mounts inside FrontDoor, no new route/tab.
+    // In-place tab — Register mounts inside FrontDoor, no new route/tab.
   },
   {
     id: "dancers",

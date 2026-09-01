@@ -220,7 +220,7 @@ export async function seedDemoVenue(onLog) {
     is_demo: true,
   }, "POSBatch (open + door-confirmed)");
 
-  // POS Transactions — subtotal added so writeEntity financial validation
+  // Register Transactions — subtotal added so writeEntity financial validation
   // (total === subtotal + tax + tip) passes.
   const txns = [
     { transaction_id: ID("TXN"), subtotal: 120, total: 120, amount: 120, cash_sales: 120, card_sales: 0,   payment_method: "Cash",        cashier: "Demo Door Girl", status: "completed", items: [{ name: "VIP Entrance", price: 30, quantity: 4 }], venue_id: DEMO_VENUE_ID, is_demo: true },

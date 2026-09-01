@@ -154,7 +154,7 @@ export default function NUPSAudit() {
           <Row name="NUPSUserManager — tiered display" status="PASS" notes="4 tiers: Platform Admin, Executive/Manager, Staff, Entertainer. Color-coded per tier." />
           <Row name="PIN eye-reveal admin gate" status="PASS" notes="PIN display and reveal button only shown when isAdmin = true (role=admin or _highestRole=PLATFORM_ADMIN)." />
           <Row name="Inline employee editing" status="PASS" notes="Admin can edit full_name, PIN, and role inline per row. Saves via updateMutation." />
-          <Row name="Quick Add Product from POS" status="PASS" notes="QuickChargePanel has inline Quick Add Product form — saves directly to POSProduct catalog without leaving the register." />
+          <Row name="Quick Add Product from Register" status="PASS" notes="QuickChargePanel has inline Quick Add Product form — saves directly to POSProduct catalog without leaving the register." />
           <Row name="RBAC — getUserPermissions backend" status="PASS" notes="getUserPermissions function returns venue_access array, highest_role, and is_platform_admin flag." />
           <Row name="RBAC — deny by default" status="PASS" notes="rbacCheck returns 403 if no matching UserRoleAssignment found. No silent pass-through." />
           <Row name="Role assignment audit trail" status="PASS" notes="manageRoleAssignment function logs AUDIT_EVENT on assign/revoke. deactivated_by + deactivated_at recorded." />
@@ -164,7 +164,7 @@ export default function NUPSAudit() {
         <Section title="Known Issues — Open Tracker" color="red">
           <Row name="Tip signatures not persisted" status="FIX" notes="TipPayout entity created. Save Record button persists signed payout with employee breakdown, split config, and cashier summary." />
           <Row name="alert() calls in EntertainerCheckIn" status="FIX" notes="Replaced with sonner toast notifications." />
-          <Row name="No rate limiting on backend" status="FIX" notes="nupsRateLimiter deployed — sliding window per user+action. 20/min POS, 10/min contracts, 30/min default." />
+          <Row name="No rate limiting on backend" status="FIX" notes="nupsRateLimiter deployed — sliding window per user+action. 20/min Register, 10/min contracts, 30/min default." />
           <Row name="card_last_six plaintext" status="WARN" notes="DreamPalaceOrder stores last 6 digits of card as plaintext. Consider field-level encryption or masking before DB write." severity="MEDIUM" />
           <Row name="Lazy loading for owner tabs" status="PLAN" notes="24 components loaded eagerly. React.lazy() would reduce initial bundle for NUPSOwner." severity="LOW" />
           <Row name="Tip pool — custom per-person override" status="PLAN" notes="Allow manager to enter partial-shift adjustments per employee before printing tip sheet." severity="LOW" />
@@ -176,10 +176,10 @@ export default function NUPSAudit() {
         {/* Cross-Device Matrix */}
         <Section title="Phase 8 — Cross-Device Validation Matrix" color="cyan">
           <Row name="iPhone Safari 375×667" status="PASS" notes="Tabs wrap correctly in 4-col grid. Touch targets ≥44px. No horizontal scroll." />
-          <Row name="iPhone Safari 390×844" status="PASS" notes="Stats grid 2-col. POS products 2-col. Contract form stacks properly." />
+          <Row name="iPhone Safari 390×844" status="PASS" notes="Stats grid 2-col. Register products 2-col. Contract form stacks properly." />
           <Row name="iPad Safari 768×1024" status="PASS" notes="3-col grids for rooms/guests/staff. Tabs show 6+ per row." />
           <Row name="Android Chrome 360×800" status="PASS" notes="PIN pad renders correctly. Time clock display fits. Batch stats 2-col." />
-          <Row name="Desktop Chrome 1366×768" status="PASS" notes="Full 6-col stats. POS 5-col layout. All tabs visible in single row." />
+          <Row name="Desktop Chrome 1366×768" status="PASS" notes="Full 6-col stats. Register 5-col layout. All tabs visible in single row." />
           <Row name="Desktop Edge 1366×768" status="PASS" notes="Identical to Chrome. No Edge-specific issues." />
           <Row name="Ultrawide 1920×1080" status="PASS" notes="Container max-width prevents over-stretch. Grids scale to 6-col max." />
         </Section>

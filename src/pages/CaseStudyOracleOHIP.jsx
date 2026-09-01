@@ -305,7 +305,7 @@ export default function CaseStudyOracleOHIP() {
               <p className="leading-7 text-slate-300">
                 This milestone verifies transport and authorization in Oracle’s Partner Sandbox. It
                 does not claim a production hotel rollout, reservation synchronization, payment
-                processing, guest-profile migration or Simphony POS certification.
+                processing, guest-profile migration or Simphony Register certification.
               </p>
               <div className="mt-6 rounded-xl border border-amber-300/20 bg-black/20 p-5">
                 <p className="text-sm font-semibold text-amber-200">What changed during the test</p>

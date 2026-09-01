@@ -20,7 +20,7 @@ const PATHS = [
   {
     icon: Plug,
     title: "Integrators and hospitality vendors",
-    body: "Property-management, POS, and hospitality-platform integrations are partner-dependent by design. Documented paths exist and are open to co-development.",
+    body: "Property-management, Register, and hospitality-platform integrations are partner-dependent by design. Documented paths exist and are open to co-development.",
     cta: "Partner with us",
     to: "/partners"
   },

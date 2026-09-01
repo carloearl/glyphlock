@@ -18,13 +18,13 @@ const CYAN = "#00F0FF";
 
 const WORKFLOWS = [
   [Fingerprint, "Verify", "Identity, age, account, venue, role, and consent controls"],
-  [ClipboardCheck, "Operate", "POS, contracts, GlyphBucks, payouts, staff workflows, reporting, and audit"],
+  [ClipboardCheck, "Operate", "Register, contracts, GlyphBucks, payouts, staff workflows, reporting, and audit"],
   [WalletCards, "Process / Integrate", "Use Stripe natively through GlyphLock/NUPS or connect an existing processor to the same transaction model"],
   [ShieldCheck, "Defend", "Linked receipts, approvals, identity, contracts, audit history, and dispute evidence"],
 ];
 
 const CAPABILITY_BANDS = [
-  { label: "CORE OPERATIONS", value: "Identity · POS · contracts · GlyphBucks · payouts · audit · reporting", tone: "#10b981" },
+  { label: "CORE OPERATIONS", value: "Identity · Register · contracts · GlyphBucks · payouts · audit · reporting", tone: "#10b981" },
   { label: "PAYMENT CONTROL", value: "Stripe-native processing · external-processor overlay · adapter architecture", tone: "#00d4ff" },
   { label: "PLATFORM EXTENSIONS", value: "DJ · messaging · marketing · offline-assisted continuity · dispute automation", tone: "#fbbf24" },
 ];
@@ -113,7 +113,7 @@ export default function CommandDeckHero({ onEnter }) {
             <div className="cd-eyebrow"><Building2 size={15} aria-hidden="true" /> Venue operating system + transaction evidence infrastructure</div>
             <h2 id="command-deck-title">Run the venue.<span>Control the transaction record.</span></h2>
             <p>
-              NUPS consolidates <strong>identity, access, POS, contracts, GlyphBucks, payouts, audit, reporting, messaging, DJ and entertainer workflows, and dispute evidence</strong> around one transaction model. When GlyphLock/NUPS controls the payment path, <strong>Stripe is the native processing rail</strong>. When a venue keeps its merchant account or terminal, NUPS can bind that processor&apos;s approval, reference, receipt, contract, identity, and audit evidence into the same operating record.
+              NUPS consolidates <strong>identity, access, Register, contracts, GlyphBucks, payouts, audit, reporting, messaging, DJ and entertainer workflows, and dispute evidence</strong> around one transaction model. When GlyphLock/NUPS controls the payment path, <strong>Stripe is the native processing rail</strong>. When a venue keeps its merchant account or terminal, NUPS can bind that processor&apos;s approval, reference, receipt, contract, identity, and audit evidence into the same operating record.
             </p>
             <div className="cd-actions">
               <button className="cd-btn primary" type="button" onClick={onEnter}>Open NUPS Gateway <ArrowRight size={16} aria-hidden="true" /></button>

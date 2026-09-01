@@ -78,8 +78,8 @@ export default function DriverDropOffTracker({ user }) {
     refetchInterval: 30000,
   });
 
-  // Active POS batch for this venue — driver payouts ride the SAME open
-  // batch as the door register so end-of-night Z-report sees POS sales AND
+  // Active Register batch for this venue — driver payouts ride the SAME open
+  // batch as the door register so end-of-night Z-report sees Register sales AND
   // driver disbursements under one transaction umbrella. We stamp every
   // session + settle with batch_id so the reconciliation joins cleanly.
   const { data: activeBatch } = useQuery({

@@ -77,7 +77,7 @@ export default function VIPReceiptPrinter({ room, guestName, contractNumber, dre
         <div>All sales final per signed contract.</div>
         <div>Disputes: ${BIZ_PHONE}</div>
         <div style="margin-top:4px;font-size:7px;color:#888;">${BIZ_LEGAL}<br/>${BIZ_ADDRESS}<br/>
-        Printed: ${now.toLocaleString()} | N.U.P.S. POS v2.0 — Secured by GlyphLock</div>
+        Printed: ${now.toLocaleString()} | N.U.P.S. Register v2.0 — Secured by GlyphLock</div>
       </div>
     </body></html>`;
     const w = window.open('','_blank','width=350,height=900');

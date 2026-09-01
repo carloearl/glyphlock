@@ -8,7 +8,7 @@ import NoBatchBanner from "@/components/nups/register/NoBatchBanner";
 
 /**
  * BarRegister — the BARTENDER's dedicated station (owner directive
- * 2026-07-17 rev 3). Bar POS only — no door register, no cross-role tabs.
+ * 2026-07-17 rev 3). Bar Register only — no door register, no cross-role tabs.
  * Front Door keeps the door register; this page is strictly the bar.
  */
 export default function BarRegister() {
@@ -36,7 +36,7 @@ export default function BarRegister() {
   return (
     <NUPSAppShell
       title="Bar Register"
-      subtitle={`${operator?.full_name || user?.full_name || "Bartender"} · Bar POS · Live ring-up`}
+      subtitle={`${operator?.full_name || user?.full_name || "Bartender"} · Bar Register · Live ring-up`}
       role="BARTENDER"
     >
       <div className="max-w-[1600px] mx-auto space-y-4">

@@ -16,7 +16,7 @@ export default function AuditPanel() {
     toast.info("Running AI-powered system audit...");
     try {
       const result = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are a senior full-stack auditor for the GlyphLock platform — a nightclub/venue management system with POS, VIP contracts, club currency, QR codes, AI chatbot, image lab, blockchain verification, and security tools.
+        prompt: `You are a senior full-stack auditor for the GlyphLock platform — a nightclub/venue management system with Register, VIP contracts, club currency, QR codes, AI chatbot, image lab, blockchain verification, and security tools.
 
 Perform a comprehensive audit and return a JSON object with realistic, honest scores and findings. The platform is built on Base44 (React + Tailwind + backend-as-a-service).
 

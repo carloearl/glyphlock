@@ -29,7 +29,7 @@ const MANAGER_ROLES = ['admin', 'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER'
 
 function money(n) { return `$${Number(n || 0).toFixed(2)}`; }
 
-// Pull the POS Batch reference out of the payout's notes blob.
+// Pull the Register Batch reference out of the payout's notes blob.
 // DriverDropOffTracker stamps "Batch ABC123" (or "batch_id=...") on disbursement.
 function extractBatchRef(payout) {
   const src = `${payout?.notes || ''} ${payout?.payment_reference || ''}`;
@@ -121,7 +121,7 @@ function PayoutRow({ payout, logs, currentUser, onUpdated, onDelete, deleting, e
                 <div className="text-slate-400 mt-1">{payout.processed_at ? new Date(payout.processed_at).toLocaleString() : '—'}</div>
               </div>
               <div className="rounded-lg border border-cyan-500/30 bg-cyan-500/5 p-3">
-                <div className="text-[10px] text-cyan-400 uppercase tracking-wide font-bold mb-1">③ POS Batch Link</div>
+                <div className="text-[10px] text-cyan-400 uppercase tracking-wide font-bold mb-1">③ Register Batch Link</div>
                 <div className="text-white font-mono">{batchRef || 'Unlinked'}</div>
                 <div className="text-slate-400 mt-1">{batchRef ? 'Reconciles with door register batch' : 'Pre-batch-linkage record'}</div>
               </div>
@@ -467,7 +467,7 @@ export default function DriverPayoutHistory({ embedded = false }) {
                   <th className="text-right p-3">Payout</th>
                   <th className="text-right p-3" title="Cumulative disbursed across rows in this filter, oldest → newest">Running</th>
                   <th className="text-left p-3" title="Handshake timestamp: Doorman confirms headcount → Door Girl disburses cash">Paid</th>
-                  <th className="text-left p-3" title="POS Batch the payout is reconciled against">Batch</th>
+                  <th className="text-left p-3" title="Register Batch the payout is reconciled against">Batch</th>
                   <th className="text-left p-3">Status</th>
                   <th className="text-left p-3">Audit</th>
                   <th className="w-8 p-3"></th>

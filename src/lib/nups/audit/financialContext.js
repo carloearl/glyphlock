@@ -2,7 +2,7 @@
  * BPAA-NUPS-AUDIT-001 §3 — financial_context builders.
  *
  * Pure functions that produce a §3-compliant financial_context payload from
- * the canonical fields a POS sale already carries. Centralized so call sites
+ * the canonical fields a Register sale already carries. Centralized so call sites
  * never inline the math and §3.1 (total_sales_impact === cash_portion +
  * card_portion) is always satisfied by construction.
  *
@@ -80,7 +80,7 @@ export function buildFinancialContext({
 
 /**
  * Map a POSTransaction.payment_method + tendered amounts → §3 context.
- * Convenience wrapper for the door POS finalize site.
+ * Convenience wrapper for the door Register finalize site.
  */
 export function fromPOSTransaction(tx) {
   const method = tx?.payment_method || 'Cash';

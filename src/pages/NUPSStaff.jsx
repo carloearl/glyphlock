@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
  * NUPSStaff — LEGACY REDIRECT
  * ─────────────────────────────────
  * This surface was the original staff portal. Every operator function
- * (POS, drivers, entertainer check-in, time clock, transactions) has
+ * (Register, drivers, entertainer check-in, time clock, transactions) has
  * been merged into RegisterConsole under NUPSAppShell. Anyone landing
  * here is forwarded to the unified Register page so there is exactly
  * one operator front door across the system.

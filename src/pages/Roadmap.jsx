@@ -29,7 +29,7 @@ const lanes = [
     accent: '#3b82f6',
     summary: 'The ecosystem expanded into venue operations, reporting, security visibility and integration work.',
     items: [
-      ['NUPS command surfaces, POS and operational workflows', 'delivered'],
+      ['NUPS command surfaces, Register and operational workflows', 'delivered'],
       ['Contracts, shift records, payout and settlement workflows', 'delivered'],
       ['Security Operations and audit visibility', 'delivered'],
       ['Oracle OHIP authenticated integration work', 'delivered'],

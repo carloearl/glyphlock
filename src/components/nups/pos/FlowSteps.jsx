@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 
 /**
  * FlowSteps — small horizontal "step 1 / 2 / 3" indicator used at the top
- * of POS-style screens (door register, driver payout handshake) so a new
+ * of Register-style screens (door register, driver payout handshake) so a new
  * operator can see the standard flow at a glance.
  *
  * Pure presentational. No business logic.

@@ -153,7 +153,7 @@ export default function ManagerConsole() {
       });
     },
   });
-  // Tonight's POS batch — opened HERE (manager-only), then confirmed at the
+  // Tonight's Register batch — opened HERE (manager-only), then confirmed at the
   // Front Door register before the first transaction of the shift.
   const { data: openBatches = [] } = useQuery({
     queryKey: ["active-pos-batch", venueId, ...modeQueryKey],

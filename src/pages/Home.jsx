@@ -47,9 +47,9 @@ const platformModules = [
     title: 'NUPS',
     status: 'FLAGSHIP · CONTROLLED EVALUATION',
     layer: 'OPERATE',
-    evidence: 'Working venue workflows, contracts, POS, reporting and integration surfaces.',
+    evidence: 'Working venue workflows, contracts, Register, reporting and integration surfaces.',
     cta: 'ENTER NUPS',
-    text: 'Venue operations across front door, POS, contracts, staff, payouts, reporting and audit trails.',
+    text: 'Venue operations across front door, Register, contracts, staff, payouts, reporting and audit trails.',
     link: 'NUPSLanding',
     accent: '#22d3ee',
   },
@@ -154,7 +154,7 @@ const capabilityCards = [
   {
     icon: Gauge,
     title: 'OPERATIONS SOFTWARE',
-    text: 'POS, contracts, scheduling, payouts, roles, reporting, audit logs and documented operational controls.',
+    text: 'Register, contracts, scheduling, payouts, roles, reporting, audit logs and documented operational controls.',
     accent: '#d946ef',
   },
 ];

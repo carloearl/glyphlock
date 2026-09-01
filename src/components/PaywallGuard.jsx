@@ -184,7 +184,7 @@ export default function PaywallGuard({ serviceName, children, requirePlan = "pro
                       </li>
                       <li className="flex items-center gap-2">
                         <Zap className="w-4 h-4 text-purple-400" />
-                        N.U.P.S. POS
+                        N.U.P.S. Register
                       </li>
                       <li className="flex items-center gap-2">
                         <Zap className="w-4 h-4 text-purple-400" />

@@ -23,7 +23,7 @@ const COMMAND_CENTER = [
 const LIVE_STATIONS = [
   { label: "Front Door", pov: "Door Girl / Doorman view", icon: DoorOpen, to: "/FrontDoor", color: "border-cyan-500/40", iconColor: "text-cyan-400" },
   { label: "VIP Sale", pov: "Hostess / Floor Host view", icon: Crown, to: "/VIPSale", color: "border-pink-500/40", iconColor: "text-pink-400" },
-  { label: "Register", pov: "Bartender / POS view", icon: ShoppingCart, to: "/Register", color: "border-emerald-500/40", iconColor: "text-emerald-400" },
+  { label: "Register", pov: "Bartender / Register view", icon: ShoppingCart, to: "/Register", color: "border-emerald-500/40", iconColor: "text-emerald-400" },
   { label: "DJ Booth", pov: "DJ view — Auto-DJ console", icon: Music, to: "/DJHome", color: "border-violet-500/40", iconColor: "text-violet-400" },
   { label: "Entertainer Check-In", pov: "Entertainer view", icon: Mic2, to: "/EntertainerCheckIn", color: "border-rose-500/40", iconColor: "text-rose-400" },
 ];

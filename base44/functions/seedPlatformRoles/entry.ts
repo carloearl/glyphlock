@@ -9,8 +9,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
  * Roles:
  *   PLATFORM_ADMIN  — Full unrestricted access (cross-venue)
  *   VENUE_OWNER     — Full venue access + settings + staff management
- *   VENUE_MANAGER   — Manage POS, batches, reports, staff (no system settings)
- *   FLOOR_HOST      — POS + VIP + guest tracking + time clock
+ *   VENUE_MANAGER   — Manage Register, batches, reports, staff (no system settings)
+ *   FLOOR_HOST      — Register + VIP + guest tracking + time clock
  *   BARTENDER       — venue register + time clock only
  *   SECURITY        — Guest tracking + time clock only
  *   DJ              — Time clock only
@@ -37,7 +37,7 @@ const CANONICAL_ROLES = [
     session_timeout_minutes: 480,
     can_escalate_to: [],
     allowed_actions: [
-      // POS
+      // Register
       'pos.transact', 'pos.void', 'pos.refund', 'pos.discount',
       // Batch
       'batch.open', 'batch.close', 'batch.view',
@@ -71,7 +71,7 @@ const CANONICAL_ROLES = [
   {
     role_key: 'VENUE_MANAGER',
     display_name: 'Venue Manager',
-    description: 'Operational control: POS, batches, reports, staff oversight. No system settings.',
+    description: 'Operational control: Register, batches, reports, staff oversight. No system settings.',
     is_cross_venue: false,
     session_timeout_minutes: 480,
     can_escalate_to: [],

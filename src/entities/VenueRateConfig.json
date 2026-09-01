@@ -14,7 +14,7 @@
     "cover_charge": {
       "type": "number",
       "default": 20,
-      "description": "Standard cover charge in USD. Read by door POS Cover — Cash / Cover — Card buttons."
+      "description": "Standard cover charge in USD. Read by door Register Cover — Cash / Cover — Card buttons."
     },
     "reentry_charge": {
       "type": "number",

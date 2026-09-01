@@ -10,7 +10,7 @@ export default function ClubCurrencyReceiptEngine({ transaction, batch, onPrint 
   const receiptRef = React.useRef();
   const activeVenue = useActiveVenue();
 
-  const venueName = activeVenue?.name || 'N.U.P.S. POS';
+  const venueName = activeVenue?.name || 'N.U.P.S. Register';
   const venueAddress = [activeVenue?.address, activeVenue?.city, activeVenue?.state].filter(Boolean).join(', ') || '';
   const venuePhone = activeVenue?.phone || '';
   const currencyName = activeVenue?.currency_name || 'Club Currency';
@@ -75,7 +75,7 @@ export default function ClubCurrencyReceiptEngine({ transaction, batch, onPrint 
             </div>
             <div className="row">
               <span>Terminal:</span>
-              <span>{batch?.station ? batch.station.toUpperCase() + ' REGISTER' : 'POS'}</span>
+              <span>{batch?.station ? batch.station.toUpperCase() + ' REGISTER' : 'Register'}</span>
             </div>
             <div className="row">
               <span>Cashier:</span>

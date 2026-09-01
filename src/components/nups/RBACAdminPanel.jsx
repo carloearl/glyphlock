@@ -209,7 +209,7 @@ export default function RBACAdminPanel() {
             <thead>
               <tr className="border-b border-white/10">
                 <th className="text-left p-3 text-gray-500 font-medium">Role</th>
-                <th className="text-center p-2 text-gray-500">POS</th>
+                <th className="text-center p-2 text-gray-500">Register</th>
                 <th className="text-center p-2 text-gray-500">Batch</th>
                 <th className="text-center p-2 text-gray-500">Reports</th>
                 <th className="text-center p-2 text-gray-500">Staff Mgmt</th>

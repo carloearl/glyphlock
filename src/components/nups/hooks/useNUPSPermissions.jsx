@@ -24,7 +24,7 @@ const PermissionsContext = createContext(null);
 const OWNER_ROLES = ["PLATFORM_ADMIN", "VENUE_OWNER"];
 // Manager-tier roles
 const MANAGER_ROLES = [...OWNER_ROLES, "VENUE_MANAGER"];
-// Staff-tier roles (get limited POS access)
+// Staff-tier roles (get limited Register access)
 const STAFF_ROLES = ["BARTENDER", "DJ", "SECURITY", "KIOSK"];
 // Performer-tier
 const PERFORMER_ROLES = ["PERFORMER"];

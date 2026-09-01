@@ -98,7 +98,7 @@ function PayrollReport({ shifts, weekStart }) {
       <h1>N.U.P.S. — PAYROLL REPORT</h1>
       <div style="text-align:center;font-size:11px;">Week: ${format(weekStart,'MM/dd/yyyy')} – ${format(weekEnd,'MM/dd/yyyy')} &nbsp;|&nbsp; Total: ${totalHours.toFixed(1)}h &nbsp;|&nbsp; Employees: ${employees.length}</div>
       <table>${rows}</table>
-      <div style="margin-top:16px;text-align:center;font-size:10px;color:#666;">Printed: ${new Date().toLocaleString()} | N.U.P.S. POS — Secured by GlyphLock</div>
+      <div style="margin-top:16px;text-align:center;font-size:10px;color:#666;">Printed: ${new Date().toLocaleString()} | N.U.P.S. Register — Secured by GlyphLock</div>
     </body></html>`;
     const w = window.open('', '_blank', 'width=700,height=900');
     w.document.write(html);

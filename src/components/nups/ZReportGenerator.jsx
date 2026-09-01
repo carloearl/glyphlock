@@ -175,7 +175,7 @@ export default function ZReportGenerator({ user: userProp }) {
         .filter(t => t.items?.some(item => item.product_name?.includes('Drink')))
         .reduce((sum, t) => sum + (t.total || 0), 0);
 
-      // C-4 FIX: merchandiseRevenue = POS sales minus bar — VIP is tracked separately, not subtracted from totalSales
+      // C-4 FIX: merchandiseRevenue = Register sales minus bar — VIP is tracked separately, not subtracted from totalSales
               const merchandiseRevenue = totalSales - barRevenue;
 
       const productSalesMap = {};
@@ -326,7 +326,7 @@ export default function ZReportGenerator({ user: userProp }) {
           </style>
         </head>
         <body>
-          <h1>N.U.P.S. POS - Z-REPORT</h1>
+          <h1>N.U.P.S. Register - Z-REPORT</h1>
           <div class="section">
             <div class="row"><span>Report ID:</span><span>${report.report_id}</span></div>
             <div class="row"><span>Date:</span><span>${report.report_date}</span></div>
@@ -406,7 +406,7 @@ export default function ZReportGenerator({ user: userProp }) {
             <div style="flex:1;"><div style="font-size:10px;font-weight:bold;margin-bottom:4px;">MANAGER SIGNATURE</div><div style="border-bottom:1px solid #000;height:28px;"></div></div>
             <div style="flex:1;"><div style="font-size:10px;font-weight:bold;margin-bottom:4px;">DATE</div><div style="border-bottom:1px solid #000;height:28px;"></div></div>
           </div>
-          <div style="text-align:center;font-size:9px;color:#999;margin-top:10px;">N.U.P.S. POS — GlyphLock Financial LLC — ${new Date().toLocaleString()}</div>
+          <div style="text-align:center;font-size:9px;color:#999;margin-top:10px;">N.U.P.S. Register — GlyphLock Financial LLC — ${new Date().toLocaleString()}</div>
         </body>
       </html>
     `);

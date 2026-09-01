@@ -90,7 +90,7 @@ export function createContractRecord(overrides = {}) {
     dancerPayout: 0,
     housePortion: 0,
     txId: `TX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
-    posTerminalId: `POS-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+    posTerminalId: `Register-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
     status: ContractStatus.DRAFT,
     signatureData: null,
     thumbprintData: null,

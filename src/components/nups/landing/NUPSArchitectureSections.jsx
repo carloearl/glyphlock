@@ -12,7 +12,7 @@ export default function NUPSArchitectureSections() {
       k: "Edge · Client Layer",
       c: "#00d4ff",
       body:
-        "Raspberry Pi nodes and Samsung tablets are supported venue surfaces for identity capture, POS activity, hardware-assisted verification, and floor operations. Supported writes can queue locally when connectivity drops; some validation still requires the server.",
+        "Raspberry Pi nodes and Samsung tablets are supported venue surfaces for identity capture, Register activity, hardware-assisted verification, and floor operations. Supported writes can queue locally when connectivity drops; some validation still requires the server.",
       tag: "OPERATING LAYER · OFFLINE-ASSISTED",
     },
     {
@@ -41,7 +41,7 @@ export default function NUPSArchitectureSections() {
   const live = [
     "Multi-tenant platform + role-scoped access controls",
     "Identity capture workflows (ID · mag-stripe · QR)",
-    "POS + cash drawer reconciliation",
+    "Register + cash drawer reconciliation",
     "GlyphBucks issuance, redemption, ledger + QR verification",
     "Stripe API payment verification + webhook infrastructure",
     "Driver QR / payout infrastructure",

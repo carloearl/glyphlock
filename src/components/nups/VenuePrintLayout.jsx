@@ -23,7 +23,7 @@ export default function VenuePrintLayout({
 }) {
   const printRef = useRef(null);
 
-  const venueName = venue?.name || "N.U.P.S. POS";
+  const venueName = venue?.name || "N.U.P.S. Register";
   const venueAddress = [venue?.address, venue?.city, venue?.state].filter(Boolean).join(", ");
   const venuePhone = venue?.phone || "";
   const currencyName = venue?.currency_name || "GlyphBucks";

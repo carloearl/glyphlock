@@ -38,7 +38,7 @@ function DriverPayoutsInner() {
               <Truck className="w-5 h-5" /> Driver Payouts — Coupled to Active Batch
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              Every payout below is a money-OUT disbursement, reconciled against the POS Batch
+              Every payout below is a money-OUT disbursement, reconciled against the Register Batch
               it was issued under. Driver payouts are never deducted from <code>total_sales</code>.
             </p>
             {/* End-of-shift audit ledger — driver payouts + entertainer

@@ -44,7 +44,7 @@ export default function SpenderRow({ profile, onInspect }) {
               </div>
               <div>{profile.contractCount} contracts</div>
               <div>{profile.cardsUsed.length} cards</div>
-              <div>{profile.transactionCount} POS tx</div>
+              <div>{profile.transactionCount} Register tx</div>
             </div>
           </div>
           <Button size="sm" variant="outline" className="border-cyan-500/40 text-cyan-400">

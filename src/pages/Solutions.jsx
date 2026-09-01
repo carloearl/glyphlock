@@ -23,7 +23,7 @@ export default function Solutions() {
         "Real-time transaction monitoring",
         "Z-report generation and reconciliation"
       ],
-      cta: "Explore NUPS POS",
+      cta: "Explore NUPS Register",
       page: "NUPSLogin",
       color: "emerald"
     },

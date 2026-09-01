@@ -52,7 +52,7 @@ export default function ContractSearch() {
           <p>Entertainer: {chain.contract.entertainer_stage_name} ({chain.contract.entertainer_id})</p>
           <p>Room: {chain.contract.room_number} ({chain.contract.room_id})</p>
           <p>Payment: {chain.payment ? `${chain.payment.record_id} · ${chain.payment.status} · ${money(chain.payment.amount)}` : '—'}</p>
-          <p>POS Transaction: {chain.transaction ? `${chain.transaction.transaction_id} · ${money(chain.transaction.total)}` : '—'}</p>
+          <p>Register Transaction: {chain.transaction ? `${chain.transaction.transaction_id} · ${money(chain.transaction.total)}` : '—'}</p>
           <p>Receipt: {chain.contract.receipt_id || '—'}</p>
           <p>Session: {chain.session ? `${chain.session.session_ref} · ${chain.session.status}` : '—'}</p>
           <details>

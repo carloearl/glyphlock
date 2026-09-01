@@ -69,7 +69,7 @@ const DREAM_TEAM = [
   },
   {
     id: 'merchant',
-    name: 'NUPS POS',
+    name: 'NUPS Register',
     number: '#3',
     position: 'Merchant',
     series: 'Every transaction leaves a verifiable trail',

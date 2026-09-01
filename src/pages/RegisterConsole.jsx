@@ -1,8 +1,8 @@
 /**
- * Register Console — Unified POS Operations (Restored Full Tab Set)
+ * Register Console — Unified Register Operations (Restored Full Tab Set)
  * ─────────────────────────────────────────────────────────────────
  * Single page hosting every operator surface the original NUPS register had:
- *   • Register (Door POS)
+ *   • Register (Door Register)
  *   • Receipts (Transaction History)
  *   • Driver Drop-offs / Payouts
  *   • Bar Register
@@ -237,7 +237,7 @@ function RegisterConsoleInner() {
 
   return (
     <NUPSAppShell
-      title="Register · POS"
+      title="Register · Register"
       subtitle={`${modeState.operatingMode} Register Terminal · ${activeVenue?.name || activeVenue?.venue_name || "Selected venue"}`}
       actions={
         <div className="flex items-center gap-2">

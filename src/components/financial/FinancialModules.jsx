@@ -13,7 +13,7 @@ const MODULES = [
   {
     title: "N.U.P.S. Portal",
     subtitle: "Nexus Unified Portal System",
-    description: "Full-stack POS built for entertainment venues. Cash register, batch management, VIP contracts, entertainer check-in, Z-reports, and real-time floor operations.",
+    description: "Full-stack Register built for entertainment venues. Cash register, batch management, VIP contracts, entertainer check-in, Z-reports, and real-time floor operations.",
     features: ["Multi-payment processing", "VIP contract signing", "Real-time floor view", "Dream Dollar integration"],
     icon: CreditCard,
     link: "NUPSLogin",

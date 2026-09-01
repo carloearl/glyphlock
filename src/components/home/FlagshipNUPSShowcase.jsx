@@ -5,7 +5,7 @@ import { ArrowRight, Play, Radio, CreditCard, FileSignature, Fingerprint, ScanLi
 import { createPageUrl } from '@/utils';
 
 const features = [
-  [CreditCard, 'POS + Registers', 'Cash/card workflows, catalogs, void logging and shift-close controls.'],
+  [CreditCard, 'Register + Registers', 'Cash/card workflows, catalogs, void logging and shift-close controls.'],
   [FileSignature, 'Contracts', 'VIP contract workflows, printing, signing, rescanning and record retention.'],
   [Fingerprint, 'Staff + Identity', 'Role-aware access, shift logs and supported biometric workflows.'],
   [ScanLine, 'QR Operations', 'Guest, driver and operational QR issuance tied to auditable records.'],
@@ -47,7 +47,7 @@ export default function FlagshipNUPSShowcase() {
               <p className="mt-4 max-w-2xl text-slate-300">Front door, guest identity, staff shifts, registers, contracts, payouts, reporting, audit evidence and integrations are organized as one connected operating system — a working demonstration of the GlyphLock architecture creating and preserving the records it later needs to verify.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              {['FRONT DOOR','POS / BAR','VIP CONTRACTS','STAFF SHIFTS','PAYOUTS','REPORTING','QR OPS','OHIP'].map((label,i)=><div key={label} className="rounded-xl border border-cyan-300/[.15] bg-white/[.055] backdrop-blur-lg px-3 py-4 text-center font-mono text-[10px] md:text-xs text-slate-200 shadow-[0_0_20px_rgba(59,130,246,.10),inset_0_0_18px_rgba(34,211,238,.04)] hover:-translate-y-1 hover:scale-[1.03] hover:border-cyan-300/60 hover:text-cyan-100 hover:bg-cyan-300/[.07] hover:shadow-[0_0_34px_rgba(34,211,238,.34),0_0_60px_rgba(124,58,237,.16)] transition-all duration-300">{String(i+1).padStart(2,'0')} // {label}</div>)}
+              {['FRONT DOOR','Register / BAR','VIP CONTRACTS','STAFF SHIFTS','PAYOUTS','REPORTING','QR OPS','OHIP'].map((label,i)=><div key={label} className="rounded-xl border border-cyan-300/[.15] bg-white/[.055] backdrop-blur-lg px-3 py-4 text-center font-mono text-[10px] md:text-xs text-slate-200 shadow-[0_0_20px_rgba(59,130,246,.10),inset_0_0_18px_rgba(34,211,238,.04)] hover:-translate-y-1 hover:scale-[1.03] hover:border-cyan-300/60 hover:text-cyan-100 hover:bg-cyan-300/[.07] hover:shadow-[0_0_34px_rgba(34,211,238,.34),0_0_60px_rgba(124,58,237,.16)] transition-all duration-300">{String(i+1).padStart(2,'0')} // {label}</div>)}
             </div>
           </div>
         </div>

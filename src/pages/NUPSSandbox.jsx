@@ -380,7 +380,7 @@ export default function NUPSSandbox() {
     const printed = contracts.filter(c => c.is_printed).length;
     const signed = contracts.filter(c => c.is_signed).length;
     
-    // POS aggregates
+    // Register aggregates
     const posCashSales = posTransactions.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + (t.total || 0), 0);
     const posCardSales = posTransactions.filter(t => t.payment_method !== 'Cash').reduce((s, t) => s + (t.total || 0), 0);
     const posTotal = posCashSales + posCardSales;
@@ -413,7 +413,7 @@ export default function NUPSSandbox() {
         .footer { text-align: center; font-size: 9px; color: #666; margin-top: 16px; }
         @media print { button { display: none; } }
       </style></head><body>
-      <h1>N.U.P.S. POS — Z-REPORT<br/><span style='font-size:12px;font-weight:normal;'>DREAM PALACE — DEMO BATCH CLOSE</span></h1>
+      <h1>N.U.P.S. Register — Z-REPORT<br/><span style='font-size:12px;font-weight:normal;'>DREAM PALACE — DEMO BATCH CLOSE</span></h1>
       <div class='demo'>⚠ SANDBOX DEMO — This report uses seeded demo contract data. No real transactions.</div>
       <h2>REPORT HEADER</h2>
       <div class='row'><span>Report ID:</span><span>${reportId}</span></div>
@@ -424,7 +424,7 @@ export default function NUPSSandbox() {
       <div class='row'><span>Batch ID:</span><span>BATCH-DEMO-${now.toISOString().split('T')[0]}</span></div>
       <h2>ALL SALES SUMMARY</h2>
       <div class='row'><span>Dream Dollar Contracts:</span><span>${totalContracts} · $${contractTotal.toFixed(2)}</span></div>
-      <div class='row'><span>POS Transactions:</span><span>${posTransactions.length} · $${posTotal.toFixed(2)}</span></div>
+      <div class='row'><span>Register Transactions:</span><span>${posTransactions.length} · $${posTotal.toFixed(2)}</span></div>
       <div class='row'><span>VIP Room Sessions:</span><span>${vipSessions.length} · $${vipTotal.toFixed(2)}</span></div>
       <div class='row'><span>GlyphBucks Orders:</span><span>${gbOrders.length} · $${gbTotal.toFixed(2)}</span></div>
       <h2>CASH DRAWER RECONCILIATION</h2>
@@ -446,7 +446,7 @@ export default function NUPSSandbox() {
       <div style='font-size:9px;color:#666;margin-top:4px;'>GlyphBucks™ is a stored-value liability instrument. Not counted as revenue.</div>
       <div class='total'>
         <div class='row'><span>TOTAL CONTRACTS:</span><span>${totalContracts}</span></div>
-        <div class='row'><span>TOTAL POS TRANSACTIONS:</span><span>${posTransactions.length}</span></div>
+        <div class='row'><span>TOTAL Register TRANSACTIONS:</span><span>${posTransactions.length}</span></div>
         <div class='row'><span>TOTAL SALES (All Tender):</span><span>$${(cashTotal + cardTotal).toFixed(2)}</span></div>
         <div class='row'><span>TOTAL GB ISSUED:</span><span>${totalGB.toFixed(2)} GB</span></div>
       </div>
@@ -454,7 +454,7 @@ export default function NUPSSandbox() {
         <div><label>MANAGER SIGNATURE</label><div class='line'></div></div>
         <div><label>DATE / TIME</label><div class='line'></div></div>
       </div>
-      <div class='footer'>N.U.P.S. POS — GlyphLock Financial LLC — ${now.toLocaleString()} — DEMO BATCH</div>
+      <div class='footer'>N.U.P.S. Register — GlyphLock Financial LLC — ${now.toLocaleString()} — DEMO BATCH</div>
       <br/><button onclick='window.print()' style='padding:8px 20px;font-size:13px;cursor:pointer;'>🖨️ Print</button>
       </body></html>
     `);
@@ -826,7 +826,7 @@ export default function NUPSSandbox() {
               <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {[
                   { label: "Hardware Test", section: "hardware" },
-                  { label: "POS Transaction", section: "pos" },
+                  { label: "Register Transaction", section: "pos" },
                   { label: "Dream Dollar Flow", section: "dreamdollar" },
                   { label: "Staff Clock-In", section: "staff" },
                   { label: "Entertainer Check-In", section: "entertainers" },
@@ -849,7 +849,7 @@ export default function NUPSSandbox() {
       case "pos":
         return (
           <div className="space-y-4">
-            <p className="text-xs text-gray-500">Demo POS — Tap items to add to cart, then complete the sale.</p>
+            <p className="text-xs text-gray-500">Demo Register — Tap items to add to cart, then complete the sale.</p>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {[
                 { label: "Cover Charge", price: 20 },
@@ -1241,7 +1241,7 @@ export default function NUPSSandbox() {
                   <div className="text-[10px] text-gray-600 mt-1">{(zReportData.contracts || []).length} contracts</div>
                 </div>
                 <div className="p-3 rounded-lg bg-white/[0.02] border border-white/[0.07]">
-                  <div className="text-gray-500 text-xs mb-1">POS Sales</div>
+                  <div className="text-gray-500 text-xs mb-1">Register Sales</div>
                   <div className="text-blue-400 font-black text-lg">${(zReportData.posTransactions || []).reduce((s, t) => s + (t.total || 0), 0).toFixed(2)}</div>
                   <div className="text-[10px] text-gray-600 mt-1">{(zReportData.posTransactions || []).length} transactions</div>
                 </div>

@@ -54,7 +54,7 @@ export default function FinancialFooterCTA() {
 
             <div className="flex flex-wrap gap-4 justify-center mb-8">
               {[
-                { label: "POS Revenue Processing", icon: DollarSign },
+                { label: "Register Revenue Processing", icon: DollarSign },
                 { label: "Club Currency Issuance", icon: Zap },
                 { label: "Blockchain Verification", icon: Shield },
               ].map((item, i) => (

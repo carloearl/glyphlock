@@ -100,7 +100,7 @@ export default function DriverQuickAdd({ user }) {
     refetchInterval: 30000,
   });
 
-  // Active POS batch — pin disbursements to it
+  // Active Register batch — pin disbursements to it
   const { data: activeBatch } = useQuery({
     queryKey: ["active-pos-batch", venueId, ...modeQueryKey],
     queryFn: async () => {

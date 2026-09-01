@@ -7,7 +7,7 @@ export default function DemoOpenNightPreview() {
     <PreviewPageShell
       title="Open Night"
       subtitle="Shift Initialization"
-      description="Open Night initializes the shift, unlocks the cash drawer, and prepares all downstream modules for the evening's operations — POS, VIP Board, Compliance, and Close Night all inherit from a single opening state."
+      description="Open Night initializes the shift, unlocks the cash drawer, and prepares all downstream modules for the evening's operations — Register, VIP Board, Compliance, and Close Night all inherit from a single opening state."
       icon={Play}
       referralSource="open-night-preview"
     />

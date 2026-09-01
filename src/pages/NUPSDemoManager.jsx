@@ -196,7 +196,7 @@ export default function NUPSDemoManager() {
     ];
     for (const s of staff) await tryCreate("NUPSUser: " + s.full_name + " (" + s.role + ")", "NUPSUser", s);
 
-    // ───────── POS PRODUCT CATALOG ─────────
+    // ───────── Register PRODUCT CATALOG ─────────
     const products = [
       { name: "Grey Goose Bottle",      sku: "SPI-GG-750",  category: "Spirits",         price: 450, cost: 180, stock_quantity: 12, low_stock_threshold: 4, taxable: true,  tax_rate: 0.08, is_active: true, supplier: "Demo Liquor Co",   venue_id: DEMO_VENUE_ID },
       { name: "Dom Pérignon",           sku: "CHM-DOM-750", category: "Beer & Wine",     price: 850, cost: 400, stock_quantity: 6,  low_stock_threshold: 2, taxable: true,  tax_rate: 0.08, is_active: true, supplier: "Demo Liquor Co",   venue_id: DEMO_VENUE_ID },

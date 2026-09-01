@@ -72,7 +72,7 @@ const POLICY = {
     ActivityLog: { create: () => null },
   },
   DOORMAN: {
-    // Doorman handles onboarding — driver + guest. NO door POS writes.
+    // Doorman handles onboarding — driver + guest. NO door Register writes.
     POSBatch: { update: batchConfirmationRule },
     DriverPayout: { create: () => null, update: () => null },
     VIPGuest:     { create: () => null, update: () => null },

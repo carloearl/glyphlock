@@ -15,7 +15,7 @@ This repository is the active codebase. Older GlyphLock repositories may contain
 
 ## Major platform areas
 
-- **NUPS** — venue operations, POS/register workflows, contracts, staff workflows, payouts, reporting, audit records, and integration surfaces.
+- **NUPS** — venue operations, Register/register workflows, contracts, staff workflows, payouts, reporting, audit records, and integration surfaces.
 - **QR Studio** — QR generation, payload tooling, verification, scan workflows, and related vault/record features.
 - **GlyphBot** — AI-assisted research, analysis, support, coding, and workflow tooling.
 - **Image Lab** — image-generation and interactive-image workflows.

@@ -10,7 +10,7 @@ const NAV = [
   { id: "dash",        label: "Dashboard",   icon: LayoutDashboard, to: "/NUPSHub" },
   { id: "venues",      label: "Venues",      icon: Building2,        to: "/admin/venue-settings" },
   { id: "frontdoor",   label: "Front Door",  icon: DoorOpen,         to: "/FrontDoor" },
-  { id: "pos",         label: "POS",         icon: ShoppingCart,     to: "/Register" },
+  { id: "pos",         label: "Register",         icon: ShoppingCart,     to: "/Register" },
   { id: "vip",         label: "VIP & Tables",icon: Crown,            to: "/Contracts" },
   { id: "inventory",   label: "Inventory",   icon: Package,          to: "/Accounting" },
   { id: "drivers",     label: "Drivers",     icon: Truck,            to: "/admin/payout-history" },

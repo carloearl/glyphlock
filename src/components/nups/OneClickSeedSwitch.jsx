@@ -118,8 +118,8 @@ export default function OneClickSeedSwitch() {
 
       {/* Stats strip */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 16 }}>
-        <Stat label="POS Transactions" value={counts.transactions} accent="#22c55e" />
-        <Stat label="POS Batches" value={counts.batches} accent="#60a5fa" />
+        <Stat label="Register Transactions" value={counts.transactions} accent="#22c55e" />
+        <Stat label="Register Batches" value={counts.batches} accent="#60a5fa" />
         <Stat label="Total Demo Rows" value={counts.total} accent="#a78bfa" />
       </div>
 

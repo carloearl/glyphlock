@@ -42,7 +42,7 @@
     },
     "batch_reference": {
       "type": "string",
-      "description": "DACO-20260610 WS-2 — Processor batch ID (GoDaddy POS or equivalent)"
+      "description": "DACO-20260610 WS-2 — Processor batch ID (GoDaddy Register or equivalent)"
     },
     "glyphbucks_activity": {
       "type": "object",

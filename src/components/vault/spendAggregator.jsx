@@ -65,7 +65,7 @@ export function aggregateSpenders({ venueContracts = [], vipRecords = [], gbOrde
   posTransactions.forEach((t) => {
     const key = normalizeKey(t.customer_name || t.customer_id);
     if (!key) return;
-    upsert(key, t.customer_name || 'POS Customer', (p) => ({
+    upsert(key, t.customer_name || 'Register Customer', (p) => ({
       totalSpend: p.totalSpend + (Number(t.total) || 0),
       transactions: [...p.transactions, t],
       paymentMethods: new Set([...p.paymentMethods, t.payment_method].filter(Boolean)),

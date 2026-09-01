@@ -127,7 +127,7 @@ export default function PayrollReport() {
       <h2 style="text-align:center;margin-bottom:4px;">N.U.P.S. — PAYROLL REPORT</h2>
       <p style="text-align:center;font-size:11px;">${dateFrom} to ${dateTo} &nbsp;|&nbsp; ${grouped.length} employees &nbsp;|&nbsp; Total: ${fmtDur(grandTotal)}</p>
       <table style="margin-top:12px;">${rows}</table>
-      <p style="margin-top:12px;text-align:center;font-size:10px;color:#666;">Printed ${new Date().toLocaleString()} | N.U.P.S. POS — GlyphLock</p>
+      <p style="margin-top:12px;text-align:center;font-size:10px;color:#666;">Printed ${new Date().toLocaleString()} | N.U.P.S. Register — GlyphLock</p>
     </body></html>`;
     const w = window.open('', '_blank', 'width=750,height=950');
     w.document.write(html); w.document.close();

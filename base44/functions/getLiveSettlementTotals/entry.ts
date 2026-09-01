@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 /**
- * DACO-20260614: Live Settlement Aggregator for Front Door POS
+ * DACO-20260614: Live Settlement Aggregator for Front Door Register
  * Fetches real-time cash + card totals + pending driver payouts for venue
  * CRITICAL: Server-side timestamp validation ensures Z-Report sync integrity
  */

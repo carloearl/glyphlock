@@ -1,6 +1,6 @@
 /**
  * RateFeeEditor — admin UI for VenueRateConfig.
- * Every numeric field that drives door/driver/POS math is editable here.
+ * Every numeric field that drives door/driver/Register math is editable here.
  */
 import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
@@ -103,7 +103,7 @@ export default function RateFeeEditor({ venueId, user }) {
     <Card className="bg-slate-900 border-slate-800">
       <CardHeader>
         <CardTitle className="text-base">Rates & Fees — {config.venue_name || venueId}</CardTitle>
-        <p className="text-xs text-slate-500">All door / driver / POS math reads from these values. No hardcoded numbers.</p>
+        <p className="text-xs text-slate-500">All door / driver / Register math reads from these values. No hardcoded numbers.</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>

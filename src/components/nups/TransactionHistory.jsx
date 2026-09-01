@@ -61,7 +61,7 @@ export default function TransactionHistory({ transactions = [], showReceipt = fa
                             <Calendar className="h-3 w-3" />
                             {safeDate(transaction.created_date).toLocaleString()}
                           </span>
-                          <span className="uppercase">{transaction.station || "POS"}</span>
+                          <span className="uppercase">{transaction.station || "Register"}</span>
                           <span>{transaction.cashier_name || transaction.cashier || "Unknown cashier"}</span>
                         </div>
                       </div>

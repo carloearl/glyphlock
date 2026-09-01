@@ -74,7 +74,7 @@ export default function DoorPOSFinalizationAudit({ user }) {
     <div className="rounded-xl p-4 my-3" style={{ background: "rgba(34,197,94,0.04)", border: "1px solid rgba(34,197,94,0.25)" }}>
       <div className="flex items-center gap-2 mb-3">
         <ShieldCheck className="w-4 h-4 text-green-400" />
-        <span className="text-[11px] font-bold uppercase tracking-widest text-green-300">Door POS Finalization Audit</span>
+        <span className="text-[11px] font-bold uppercase tracking-widest text-green-300">Door Register Finalization Audit</span>
         <span className="ml-auto text-[9px] text-gray-500">DACO-20260603</span>
       </div>
 

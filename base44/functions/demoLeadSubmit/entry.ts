@@ -9,7 +9,7 @@ function buildEmailBody({ full_name, venue_name }) {
 
 Thanks for taking NUPS for a live drive.
 
-What you just saw is the same platform operating at Dream Palace right now — built by GlyphLock to replace the patchwork of POS, schedule, compliance, and cash-handling tools that venue operators have been stitching together for years.
+What you just saw is the same platform operating at Dream Palace right now — built by GlyphLock to replace the patchwork of Register, schedule, compliance, and cash-handling tools that venue operators have been stitching together for years.
 
 If NUPS looks like it could fit ${venue_name}, reply to this email and we will set up a 20-minute working session.
 
@@ -27,7 +27,7 @@ To unsubscribe, reply with "unsubscribe".`;
     <h1 style="font-size:24px;font-weight:700;margin:0 0 24px;color:#fafafa;letter-spacing:-0.01em;">Thanks for experiencing NUPS</h1>
     <p style="font-size:15px;line-height:1.6;color:#d4d4d4;margin:0 0 16px;">Hi ${full_name},</p>
     <p style="font-size:15px;line-height:1.6;color:#d4d4d4;margin:0 0 16px;">Thanks for taking NUPS for a live drive.</p>
-    <p style="font-size:15px;line-height:1.6;color:#d4d4d4;margin:0 0 16px;">What you just saw is the same platform operating at Dream Palace right now — built by GlyphLock to replace the patchwork of POS, schedule, compliance, and cash-handling tools that venue operators have been stitching together for years.</p>
+    <p style="font-size:15px;line-height:1.6;color:#d4d4d4;margin:0 0 16px;">What you just saw is the same platform operating at Dream Palace right now — built by GlyphLock to replace the patchwork of Register, schedule, compliance, and cash-handling tools that venue operators have been stitching together for years.</p>
     <p style="font-size:15px;line-height:1.6;color:#d4d4d4;margin:0 0 24px;">If NUPS looks like it could fit <strong style="color:#fafafa;">${venue_name}</strong>, reply to this email and we will set up a 20-minute working session.</p>
     <p style="font-size:15px;line-height:1.6;color:#d4d4d4;margin:0 0 4px;">— Carlo Rodriguez</p>
     <p style="font-size:13px;color:#a3a3a3;margin:0 0 32px;">Founder, GlyphLock LLC</p>

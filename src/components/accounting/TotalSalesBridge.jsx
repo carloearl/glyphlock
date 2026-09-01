@@ -46,11 +46,11 @@ export default function TotalSalesBridge({ venue_id, mode = "REAL", from, to }) 
       </CardHeader>
       <CardContent className="space-y-3 pt-0 text-xs">
         <div className="flex justify-between">
-          <span className="text-gray-400">POS Transactions · cash_sales</span>
+          <span className="text-gray-400">Register Transactions · cash_sales</span>
           <span className="font-mono text-white">{formatCents(data.pos_cash_cents)}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-gray-400">POS Transactions · card_sales</span>
+          <span className="text-gray-400">Register Transactions · card_sales</span>
           <span className="font-mono text-white">{formatCents(data.pos_card_cents)}</span>
         </div>
         <div className="flex justify-between font-bold border-t border-gray-800 pt-1">

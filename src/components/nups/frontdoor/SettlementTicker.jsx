@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { TrendingUp, AlertCircle, DollarSign, Wallet, Banknote } from "lucide-react";
 
 /**
- * DACO-20260614: Live Settlement Ticker for Front Door POS
+ * DACO-20260614: Live Settlement Ticker for Front Door Register
  * Real-time cash + card totals + pending driver payout visibility.
  * Polling interval: 30 seconds.
  */

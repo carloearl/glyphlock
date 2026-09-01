@@ -43,7 +43,7 @@
     },
     "pos_transaction_id": {
       "type": "string",
-      "description": "Optional \u2014 links to POSTransaction if redeemed at POS"
+      "description": "Optional \u2014 links to POSTransaction if redeemed at Register"
     },
     "batch_id": {
       "type": "string",

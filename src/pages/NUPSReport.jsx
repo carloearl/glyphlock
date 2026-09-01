@@ -53,9 +53,9 @@ export default function NUPSReport() {
 
         {/* PORTAL SYSTEM */}
         <Card className="bg-gray-900/60 border-green-500/30">
-          <CardHeader><CardTitle className="text-green-400">POS Cash Register</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-green-400">Register Cash Register</CardTitle></CardHeader>
           <CardContent className="space-y-2">
-            <StatusRow name="POS Cash Register" status="DONE" notes="Full cart, product search, checkout flow, multiple payment methods, receipt printing." />
+            <StatusRow name="Register Cash Register" status="DONE" notes="Full cart, product search, checkout flow, multiple payment methods, receipt printing." />
             <StatusRow name="Batch Management" status="DONE" notes="Open/close batches, cash reconciliation, linked to transactions." />
             <StatusRow name="Transaction History" status="DONE" notes="Shows all transactions with receipt reprint." />
             <StatusRow name="Z-Report Generator" status="DONE" notes="End-of-day summary report on owner dashboard." />

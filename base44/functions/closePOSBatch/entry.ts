@@ -1,7 +1,7 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.43';
 
 /**
- * SECURE POS BATCH CLOSE
+ * SECURE Register BATCH CLOSE
  * Authority: DACO — Architecture Lock ACTIVE
  * Role: PLATFORM_ADMIN | VENUE_OWNER | VENUE_MANAGER required.
  */

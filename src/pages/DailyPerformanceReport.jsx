@@ -219,7 +219,7 @@ export default function DailyPerformanceReport() {
                       ) : <Empty>No DailySettlement record for this day.</Empty>}
                     </Section>
 
-                    <Section title={`POS Batches (${day.batches.length})`}>
+                    <Section title={`Register Batches (${day.batches.length})`}>
                       {day.batches.length ? (
                         <table style={{ width: "100%", fontSize: 11, borderCollapse: "collapse" }}>
                           <thead>

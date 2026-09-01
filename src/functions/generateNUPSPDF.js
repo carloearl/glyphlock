@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
     doc.setTextColor(0, 0, 0);
     const summaryData = [
       ['Metric', 'Value'],
-      ['POS Revenue', `$${totalRevenue.toFixed(2)}`],
+      ['Register Revenue', `$${totalRevenue.toFixed(2)}`],
       ['GlyphBucks Liability', `$${totalDDRevenue.toFixed(2)}`],
       ['Total Transactions', qTransactions.length.toString()],
       ['Avg Transaction', `$${avgTransaction.toFixed(2)}`],
@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
       ['Revenue Stream', 'Amount', 'Count', '% of Total'],
       ['Cash Sales', `$${qTransactions.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0).toFixed(2)}`, qTransactions.filter(t => t.payment_method === 'Cash').length.toString(), totalRevenue > 0 ? ((qTransactions.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0) / totalRevenue) * 100).toFixed(1) + '%' : '0%'],
       ['Card Sales', `$${qTransactions.filter(t => ['Credit Card', 'Debit Card', 'Digital Wallet'].includes(t.payment_method)).reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0).toFixed(2)}`, qTransactions.filter(t => ['Credit Card', 'Debit Card', 'Digital Wallet'].includes(t.payment_method)).length.toString(), totalRevenue > 0 ? ((qTransactions.filter(t => ['Credit Card', 'Debit Card', 'Digital Wallet'].includes(t.payment_method)).reduce((s, t) => s + ((t.total || 0) - (t.tip || 0)), 0) / totalRevenue) * 100).toFixed(1) + '%' : '0%'],
-      ['POS Total', `$${totalRevenue.toFixed(2)}`, qTransactions.length.toString(), '100%'],
+      ['Register Total', `$${totalRevenue.toFixed(2)}`, qTransactions.length.toString(), '100%'],
       ['GlyphBucks Liability', `$${totalDDRevenue.toFixed(2)}`, qDreamOrders.length.toString(), 'N/A'],
     ];
 

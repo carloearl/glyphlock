@@ -48,7 +48,7 @@ export const ENTERTAINERS = [
     schedule: [{ day: 'Friday', start_time: '22:00', end_time: '04:00' }] },
 ];
 
-// ---------- POS PRODUCTS ----------
+// ---------- Register PRODUCTS ----------
 export const PRODUCTS = [
   { name: 'Domestic Beer',     sku: 'BEER-DOM',  barcode: '1000000001', price: 8,   cost: 2,   category: 'Beer & Wine',  stock_quantity: 240, low_stock_threshold: 24, supplier: 'Local Distrib', is_active: true, taxable: true, tax_rate: 0.08, description: 'Domestic bottled beer' },
   { name: 'Premium Cocktail',  sku: 'CKT-PREM',  barcode: '1000000002', price: 18,  cost: 5,   category: 'Spirits',      stock_quantity: 120, low_stock_threshold: 12, supplier: 'Top Shelf Co',  is_active: true, taxable: true, tax_rate: 0.08, description: 'House premium cocktail' },
@@ -57,7 +57,7 @@ export const PRODUCTS = [
   { name: 'Energy Drink',      sku: 'ENRG-01',   barcode: '1000000005', price: 6,   cost: 1.5, category: 'Mixers',       stock_quantity: 180, low_stock_threshold: 18, supplier: 'Local Distrib', is_active: true, taxable: true, tax_rate: 0.08, description: 'Standard energy drink mixer' },
 ];
 
-// ---------- POS CUSTOMERS ----------
+// ---------- Register CUSTOMERS ----------
 export const CUSTOMERS = [
   { customer_id: 'DEMO-CUST-001', full_name: 'Robert Spender',  email: 'robert@demo.test',  phone: '555-2001', address: '123 Main St',   city: 'Phoenix', state: 'AZ', zip_code: '85001', total_spent: 4200, visit_count: 12, loyalty_points: 420, loyalty_tier: 'Gold',     status: 'vip',    last_visit: T(20), birthday: '1985-06-15', preferences: { favorite_categories: ['Spirits', 'VIP Service'], communication_preferences: { email: true, sms: true, phone: false } } },
   { customer_id: 'DEMO-CUST-002', full_name: 'James Regular',   email: 'james@demo.test',   phone: '555-2002', address: '456 Oak Ave',   city: 'Phoenix', state: 'AZ', zip_code: '85002', total_spent: 850,  visit_count: 4,  loyalty_points: 85,  loyalty_tier: 'Silver',   status: 'active', last_visit: T(21), birthday: '1990-11-22', preferences: { favorite_categories: ['Beer & Wine'], communication_preferences: { email: true, sms: false, phone: false } } },
@@ -65,7 +65,7 @@ export const CUSTOMERS = [
   { customer_id: 'DEMO-CUST-004', full_name: 'Anthony Platinum',email: 'anthony@demo.test', phone: '555-2004', address: '321 Elite Blvd',city: 'Scottsdale', state: 'AZ', zip_code: '85250', total_spent: 18500, visit_count: 42, loyalty_points: 1850, loyalty_tier: 'Platinum', status: 'vip', last_visit: T(22, 30), birthday: '1980-09-30', preferences: { favorite_categories: ['VIP Service', 'Spirits'], communication_preferences: { email: true, sms: true, phone: true } } },
 ];
 
-// ---------- POS LOCATION ----------
+// ---------- Register LOCATION ----------
 export const LOCATION = {
   location_id: DEMO_LOCATION_ID, name: 'Demo Main Floor', address: '100 Demo Way', city: 'Phoenix', state: 'AZ', zip_code: '85003',
   phone: '555-0001', email: 'venue@demo.test', manager_email: 'demo_mgr@demo.test', is_active: true,
@@ -73,14 +73,14 @@ export const LOCATION = {
   total_revenue: 4210, total_transactions: 15,
 };
 
-// ---------- POS BATCH (closed shift) ----------
+// ---------- Register BATCH (closed shift) ----------
 export const BATCH = {
   batch_id: `DEMO-BATCH-${DATE}`, venue_id: DEMO_VENUE_ID, start_time: T(19), end_time: T(28),
   opening_cash: 500, closing_cash: 1742, total_sales: 1242, transaction_count: 15, cashier: 'demo_bar',
   status: 'closed', discrepancy: 0, notes: 'Friday night demo shift — clean close',
 };
 
-// ---------- POS TRANSACTIONS (15 — mixed cash/card, with tips) ----------
+// ---------- Register TRANSACTIONS (15 — mixed cash/card, with tips) ----------
 function tx(id, hour, items, payment, customerId) {
   const subtotal = items.reduce((s, i) => s + i.total, 0);
   const tax = Math.round(subtotal * 0.08 * 100) / 100;
@@ -116,7 +116,7 @@ export const TRANSACTIONS = [
   tx('015', 26, [cocktail(1), beer(1)], 'Cash',         null),
 ];
 
-// ---------- POS Z REPORT ----------
+// ---------- Register Z REPORT ----------
 const cashSales = TRANSACTIONS.filter(t => t.payment_method === 'Cash').reduce((s, t) => s + t.subtotal + t.tax, 0);
 const cardSales = TRANSACTIONS.filter(t => t.payment_method !== 'Cash').reduce((s, t) => s + t.subtotal + t.tax, 0);
 const totalSales = Math.round((cashSales + cardSales) * 100) / 100;
@@ -392,7 +392,7 @@ export const CONTRACTOR_PAYOUT = {
   status: 'paid', tax_year: 2026, notes: 'GlyphBucks 50% redemption — demo',
 };
 
-// ---------- POS CAMPAIGN ----------
+// ---------- Register CAMPAIGN ----------
 export const POS_CAMPAIGN = {
   campaign_id: 'DEMO-CAMP-001', venue_id: DEMO_VENUE_ID, name: 'Friday Night VIP Promo',
   type: 'email', status: 'completed', target_audience: 'vip',
@@ -401,7 +401,7 @@ export const POS_CAMPAIGN = {
   sent_count: 50, open_count: 32, conversion_count: 4, revenue_generated: 1800,
 };
 
-// ---------- POS INVENTORY BATCH ----------
+// ---------- Register INVENTORY BATCH ----------
 export const POS_INVENTORY_BATCH = {
   batch_id: 'DEMO-INV-001', venue_id: DEMO_VENUE_ID, product_id: 'BEER-DOM', product_name: 'Domestic Beer',
   quantity: 240, cost_per_unit: 2, total_cost: 480, supplier: 'Local Distrib', location_id: DEMO_LOCATION_ID,

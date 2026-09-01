@@ -168,7 +168,7 @@ export default function ContractTerminal({ onArchive }) {
         </div>
         <div className="flex items-center gap-2 text-[10px] text-gray-500 font-mono">
           <span>TX: {contract.txId}</span>
-          <span>POS: {contract.posTerminalId}</span>
+          <span>Register: {contract.posTerminalId}</span>
         </div>
       </div>
 
