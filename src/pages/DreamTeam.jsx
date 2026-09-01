@@ -342,8 +342,7 @@ export default function DreamTeamPage() {
       {/* Player Cards - Mobile-Optimized Scroll */}
       <div style={{
         scrollSnapType: 'none',
-        scrollBehavior: 'auto',
-        overscrollBehavior: 'none'
+        scrollBehavior: 'auto'
       }}>
         {DREAM_TEAM_ROSTER.map((card, index) => (
           <FullScreenCard key={card.id} card={card} index={index} />
@@ -547,8 +546,12 @@ export default function DreamTeamPage() {
               className="absolute inset-[4px] rounded-3xl bg-white/8 backdrop-blur-lg p-6 md:p-8 flex flex-col overflow-y-auto border border-white/10 shadow-[inset_0_0_40px_rgba(87,61,255,0.15)]"
               style={{
                 scrollbarWidth: 'thin',
-                scrollbarColor: `${card.glowColor} transparent`
+                scrollbarColor: `${card.glowColor} transparent`,
+                overscrollBehavior: 'auto',
+                touchAction: 'pan-y',
+                WebkitOverflowScrolling: 'touch'
               }}
+              onClick={(e) => e.stopPropagation()}
             >
               
               {/* Header */}
