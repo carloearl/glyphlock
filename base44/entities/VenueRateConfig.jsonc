@@ -104,7 +104,7 @@
     "service_fee_pct": {
       "type": "number",
       "default": 0,
-      "description": "Optional service fee percentage applied to POS transactions and shown as a distinct line on the receipt. 0 = disabled. Expressed as a decimal (0.05 = 5%)."
+      "description": "Optional service fee percentage applied to register transactions and shown as a distinct line on the receipt. 0 = disabled. Expressed as a decimal (0.05 = 5%)."
     },
     "service_fee_label": {
       "type": "string",
@@ -139,7 +139,7 @@
     "receipt_auto_prompt": {
       "type": "boolean",
       "default": true,
-      "description": "Open the receipt confirmation after a completed POS transaction."
+      "description": "Open the receipt confirmation after a completed register transaction."
     },
     "receipt_print_copies": {
       "type": "number",

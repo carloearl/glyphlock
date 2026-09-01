@@ -17,7 +17,7 @@ const num = (v) => {
 const round2 = (v) => Math.round(num(v) * 100) / 100;
 
 /**
- * Build financial_context for a POS transaction.
+ * Build financial_context for a register transaction.
  *
  * Input (all optional unless noted):
  *   gross          — full price before discount/comp (§3 gross_value)

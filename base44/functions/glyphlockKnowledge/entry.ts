@@ -27,7 +27,7 @@ Deno.serve(() => {
     },
     nups: {
       name: "NUPS",
-      expansion: "Nexus Unified POS System",
+      expansion: "Nexus Unified Portal System",
       description: "Venue-operations software connecting identity, roles, contracts, shifts, registers, payouts, reconciliation, and audit records.",
       url: `${SITE_URL}/NUPSLanding`,
       boundaries: [

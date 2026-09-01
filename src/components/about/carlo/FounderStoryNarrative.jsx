@@ -215,7 +215,7 @@ export default function FounderStoryNarrative() {
 
         <Section eyebrow="The product" title="NUPS is the operational form of the idea.">
           <p>
-            NUPS—the Nexus Unified POS System—is GlyphLock's flagship
+            NUPS—the Nexus Unified Portal System—is GlyphLock's flagship
             venue-operations platform.
           </p>
           <p>

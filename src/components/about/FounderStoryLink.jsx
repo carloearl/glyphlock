@@ -16,7 +16,7 @@ export default function FounderStoryLink() {
           GlyphLock started inside real venue operations, where nobody could reconstruct
           what actually happened on a shift. A carrier experiment revealed the continuity
           principle behind it, and that principle became GlyphLock and the Nexus Unified
-          POS System now used in a live venue environment.
+          Portal System now used in a live venue environment.
         </p>
         <Link
           to="/AboutCarlo"

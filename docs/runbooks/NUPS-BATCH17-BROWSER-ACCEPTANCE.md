@@ -27,7 +27,7 @@ Record route, actor, venue, mode, record ID, refresh result and relevant audit e
 10. Edit Daily Checklist, save, refresh and verify item order/required flags.
 11. Save entertainer playlist, refresh and verify track order.
 12. Load playlist into DJ workspace.
-13. Create a safe non-live POS transaction.
+13. Create a safe non-live register transaction.
 14. Confirm transaction venue and mode.
 15. Start the non-live VIP workflow.
 16. Capture synthetic protected evidence through the private path.

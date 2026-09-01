@@ -99,7 +99,7 @@ const PROOF = [
   {
     label: "Product system",
     value: "NUPS",
-    detail: "Nexus Unified POS System for venue operations and evidence packaging",
+    detail: "Nexus Unified Portal System for venue operations and evidence packaging",
     icon: Network,
   },
   {

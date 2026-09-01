@@ -51,7 +51,7 @@ export default function NUPSReport() {
           </CardContent>
         </Card>
 
-        {/* POS SYSTEM */}
+        {/* PORTAL SYSTEM */}
         <Card className="bg-gray-900/60 border-green-500/30">
           <CardHeader><CardTitle className="text-green-400">POS Cash Register</CardTitle></CardHeader>
           <CardContent className="space-y-2">

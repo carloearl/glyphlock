@@ -23,7 +23,7 @@ export const navItems = [
     ]
   },
   {
-    category: "Point of Sale",
+    category: "Venue Register",
     items: [
       { id: "pos-products", label: "Products", entity: "POSProduct", icon: Package },
       { id: "pos-transactions", label: "Transactions", entity: "POSTransaction", icon: ShoppingCart },

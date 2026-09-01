@@ -48,7 +48,7 @@ The generated page registry and component tree expose NUPS operational surfaces 
 - `NUPSAudit`
 - `NUPSInfrastructurePage`
 - front-door/check-in components
-- bar/POS register components
+- bar/venue register components
 - manager/batch/Z-report components
 - VIP contract/room/session components
 - accounting/reconciliation/settlement components

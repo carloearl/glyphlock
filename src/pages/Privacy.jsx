@@ -100,7 +100,7 @@ export default function Privacy() {
                   ["Identity verification", "Information derived from supported identity-verification workflows, including document or scanner data where enabled. Venues are responsible for using these features lawfully and providing any required notices."],
                   ["Biometric-enabled workflows", "If a venue enables a biometric feature, applicable consent, notice, retention, and deletion requirements must be addressed by the venue and GlyphLock according to the deployment and applicable law."],
                   ["Contracts and signatures", "VIP or other venue agreements, signatures, timestamps, document images, status information, and record links used to preserve the transaction history."],
-                  ["POS, payouts, and settlement", "Point-of-sale records, shift close information, payout calculations, settlement summaries, reconciliation information, and audit events."],
+                  ["Registers, payouts, and settlement", "Register records, shift close information, payout calculations, settlement summaries, reconciliation information, and audit events."],
                 ].map(([name, text]) => (
                   <div key={name} className="rounded-xl border border-violet-300/15 bg-violet-300/[.035] p-4">
                     <h3 className="font-bold text-white">{name}</h3>

@@ -128,7 +128,7 @@ function AccountingContent() {
     queryFn: () => base44.entities.GlyphBucksBill.filter(venueFilter, "-created_date", 5000),
   });
 
-  // POS transactions — needed so the aggregator can surface comp gross (gap)
+  // register transactions — needed so the aggregator can surface comp gross (gap)
   const { data: posTransactions = [], isLoading: lTx } = useQuery({
     queryKey: ["acct-pos-tx", venueId, range.start, range.end],
     queryFn: async () => {

@@ -53,7 +53,7 @@ export default function BuilderTerminal() {
       try {
         const result = await base44.integrations.Core.InvokeLLM({
           prompt: `You are a site auditor. Analyze the GlyphLock platform and generate a JSON audit summary.
-The platform has: POS system, VIP contracts, club currency press, QR studio, image lab, blockchain verification, AI chatbot, security tools.
+The platform has: portal system, VIP contracts, club currency press, QR studio, image lab, blockchain verification, AI chatbot, security tools.
 Generate realistic scores for: frontend, backend, payments, security, deployment.
 Also list 5 critical issues and 5 warnings with descriptions.`,
           response_json_schema: {

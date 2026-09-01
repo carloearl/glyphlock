@@ -51,7 +51,7 @@
 - InteractiveImageStudio.jsx ✅
 - ImageGenerator.jsx ⚠️ (Deprecated)
 
-**POS System:**
+**Portal System:**
 - NUPSLogin.jsx ✅
 - NUPSStaff.jsx ✅
 - NUPSOwner.jsx ✅

@@ -251,7 +251,7 @@ const StatMini = ({ value, label }) => (
 // ─── MILESTONES ───
 const MILESTONES = [
   { label: "NUPS Core", done: true },
-  { label: "POS Register", done: true },
+  { label: "Venue Register", done: true },
   { label: "Double-Entry GL", done: true },
   { label: "Driver Payouts", done: true },
   { label: "1099 Payroll", done: true },

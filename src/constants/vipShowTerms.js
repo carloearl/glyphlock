@@ -6,7 +6,7 @@
 export const VIP_TERMS_VERSION = "v1.0";
 
 export const VIP_TERMS = [
-  "NATURE OF TRANSACTION — This contract covers VIP suite access and itemized entertainment services at the named venue, executed and sealed at the point of sale. All charges are itemized above and agreed to before execution.",
+  "NATURE OF TRANSACTION — This contract covers VIP suite access and itemized entertainment services at the named venue, executed and sealed at the venue register. All charges are itemized above and agreed to before execution.",
   "VENUE AS OPERATOR — The venue named on this contract is the operator and merchant of record. GlyphLock LLC is the software provider only and is not a party to, guarantor of, or beneficiary of the underlying transaction.",
   "SOFTWARE PROVIDER HELD HARMLESS — GlyphLock LLC provides record-keeping, sealing, and verification software only and is held harmless from all claims, disputes, chargebacks, and liabilities arising from the transaction between guest and venue.",
   "COMPLIANCE WITH LAW — The venue represents that all services are provided in compliance with applicable federal, state, and local laws, ordinances, and licensing requirements. Nothing in this contract authorizes any unlawful act.",

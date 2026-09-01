@@ -286,7 +286,7 @@ These labels identify frameworks we consider when architecting a build. They do 
           className="text-center"
         >
           <p className="text-white/80 text-base md:text-lg max-w-2xl mx-auto leading-relaxed mb-3">
-From point of sale and payouts to AI features and QR tooling — built and maintained by one team.
+From venue register and payouts to AI features and QR tooling — built and maintained by one team.
             Availability varies by module, account permissions, integration status, and deployment.
           </p>
           <p className="text-white font-bold text-lg md:text-xl mb-10">

@@ -27,7 +27,7 @@ export default function VIPReceiptPrinter({ room, guestName, contractNumber, dre
     </style></head><body>
       <div class="center">
         <div style="font-size:20px;font-weight:900;letter-spacing:2px;">${BIZ_NAME}</div>
-        <div style="font-size:9px;">N.U.P.S. — NEXUS UNIVERSAL POINT-OF-SALE</div>
+        <div style="font-size:9px;">N.U.P.S. — NEXUS UNIFIED PORTAL SYSTEM</div>
         <div style="font-size:9px;margin-top:2px;">${BIZ_LEGAL}</div>
         <div style="font-size:10px;font-weight:bold;margin-top:2px;">${BIZ_ADDRESS}</div>
         ${BIZ_PHONE ? `<div style="font-size:10px;">Tel: ${BIZ_PHONE}</div>` : ''}

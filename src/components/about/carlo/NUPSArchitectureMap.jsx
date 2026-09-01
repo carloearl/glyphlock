@@ -30,7 +30,7 @@ const LAYERS = [
     ]
   },
   {
-    layer: "Layer 2 — NUPS core (Nexus Unified POS System)",
+    layer: "Layer 2 — NUPS core (Nexus Unified Portal System)",
     items: [
       ["Role-based operator kiosk and session control", "live"],
       ["Transaction, batch, and nightly settlement engine", "live"],
@@ -85,7 +85,7 @@ export default function NUPSArchitectureMap() {
         NUPS Architecture Map
       </h2>
       <p className="text-blue-300 text-center mb-8 max-w-3xl mx-auto">
-        Nexus Unified POS System. Every component carries an explicit status. Nothing on
+        Nexus Unified Portal System. Every component carries an explicit status. Nothing on
         this map should be read as complete unless it is labelled as a live workflow.
       </p>
 

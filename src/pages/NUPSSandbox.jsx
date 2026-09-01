@@ -75,7 +75,7 @@ const SECTIONS = [
   { key: "walkthrough", label: "Guided Walkthrough", icon: Play },
   { key: "overview", label: "Overview", icon: BarChart3 },
   { key: "hardware", label: "Hardware Test", icon: Wifi },
-  { key: "pos", label: "POS Register", icon: CreditCard },
+  { key: "pos", label: "Venue Register", icon: CreditCard },
   { key: "dreamdollar", label: "Dream Dollar Demo", icon: Banknote },
   { key: "zreport", label: "Z-Report", icon: FileText },
   { key: "staff", label: "Staff & Clock-In", icon: Clock },
@@ -1221,7 +1221,7 @@ export default function NUPSSandbox() {
                 <FileText className="w-4 h-4" />
                 <span className="font-bold">END-OF-NIGHT Z-REPORT</span>
               </div>
-              <p>Comprehensive daily close summarizing all sales sources: Dream Dollar contracts, POS transactions, VIP room revenue, and GlyphBucks ledger. Ready to print.</p>
+              <p>Comprehensive daily close summarizing all sales sources: Dream Dollar contracts, register transactions, VIP room revenue, and GlyphBucks ledger. Ready to print.</p>
             </div>
 
             <button

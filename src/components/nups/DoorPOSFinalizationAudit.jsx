@@ -44,7 +44,7 @@ export default function DoorPOSFinalizationAudit({ user }) {
 
       const entry = await base44.entities.SystemAuditLog.create({
         event_type: "DOOR_POS_FINALIZED",
-        description: `Door POS Register finalized for ${activeVenue.name || activeVenue.id} — cover $${rates?.cover_charge}, re-entry $${rates?.reentry_charge}, mode ${rates?.mode}`,
+        description: `Door Venue Register finalized for ${activeVenue.name || activeVenue.id} — cover $${rates?.cover_charge}, re-entry $${rates?.reentry_charge}, mode ${rates?.mode}`,
         actor_email: user?.email || "unknown",
         status: "success",
         severity: "low",

@@ -28,7 +28,7 @@ const TECH_SERVICES = [
     icon: Building2,
     title: "NUPS and GlyphLock Platform Implementation",
     description:
-      "Configuration and deployment of GlyphLock software and the NUPS audit, compliance, ERP, and point-of-sale platform for venue operations. Services may include system setup, workflow configuration, reporting, audit controls, payment-system integration, staff onboarding, and implementation support.",
+      "Configuration and deployment of GlyphLock software and the NUPS audit, compliance, ERP, and venue-operations platform for venue operations. Services may include system setup, workflow configuration, reporting, audit controls, payment-system integration, staff onboarding, and implementation support.",
   },
   {
     icon: Mic,

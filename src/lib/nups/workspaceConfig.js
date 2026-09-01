@@ -43,7 +43,7 @@ export const WORKSPACES = {
     label: "Register",
     icon: ShoppingCart,
     color: "cyan",
-    description: "Point of Sale",
+    description: "Venue Register",
     allowedClasses: ["STAFF", "MANAGER", "ADMIN"],
     home: "/Register",
     modules: [
@@ -242,7 +242,7 @@ export function getWorkspaceForPath(pathname, roleClass = "ADMIN") {
     return "MANAGER";
   }
 
-  // 5. REGISTER — POS terminal
+  // 5. REGISTER — register terminal
   if (path.startsWith("/register") ||
       path.startsWith("/registerconsole") ||
       path.startsWith("/receipts") ||

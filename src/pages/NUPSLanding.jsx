@@ -2007,7 +2007,7 @@ export default function NUPSLanding() {
               <div className="flow-step"><span className="num">01</span><h4>Driver Scan</h4><p>Driver arrives with guests, scans personal QR. System logs guest count, runs venue rate card, computes net payout.</p><span className="trigger">→ BARCODE SCANNER</span></div>
               <div className="flow-step"><span className="num">02</span><h4>ID Swipe</h4><p>Guest swipes ID at door. NUPS creates or retrieves profile — searchable by card, name, address, QR.</p><span className="trigger">→ MAG-STRIPE READER</span></div>
               <div className="flow-step"><span className="num">03</span><h4>Cover + Card</h4><p>Door economics auto-calculated from venue rate card. Payout netted at source before cash drawer updates.</p><span className="trigger">→ EXISTING TERMINAL / OPTIONAL API</span></div>
-              <div className="flow-step"><span className="num">04</span><h4>Bar &amp; Bottles</h4><p>POS handles drinks and bottle service. Card whitelist enforced; totals balance cash + card only.</p><span className="trigger">→ POS TERMINAL</span></div>
+              <div className="flow-step"><span className="num">04</span><h4>Bar &amp; Bottles</h4><p>Register handles drinks and bottle service. Card whitelist enforced; totals balance cash + card only.</p><span className="trigger">→ REGISTER TERMINAL</span></div>
               <div className="flow-step"><span className="num">05</span><h4>Contract Print &amp; Sign</h4><p>ET-5850 can print the VIP contract for wet signature and rescan into the record. Supported sealed flows can then be hash-linked and submitted for OpenTimestamps anchoring.</p><span className="trigger">→ PRINT → SIGN → RESCAN</span></div>
               <div className="flow-step"><span className="num">06</span><h4>GlyphBucks Issue</h4><p>Once the signed contract is scanned and sealed, SVC issues denominated GlyphBucks. QR on each note links back to tx + contract + profile.</p><span className="trigger">→ SVC PRINTER</span></div>
             </div>
@@ -2090,7 +2090,7 @@ export default function NUPSLanding() {
               <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M 12 2 L 3 7 V 12 C 3 17 7 21 12 22 C 17 21 21 17 21 12 V 7 Z" /><circle cx="12" cy="11" r="3" /><path d="M 12 14 v 4" /></svg>
               <span className="tag">Roles &amp; Access</span>
               <h4>Scoped session permissions.</h4>
-              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> shared logins, manager-only POS terminals.</p>
+              <p><b style={{ color: 'var(--violet)' }}>Replaces / consolidates:</b> shared logins, manager-only register terminals.</p>
               <p>Seven top-level access tiers span Admin, Owner, Venue Manager, Staff, Entertainer, Driver, and Guest, with venue-specific operational roles such as bartender, door, hostess, security, and DJ scoped underneath the operating model. Sessions carry role and venue context so one gateway can route each user into the controls relevant to that responsibility.</p>
             </div>
             <div className="cap">

@@ -302,7 +302,7 @@ function FrontDoorContent() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-black text-white text-xl">Open the Register</div>
-                            <div className="text-sm text-slate-400 mt-0.5">Cover, drinks & payouts ring up on the POS terminal — one register, one drawer.</div>
+                            <div className="text-sm text-slate-400 mt-0.5">Cover, drinks & payouts ring up on the register terminal — one register, one drawer.</div>
                           </div>
                           <div className="text-cyan-300 font-mono text-sm shrink-0">GO →</div>
                         </button>

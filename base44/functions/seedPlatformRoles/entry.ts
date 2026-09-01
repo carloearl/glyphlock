@@ -11,11 +11,11 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
  *   VENUE_OWNER     — Full venue access + settings + staff management
  *   VENUE_MANAGER   — Manage POS, batches, reports, staff (no system settings)
  *   FLOOR_HOST      — POS + VIP + guest tracking + time clock
- *   BARTENDER       — POS register + time clock only
+ *   BARTENDER       — venue register + time clock only
  *   SECURITY        — Guest tracking + time clock only
  *   DJ              — Time clock only
  *   PERFORMER       — Entertainer check-in + time clock
- *   KIOSK           — POS register only (no time clock, no history)
+ *   KIOSK           — venue register only (no time clock, no history)
  */
 
 const CANONICAL_ROLES = [
@@ -95,7 +95,7 @@ const CANONICAL_ROLES = [
   {
     role_key: 'FLOOR_HOST',
     display_name: 'Floor Host',
-    description: 'POS register, VIP room management, guest tracking, and time clock.',
+    description: 'venue register, VIP room management, guest tracking, and time clock.',
     is_cross_venue: false,
     session_timeout_minutes: 480,
     can_escalate_to: [],
@@ -112,7 +112,7 @@ const CANONICAL_ROLES = [
   {
     role_key: 'BARTENDER',
     display_name: 'Bartender / Cashier',
-    description: 'POS register and time clock. No batch management or reporting.',
+    description: 'venue register and time clock. No batch management or reporting.',
     is_cross_venue: false,
     session_timeout_minutes: 480,
     can_escalate_to: [],
@@ -163,7 +163,7 @@ const CANONICAL_ROLES = [
   {
     role_key: 'KIOSK',
     display_name: 'Kiosk',
-    description: 'POS register only. No time clock, no history.',
+    description: 'venue register only. No time clock, no history.',
     is_cross_venue: false,
     session_timeout_minutes: 5,
     can_escalate_to: [],

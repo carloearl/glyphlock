@@ -70,7 +70,7 @@ Target model:
 - Assent, signatures, media, QR/barcode references, and audit events linked by contract ID.
 - No contract facts duplicated across multiple records without a declared source of truth.
 
-### Payments, POS, payouts, and accounting
+### Payments, Registers, payouts, and accounting
 
 Entities to reconcile:
 

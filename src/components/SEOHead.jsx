@@ -249,7 +249,7 @@ export default function SEOHead({
       "url": siteUrl,
       "logo": image,
       "image": image,
-      "description": "GlyphLock LLC builds evidence infrastructure connecting identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS (Nexus Unified POS System) venue operations, financial accountability, APIs, hardware, and governance.",
+      "description": "GlyphLock LLC builds evidence infrastructure connecting identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS (Nexus Unified Portal System) venue operations, financial accountability, APIs, hardware, and governance.",
       "foundingDate": "2025-05-24",
       "founder": {
         "@type": "Person",

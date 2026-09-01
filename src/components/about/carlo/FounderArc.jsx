@@ -14,7 +14,7 @@ const STEPS = [
   {
     n: "03",
     title: "The principle became GlyphLock, then NUPS",
-    body: "GlyphLock generalized continuity into carriers, verification, and evidence recordkeeping. NUPS — the Nexus Unified POS System — applied it to the venue workflows the problem came from."
+    body: "GlyphLock generalized continuity into carriers, verification, and evidence recordkeeping. NUPS — the Nexus Unified Portal System — applied it to the venue workflows the problem came from."
   },
   {
     n: "04",

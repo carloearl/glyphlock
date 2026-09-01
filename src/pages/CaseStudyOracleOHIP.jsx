@@ -182,7 +182,7 @@ export default function CaseStudyOracleOHIP() {
                 </span>
               </h1>
               <p className="mt-7 max-w-3xl text-lg leading-8 text-slate-300">
-                GlyphLock built a controlled server-to-server bridge between the Nexus Unified POS System (NUPS) and the Oracle
+                GlyphLock built a controlled server-to-server bridge between the Nexus Unified Portal System (NUPS) and the Oracle
                 Hospitality Integration Platform, then progressed the Partner Sandbox path through
                 protected configuration, OCIM authentication, request success and sanitized response validation.
               </p>

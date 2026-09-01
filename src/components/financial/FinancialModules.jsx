@@ -11,8 +11,8 @@ const SHIELD_LOGO_URL = "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/obj
 
 const MODULES = [
   {
-    title: "N.U.P.S. Point-of-Sale",
-    subtitle: "Nexus Universal Point-of-Sale System",
+    title: "N.U.P.S. Portal",
+    subtitle: "Nexus Unified Portal System",
     description: "Full-stack POS built for entertainment venues. Cash register, batch management, VIP contracts, entertainer check-in, Z-reports, and real-time floor operations.",
     features: ["Multi-payment processing", "VIP contract signing", "Real-time floor view", "Dream Dollar integration"],
     icon: CreditCard,

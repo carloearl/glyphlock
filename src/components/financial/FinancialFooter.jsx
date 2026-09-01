@@ -15,7 +15,7 @@ export default function FinancialFooter() {
             </h4>
             <p className="text-xs text-gray-500 leading-relaxed">
               GlyphLock Financial, LLC is a separate limited liability company operating within the GlyphLock ecosystem.
-              All POS transactions, currency issuance, blockchain operations, and entertainment services fall under this entity.
+              All register transactions, currency issuance, blockchain operations, and entertainment services fall under this entity.
             </p>
           </div>
 
@@ -24,7 +24,7 @@ export default function FinancialFooter() {
             <h4 className="text-sm font-bold text-white mb-3">Quick Access</h4>
             <div className="space-y-2">
               {[
-                { label: "N.U.P.S. POS System", page: "NUPSLogin" },
+                { label: "N.U.P.S. Portal System", page: "NUPSLogin" },
                 { label: "Blockchain Suite", page: "Blockchain" },
                 { label: "Club Currency Press", page: "ClubCurrencyPress" },
                 { label: "DJ Pro Mixer", page: "GlyphBotMixer" },

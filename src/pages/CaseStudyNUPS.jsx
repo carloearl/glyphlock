@@ -55,8 +55,8 @@ export default function CaseStudyNUPS() {
     <main className="min-h-screen bg-[#050b14] px-5 py-24 text-white">
       <SEOHead
         title="NUPS Product Category and Positioning | GlyphLock"
-        description="A factual comparison of the Nexus Unified POS System with modern payment platforms, focused on venue integration and evidence packaging."
-        keywords={['Nexus Unified POS System', 'NUPS positioning', 'venue operations', 'payment integration', 'evidence packaging', 'biometric data handling']}
+        description="A factual comparison of the Nexus Unified Portal System with modern payment platforms, focused on venue integration and evidence packaging."
+        keywords={['Nexus Unified Portal System', 'NUPS positioning', 'venue operations', 'payment integration', 'evidence packaging', 'biometric data handling']}
         url="/CaseStudyNUPS"
       />
 
@@ -70,8 +70,8 @@ export default function CaseStudyNUPS() {
           <Badge className="border border-cyan-400/30 bg-cyan-400/10 text-cyan-200">Technical positioning</Badge>
           <h1 className="mt-6 text-4xl font-black tracking-tight sm:text-6xl">NUPS Product Category and Positioning</h1>
           <p className="mt-6 text-lg leading-8 text-slate-300">
-            NUPS means <strong className="text-white">Nexus Unified POS System</strong>. It is a venue-operations
-            platform that connects point-of-sale activity with identity, permissions, contracts, shifts, payouts,
+            NUPS means <strong className="text-white">Nexus Unified Portal System</strong>. It is a venue-operations
+            platform that connects register activity with identity, permissions, contracts, shifts, payouts,
             reconciliation, and evidence records. Its differentiator is integration and evidentiary packaging—not a
             claim that payment platforms lack modern security, audit, or dispute tooling.
           </p>

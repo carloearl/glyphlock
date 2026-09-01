@@ -234,7 +234,7 @@ export default function FinancialCoinHero() {
               <span className="glf-td">▲</span>
               <span className="glf-ti">IP DOCUMENTATION</span>
               <span className="glf-td">▲</span>
-              <span className="glf-ti">NUPS POS SYSTEM</span>
+              <span className="glf-ti">NUPS PORTAL SYSTEM</span>
               <span className="glf-td">▲</span>
               <span className="glf-ti">DREAM DOLLAR PRESS</span>
               <span className="glf-td">▲</span>

@@ -23,7 +23,7 @@
 - `/NUPSHub` → Dashboard (TodaysSummary, TopProducts, HourlySales, VenuePerformance, OperatorFlowStrip, DailySettlementSummary)
 - `/FrontDoor` → Door operations (cover charges, driver drops, guest check-in)
 - `/EntertainerCheckIn` → Entertainer check-in kiosk
-- `/Register` / `/RegisterConsole` → POS terminal (tabs: register, bar, dj, staff, audit)
+- `/Register` / `/RegisterConsole` → register terminal (tabs: register, bar, dj, staff, audit)
 - `/DriverPayouts` → Driver payout management
 - `/Receipts` → Receipt history
 - `/Tonight` → Tonight snapshot

@@ -50,7 +50,7 @@
     },
     "terminal_id": {
       "type": "string",
-      "description": "POS terminal that executed the sale (e.g. CG01-T1)."
+      "description": "register terminal that executed the sale (e.g. CG01-T1)."
     },
     "shift_id": {
       "type": "string",

@@ -48,7 +48,7 @@ export default function FinancialFooterCTA() {
 
             <p className="text-slate-400 max-w-2xl mx-auto mb-8 leading-relaxed">
               GlyphLock Financial is a separate limited liability company operating within the GlyphLock ecosystem. 
-              All financial products, POS systems, club currency operations, and blockchain tools are 
+              All financial products, register systems, club currency operations, and blockchain tools are 
               developed and maintained under this entity. Bootstrapped. No outside investors. Full ownership.
             </p>
 

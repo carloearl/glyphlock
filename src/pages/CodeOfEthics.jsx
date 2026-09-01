@@ -80,7 +80,7 @@ export default function CodeOfEthics() {
             GlyphLock LLC ("GlyphLock") is committed to earning trust through lawful conduct, accurate
             records, responsible technology practices, and fair dealing. This Policy establishes
             minimum standards for ethical conduct and anti-corruption compliance across GlyphLock's
-            business, including the development and operation of NUPS (Nexus Unified POS System),
+            business, including the development and operation of NUPS (Nexus Unified Portal System),
             partner integrations, customer relationships, procurement, sales, and marketplace
             activities.
           </p>
@@ -285,7 +285,7 @@ export default function CodeOfEthics() {
             <strong className="text-white">GlyphBucks</strong> refers to physical club vouchers or
             tokens and any related digital closed-loop stored-value functionality supported by
             GlyphLock. Venue-issued physical instruments may be sold through a venue's live
-            point-of-sale system and recorded by NUPS in an authorized parallel or production
+            register system and recorded by NUPS in an authorized parallel or production
             workflow. Any integrated digital wallet or materially expanded stored-value functionality
             requires documented legal, processor, security, accounting, and product-risk review before
             activation.

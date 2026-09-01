@@ -4,7 +4,7 @@ GlyphLock LLC is an Arizona limited liability company founded on May 24, 2025, i
 
 ## NUPS
 
-NUPS means Nexus Unified POS System. It is venue-operations software that connects identity, role, contract, shift, register, payout, reconciliation, and audit records. NUPS can package references from payment and hospitality systems, but those source systems remain authoritative for the events they control.
+NUPS means Nexus Unified Portal System. It is venue-operations software that connects identity, role, contract, shift, register, payout, reconciliation, and audit records. NUPS can package references from payment and hospitality systems, but those source systems remain authoritative for the events they control.
 
 ## Oracle Hospitality identifiers
 

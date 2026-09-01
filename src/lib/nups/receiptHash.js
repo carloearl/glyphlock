@@ -1,5 +1,5 @@
 /**
- * receiptHash — SHA-256 fingerprint of a completed POS transaction.
+ * receiptHash — SHA-256 fingerprint of a completed register transaction.
  *
  * Purpose: prints a tamper-evident hash on every receipt (and stores it
  * back on the transaction). Downstream: exportable to a public blockchain

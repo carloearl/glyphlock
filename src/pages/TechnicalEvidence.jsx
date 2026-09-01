@@ -30,7 +30,7 @@ const RECORDS = [
     date: 'Updated August 25, 2026',
     icon: ShieldCheck,
     tone: 'cyan',
-    summary: 'A factual comparison of the Nexus Unified POS System with modern payment platforms, centered on integration boundaries and evidence packaging rather than unsupported category claims.',
+    summary: 'A factual comparison of the Nexus Unified Portal System with modern payment platforms, centered on integration boundaries and evidence packaging rather than unsupported category claims.',
     evidence: [
       'Acknowledges modern audit, 3-D Secure, KYC, and dispute-evidence tooling',
       'Defines NUPS around venue workflow integration and evidence packaging',

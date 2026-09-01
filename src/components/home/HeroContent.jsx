@@ -92,7 +92,7 @@ export default function HeroContent() {
 
   const features = [
     { highlight: "WEB & APP BUILDS", text: "— sites, apps, and internal tools built to spec" },
-    { highlight: "OPERATIONS SYSTEMS", text: "— point of sale, scheduling, payouts, reporting" },
+    { highlight: "OPERATIONS SYSTEMS", text: "— venue register, scheduling, payouts, reporting" },
     { highlight: "INTEGRATIONS", text: "— payments, accounting, and third-party APIs wired in" },
     { highlight: "AI FEATURES", text: "— assistants and automation embedded in your product" },
     { highlight: "ONGOING SUPPORT", text: "— we maintain and extend what we ship" }
@@ -119,7 +119,7 @@ export default function HeroContent() {
     },
     {
       title: "PROOF OF WORK",
-      desc: "NUPS — a venue platform we built and run: point of sale, contracts, receipts, and reporting.",
+      desc: "NUPS — a venue platform we built and run: venue register, contracts, receipts, and reporting.",
       color: "#7c3aed",
       borderClass: "border-purple-500/40",
       glowClass: "hover:shadow-[0_0_50px_rgba(124,58,237,0.5)]",

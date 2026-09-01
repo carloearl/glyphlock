@@ -185,7 +185,7 @@ DEBITS = CREDITS
 REAL / DEMO / SANDBOX remain isolated
 ```
 
-A full authenticated DEMO/SANDBOX point-of-sale, VIP, batch-close, and Z-report browser journey remains unverified.
+A full authenticated DEMO/SANDBOX venue register, VIP, batch-close, and Z-report browser journey remains unverified.
 
 ## Security acceptance table
 

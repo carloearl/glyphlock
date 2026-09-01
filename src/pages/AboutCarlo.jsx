@@ -30,7 +30,7 @@ export default function AboutCarloPage() {
             "url": "https://glyphlock.io/about-carlo",
             "knowsAbout": [
               "Venue operations",
-              "Point of sale systems",
+              "Venue register systems",
               "Evidence recordkeeping",
               "Secure image carriers",
               "Secure QR workflows",

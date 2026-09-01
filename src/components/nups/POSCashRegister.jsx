@@ -323,7 +323,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
     setHeldTransactions([]);
     setShowManagerOverride(false);
     setManagerPin('');
-    toast.success(`POS system cleared by ${actor}`);
+    toast.success(`portal system cleared by ${actor}`);
   };
 
   const handleManagerRefresh = async () => {
@@ -1366,7 +1366,7 @@ export default function POSCashRegister({ user, station = 'door', showDriverPane
               <Lock className="w-5 h-5 text-yellow-400" />
               <span className="text-white font-bold text-sm">Manager PIN Required</span>
             </div>
-            <p className="text-gray-400 text-sm">Enter manager PIN to clear POS system:</p>
+            <p className="text-gray-400 text-sm">Enter manager PIN to clear portal system:</p>
             <input
               type="password"
               value={managerPin}

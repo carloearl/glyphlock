@@ -245,8 +245,8 @@ if (sdkDocs && !sdkDocs.includes('https://github.com/carloearl/glyphlock')) {
 const expansionSources = ['base44/functions/llmsTxt/entry.ts', 'base44/functions/aiTxtEnhanced/entry.ts', 'base44/functions/glyphlockKnowledge/entry.ts'];
 for (const p of expansionSources) {
   const c = sourceContents[p];
-  if (c && !c.includes('Nexus Unified POS System')) {
-    fail(`NUPS expansion "Nexus Unified POS System" missing in ${p}`);
+  if (c && !c.includes('Nexus Unified Portal System')) {
+    fail(`NUPS expansion "Nexus Unified Portal System" missing in ${p}`);
   }
 }
 

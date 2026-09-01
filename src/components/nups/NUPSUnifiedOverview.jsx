@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 
 const moduleRows = [
   ["Contractor Onboarding", "Biometric Identity Verify", "Digital Contracts", "VIP Contracts", "Internal Currency System"],
-  ["POS System", "Shift Check-In / Check-Out", "DJ & Event Management", "Reporting & Analytics", "Financial Reconciliation"],
+  ["Portal System", "Shift Check-In / Check-Out", "DJ & Event Management", "Reporting & Analytics", "Financial Reconciliation"],
   ["Chargeback Documentation", "Archive & Audit Trail", "Multi-Station Deployment", "Role-Based Permissions", "Owner Dashboard"],
 ];
 
@@ -81,7 +81,7 @@ export default function NUPSUnifiedOverview() {
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="min-w-0">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-cyan-300">GlyphLock Ecosystem</p>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight text-white md:text-5xl">NUPS — Nexus Unified POS System</h1>
+              <h1 className="mt-2 text-3xl font-bold tracking-tight text-white md:text-5xl">NUPS — Nexus Unified Portal System</h1>
               <p className="mt-3 max-w-3xl text-base leading-7 text-slate-300 md:text-lg">
                 Venue Operating System & Infrastructure Platform — multi-station, multi-venue, compliance-ready, and institutional-grade.
               </p>
@@ -94,7 +94,7 @@ export default function NUPSUnifiedOverview() {
               <CardTitle className="text-lg">Venue Operations</CardTitle>
             </CardHeader>
             <CardContent className="text-sm leading-6 text-slate-300">
-              NUPS integrates contractor onboarding, digital contracts, internal currency systems, POS operations, event & DJ management, reporting, compliance infrastructure, and financial reconciliation.
+              NUPS integrates contractor onboarding, digital contracts, internal currency systems, register operations, event & DJ management, reporting, compliance infrastructure, and financial reconciliation.
             </CardContent>
           </Card>
           <Card className="border-white/10 bg-white/5 text-white">

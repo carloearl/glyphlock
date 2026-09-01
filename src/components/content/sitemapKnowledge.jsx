@@ -61,7 +61,7 @@ export const SITEMAP_KNOWLEDGE = {
     { name: "Steganography", path: "/steganography", category: "Security" },
     { name: "Blockchain Verification", path: "/blockchain", category: "Security" },
     { name: "GlyphBot Assistant", path: "/glyphbot", category: "AI Tools" },
-    { name: "NUPS POS System", path: "/nups-login", category: "Services" }
+    { name: "NUPS Portal System", path: "/nups-login", category: "Services" }
   ],
 
   company: [

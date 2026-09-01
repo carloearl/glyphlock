@@ -314,7 +314,7 @@ export default function OracleOHIPMilestone() {
           <div className="space-y-7 text-base leading-8 text-slate-300">
             <p className="text-lg leading-8 text-slate-200">
               <strong className="text-white">EL MIRAGE, Ariz., Aug. 25, 2026 —</strong> GlyphLock LLC
-              announced that its Nexus Unified POS System, or NUPS, has advanced across three separate Oracle
+              announced that its Nexus Unified Portal System, or NUPS, has advanced across three separate Oracle
               workstreams: <strong className="text-emerald-300">response validated</strong> in the OHIP Partner
               Sandbox, an approved and active Oracle Cloud Marketplace program enrollment, and a formally submitted
               Simphony Integration Partner Program request now awaiting Oracle review.

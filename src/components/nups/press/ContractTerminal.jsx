@@ -51,7 +51,7 @@ function PrintableContract({ contract }) {
       <div className="border-2 border-black p-4 mb-4">
         <div className="grid grid-cols-2 gap-2 text-xs">
           <div><strong>TX ID:</strong> {contract.txId}</div>
-          <div><strong>POS Terminal:</strong> {contract.posTerminalId}</div>
+          <div><strong>Register Terminal:</strong> {contract.posTerminalId}</div>
           <div><strong>Date:</strong> {new Date(contract.timestamp).toLocaleString()}</div>
           <div><strong>Status:</strong> {contract.status}</div>
           <div><strong>Customer:</strong> {contract.customerName}</div>

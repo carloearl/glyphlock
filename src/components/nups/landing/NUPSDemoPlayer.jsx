@@ -212,7 +212,7 @@ function VenueOperationsScene({ progress }) {
       <Panel className="p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-300">Nexus Unified POS System</div>
+            <div className="text-[10px] uppercase tracking-[0.2em] text-cyan-300">Nexus Unified Portal System</div>
             <div className="mt-1 text-sm font-bold text-white">Venue operations timeline</div>
           </div>
           <StatusPill active><span className="relative flex h-2 w-2"><span className="absolute h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" /><span className="relative h-2 w-2 rounded-full bg-emerald-400" /></span>Active session</StatusPill>

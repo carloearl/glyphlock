@@ -298,7 +298,7 @@ export default function NUPSOwner() {
       <SEOHead
         title="N.U.P.S. Owner Dashboard | GlyphLock"
         description="Venue owner operations dashboard."
-        keywords="venue management, POS system, staff management, VIP room tracking, GlyphLock NUPS"
+        keywords="venue management, portal system, staff management, VIP room tracking, GlyphLock NUPS"
         url="/nups-owner"
       />
       <OfflineSyncBanner />

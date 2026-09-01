@@ -20,7 +20,7 @@ export default function NUPSOperatingProof() {
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300">Operational proof</p>
             <h2 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-5xl">NUPS connects the whole venue event.</h2>
             <p className="mt-5 text-lg leading-8 text-slate-300">
-              Nexus Unified POS System is the real-world operating proof for the architecture. It connects front-door identity,
+              Nexus Unified Portal System is the real-world operating proof for the architecture. It connects front-door identity,
               role permissions, contractor agreements, registers, stored-value liabilities, batches, reconciliation, reports,
               and audit history without treating every record as the same thing.
             </p>

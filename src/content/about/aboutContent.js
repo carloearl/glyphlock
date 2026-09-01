@@ -70,9 +70,9 @@ export const originTimeline = [
   {
     number: "06",
     year: "Operating proof",
-    phase: "Nexus Unified POS System",
+    phase: "Nexus Unified Portal System",
     title: "NUPS connected the work between arrival and the final report.",
-    body: "Nexus Unified POS System became GlyphLock’s first real operating proof. It connects venue-scoped guest, staff, contractor, and operator context to permissions, digital agreements, registers, shifts, transaction references, batches, reconciliation, reports, and audit events.",
+    body: "Nexus Unified Portal System became GlyphLock’s first real operating proof. It connects venue-scoped guest, staff, contractor, and operator context to permissions, digital agreements, registers, shifts, transaction references, batches, reconciliation, reports, and audit events.",
     work: "The system preserves strict accounting and role boundaries: total sales remain cash plus card sales; GlyphBucks remain a closed-loop liability; entertainer agreements remain separate from employee payroll and tip pools; REAL, DEMO, and SANDBOX activity remain isolated.",
     record: "Management can review not only a total, but the chain of people, permissions, agreements, references, approvals, liabilities, exceptions, and reports that produced it.",
     color: "#10B981",

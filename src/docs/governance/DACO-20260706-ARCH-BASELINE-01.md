@@ -140,7 +140,7 @@ Every NUPS route is declared in both TitleCase and lowercase (e.g., `/FrontDoor`
 
 | Functional Area | Canonical Route | Remove |
 |---|---|---|
-| POS Register | `/register` | Remove `/Register`, `/RegisterConsole` duplicates from LayoutWrapper block |
+| Venue Register | `/register` | Remove `/Register`, `/RegisterConsole` duplicates from LayoutWrapper block |
 | Contracts | `/contracts` | Remove `/Contracts`, `/ContractsHub` from LayoutWrapper block |
 | Accounting | `/accounting` | Remove `/Accounting` from LayoutWrapper block |
 | Settlements | `/admin/settlement` | Remove from LayoutWrapper block |
@@ -172,7 +172,7 @@ Every NUPS route is declared in both TitleCase and lowercase (e.g., `/FrontDoor`
 
 | Field | Value |
 |---|---|
-| Purpose | Unified POS register for door, bar, VIP stations; item selection, cart, checkout, payment processing, receipt hashing |
+| Purpose | Unified venue register for door, bar, VIP stations; item selection, cart, checkout, payment processing, receipt hashing |
 | Owner | STAFF+ (role-scoped) |
 | Routes | `/register`, `/Register`, `/RegisterConsole` |
 | Entities (write) | POSTransaction, POSBatch, AuditEvent, ActivityLog, MigrationAuditLog |
@@ -622,7 +622,7 @@ The following backend functions write to entities using `base44.asServiceRole.en
 
 ## G.3 Mode Leakage Risk
 
-- NUPS POS transactions stamp `mode` from `resolveMode()` which reads `SystemConfig` global singleton.
+- NUPS register transactions stamp `mode` from `resolveMode()` which reads `SystemConfig` global singleton.
 - If SystemConfig is set to DEMO, ALL writes get mode=DEMO — including real door sales if an admin accidentally toggles mode.
 - `toggleMode()` requires SOVEREIGN role — this is the correct gate.
 - **Risk:** No per-venue mode. SystemConfig is global. A multi-venue deployment would share one mode flag.

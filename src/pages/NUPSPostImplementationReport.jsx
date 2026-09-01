@@ -55,7 +55,7 @@ const STEPS = [
   },
   {
     step: 4,
-    title: "POS Register Structure",
+    title: "Venue Register Structure",
     status: "existing_verified",
     route: "components/nups/POSCashRegister.jsx",
     items: [

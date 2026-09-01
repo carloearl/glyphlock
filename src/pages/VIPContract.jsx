@@ -494,7 +494,7 @@ EXECUTION TIMESTAMP: ${new Date().toISOString()}`;
       </div>
 
       <div class="footer">
-        N.U.P.S. — NEXUS UNIVERSAL POINT-OF-SALE<br/>
+        N.U.P.S. — NEXUS UNIFIED PORTAL SYSTEM<br/>
         Contract Serial: ${serialNumber} | Executed: ${new Date().toISOString()}<br/>
         This document is a true and complete copy of the executed agreement.<br/>
         Retain for a minimum of three (3) years per data retention policy (Section 7).

@@ -108,7 +108,7 @@ export default function Tonight() {
   const pending = payouts.filter(p => (p.payout_status || "PENDING") === "PENDING");
   const pendingTotal = pending.reduce((s, p) => s + (Number(p.total_payout) || 0), 0);
 
-  // Today's POS transactions (live revenue)
+  // Today's register transactions (live revenue)
   const { data: txns = [], refetch: refetchTxns } = useQuery({
     queryKey: ["tonight-txns", venueId, t],
     queryFn: async () => {

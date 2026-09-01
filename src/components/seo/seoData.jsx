@@ -7,7 +7,7 @@
 //    /NUPSLanding, /SDKDocs, /GlyphLockFinancial). No obsolete service slugs.
 //  - No retired/misleading strings (full enumerated list enforced by
 //    scripts/check-seo-metadata.mjs).
-//  - NUPS expands to "Nexus Unified POS System" only.
+//  - NUPS expands to "Nexus Unified Portal System" only.
 //  - Structured data is claims-safe: no unsupported certification, endorsement,
 //    price, rating, partner, patent, or production claims.
 //  - Canonical origin: https://glyphlock.io
@@ -55,7 +55,7 @@ export const SEO_DATA = {
     keywords: [
       "GlyphLock", "evidence infrastructure", "identity and permission workflows", "Secure QR Studio",
       "QR verification", "interactive images", "image carrier research", "GlyphBot", "automated DJ software",
-      "Fable visual engine", "NUPS", "Nexus Unified POS System", "venue operations software", "digital contracts",
+      "Fable visual engine", "NUPS", "Nexus Unified Portal System", "venue operations software", "digital contracts",
       "GlyphBucks", "closed-loop stored value", "reconciliation", "API integration", "SDK integration", "webhooks",
       "hardware integration", "Oracle Hospitality integration", "OHIP integration work", "audit trails", "governance",
       "Carlo Rene Earl", "Jacub Lough", "Collin Vanderginst", "El Mirage Arizona",
@@ -269,12 +269,12 @@ export const SEO_DATA = {
 
   // ─────────────────────────── NUPS / FINANCIAL ───────────────────────────
   "NUPSLanding": {
-    title: "NUPS | Nexus Unified POS System for Venue Operations",
+    title: "NUPS | Nexus Unified Portal System for Venue Operations",
     description: "NUPS: venue operations software for check-in, floor status, VIP contracts, POS, and nightly settlement.",
-    keywords: ["NUPS", "Nexus Unified POS System", "venue operations software", "guest check-in", "identity verification workflow", "digital contracts", "venue ledger", "reconciliation", "payout records"],
+    keywords: ["NUPS", "Nexus Unified Portal System", "venue operations software", "guest check-in", "identity verification workflow", "digital contracts", "venue ledger", "reconciliation", "payout records"],
     h1: "NUPS Connected Venue Operations",
     url: "/NUPSLanding",
-    ogTitle: "NUPS | Nexus Unified POS System for Venue Operations",
+    ogTitle: "NUPS | Nexus Unified Portal System for Venue Operations",
     ogDescription: "NUPS: venue operations software for check-in, floor status, VIP contracts, POS, and nightly settlement.",
     schemaType: "SoftwareApplication",
     priority: 0.9,
@@ -446,7 +446,7 @@ export const SEO_DATA = {
   "CaseStudyOracleOHIP": {
     title: "NUPS Oracle OHIP Integration Evidence | GlyphLock",
     description: "Review NUPS Oracle OHIP sandbox evidence, Cloud Marketplace program approval, and formal Simphony integration intake with production boundaries explicit.",
-    keywords: ["Nexus Unified POS System", "Oracle OHIP integration", "Partner Sandbox", "Oracle Cloud Marketplace", "Oracle Simphony integration", "read-only validation", "OPERA Cloud configuration", "hospitality integration evidence"],
+    keywords: ["Nexus Unified Portal System", "Oracle OHIP integration", "Partner Sandbox", "Oracle Cloud Marketplace", "Oracle Simphony integration", "read-only validation", "OPERA Cloud configuration", "hospitality integration evidence"],
     h1: "NUPS Oracle OHIP Partner Sandbox Evidence",
     url: "/CaseStudyOracleOHIP",
     ogTitle: "NUPS Oracle OHIP Integration Evidence | GlyphLock",
@@ -461,7 +461,7 @@ export const SEO_DATA = {
   "OracleOHIPMilestone": {
     title: "Oracle OHIP, Marketplace & Simphony Progress | GlyphLock",
     description: "GlyphLock NUPS validated Oracle OHIP sandbox response, activated Cloud Marketplace enrollment, and submitted Simphony integration intake for Oracle review.",
-    keywords: ["Nexus Unified POS System", "Oracle OHIP", "Oracle Hospitality", "Oracle Cloud Marketplace", "Oracle Simphony integration", "Partner Sandbox", "OPN member", "hospitality technology", "read-only validation"],
+    keywords: ["Nexus Unified Portal System", "Oracle OHIP", "Oracle Hospitality", "Oracle Cloud Marketplace", "Oracle Simphony integration", "Partner Sandbox", "OPN member", "hospitality technology", "read-only validation"],
     h1: "GlyphLock Advances NUPS Across Oracle OHIP, Marketplace and Simphony Tracks",
     url: "/OracleOHIPMilestone",
     ogTitle: "Oracle OHIP, Marketplace & Simphony Progress | GlyphLock",
@@ -473,12 +473,12 @@ export const SEO_DATA = {
   },
   "CaseStudyNUPS": {
     title: "NUPS Product Category and Positioning | GlyphLock",
-    description: "How the Nexus Unified POS System differs from payment platforms through integration design and evidence packaging, with explicit biometric-data boundaries.",
-    keywords: ["Nexus Unified POS System", "NUPS positioning", "evidence packaging", "payment platform comparison", "biometric data handling"],
+    description: "How the Nexus Unified Portal System differs from payment platforms through integration design and evidence packaging, with explicit biometric-data boundaries.",
+    keywords: ["Nexus Unified Portal System", "NUPS positioning", "evidence packaging", "payment platform comparison", "biometric data handling"],
     h1: "NUPS Product Category and Positioning",
     url: "/CaseStudyNUPS",
     ogTitle: "NUPS Product Category and Positioning | GlyphLock",
-    ogDescription: "How the Nexus Unified POS System differs from payment platforms through integration design and evidence packaging, with explicit biometric-data boundaries.",
+    ogDescription: "How the Nexus Unified Portal System differs from payment platforms through integration design and evidence packaging, with explicit biometric-data boundaries.",
     schemaType: "TechArticle",
     datePublished: "2026-08-25",
     dateModified: "2026-08-25",

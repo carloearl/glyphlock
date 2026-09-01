@@ -238,7 +238,7 @@ function RegisterConsoleInner() {
   return (
     <NUPSAppShell
       title="Register · POS"
-      subtitle={`${modeState.operatingMode} POS Terminal · ${activeVenue?.name || activeVenue?.venue_name || "Selected venue"}`}
+      subtitle={`${modeState.operatingMode} Register Terminal · ${activeVenue?.name || activeVenue?.venue_name || "Selected venue"}`}
       actions={
         <div className="flex items-center gap-2">
           <BatchStatusBadge batch={activeBatch} />

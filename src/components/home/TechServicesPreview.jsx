@@ -24,7 +24,7 @@ const PREVIEW_CARDS = [
     icon: Building2,
     title: "NUPS and GlyphLock Implementation",
     description:
-      "Setup and deployment of the NUPS audit, compliance, ERP, and point-of-sale platform, with workflow configuration and staff onboarding.",
+      "Setup and deployment of the NUPS audit, compliance, ERP, and venue-operations platform, with workflow configuration and staff onboarding.",
     color: "#10b981",
   },
 ];

@@ -1,6 +1,6 @@
 # NUPS CONTEXT — Layer 3 Domain State
 
-**System:** Nexus Unified POS System (NUPS) inside the canonical GlyphLock application  
+**System:** Nexus Unified Portal System (NUPS) inside the canonical GlyphLock application  
 **Canonical Base44 app:** `697a087fb354faebb72df54b`  
 **Canonical source repository:** `carloearl/glyphlock`  
 **Canonical branch:** `main`  
@@ -77,7 +77,7 @@ Frontend operating presentation is layered by `src/hooks/useNUPSOperatingMode.js
 
 ## Core financial model
 
-- `POSTransaction` records POS transaction facts and separates `cash_sales`, `card_sales`, `gb_liability`, comps, fees, station, batch, venue, and mode.
+- `POSTransaction` records register transaction facts and separates `cash_sales`, `card_sales`, `gb_liability`, comps, fees, station, batch, venue, and mode.
 - `POSBatch` groups shift/register activity.
 - `POSZReport` records close/reconciliation output.
 - `DailySettlement` provides venue/business-day settlement.

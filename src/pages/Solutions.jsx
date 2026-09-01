@@ -16,7 +16,7 @@ export default function Solutions() {
       icon: Building2,
       description: "Transaction verification module – protocol-governed payment processing restricted to credentialed venues.",
       features: [
-        "NUPS POS System with VIP room tracking",
+        "NUPS Portal System with VIP room tracking",
         "Entertainer management and contracts",
         "Customer loyalty programs",
         "Secure payment processing with blockchain verification",

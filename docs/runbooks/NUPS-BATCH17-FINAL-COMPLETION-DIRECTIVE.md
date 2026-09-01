@@ -154,7 +154,7 @@ owner/admin login
 → entertainer credential workflow
 → Daily Checklist save and refresh
 → entertainer playlist save, refresh, and reload
-→ safe non-live POS transaction
+→ safe non-live register transaction
 → VIP workflow
 → synthetic protected-evidence capture
 → non-live contract workflow where safe
