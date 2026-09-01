@@ -10,7 +10,7 @@ export default function IntroStatement() {
       </p>
 
       <p className="mt-3 text-sm sm:text-base text-white/60 leading-relaxed">
-        Point of sale, scheduling, payouts, reporting, integrations, and AI features. We've built
+        Venue registers, scheduling, payouts, reporting, integrations, and AI features. We've built
         and operate the NUPS venue platform, so you can see our work running in production.
       </p>
 
