@@ -3,9 +3,12 @@ import { readFileSync, existsSync } from 'node:fs';
 const requiredFiles = [
   'AGENTS.md',
   'CONTRIBUTING.md',
+  '.base44/ci-checks.json',
   '.github/pull_request_template.md',
   '.github/workflows/nups-ci.yml',
   'docs/engineering/REPOSITORY_GOVERNANCE.md',
+  'package.json',
+  'scripts/run-base44-ci.mjs',
 ];
 
 const failures = [];
@@ -40,9 +43,13 @@ requireText('.github/pull_request_template.md', [
 ]);
 
 requireText('.github/workflows/nups-ci.yml', [
-  /pull_request:/,
+  /pull_request:\s*\n\s+branches:\s*\[main\]/,
   /name: Verify source and production build/,
   /npm run ci:base44/,
+]);
+
+requireText('scripts/run-base44-ci.mjs', [
+  /const requiredScripts = \['check:repository-governance'\]/,
 ]);
 
 if (existsSync('.github/workflows/nups-ci.yml')) {
@@ -65,6 +72,13 @@ if (existsSync('.base44/ci-checks.json')) {
   const config = JSON.parse(readFileSync('.base44/ci-checks.json', 'utf8'));
   if (!config.scripts?.includes('check:repository-governance')) {
     failures.push('.base44/ci-checks.json must run check:repository-governance');
+  }
+}
+
+if (existsSync('package.json')) {
+  const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+  if (pkg.scripts?.['ci:base44'] !== 'node scripts/run-base44-ci.mjs') {
+    failures.push('package.json must bind ci:base44 to scripts/run-base44-ci.mjs');
   }
 }
 
