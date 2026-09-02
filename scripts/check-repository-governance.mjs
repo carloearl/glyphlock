@@ -197,6 +197,16 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
         return key ? { key, value: getYamlScalar(line, 10, key) } : undefined;
       })
       .filter(Boolean);
+    const hasScalarContinuation = (key) => {
+      const scalarStart = propertyLines.findIndex((line) => isYamlKeyLine(line, 8, key));
+      if (scalarStart === -1) return false;
+      const scalarEnd = propertyLines.findIndex(
+        (line, propertyIndex) => propertyIndex > scalarStart && isMappingKeyLine(line, 8),
+      );
+      return propertyLines
+        .slice(scalarStart + 1, scalarEnd === -1 ? propertyLines.length : scalarEnd)
+        .some((line) => line.trim() && !line.trimStart().startsWith('#'));
+    };
     return {
       name: propertyLines.map((line) => getYamlScalar(line, 8, 'name')).find((value) => value !== undefined),
       run: propertyLines.map((line) => getYamlScalar(line, 8, 'run')).find((value) => value !== undefined),
@@ -204,6 +214,7 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
       condition: propertyLines.map((line) => getYamlScalar(line, 8, 'if')).find((value) => value !== undefined),
       properties,
       withEntries,
+      hasProtectedScalarContinuation: ['run', 'uses', 'if'].some(hasScalarContinuation),
     };
   });
   if (!steps.length) failures.push('NUPS CI verify job must define steps');
@@ -252,7 +263,8 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
         step.withEntries.some((entry) => entry.key === key && entry.value === value)
       ));
     if (!step || step.run !== expected.run || step.uses !== expected.uses
-      || step.condition !== expected.condition || !sameProperties || !sameWith) {
+      || step.condition !== expected.condition || !sameProperties || !sameWith
+      || step.hasProtectedScalarContinuation) {
       failures.push(`NUPS CI verify step ${index + 1} is not canonical and fail closed`);
     }
   }

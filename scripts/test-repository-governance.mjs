@@ -184,3 +184,12 @@ test('rejects repository-controlled Node preload options', () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /.npmrc cannot set node-options/);
 });
+
+test('rejects folded continuations on protected commands', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '        run: npm run check:secrets',
+    '        run: npm run check:secrets\n          || true',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /verify step 4 is not canonical and fail closed/);
+});
