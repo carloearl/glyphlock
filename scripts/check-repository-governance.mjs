@@ -44,6 +44,22 @@ requireText('.github/workflows/nups-ci.yml', [
   /npm run ci:base44/,
 ]);
 
+if (existsSync('.github/workflows/nups-ci.yml')) {
+  const workflow = readFileSync('.github/workflows/nups-ci.yml', 'utf8');
+  const secretScan = workflow.indexOf('run: npm run check:secrets');
+  const dependencyInstall = workflow.indexOf('run: npm ci');
+
+  if (secretScan === -1) {
+    failures.push('.github/workflows/nups-ci.yml must run check:secrets');
+  }
+  if (dependencyInstall === -1) {
+    failures.push('.github/workflows/nups-ci.yml must use npm ci');
+  }
+  if (secretScan !== -1 && dependencyInstall !== -1 && secretScan > dependencyInstall) {
+    failures.push('check:secrets must run before npm ci');
+  }
+}
+
 if (existsSync('.base44/ci-checks.json')) {
   const config = JSON.parse(readFileSync('.base44/ci-checks.json', 'utf8'));
   if (!config.scripts?.includes('check:repository-governance')) {
