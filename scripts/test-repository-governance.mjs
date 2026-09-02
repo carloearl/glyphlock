@@ -176,3 +176,11 @@ test('rejects repository-controlled npm script shells', () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /.npmrc cannot override script-shell/);
 });
+
+test('rejects repository-controlled Node preload options', () => {
+  const result = runFixture(undefined, (fixtureRoot) => {
+    writeFileSync(join(fixtureRoot, '.npmrc'), 'node-options=--require=./preload.cjs\n');
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /.npmrc cannot set node-options/);
+});

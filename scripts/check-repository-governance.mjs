@@ -266,6 +266,9 @@ if (existsSync('.npmrc')) {
   if (/^\s*script-shell\s*=/im.test(npmConfig)) {
     failures.push('.npmrc cannot override script-shell');
   }
+  if (/^\s*node-options\s*=/im.test(npmConfig)) {
+    failures.push('.npmrc cannot set node-options');
+  }
 }
 
 if (existsSync('.base44/ci-checks.json')) {
