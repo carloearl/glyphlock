@@ -233,155 +233,138 @@ export default function SEOHead({
     }
     llmIndexLink.setAttribute('href', `${siteUrl}/glyphlock-llm-index.json`);
 
-    // Structured Data - Comprehensive Organization Schema (always present)
-    let script = document.querySelector('script[type="application/ld+json"]#org-schema');
-    if (!script) {
-      script = document.createElement('script');
-      script.setAttribute('type', 'application/ld+json');
-      script.setAttribute('id', 'org-schema');
-      document.head.appendChild(script);
+    // One canonical identity graph. Base44 platform JSON-LD must remain
+    // disabled in Dashboard > SEO & GEO > Advanced SEO to prevent duplicates.
+    document.querySelector('script[type="application/ld+json"]#org-schema')?.remove();
+    document.querySelector('script[type="application/ld+json"]#website-schema')?.remove();
+
+    let identityScript = document.querySelector('script[type="application/ld+json"]#identity-schema');
+    if (!identityScript) {
+      identityScript = document.createElement('script');
+      identityScript.setAttribute('type', 'application/ld+json');
+      identityScript.setAttribute('id', 'identity-schema');
+      document.head.appendChild(identityScript);
     }
-    script.textContent = JSON.stringify({
-      "@context": "https://schema.org",
+
+    const organizationId = siteUrl + '/#organization';
+    const websiteId = siteUrl + '/#website';
+    const organization = {
       "@type": "Organization",
-      "name": "GlyphLock LLC",
-      "alternateName": "GlyphLock",
-      "url": siteUrl,
-      "logo": image,
-      "image": image,
-      "description": "GlyphLock LLC builds evidence infrastructure connecting identity and permission, secure QR and image carriers, AI-assisted workflows, NUPS (Nexus Unified Portal System) venue operations, financial accountability, APIs, hardware, and governance.",
+      "@id": organizationId,
+      "name": "GlyphLock",
+      "legalName": "GlyphLock LLC",
+      "alternateName": ["GlyphLock LLC", "Glyphlock"],
+      "url": siteUrl + "/",
+      "logo": {
+        "@type": "ImageObject",
+        "@id": siteUrl + "/#logo",
+        "url": image,
+        "caption": "GlyphLock"
+      },
+      "image": { "@id": siteUrl + "/#logo" },
+      "description": "Evidence infrastructure for identity, operations, and proof. GlyphLock builds custom software, NUPS venue operations, secure QR and image verification, AI-assisted workflows, and documented governance controls.",
       "foundingDate": "2025-05-24",
       "founder": {
         "@type": "Person",
-        "name": "Carlo Rene Earl",
-        "jobTitle": "Founder & Chief Executive Officer"
+        "@id": siteUrl + "/#carloearl",
+        "name": "Carlo Earl",
+        "jobTitle": "Chief Executive Officer",
+        "worksFor": { "@id": organizationId }
       },
-      "member": [
-        {
-          "@type": "Person",
-          "name": "Jacub Lough",
-          "jobTitle": "Chief Financial Officer & Chief Strategy Officer"
-        },
-        {
-          "@type": "Person",
-          "name": "Collin Vanderginst",
-          "jobTitle": "Chief Technology Officer"
-        }
-      ],
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "El Mirage",
-        "addressRegion": "AZ",
-        "addressCountry": "US"
-      },
-      "contactPoint": [
-        {
-          "@type": "ContactPoint",
-          "telephone": "+1-480-886-5588",
-          "contactType": "customer service",
-          "email": "carloearl@glyphlock.com",
-          "availableLanguage": ["en"]
-        },
-        {
-          "@type": "ContactPoint",
-          "email": "carloearl@glyphlock.com",
-          "contactType": "technical support"
-        }
-      ],
-      "sameAs": [
-        "https://github.com/carloearl/glyphlock",
-        "https://linkedin.com/company/glyphlock",
-        "https://instagram.com/glyphlock",
-        "https://tiktok.com/@glyphlock"
-      ],
-      "slogan": "Infrastructure that makes activity provable.",
-      "areaServed": "Worldwide",
-      "keywords": resolvedKeywords,
+      "email": "carloearl@glyphlock.com",
+      "areaServed": "US",
       "knowsAbout": [
         "Evidence infrastructure",
-        "Concealed image data and least-significant-bit steganography",
-        "Secure QR payloads and interactive images",
-        "AI-assisted construction and system auditing",
+        "Secure QR verification",
+        "Identity and permission workflows",
         "Venue operations software",
-        "Closed-loop stored value recordkeeping",
-        "Operational and financial ledgers",
-        "Audit evidence and provenance",
-        "Hospitality interoperability",
-        "Hardware-assisted workflows",
-        "Governance and human approval controls"
+        "Digital contract and evidence capture",
+        "AI governance"
       ],
-      "hasOfferCatalog": {
-        "@type": "OfferCatalog",
-        "name": "GlyphLock Engagements",
-        "itemListElement": [
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Platform Access",
-              "description": "Secure QR, interactive image, verification, and GlyphBot-assisted workflows for creators, builders, and teams.",
-              "provider": {
-                "@type": "Organization",
-                "name": "GlyphLock LLC"
-              }
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Venue Deployment",
-              "description": "NUPS workflow configuration, role mapping, hardware planning, onboarding, and launch support.",
-              "provider": {
-                "@type": "Organization",
-                "name": "GlyphLock LLC"
-              }
-            }
-          },
-          {
-            "@type": "Offer",
-            "itemOffered": {
-              "@type": "Service",
-              "name": "Enterprise Integration",
-              "description": "Custom interoperability, data-boundary planning, technical review, licensing, and service-level scoping.",
-              "provider": {
-                "@type": "Organization",
-                "name": "GlyphLock LLC"
-              }
-            }
-          }
-        ]
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "sales",
+        "email": "carloearl@glyphlock.com",
+        "areaServed": "US",
+        "availableLanguage": "en"
+      },
+      "sameAs": [
+        "https://github.com/carloearl/glyphlock",
+        "https://www.bbb.org/us/az/el-mirage/profile/computer-system-designers/glyphlock-llc-1126-1000169606"
+      ]
+    };
+    const website = {
+      "@type": "WebSite",
+      "@id": websiteId,
+      "url": siteUrl + "/",
+      "name": "GlyphLock",
+      "description": "Evidence infrastructure for identity, operations, and proof.",
+      "publisher": { "@id": organizationId },
+      "inLanguage": "en-US"
+    };
+    const homepageProducts = path === "/" ? [
+      {
+        "@type": "SoftwareApplication",
+        "@id": siteUrl + "/#nups",
+        "name": "NUPS",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": siteUrl + "/NUPSLanding",
+        "description": "Venue operations across front door, register, contracts, staff, payouts, reporting, and audit trails.",
+        "publisher": { "@id": organizationId },
+        "isPartOf": { "@id": websiteId }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": siteUrl + "/#qrstudio",
+        "name": "GlyphLock QR Studio",
+        "applicationCategory": "SecurityApplication",
+        "operatingSystem": "Web",
+        "url": siteUrl + "/SecureQRStudio",
+        "description": "Custom QR payloads, branded codes, scan logging, signing options, verification, and vault workflows.",
+        "publisher": { "@id": organizationId },
+        "isPartOf": { "@id": websiteId }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": siteUrl + "/#glyphbot",
+        "name": "GlyphBot",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web",
+        "url": siteUrl + "/GlyphBot",
+        "description": "AI-assisted research, code analysis, site auditing, support, and workflow drafting with human responsibility for decisions and approvals.",
+        "publisher": { "@id": organizationId },
+        "isPartOf": { "@id": websiteId }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": siteUrl + "/#imagelab",
+        "name": "GlyphLock Image Lab",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web",
+        "url": siteUrl + "/ImageLab",
+        "description": "AI-assisted image generation, visual analysis, interactive hotspots, and media tooling.",
+        "publisher": { "@id": organizationId },
+        "isPartOf": { "@id": websiteId }
+      },
+      {
+        "@type": "TechArticle",
+        "@id": siteUrl + "/SDKDocs#documentation",
+        "headline": "GlyphLock SDK Documentation",
+        "url": siteUrl + "/SDKDocs",
+        "description": "GlyphLock SDK documentation and integration references.",
+        "author": { "@id": organizationId },
+        "publisher": { "@id": organizationId },
+        "isPartOf": { "@id": websiteId },
+        "inLanguage": "en-US"
       }
+    ] : [];
+
+    identityScript.textContent = JSON.stringify({
+      "@context": "https://schema.org",
+      "@graph": [organization, website, ...homepageProducts]
     });
 
-    // WebSite Schema for search (always present)
-    let websiteScript = document.querySelector('script[type="application/ld+json"]#website-schema');
-    if (!websiteScript) {
-      websiteScript = document.createElement('script');
-      websiteScript.setAttribute('type', 'application/ld+json');
-      websiteScript.setAttribute('id', 'website-schema');
-      document.head.appendChild(websiteScript);
-    }
-    websiteScript.textContent = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "GlyphLock",
-      "url": siteUrl,
-      "description": resolvedDescription,
-      "publisher": {
-        "@type": "Organization",
-        "name": "GlyphLock LLC"
-      },
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": `${siteUrl}/search?q={search_term_string}`
-        },
-        "query-input": "required name=search_term_string"
-      }
-    });
-    
     // Page Specific Schema (if not Organization or WebSite)
     if (resolvedSchemaType !== "Organization" && resolvedSchemaType !== "WebSite") {
         let pageScript = document.querySelector('script[type="application/ld+json"]#page-schema');
