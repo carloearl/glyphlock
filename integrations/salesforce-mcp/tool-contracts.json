@@ -1,0 +1,179 @@
+{
+  "schema_version": "2026-09-01",
+  "server": {
+    "name": "glyphlock-nups-mcp",
+    "display_name": "GlyphLock NUPS Evidence and Operations",
+    "transport": "streamable-http",
+    "endpoint": "/mcp",
+    "authentication": "oauth2-client-credentials",
+    "methods": [
+      "initialize",
+      "tools/list",
+      "tools/call"
+    ],
+    "default_mode": "read-only"
+  },
+  "global_rules": {
+    "deny_by_default": true,
+    "tenant_and_venue_scope_required": true,
+    "allowed_modes": [
+      "REAL",
+      "DEMO",
+      "SANDBOX"
+    ],
+    "write_tools_enabled": false,
+    "arbitrary_query_enabled": false,
+    "raw_identity_documents_allowed": false,
+    "biometric_data_allowed": false,
+    "payment_card_data_allowed": false,
+    "authentication_secrets_allowed": false,
+    "raw_signature_images_allowed": false
+  },
+  "tools": [
+    {
+      "name": "nups_get_venue_status",
+      "description": "Return a sanitized, read-only operational snapshot for one authorized venue and business date.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "venue_ref",
+          "business_date"
+        ],
+        "properties": {
+          "venue_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "business_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "REAL",
+              "DEMO",
+              "SANDBOX"
+            ],
+            "default": "REAL"
+          }
+        }
+      },
+      "output_fields": [
+        "venue_ref",
+        "business_date",
+        "mode",
+        "shift_state",
+        "open_workflow_counts",
+        "exception_count",
+        "last_closeout_state",
+        "as_of",
+        "authority_notice"
+      ],
+      "authority_notice": "Informational only. NUPS deterministic rules and authorized venue personnel control operational actions."
+    },
+    {
+      "name": "nups_get_agreement_evidence_status",
+      "description": "Return the status and integrity metadata for one authorized DCE agreement without returning identity documents, signatures, or raw evidence.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "agreement_ref"
+        ],
+        "properties": {
+          "agreement_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "venue_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "REAL",
+              "DEMO",
+              "SANDBOX"
+            ],
+            "default": "REAL"
+          }
+        }
+      },
+      "output_fields": [
+        "agreement_ref",
+        "venue_ref",
+        "mode",
+        "workflow_state",
+        "required_steps_complete",
+        "manager_signoff_state",
+        "evidence_digest",
+        "recorded_at",
+        "as_of",
+        "authority_notice"
+      ],
+      "authority_notice": "Informational only. This tool cannot authorize, amend, sign, delete, or finalize an agreement."
+    },
+    {
+      "name": "nups_list_operational_exceptions",
+      "description": "List sanitized unresolved operational exceptions for one authorized venue, without exposing raw PII or payment credentials.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "venue_ref"
+        ],
+        "properties": {
+          "venue_ref": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "business_date": {
+            "type": "string",
+            "format": "date"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "REAL",
+              "DEMO",
+              "SANDBOX"
+            ],
+            "default": "REAL"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 25
+          }
+        }
+      },
+      "output_fields": [
+        "venue_ref",
+        "business_date",
+        "mode",
+        "exceptions",
+        "next_cursor",
+        "as_of",
+        "authority_notice"
+      ],
+      "exception_fields": [
+        "exception_ref",
+        "category",
+        "severity",
+        "workflow_ref",
+        "state",
+        "opened_at",
+        "required_human_role"
+      ],
+      "authority_notice": "Informational only. Exception resolution remains a human-authorized NUPS workflow."
+    }
+  ]
+}
