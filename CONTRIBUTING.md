@@ -22,7 +22,8 @@ Examples:
 ## Merge requirements
 
 - Direct pushes to `main` are prohibited.
-- `NUPS CI / Verify source and production build` must pass.
+- `Repository Governance / Validate protected controls` and `NUPS CI / Verify source and production build` must pass.
+- Protected-control changes require the repository owner as author or an exact-head owner approval through the default-branch governance gate.
 - The branch must be current with `main`.
 - Material changes require explicit invariant review and evidence.
 - Use squash merge with a descriptive conventional title.

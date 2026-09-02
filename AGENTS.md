@@ -21,7 +21,8 @@ These rules apply to every coding agent, including Base44 Builder, Codex, and ot
 
 - `main` is a protected release branch. No human, Base44 builder, coding agent, or other automation may use it as a normal working branch.
 - Base44 and other agents must work on a purpose-named task branch and open a pull request into `main`.
-- Pull requests into `main` must pass `NUPS CI / Verify source and production build` and must be current with `main` before squash merge.
+- Pull requests into `main` must pass `Repository Governance / Validate protected controls` and `NUPS CI / Verify source and production build`, and must be current with `main` before squash merge.
+- The default-branch governance workflow never executes pull-request code. Changes to workflows, governance, scripts, package bindings, invariants, or npm configuration require the repository owner as author or an exact-head owner approval.
 - Base44 must not be configured as a standing bypass actor for ordinary changes. A time-bounded owner recovery exception is allowed only when the protected workflow itself is broken; record the reason and resulting commit in the pull request or recovery issue.
 - Workflow-file changes remain admin-managed.
 - Use squash merge so the pull-request title becomes the authoritative commit subject on `main`.

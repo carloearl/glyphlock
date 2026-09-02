@@ -1,0 +1,83 @@
+# Default-branch trust gate. This workflow never checks out or executes pull-request code.
+name: Repository Governance
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  validate:
+    name: Validate protected controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require owner authority for protected-control changes
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            const pull = context.payload.pull_request;
+            if (!pull || pull.base.ref !== 'main') {
+              core.notice('Not a main-bound pull request.');
+              return;
+            }
+
+            const trustedOwner = 'carloearl';
+            const protectedPaths = [
+              /^\.github\/workflows\//,
+              /^\.github\/CODEOWNERS$/,
+              /^\.github\/pull_request_template\.md$/,
+              /^\.base44\//,
+              /^scripts\//,
+              /^package(?:-lock)?\.json$/,
+              /^\.npmrc$/,
+              /^AGENTS\.md$/,
+              /^CONTRIBUTING\.md$/,
+              /^INVARIANTS\.md$/,
+              /^docs\/engineering\/REPOSITORY_GOVERNANCE\.md$/,
+            ];
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull.number,
+              per_page: 100,
+            });
+            const protectedFiles = files
+              .map(({ filename }) => filename)
+              .filter((filename) => protectedPaths.some((pattern) => pattern.test(filename)));
+            if (protectedFiles.length === 0) {
+              core.notice('No protected-control files changed.');
+              return;
+            }
+
+            if (pull.user.login.toLowerCase() === trustedOwner) {
+              core.notice(`Owner-authored protected change: ${protectedFiles.join(', ')}`);
+              return;
+            }
+
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull.number,
+              per_page: 100,
+            });
+            const ownerReviews = reviews
+              .filter(({ user }) => user?.login?.toLowerCase() === trustedOwner)
+              .sort((left, right) => new Date(left.submitted_at) - new Date(right.submitted_at));
+            const latestOwnerReview = ownerReviews.at(-1);
+            if (latestOwnerReview?.state === 'APPROVED' && latestOwnerReview.commit_id === pull.head.sha) {
+              core.notice(`Exact-head owner approval covers: ${protectedFiles.join(', ')}`);
+              return;
+            }
+
+            core.setFailed(
+              `Protected-control changes require ${trustedOwner} as PR author or an exact-head owner approval: `
+              + protectedFiles.join(', '),
+            );
+

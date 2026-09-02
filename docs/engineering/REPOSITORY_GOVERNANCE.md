@@ -15,6 +15,7 @@ The branch is the workspace. The pull request is the review and evidence record.
 The `main` branch ruleset must enforce:
 
 - pull request before merge;
+- required status check `Repository Governance / Validate protected controls`;
 - required status check `NUPS CI / Verify source and production build`;
 - branch current with `main` before merge;
 - force pushes blocked;
@@ -23,7 +24,7 @@ The `main` branch ruleset must enforce:
 - no standing Base44 bypass for ordinary changes;
 - owner bypass reserved for time-bounded recovery when the protected workflow itself is unavailable.
 
-Mandatory approval count may remain zero while the core team is small. The non-negotiable controls are pull-request routing, required CI, current branches, and protected history.
+The global mandatory approval count may remain zero while the core team is small. Protected-control changes are different: the default-branch governance gate requires the repository owner as author or an exact-head owner approval, and it never checks out or executes pull-request code. The non-negotiable controls are pull-request routing, both required checks, current branches, and protected history.
 
 Cloudflare Edge Guard is not a universal merge gate while it depends on environment-specific protected credentials. Require its workflow for Cloudflare, edge-security, or deployment changes after the credential path is configured; keep NUPS CI universal.
 

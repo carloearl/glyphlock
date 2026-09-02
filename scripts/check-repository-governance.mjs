@@ -7,6 +7,7 @@ const requiredFiles = [
   '.github/CODEOWNERS',
   '.github/pull_request_template.md',
   '.github/workflows/nups-ci.yml',
+  '.github/workflows/repository-governance.yml',
   'docs/engineering/REPOSITORY_GOVERNANCE.md',
   'package.json',
   'scripts/run-base44-ci.mjs',
@@ -65,6 +66,15 @@ requireText('.github/workflows/nups-ci.yml', [
   /pull_request:\s*\n\s+branches:\s*\[main\]/,
   /name: Verify source and production build/,
   /npm run ci:base44/,
+]);
+
+requireText('.github/workflows/repository-governance.yml', [
+  /name: Repository Governance/,
+  /pull_request_target:/,
+  /pull_request_review:/,
+  /name: Validate protected controls/,
+  /const trustedOwner = 'carloearl'/,
+  /const protectedPaths = \[/,
 ]);
 
 requireText('.github/CODEOWNERS', [
@@ -167,18 +177,37 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
     const firstLine = lines[0].replace(/^      -\s+/, '        ');
     const propertyLines = [firstLine, ...lines.slice(1)];
     const properties = propertyLines.map((line) => getYamlKey(line, 8)).filter(Boolean);
+    const withStart = propertyLines.findIndex((line) => isYamlKeyLine(line, 8, 'with'));
+    const withEnd = propertyLines.findIndex(
+      (line, propertyIndex) => propertyIndex > withStart && isMappingKeyLine(line, 8),
+    );
+    const withLines = withStart === -1 ? [] : propertyLines.slice(
+      withStart + 1,
+      withEnd === -1 ? propertyLines.length : withEnd,
+    );
+    const withEntries = withLines
+      .map((line) => {
+        const key = getYamlKey(line, 10);
+        return key ? { key, value: getYamlScalar(line, 10, key) } : undefined;
+      })
+      .filter(Boolean);
     return {
       name: propertyLines.map((line) => getYamlScalar(line, 8, 'name')).find((value) => value !== undefined),
       run: propertyLines.map((line) => getYamlScalar(line, 8, 'run')).find((value) => value !== undefined),
       uses: propertyLines.map((line) => getYamlScalar(line, 8, 'uses')).find((value) => value !== undefined),
       condition: propertyLines.map((line) => getYamlScalar(line, 8, 'if')).find((value) => value !== undefined),
       properties,
+      withEntries,
     };
   });
   if (!steps.length) failures.push('NUPS CI verify job must define steps');
   const expectedSteps = [
     { uses: 'actions/checkout@v4', properties: ['name', 'uses'] },
-    { uses: 'actions/setup-node@v4', properties: ['name', 'uses', 'with'] },
+    {
+      uses: 'actions/setup-node@v4',
+      properties: ['name', 'uses', 'with'],
+      with: { 'node-version': '20', cache: 'npm' },
+    },
     { run: 'node scripts/check-repository-governance.mjs', properties: ['name', 'run'] },
     { run: 'npm run check:secrets', properties: ['name', 'run'] },
     { run: 'npm ci', properties: ['name', 'run'] },
@@ -196,6 +225,12 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
       uses: 'actions/upload-artifact@v4',
       condition: 'always()',
       properties: ['name', 'if', 'uses', 'with'],
+      with: {
+        name: 'base44-entity-audit',
+        path: 'artifacts/entity-audit/',
+        'if-no-files-found': 'warn',
+        'retention-days': '30',
+      },
     },
   ];
   if (steps.length !== expectedSteps.length) {
@@ -205,13 +240,25 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
     const step = steps[index];
     const sameProperties = step && step.properties.length === expected.properties.length
       && expected.properties.every((property) => step.properties.includes(property));
+    const expectedWith = Object.entries(expected.with ?? {});
+    const sameWith = step && step.withEntries.length === expectedWith.length
+      && expectedWith.every(([key, value]) => (
+        step.withEntries.some((entry) => entry.key === key && entry.value === value)
+      ));
     if (!step || step.run !== expected.run || step.uses !== expected.uses
-      || step.condition !== expected.condition || !sameProperties) {
+      || step.condition !== expected.condition || !sameProperties || !sameWith) {
       failures.push(`NUPS CI verify step ${index + 1} is not canonical and fail closed`);
     }
   }
   if (steps.some((step) => /^npm\s+(?:i|install)(?:\s|$)/.test(step.run ?? ''))) {
     failures.push('NUPS CI cannot run npm install or npm i; use the canonical npm ci step');
+  }
+}
+
+if (existsSync('.npmrc')) {
+  const npmConfig = readFileSync('.npmrc', 'utf8');
+  if (/^\s*script-shell\s*=/im.test(npmConfig)) {
+    failures.push('.npmrc cannot override script-shell');
   }
 }
 

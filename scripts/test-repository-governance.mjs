@@ -15,13 +15,14 @@ const fixturePaths = [
   '.github/CODEOWNERS',
   '.github/pull_request_template.md',
   '.github/workflows/nups-ci.yml',
+  '.github/workflows/repository-governance.yml',
   'docs/engineering/REPOSITORY_GOVERNANCE.md',
   'package.json',
   'scripts/run-base44-ci.mjs',
   'scripts/test-repository-governance.mjs',
 ];
 
-const runFixture = (mutateWorkflow = (workflow) => workflow) => {
+const runFixture = (mutateWorkflow = (workflow) => workflow, prepareFixture = () => {}) => {
   const fixtureRoot = mkdtempSync(join(tmpdir(), 'glyphlock-governance-'));
   try {
     for (const relativePath of fixturePaths) {
@@ -31,6 +32,7 @@ const runFixture = (mutateWorkflow = (workflow) => workflow) => {
     }
     const workflowPath = join(fixtureRoot, '.github/workflows/nups-ci.yml');
     writeFileSync(workflowPath, mutateWorkflow(readFileSync(workflowPath, 'utf8')));
+    prepareFixture(fixtureRoot);
     return spawnSync(process.execPath, [checker], { cwd: fixtureRoot, encoding: 'utf8' });
   } finally {
     rmSync(fixtureRoot, { recursive: true, force: true });
@@ -155,4 +157,21 @@ test('binds the required status to the exact workflow name', () => {
   const result = runFixture((workflow) => workflow.replace('name: NUPS CI', 'name: Alternate CI'));
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /workflow name must be exactly NUPS CI/);
+});
+
+test('validates exact entity-audit artifact inputs', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '          if-no-files-found: warn',
+    '          if-no-files-found: ignore',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /verify step 16 is not canonical and fail closed/);
+});
+
+test('rejects repository-controlled npm script shells', () => {
+  const result = runFixture(undefined, (fixtureRoot) => {
+    writeFileSync(join(fixtureRoot, '.npmrc'), 'script-shell=/bin/true\n');
+  });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /.npmrc cannot override script-shell/);
 });
