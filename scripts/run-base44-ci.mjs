@@ -25,6 +25,14 @@ if (!Array.isArray(configured)) {
   process.exit(1);
 }
 
+const requiredScripts = ['check:repository-governance'];
+for (const requiredScript of requiredScripts) {
+  if (!configured.includes(requiredScript)) {
+    console.error(`[ci:base44] Required npm script is not registered: ${requiredScript}`);
+    process.exit(1);
+  }
+}
+
 const scriptNamePattern = /^[a-z0-9][a-z0-9:_-]*$/;
 const seen = new Set();
 const scripts = [];

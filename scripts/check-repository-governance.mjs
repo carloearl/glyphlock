@@ -4,6 +4,7 @@ const requiredFiles = [
   'AGENTS.md',
   'CONTRIBUTING.md',
   '.github/pull_request_template.md',
+  '.github/workflows/nups-ci.yml',
   'docs/engineering/REPOSITORY_GOVERNANCE.md',
 ];
 
