@@ -10,9 +10,21 @@ const requiredFiles = [
   'docs/engineering/REPOSITORY_GOVERNANCE.md',
   'package.json',
   'scripts/run-base44-ci.mjs',
+  'scripts/test-repository-governance.mjs',
 ];
 
 const failures = [];
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const yamlKeyPattern = (key) => `(?:${escapeRegExp(key)}|"${escapeRegExp(key)}"|'${escapeRegExp(key)}')`;
+const isYamlKeyLine = (line, spaces, key) => (
+  new RegExp(`^ {${spaces}}${yamlKeyPattern(key)}:\\s*`).test(line)
+);
+const getYamlScalar = (line, spaces, key) => (
+  line.match(new RegExp(`^ {${spaces}}${yamlKeyPattern(key)}:\\s*(.*?)\\s*$`))?.[1]
+);
+const isMappingKeyLine = (line, spaces) => (
+  new RegExp(`^ {${spaces}}(?:[a-zA-Z][a-zA-Z0-9_-]*|"[^"]+"|'[^']+'):\\s*`).test(line)
+);
 
 for (const path of requiredFiles) {
   if (!existsSync(path)) failures.push(`Missing governance file: ${path}`);
@@ -62,47 +74,58 @@ requireText('scripts/run-base44-ci.mjs', [
 if (existsSync('.github/workflows/nups-ci.yml')) {
   const workflow = readFileSync('.github/workflows/nups-ci.yml', 'utf8');
   const workflowLines = workflow.split(/\r?\n/);
-  const pullRequestStart = workflowLines.findIndex((line) => /^  pull_request:\s*$/.test(line));
+  const pullRequestStart = workflowLines.findIndex((line) => isYamlKeyLine(line, 2, 'pull_request'));
   const pullRequestEnd = workflowLines.findIndex(
-    (line, index) => index > pullRequestStart && /^  [a-zA-Z][a-zA-Z0-9_-]*:\s*$/.test(line),
+    (line, index) => index > pullRequestStart && isMappingKeyLine(line, 2),
   );
   const pullRequestBlock = workflowLines.slice(
     pullRequestStart + 1,
     pullRequestEnd === -1 ? workflowLines.length : pullRequestEnd,
   );
-
-  if (!pullRequestBlock.some((line) => /^    branches:\s*\[main\]\s*$/.test(line))) {
+  const branchesValue = pullRequestBlock
+    .map((line) => getYamlScalar(line, 4, 'branches'))
+    .find((value) => value !== undefined);
+  if (!/^\[\s*["']?main["']?\s*\]$/.test(branchesValue ?? '')) {
     failures.push('NUPS CI pull_request must target main');
   }
-  const restrictedPullRequestFilter = pullRequestBlock.find((line) => (
-    /^    (types|paths|paths-ignore|branches-ignore):/.test(line)
-  ));
-  if (restrictedPullRequestFilter) {
-    failures.push(`NUPS CI pull_request cannot use a restrictive filter: ${restrictedPullRequestFilter.trim()}`);
+  for (const filter of ['types', 'paths', 'paths-ignore', 'branches-ignore']) {
+    if (pullRequestBlock.some((line) => isYamlKeyLine(line, 4, filter))) {
+      failures.push(`NUPS CI pull_request cannot use a restrictive filter: ${filter}`);
+    }
   }
 
-  const verifyJobStart = workflowLines.findIndex((line) => /^  verify:\s*$/.test(line));
-  const stepsStart = workflowLines.findIndex(
-    (line, index) => index > verifyJobStart && /^    steps:\s*$/.test(line),
+  const verifyJobStart = workflowLines.findIndex((line) => isYamlKeyLine(line, 2, 'verify'));
+  const verifyJobEnd = workflowLines.findIndex(
+    (line, index) => index > verifyJobStart && isMappingKeyLine(line, 2),
   );
-  const verifyJobHeader = workflowLines.slice(verifyJobStart + 1, stepsStart);
-  if (verifyJobHeader.some((line) => /^    if:/.test(line))) {
+  const verifyJobLines = verifyJobStart === -1 ? [] : workflowLines.slice(
+    verifyJobStart + 1,
+    verifyJobEnd === -1 ? workflowLines.length : verifyJobEnd,
+  );
+  if (verifyJobStart === -1) {
+    failures.push('NUPS CI must define the verify job');
+  }
+  if (verifyJobLines.some((line) => isYamlKeyLine(line, 4, 'if'))) {
     failures.push('NUPS CI verify job must be unconditional');
   }
-
-  const stepStarts = workflowLines
-    .map((line, index) => (/^      - name:\s+/.test(line) ? index : -1))
+  const stepsStart = verifyJobLines.findIndex((line) => isYamlKeyLine(line, 4, 'steps'));
+  const stepLines = stepsStart === -1 ? [] : verifyJobLines.slice(stepsStart + 1);
+  const stepStarts = stepLines
+    .map((line, index) => (/^      -\s+/.test(line) ? index : -1))
     .filter((index) => index !== -1);
   const steps = stepStarts.map((start, index) => {
-    const end = stepStarts[index + 1] ?? workflowLines.length;
-    const lines = workflowLines.slice(start, end);
+    const end = stepStarts[index + 1] ?? stepLines.length;
+    const lines = stepLines.slice(start, end);
+    const firstLine = lines[0].replace(/^      -\s+/, '        ');
+    const propertyLines = [firstLine, ...lines.slice(1)];
     return {
-      name: workflowLines[start].replace(/^      - name:\s+/, '').trim(),
-      run: lines.map((line) => line.match(/^        run:\s*(.+?)\s*$/)?.[1]).find(Boolean),
-      hasCondition: lines.some((line) => /^        if:/.test(line)),
-      canContinueOnError: lines.some((line) => /^        continue-on-error:/.test(line)),
+      name: propertyLines.map((line) => getYamlScalar(line, 8, 'name')).find((value) => value !== undefined),
+      run: propertyLines.map((line) => getYamlScalar(line, 8, 'run')).find((value) => value !== undefined),
+      hasCondition: propertyLines.some((line) => isYamlKeyLine(line, 8, 'if')),
+      canContinueOnError: propertyLines.some((line) => isYamlKeyLine(line, 8, 'continue-on-error')),
     };
   });
+  if (!steps.length) failures.push('NUPS CI verify job must define steps');
   const requiredCommandOrder = [
     'node scripts/check-repository-governance.mjs',
     'npm run check:secrets',
@@ -120,7 +143,7 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
     }
     const step = steps[commandIndexes[index]];
     if (step.hasCondition || step.canContinueOnError) {
-      failures.push(`Required workflow step must be unconditional and fail closed: ${step.name}`);
+      failures.push(`Required workflow step must be unconditional and fail closed: ${step.name ?? command}`);
     }
   }
   for (let index = 1; index < commandIndexes.length; index += 1) {
@@ -136,6 +159,9 @@ if (existsSync('.base44/ci-checks.json')) {
   if (!config.scripts?.includes('check:repository-governance')) {
     failures.push('.base44/ci-checks.json must run check:repository-governance');
   }
+  if (!config.scripts?.includes('test:repository-governance')) {
+    failures.push('.base44/ci-checks.json must run test:repository-governance');
+  }
 }
 
 if (existsSync('package.json')) {
@@ -145,6 +171,9 @@ if (existsSync('package.json')) {
   }
   if (pkg.scripts?.['ci:base44'] !== 'node scripts/run-base44-ci.mjs') {
     failures.push('package.json must bind ci:base44 to scripts/run-base44-ci.mjs');
+  }
+  if (pkg.scripts?.['test:repository-governance'] !== 'node --test scripts/test-repository-governance.mjs') {
+    failures.push('package.json must bind test:repository-governance to its regression suite');
   }
 }
 

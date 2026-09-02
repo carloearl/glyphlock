@@ -17,6 +17,7 @@
     "check:secrets": "node scripts/check-no-tracked-secrets.mjs",
     "check:integrations": "node scripts/check-integration-boundaries.mjs",
     "check:repository-governance": "node scripts/check-repository-governance.mjs",
+    "test:repository-governance": "node --test scripts/test-repository-governance.mjs",
     "preview": "vite preview",
     "check:dj-functions": "node scripts/check-dj-function-sdk.mjs",
     "check:nups-frozen-rules": "node scripts/check-nups-frozen-rules.mjs",
