@@ -52,7 +52,7 @@ test('requires protected commands inside the verify job', () => {
         uses: actions/checkout@v4
 `);
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /must actively run: node scripts\/check-repository-governance\.mjs/);
+  assert.match(result.stderr, /verify step 1 is not canonical|exactly 16 canonical steps/);
 });
 
 test('rejects quoted restrictive pull-request filters', () => {
@@ -70,7 +70,7 @@ test('rejects quoted conditions on protected steps', () => {
     '        "if": false\n        run: npm run check:secrets',
   ));
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /must be unconditional and fail closed/);
+  assert.match(result.stderr, /verify step 4 is not canonical and fail closed/);
 });
 
 test('rejects whitespace-separated restrictive filter keys', () => {
@@ -97,7 +97,7 @@ test('rejects custom shells on protected steps', () => {
     '        run: npm run check:secrets\n        shell: echo {0}',
   ));
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /must be unconditional and fail closed/);
+  assert.match(result.stderr, /verify step 4 is not canonical and fail closed/);
 });
 
 test('rejects prerequisites that can skip the verify job', () => {
@@ -106,7 +106,7 @@ test('rejects prerequisites that can skip the verify job', () => {
     '    needs: never\n    runs-on: ubuntu-latest',
   ));
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /verify job cannot define needs/);
+  assert.match(result.stderr, /may only define name, runs-on, timeout-minutes, and steps once/);
 });
 
 test('rejects workflow-level run defaults', () => {
@@ -124,5 +124,35 @@ test('rejects duplicate protected step properties', () => {
     '        run: npm run check:secrets\n        "run" : echo bypass',
   ));
   assert.notEqual(result.status, 0);
-  assert.match(result.stderr, /must be unconditional and fail closed/);
+  assert.match(result.stderr, /verify step 4 is not canonical and fail closed/);
+});
+
+test('rejects job overrides placed after the steps block', () => {
+  const result = runFixture((workflow) => `${workflow}    defaults:\n      run:\n        shell: echo {0}\n`);
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /may only define name, runs-on, timeout-minutes, and steps once/);
+});
+
+test('requires production build validation', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '      - name: Build production bundle\n        run: npm run build\n\n',
+    '',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /exactly 16 canonical steps|verify step 15 is not canonical/);
+});
+
+test('binds the required status to the exact verify job name', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '    name: Verify source and production build',
+    '    name: Alternate status',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /verify job name must be exactly Verify source and production build/);
+});
+
+test('binds the required status to the exact workflow name', () => {
+  const result = runFixture((workflow) => workflow.replace('name: NUPS CI', 'name: Alternate CI'));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /workflow name must be exactly NUPS CI/);
 });

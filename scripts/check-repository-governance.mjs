@@ -80,6 +80,12 @@ requireText('scripts/run-base44-ci.mjs', [
 if (existsSync('.github/workflows/nups-ci.yml')) {
   const workflow = readFileSync('.github/workflows/nups-ci.yml', 'utf8');
   const workflowLines = workflow.split(/\r?\n/);
+  const workflowNames = workflowLines
+    .map((line) => getYamlScalar(line, 0, 'name'))
+    .filter((value) => value !== undefined);
+  if (workflowNames.length !== 1 || workflowNames[0] !== 'NUPS CI') {
+    failures.push('NUPS CI workflow name must be exactly NUPS CI');
+  }
   if (workflowLines.some((line) => /(?:^|\s)(?:<<\s*:|[&*][a-zA-Z_][a-zA-Z0-9_-]*)/.test(line))) {
     failures.push('NUPS CI cannot use YAML anchors, aliases, or merge keys');
   }
@@ -133,17 +139,19 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
     failures.push('NUPS CI must define exactly one verify job');
   }
   const stepsStart = verifyJobLines.findIndex((line) => isYamlKeyLine(line, 4, 'steps'));
-  const verifyJobHeader = stepsStart === -1 ? verifyJobLines : verifyJobLines.slice(0, stepsStart);
-  const jobKeys = verifyJobHeader.map((line) => getYamlKey(line, 4)).filter(Boolean);
-  const allowedJobKeys = new Set(['name', 'runs-on', 'timeout-minutes']);
-  const unsupportedJobKey = jobKeys.find((key) => !allowedJobKeys.has(key));
-  if (unsupportedJobKey) {
-    failures.push(`NUPS CI verify job cannot define ${unsupportedJobKey}`);
+  const jobKeys = verifyJobLines.map((line) => getYamlKey(line, 4)).filter(Boolean);
+  const canonicalJobKeys = ['name', 'runs-on', 'timeout-minutes', 'steps'];
+  if (jobKeys.length !== canonicalJobKeys.length
+    || canonicalJobKeys.some((key) => !jobKeys.includes(key))) {
+    failures.push('NUPS CI verify job may only define name, runs-on, timeout-minutes, and steps once');
   }
-  if (new Set(jobKeys).size !== jobKeys.length) {
-    failures.push('NUPS CI verify job cannot define duplicate properties');
+  const jobName = verifyJobLines
+    .map((line) => getYamlScalar(line, 4, 'name'))
+    .find((value) => value !== undefined);
+  if (jobName !== 'Verify source and production build') {
+    failures.push('NUPS CI verify job name must be exactly Verify source and production build');
   }
-  const runsOn = verifyJobHeader
+  const runsOn = verifyJobLines
     .map((line) => getYamlScalar(line, 4, 'runs-on'))
     .find((value) => value !== undefined);
   if (runsOn !== 'ubuntu-latest') {
@@ -163,51 +171,43 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
       name: propertyLines.map((line) => getYamlScalar(line, 8, 'name')).find((value) => value !== undefined),
       run: propertyLines.map((line) => getYamlScalar(line, 8, 'run')).find((value) => value !== undefined),
       uses: propertyLines.map((line) => getYamlScalar(line, 8, 'uses')).find((value) => value !== undefined),
+      condition: propertyLines.map((line) => getYamlScalar(line, 8, 'if')).find((value) => value !== undefined),
       properties,
     };
   });
   if (!steps.length) failures.push('NUPS CI verify job must define steps');
-  const requiredCommandOrder = [
-    'node scripts/check-repository-governance.mjs',
-    'npm run check:secrets',
-    'npm ci',
-    'npm run ci:base44',
-  ];
-  const commandIndexes = requiredCommandOrder.map((command) => (
-    steps.findIndex((step) => step.run === command)
-  ));
-
-  for (const [index, command] of requiredCommandOrder.entries()) {
-    if (commandIndexes[index] === -1) {
-      failures.push(`.github/workflows/nups-ci.yml must actively run: ${command}`);
-      continue;
-    }
-    const step = steps[commandIndexes[index]];
-    const allowedProperties = new Set(['name', 'run']);
-    if (step.properties.some((property) => !allowedProperties.has(property))
-      || new Set(step.properties).size !== step.properties.length) {
-      failures.push(`Required workflow step must be unconditional and fail closed: ${step.name ?? command}`);
-    }
-  }
-  for (let index = 1; index < commandIndexes.length; index += 1) {
-    if (commandIndexes[index - 1] !== -1 && commandIndexes[index] !== -1
-      && commandIndexes[index - 1] > commandIndexes[index]) {
-      failures.push(`Workflow command must run earlier: ${requiredCommandOrder[index - 1]}`);
-    }
-  }
-  const expectedInitialSteps = [
+  const expectedSteps = [
     { uses: 'actions/checkout@v4', properties: ['name', 'uses'] },
     { uses: 'actions/setup-node@v4', properties: ['name', 'uses', 'with'] },
     { run: 'node scripts/check-repository-governance.mjs', properties: ['name', 'run'] },
     { run: 'npm run check:secrets', properties: ['name', 'run'] },
     { run: 'npm ci', properties: ['name', 'run'] },
+    { run: 'npm run audit:entities', properties: ['name', 'run'] },
+    { run: 'npm run check:nups-write-gateway', properties: ['name', 'run'] },
+    { run: 'npm run ci:base44', properties: ['name', 'run'] },
+    { run: 'npm run check:dj-functions', properties: ['name', 'run'] },
+    { run: 'npm run check:integrations', properties: ['name', 'run'] },
+    { run: 'npm run check:nups-isolation', properties: ['name', 'run'] },
+    { run: 'npm run audit:nups-ui', properties: ['name', 'run'] },
+    { run: 'npm run lint', properties: ['name', 'run'] },
+    { run: 'npm run typecheck', properties: ['name', 'run'] },
+    { run: 'npm run build', properties: ['name', 'run'] },
+    {
+      uses: 'actions/upload-artifact@v4',
+      condition: 'always()',
+      properties: ['name', 'if', 'uses', 'with'],
+    },
   ];
-  for (const [index, expected] of expectedInitialSteps.entries()) {
+  if (steps.length !== expectedSteps.length) {
+    failures.push(`NUPS CI verify job must define exactly ${expectedSteps.length} canonical steps`);
+  }
+  for (const [index, expected] of expectedSteps.entries()) {
     const step = steps[index];
     const sameProperties = step && step.properties.length === expected.properties.length
-      && step.properties.every((property, propertyIndex) => property === expected.properties[propertyIndex]);
-    if (!step || step.run !== expected.run || step.uses !== expected.uses || !sameProperties) {
-      failures.push(`NUPS CI protected pre-install step ${index + 1} is not canonical`);
+      && expected.properties.every((property) => step.properties.includes(property));
+    if (!step || step.run !== expected.run || step.uses !== expected.uses
+      || step.condition !== expected.condition || !sameProperties) {
+      failures.push(`NUPS CI verify step ${index + 1} is not canonical and fail closed`);
     }
   }
   if (steps.some((step) => /^npm\s+(?:i|install)(?:\s|$)/.test(step.run ?? ''))) {
