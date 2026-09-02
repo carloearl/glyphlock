@@ -72,3 +72,57 @@ test('rejects quoted conditions on protected steps', () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /must be unconditional and fail closed/);
 });
+
+test('rejects whitespace-separated restrictive filter keys', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '    branches: [main]\n  workflow_dispatch:',
+    '    branches: [main]\n    types : [closed]\n  workflow_dispatch:',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /restrictive filter: types/);
+});
+
+test('rejects alternative dependency installs before the secret scan', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '      - name: Block tracked environments and secrets',
+    '      - name: Early install\n        run: npm install\n\n      - name: Block tracked environments and secrets',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /cannot run npm install or npm i/);
+});
+
+test('rejects custom shells on protected steps', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '        run: npm run check:secrets',
+    '        run: npm run check:secrets\n        shell: echo {0}',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /must be unconditional and fail closed/);
+});
+
+test('rejects prerequisites that can skip the verify job', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '    runs-on: ubuntu-latest',
+    '    needs: never\n    runs-on: ubuntu-latest',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /verify job cannot define needs/);
+});
+
+test('rejects workflow-level run defaults', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    'permissions:\n  contents: read',
+    'defaults:\n  run:\n    shell: echo {0}\n\npermissions:\n  contents: read',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /workflow-level defaults/);
+});
+
+test('rejects duplicate protected step properties', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '        run: npm run check:secrets',
+    '        run: npm run check:secrets\n        "run" : echo bypass',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /must be unconditional and fail closed/);
+});

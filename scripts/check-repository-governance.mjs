@@ -17,13 +17,19 @@ const failures = [];
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const yamlKeyPattern = (key) => `(?:${escapeRegExp(key)}|"${escapeRegExp(key)}"|'${escapeRegExp(key)}')`;
 const isYamlKeyLine = (line, spaces, key) => (
-  new RegExp(`^ {${spaces}}${yamlKeyPattern(key)}:\\s*`).test(line)
+  new RegExp(`^ {${spaces}}${yamlKeyPattern(key)}\\s*:\\s*`).test(line)
 );
 const getYamlScalar = (line, spaces, key) => (
-  line.match(new RegExp(`^ {${spaces}}${yamlKeyPattern(key)}:\\s*(.*?)\\s*$`))?.[1]
+  line.match(new RegExp(`^ {${spaces}}${yamlKeyPattern(key)}\\s*:\\s*(.*?)\\s*$`))?.[1]
 );
+const getYamlKey = (line, spaces) => {
+  const match = line.match(new RegExp(
+    `^ {${spaces}}(?:"([^"]+)"|'([^']+)'|([a-zA-Z][a-zA-Z0-9_-]*))\\s*:`,
+  ));
+  return match?.[1] ?? match?.[2] ?? match?.[3];
+};
 const isMappingKeyLine = (line, spaces) => (
-  new RegExp(`^ {${spaces}}(?:[a-zA-Z][a-zA-Z0-9_-]*|"[^"]+"|'[^']+'):\\s*`).test(line)
+  getYamlKey(line, spaces) !== undefined
 );
 
 for (const path of requiredFiles) {
@@ -74,7 +80,21 @@ requireText('scripts/run-base44-ci.mjs', [
 if (existsSync('.github/workflows/nups-ci.yml')) {
   const workflow = readFileSync('.github/workflows/nups-ci.yml', 'utf8');
   const workflowLines = workflow.split(/\r?\n/);
-  const pullRequestStart = workflowLines.findIndex((line) => isYamlKeyLine(line, 2, 'pull_request'));
+  if (workflowLines.some((line) => /(?:^|\s)(?:<<\s*:|[&*][a-zA-Z_][a-zA-Z0-9_-]*)/.test(line))) {
+    failures.push('NUPS CI cannot use YAML anchors, aliases, or merge keys');
+  }
+  for (const globalOverride of ['defaults', 'env']) {
+    if (workflowLines.some((line) => isYamlKeyLine(line, 0, globalOverride))) {
+      failures.push(`NUPS CI cannot set workflow-level ${globalOverride}`);
+    }
+  }
+  const pullRequestStarts = workflowLines
+    .map((line, index) => (isYamlKeyLine(line, 2, 'pull_request') ? index : -1))
+    .filter((index) => index !== -1);
+  if (pullRequestStarts.length !== 1) {
+    failures.push('NUPS CI must define exactly one pull_request trigger');
+  }
+  const pullRequestStart = pullRequestStarts[0] ?? -1;
   const pullRequestEnd = workflowLines.findIndex(
     (line, index) => index > pullRequestStart && isMappingKeyLine(line, 2),
   );
@@ -93,8 +113,15 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
       failures.push(`NUPS CI pull_request cannot use a restrictive filter: ${filter}`);
     }
   }
+  const pullRequestKeys = pullRequestBlock.map((line) => getYamlKey(line, 4)).filter(Boolean);
+  if (pullRequestKeys.length !== 1 || pullRequestKeys[0] !== 'branches') {
+    failures.push('NUPS CI pull_request may only define the main branches filter');
+  }
 
-  const verifyJobStart = workflowLines.findIndex((line) => isYamlKeyLine(line, 2, 'verify'));
+  const verifyJobStarts = workflowLines
+    .map((line, index) => (isYamlKeyLine(line, 2, 'verify') ? index : -1))
+    .filter((index) => index !== -1);
+  const verifyJobStart = verifyJobStarts[0] ?? -1;
   const verifyJobEnd = workflowLines.findIndex(
     (line, index) => index > verifyJobStart && isMappingKeyLine(line, 2),
   );
@@ -102,13 +129,26 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
     verifyJobStart + 1,
     verifyJobEnd === -1 ? workflowLines.length : verifyJobEnd,
   );
-  if (verifyJobStart === -1) {
-    failures.push('NUPS CI must define the verify job');
-  }
-  if (verifyJobLines.some((line) => isYamlKeyLine(line, 4, 'if'))) {
-    failures.push('NUPS CI verify job must be unconditional');
+  if (verifyJobStarts.length !== 1) {
+    failures.push('NUPS CI must define exactly one verify job');
   }
   const stepsStart = verifyJobLines.findIndex((line) => isYamlKeyLine(line, 4, 'steps'));
+  const verifyJobHeader = stepsStart === -1 ? verifyJobLines : verifyJobLines.slice(0, stepsStart);
+  const jobKeys = verifyJobHeader.map((line) => getYamlKey(line, 4)).filter(Boolean);
+  const allowedJobKeys = new Set(['name', 'runs-on', 'timeout-minutes']);
+  const unsupportedJobKey = jobKeys.find((key) => !allowedJobKeys.has(key));
+  if (unsupportedJobKey) {
+    failures.push(`NUPS CI verify job cannot define ${unsupportedJobKey}`);
+  }
+  if (new Set(jobKeys).size !== jobKeys.length) {
+    failures.push('NUPS CI verify job cannot define duplicate properties');
+  }
+  const runsOn = verifyJobHeader
+    .map((line) => getYamlScalar(line, 4, 'runs-on'))
+    .find((value) => value !== undefined);
+  if (runsOn !== 'ubuntu-latest') {
+    failures.push('NUPS CI verify job must run on ubuntu-latest');
+  }
   const stepLines = stepsStart === -1 ? [] : verifyJobLines.slice(stepsStart + 1);
   const stepStarts = stepLines
     .map((line, index) => (/^      -\s+/.test(line) ? index : -1))
@@ -118,11 +158,12 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
     const lines = stepLines.slice(start, end);
     const firstLine = lines[0].replace(/^      -\s+/, '        ');
     const propertyLines = [firstLine, ...lines.slice(1)];
+    const properties = propertyLines.map((line) => getYamlKey(line, 8)).filter(Boolean);
     return {
       name: propertyLines.map((line) => getYamlScalar(line, 8, 'name')).find((value) => value !== undefined),
       run: propertyLines.map((line) => getYamlScalar(line, 8, 'run')).find((value) => value !== undefined),
-      hasCondition: propertyLines.some((line) => isYamlKeyLine(line, 8, 'if')),
-      canContinueOnError: propertyLines.some((line) => isYamlKeyLine(line, 8, 'continue-on-error')),
+      uses: propertyLines.map((line) => getYamlScalar(line, 8, 'uses')).find((value) => value !== undefined),
+      properties,
     };
   });
   if (!steps.length) failures.push('NUPS CI verify job must define steps');
@@ -142,7 +183,9 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
       continue;
     }
     const step = steps[commandIndexes[index]];
-    if (step.hasCondition || step.canContinueOnError) {
+    const allowedProperties = new Set(['name', 'run']);
+    if (step.properties.some((property) => !allowedProperties.has(property))
+      || new Set(step.properties).size !== step.properties.length) {
       failures.push(`Required workflow step must be unconditional and fail closed: ${step.name ?? command}`);
     }
   }
@@ -151,6 +194,24 @@ if (existsSync('.github/workflows/nups-ci.yml')) {
       && commandIndexes[index - 1] > commandIndexes[index]) {
       failures.push(`Workflow command must run earlier: ${requiredCommandOrder[index - 1]}`);
     }
+  }
+  const expectedInitialSteps = [
+    { uses: 'actions/checkout@v4', properties: ['name', 'uses'] },
+    { uses: 'actions/setup-node@v4', properties: ['name', 'uses', 'with'] },
+    { run: 'node scripts/check-repository-governance.mjs', properties: ['name', 'run'] },
+    { run: 'npm run check:secrets', properties: ['name', 'run'] },
+    { run: 'npm ci', properties: ['name', 'run'] },
+  ];
+  for (const [index, expected] of expectedInitialSteps.entries()) {
+    const step = steps[index];
+    const sameProperties = step && step.properties.length === expected.properties.length
+      && step.properties.every((property, propertyIndex) => property === expected.properties[propertyIndex]);
+    if (!step || step.run !== expected.run || step.uses !== expected.uses || !sameProperties) {
+      failures.push(`NUPS CI protected pre-install step ${index + 1} is not canonical`);
+    }
+  }
+  if (steps.some((step) => /^npm\s+(?:i|install)(?:\s|$)/.test(step.run ?? ''))) {
+    failures.push('NUPS CI cannot run npm install or npm i; use the canonical npm ci step');
   }
 }
 
