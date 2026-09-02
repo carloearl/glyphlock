@@ -9,6 +9,7 @@ const requiredFiles = [
   '.github/workflows/nups-ci.yml',
   '.github/workflows/repository-governance.yml',
   'docs/engineering/REPOSITORY_GOVERNANCE.md',
+  'INVARIANTS.md',
   'package.json',
   'scripts/run-base44-ci.mjs',
   'scripts/test-repository-governance.mjs',
@@ -75,6 +76,11 @@ requireText('.github/workflows/repository-governance.yml', [
   /name: Validate protected controls/,
   /const trustedOwner = 'carloearl'/,
   /const protectedPaths = \[/,
+  /Repository Governance \/ Validate protected controls/,
+  /createCommitStatus/,
+  /files\.length !== pull\.changed_files/,
+  /previous_filename/,
+  /npm-shrinkwrap/,
 ]);
 
 requireText('.github/CODEOWNERS', [

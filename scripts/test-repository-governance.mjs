@@ -17,6 +17,7 @@ const fixturePaths = [
   '.github/workflows/nups-ci.yml',
   '.github/workflows/repository-governance.yml',
   'docs/engineering/REPOSITORY_GOVERNANCE.md',
+  'INVARIANTS.md',
   'package.json',
   'scripts/run-base44-ci.mjs',
   'scripts/test-repository-governance.mjs',
