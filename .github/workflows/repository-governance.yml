@@ -1,0 +1,106 @@
+# Default-branch trust gate. This workflow never checks out or executes pull-request code.
+name: Repository Governance
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review, edited]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  validate:
+    name: Validate protected controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require owner authority for protected-control changes
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            const pull = context.payload.pull_request;
+            if (!pull || pull.base.ref !== 'main') {
+              core.notice('Not a main-bound pull request.');
+              return;
+            }
+
+            const trustedOwner = 'carloearl';
+            const statusContext = 'Repository Governance / Validate protected controls';
+            const setStatus = (state, description) => github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: pull.head.sha,
+              state,
+              context: statusContext,
+              description,
+              target_url: pull.html_url,
+            });
+            await setStatus('pending', 'Evaluating protected-control changes');
+            const protectedPaths = [
+              /^\.github\/workflows\//,
+              /^\.github\/CODEOWNERS$/,
+              /^\.github\/pull_request_template\.md$/,
+              /^\.base44\//,
+              /(?:^|\/)scripts\//,
+              /(?:^|\/)(?:package(?:-lock)?|npm-shrinkwrap)\.json$/,
+              /(?:^|\/)\.npmrc$/,
+              /^cloudflare\//,
+              /^AGENTS\.md$/,
+              /^CONTRIBUTING\.md$/,
+              /^INVARIANTS\.md$/,
+              /^docs\/engineering\/REPOSITORY_GOVERNANCE\.md$/,
+            ];
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull.number,
+              per_page: 100,
+            });
+            if (files.length !== pull.changed_files) {
+              await setStatus('failure', 'Changed-file inventory is incomplete');
+              core.setFailed(`Expected ${pull.changed_files} changed files but GitHub returned ${files.length}.`);
+              return;
+            }
+            const protectedFiles = [...new Set(
+              files
+                .flatMap(({ filename, previous_filename }) => [filename, previous_filename].filter(Boolean))
+                .filter((filename) => protectedPaths.some((pattern) => pattern.test(filename))),
+            )];
+            if (protectedFiles.length === 0) {
+              await setStatus('success', 'No protected-control files changed');
+              core.notice('No protected-control files changed.');
+              return;
+            }
+
+            if (pull.user.login.toLowerCase() === trustedOwner) {
+              await setStatus('success', 'Owner-authored protected-control change');
+              core.notice(`Owner-authored protected change: ${protectedFiles.join(', ')}`);
+              return;
+            }
+
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pull.number,
+              per_page: 100,
+            });
+            const ownerReviews = reviews
+              .filter(({ user }) => user?.login?.toLowerCase() === trustedOwner)
+              .sort((left, right) => new Date(left.submitted_at) - new Date(right.submitted_at));
+            const latestOwnerReview = ownerReviews.at(-1);
+            if (latestOwnerReview?.state === 'APPROVED' && latestOwnerReview.commit_id === pull.head.sha) {
+              await setStatus('success', 'Exact-head owner approval verified');
+              core.notice(`Exact-head owner approval covers: ${protectedFiles.join(', ')}`);
+              return;
+            }
+
+            await setStatus('failure', 'Protected changes require owner authority');
+            core.setFailed(
+              `Protected-control changes require ${trustedOwner} as PR author or an exact-head owner approval: `
+              + protectedFiles.join(', '),
+            );
