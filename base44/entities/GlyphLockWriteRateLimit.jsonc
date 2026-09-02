@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Server-only hourly rate-limit buckets for public governed-write endpoints.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "bucket_key": {
       "type": "string"
     },

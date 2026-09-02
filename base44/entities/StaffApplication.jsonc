@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Resumable W-2 staff application and activation gate. Never store SSN, bank data, or raw tax document values.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "application_type": {
       "type": "string",
       "enum": [

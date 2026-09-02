@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Append-only retention or tombstone evidence for governed GlyphLock record deletions and archival actions. Protected content and secrets must be scrubbed before persistence.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "archive_id": {
       "type": "string"
     },

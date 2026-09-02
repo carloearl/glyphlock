@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Short-lived one-time capability used to finish an explicitly allowed public intake workflow without allowing arbitrary record updates.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "grant_id": {
       "type": "string"
     },

@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Append-only partner-scoped evidence that an authorized marketing asset was downloaded.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "event_id": {
       "type": "string"
     },

@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Append-only decision and outcome evidence for governed non-NUPS GlyphLock business mutations. Stores safe hashes and field names, never private content or credentials.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "event_id": {
       "type": "string"
     },

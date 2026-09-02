@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Authoritative current non-secret maturity state for a GlyphLock/NUPS integration in one environment and optional venue.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "status_key": {
       "type": "string",
       "description": "Stable integration/environment/venue key."

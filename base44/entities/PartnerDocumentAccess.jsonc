@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Per-partner access evidence for partner documents. Avoids using one global viewed flag across every partner.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "access_key": {
       "type": "string"
     },

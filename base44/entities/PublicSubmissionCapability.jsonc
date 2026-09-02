@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Server-only, short-lived one-time capability for a public submitter to update limited delivery fields on the record they just created. The plaintext capability is returned once and never persisted.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "capability_id": {
       "type": "string"
     },

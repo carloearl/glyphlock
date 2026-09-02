@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Append-only sanitized evidence for one authenticated Batch 17 acceptance assignment. Contains no bearer token, OTP, password, signed URL, file URI, or protected document content.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "result_id": {
       "type": "string"
     },

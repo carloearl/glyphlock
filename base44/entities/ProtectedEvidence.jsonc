@@ -3,6 +3,10 @@
   "type": "object",
   "description": "Opaque references to protected NUPS identity/tax/biometric/contract evidence. Raw permanent public URLs are not canonical storage.",
   "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
     "evidence_id": {
       "type": "string"
     },
