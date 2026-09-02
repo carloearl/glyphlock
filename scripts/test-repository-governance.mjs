@@ -193,3 +193,12 @@ test('rejects folded continuations on protected commands', () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /verify step 4 is not canonical and fail closed/);
 });
+
+test('rejects folded continuations on canonical action inputs', () => {
+  const result = runFixture((workflow) => workflow.replace(
+    '          path: artifacts/entity-audit/',
+    '          path: artifacts/entity-audit/\n            definitely-missing',
+  ));
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /verify step 16 is not canonical and fail closed/);
+});
