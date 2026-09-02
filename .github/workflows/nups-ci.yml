@@ -33,8 +33,11 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Enforce repository governance
+        run: node scripts/check-repository-governance.mjs
+
       - name: Block tracked environments and secrets
-        run: npm run check:secrets
+        run: node scripts/check-no-tracked-secrets.mjs
 
       - name: Install locked dependencies
         run: npm ci
@@ -46,7 +49,7 @@ jobs:
         run: npm run check:nups-write-gateway
 
       - name: Run Base44-managed CI checks
-        run: npm run ci:base44
+        run: node scripts/run-base44-ci.mjs
 
       - name: Verify NUPS DJ function SDK pins
         run: npm run check:dj-functions

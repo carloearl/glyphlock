@@ -1,0 +1,9 @@
+# Owner review routing for repository and release controls.
+/.github/workflows/ @carloearl
+/.github/CODEOWNERS @carloearl
+/AGENTS.md @carloearl
+/INVARIANTS.md @carloearl
+/docs/engineering/REPOSITORY_GOVERNANCE.md @carloearl
+/scripts/check-repository-governance.mjs @carloearl
+/scripts/run-base44-ci.mjs @carloearl
+/.base44/ci-checks.json @carloearl

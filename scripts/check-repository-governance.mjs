@@ -4,6 +4,7 @@ const requiredFiles = [
   'AGENTS.md',
   'CONTRIBUTING.md',
   '.base44/ci-checks.json',
+  '.github/CODEOWNERS',
   '.github/pull_request_template.md',
   '.github/workflows/nups-ci.yml',
   'docs/engineering/REPOSITORY_GOVERNANCE.md',
@@ -45,7 +46,13 @@ requireText('.github/pull_request_template.md', [
 requireText('.github/workflows/nups-ci.yml', [
   /pull_request:\s*\n\s+branches:\s*\[main\]/,
   /name: Verify source and production build/,
-  /npm run ci:base44/,
+  /node scripts\/run-base44-ci\.mjs/,
+]);
+
+requireText('.github/CODEOWNERS', [
+  /\/\.github\/workflows\/ @carloearl/,
+  /\/scripts\/check-repository-governance\.mjs @carloearl/,
+  /\/scripts\/run-base44-ci\.mjs @carloearl/,
 ]);
 
 requireText('scripts/run-base44-ci.mjs', [
@@ -54,17 +61,44 @@ requireText('scripts/run-base44-ci.mjs', [
 
 if (existsSync('.github/workflows/nups-ci.yml')) {
   const workflow = readFileSync('.github/workflows/nups-ci.yml', 'utf8');
-  const secretScan = workflow.indexOf('run: npm run check:secrets');
-  const dependencyInstall = workflow.indexOf('run: npm ci');
+  const workflowLines = workflow.split(/\r?\n/);
+  const pullRequestStart = workflowLines.findIndex((line) => /^  pull_request:\s*$/.test(line));
+  const pullRequestEnd = workflowLines.findIndex(
+    (line, index) => index > pullRequestStart && /^  [a-zA-Z][a-zA-Z0-9_-]*:\s*$/.test(line),
+  );
+  const pullRequestBlock = workflowLines.slice(
+    pullRequestStart + 1,
+    pullRequestEnd === -1 ? workflowLines.length : pullRequestEnd,
+  );
 
-  if (secretScan === -1) {
-    failures.push('.github/workflows/nups-ci.yml must run check:secrets');
+  if (!pullRequestBlock.some((line) => /^    branches:\s*\[main\]\s*$/.test(line))) {
+    failures.push('NUPS CI pull_request must target main');
   }
-  if (dependencyInstall === -1) {
-    failures.push('.github/workflows/nups-ci.yml must use npm ci');
+  if (pullRequestBlock.some((line) => /^    types:/.test(line))) {
+    failures.push('NUPS CI pull_request must use default activity types so opened, reopened, and synchronized changes run');
   }
-  if (secretScan !== -1 && dependencyInstall !== -1 && secretScan > dependencyInstall) {
-    failures.push('check:secrets must run before npm ci');
+
+  const runCommands = workflowLines
+    .map((line) => line.match(/^\s+run:\s*(.+?)\s*$/)?.[1])
+    .filter(Boolean);
+  const requiredCommandOrder = [
+    'node scripts/check-repository-governance.mjs',
+    'node scripts/check-no-tracked-secrets.mjs',
+    'npm ci',
+    'node scripts/run-base44-ci.mjs',
+  ];
+  const commandIndexes = requiredCommandOrder.map((command) => runCommands.indexOf(command));
+
+  for (const [index, command] of requiredCommandOrder.entries()) {
+    if (commandIndexes[index] === -1) {
+      failures.push(`.github/workflows/nups-ci.yml must actively run: ${command}`);
+    }
+  }
+  for (let index = 1; index < commandIndexes.length; index += 1) {
+    if (commandIndexes[index - 1] !== -1 && commandIndexes[index] !== -1
+      && commandIndexes[index - 1] > commandIndexes[index]) {
+      failures.push(`Workflow command must run earlier: ${requiredCommandOrder[index - 1]}`);
+    }
   }
 }
 
