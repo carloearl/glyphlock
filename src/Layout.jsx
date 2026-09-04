@@ -8,7 +8,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import UnifiedSidebar from "@/components/global/UnifiedSidebar";
 import ThemeProvider from "@/components/ThemeProvider";
-import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CrawlerFallback from "@/components/seo/CrawlerFallback";
 import PrerenderHints from "@/components/seo/PrerenderHints";
 import AccessibilityToolbar from "@/components/accessibility/AccessibilityToolbar";
@@ -89,7 +88,6 @@ export default function Layout({ children, currentPageName }) {
   return (
     <ThemeProvider>
       {/* GLYPHLOCK: Analytics, SEO & Security */}
-      <GoogleAnalytics />
       <CrawlerFallback />
       <PrerenderHints />
 
