@@ -18,6 +18,17 @@ export default function NavigationTracker() {
         }, '*');
     }, [location]);
 
+    // Record SPA route views in Google Analytics without sending query strings or fragments.
+    useEffect(() => {
+        if (typeof window.gtag !== 'function') return;
+
+        window.gtag('event', 'page_view', {
+            page_title: document.title,
+            page_location: `${window.location.origin}${location.pathname}`,
+            page_path: location.pathname
+        });
+    }, [location.pathname]);
+
     // Log user activity when navigating to a page
     useEffect(() => {
         // Extract page name from pathname
