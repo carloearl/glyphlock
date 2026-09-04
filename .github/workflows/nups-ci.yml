@@ -57,6 +57,9 @@ jobs:
       - name: Verify integration security boundaries
         run: npm run check:integrations
 
+      - name: Test partner integration scaffolds
+        run: node --test integrations/salesforce-mcp/runtime.test.mjs integrations/microsoft-marketplace/lifecycle.test.mjs
+
       - name: Verify NUPS mode and venue isolation guards
         run: npm run check:nups-isolation
 
