@@ -312,6 +312,11 @@ const AuthenticatedApp = () => {
         <Route path="/dce" element={<DCE />} />
         <Route path="/Qr" element={<Navigate to="/SecureQRStudio" replace />} />
         <Route path="/qr" element={<Navigate to="/SecureQRStudio" replace />} />
+        {/* Retired public case-study aliases converge on the canonical evidence library. */}
+        <Route path="/CaseStudies" element={<Navigate to="/TechnicalEvidence" replace />} />
+        <Route path="/casestudies" element={<Navigate to="/TechnicalEvidence" replace />} />
+        <Route path="/CaseStudyAIBinding" element={<Navigate to="/TechnicalEvidence" replace />} />
+        <Route path="/casestudyaibinding" element={<Navigate to="/TechnicalEvidence" replace />} />
         {Object.entries(Pages).map(([path, Page]) => (
           <Route key={path} path={`/${path}`} element={<Page />} />
         ))}
