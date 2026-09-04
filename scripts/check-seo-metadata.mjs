@@ -176,6 +176,93 @@ if (indexHtml) {
   if (descCount !== 1) fail(`index.html must have exactly one description meta (found ${descCount})`);
 }
 
+// Static homepage identity graph: source-level contract for raw crawlers and runtime de-duplication.
+let identityGraph = null;
+if (indexHtml) {
+  const scriptTags = [...indexHtml.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+  const jsonLdScripts = scriptTags.filter((match) => /\btype=["']application\/ld\+json["']/i.test(match[1]));
+  const identityScripts = scriptTags.filter((match) => /\bid=["']identity-schema["']/i.test(match[1]));
+
+  if (jsonLdScripts.length !== 1) fail(`index.html must contain exactly one static JSON-LD script (found ${jsonLdScripts.length})`);
+  if (identityScripts.length !== 1) fail(`index.html must contain exactly one script with id="identity-schema" (found ${identityScripts.length})`);
+
+  if (identityScripts.length === 1) {
+    if (!/\btype=["']application\/ld\+json["']/i.test(identityScripts[0][1])) {
+      fail('identity-schema must use type="application/ld+json"');
+    }
+    try {
+      identityGraph = JSON.parse(identityScripts[0][2].trim());
+    } catch (error) {
+      fail(`identity-schema must contain valid JSON: ${error.message}`);
+    }
+  }
+
+  const gaLoader = 'https://www.googletagmanager.com/gtag/js?id=G-8ND3NFNM48';
+  const gaLoaderCount = indexHtml.split(gaLoader).length - 1;
+  const gaConfigCount = (indexHtml.match(/gtag\(['"]config['"],\s*['"]G-8ND3NFNM48['"]/g) || []).length;
+  if (gaLoaderCount !== 1) fail(`index.html must load the GlyphLock GA4 tag exactly once (found ${gaLoaderCount})`);
+  if (gaConfigCount !== 1) fail(`index.html must configure G-8ND3NFNM48 exactly once (found ${gaConfigCount})`);
+  if (indexHtml.includes('G-XXXXXXXXXX')) fail('index.html contains the retired GA placeholder');
+  if (/glyphlock\.com/i.test(indexHtml)) fail('index.html contains a retired glyphlock.com reference');
+}
+
+if (identityGraph) {
+  if (identityGraph['@context'] !== 'https://schema.org') fail('identity-schema @context must be https://schema.org');
+  const graph = identityGraph['@graph'];
+  if (!Array.isArray(graph)) {
+    fail('identity-schema must contain an @graph array');
+  } else {
+    const hasType = (node, expected) => {
+      const types = Array.isArray(node?.['@type']) ? node['@type'] : [node?.['@type']];
+      return types.includes(expected);
+    };
+    const organizations = graph.filter((node) => hasType(node, 'Organization'));
+    const websites = graph.filter((node) => hasType(node, 'WebSite'));
+    if (organizations.length !== 1 || organizations[0]?.['@id'] !== 'https://glyphlock.io/#organization') {
+      fail('identity-schema must have one canonical Organization at https://glyphlock.io/#organization');
+    }
+    if (websites.length !== 1 || websites[0]?.['@id'] !== 'https://glyphlock.io/#website') {
+      fail('identity-schema must have one canonical WebSite at https://glyphlock.io/#website');
+    }
+
+    const requiredNodes = new Map([
+      ['NUPS', 'https://glyphlock.io/NUPSLanding'],
+      ['GlyphLock QR Studio', 'https://glyphlock.io/SecureQRStudio'],
+      ['GlyphBot', 'https://glyphlock.io/GlyphBot'],
+      ['GlyphLock Image Lab', 'https://glyphlock.io/ImageLab'],
+      ['GlyphLock SDK Documentation', 'https://glyphlock.io/SDKDocs'],
+    ]);
+    for (const [name, url] of requiredNodes) {
+      const matches = graph.filter((node) => node?.name === name);
+      if (matches.length !== 1 || matches[0]?.url !== url) {
+        fail(`identity-schema must have one ${name} node at ${url}`);
+      }
+    }
+
+    const serialized = JSON.stringify(identityGraph);
+    if (/glyphlock\.com/i.test(serialized)) fail('identity-schema contains a retired glyphlock.com reference');
+    const forbiddenKeys = new Set([
+      'telephone', 'faxNumber', 'address', 'streetAddress',
+      'postOfficeBoxNumber', 'postalCode', 'addressLocality',
+      'addressRegion', 'addressCountry',
+    ]);
+    const scanPrivateFields = (value, path = '$') => {
+      if (!value || typeof value !== 'object') return;
+      for (const [key, child] of Object.entries(value)) {
+        if (forbiddenKeys.has(key)) fail(`identity-schema exposes forbidden location/phone field: ${path}.${key}`);
+        scanPrivateFields(child, `${path}.${key}`);
+      }
+    };
+    scanPrivateFields(identityGraph);
+
+    const organization = organizations[0];
+    if (organization && !Array.isArray(organization.sameAs)) fail('Organization sameAs must be an array');
+    if (organization && !organization.sameAs?.includes('https://github.com/carloearl/glyphlock')) {
+      fail('Organization sameAs must include https://github.com/carloearl/glyphlock');
+    }
+  }
+}
+
 // StructuredDataOrg.jsx must NOT exist (duplicate org schema eliminated).
 const structuredOrgPath = join(ROOT, 'src/components/StructuredDataOrg.jsx');
 if (existsSync(structuredOrgPath)) {
@@ -268,8 +355,8 @@ if (footer && !footer.includes('https://github.com/carloearl/glyphlock')) {
   fail('Footer GitHub social must be https://github.com/carloearl/glyphlock');
 }
 const seoHead = sourceContents['src/components/SEOHead.jsx'];
-if (seoHead && !seoHead.includes('https://github.com/carloearl/glyphlock')) {
-  fail('SEOHead sameAs must include https://github.com/carloearl/glyphlock');
+if (seoHead && (seoHead.includes("setAttribute('id', 'identity-schema')") || seoHead.includes('identityScript.textContent'))) {
+  fail('SEOHead must not inject or overwrite the static identity-schema');
 }
 const sdkDocs = sourceContents['src/pages/SDKDocs.jsx'];
 if (sdkDocs && !sdkDocs.includes('https://github.com/carloearl/glyphlock')) {
