@@ -14,7 +14,7 @@ NUPS means Nexus Unified Portal System. It is venue-operations software that con
 - Enrollment: 1654123
 - Marketplace subscription: 1655445
 
-These identifiers document enrollment and development activity. Production access, an Oracle Marketplace listing, and Oracle Simphony certification are not approved as of August 25, 2026.
+These identifiers document enrollment and development activity. Oracle Cloud Marketplace program enrollment 1655445 is approved and active. A published NUPS Marketplace listing, production OPERA Cloud access, and Simphony Solution Validation or certification are not approved as of September 3, 2026; the formal Simphony integration request submitted August 25 remains under Oracle review.
 
 ## Public pages
 
