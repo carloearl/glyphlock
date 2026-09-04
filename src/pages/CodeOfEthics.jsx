@@ -3,6 +3,7 @@ import { ShieldCheck } from "lucide-react";
 import PolicySection from "@/components/policy/PolicySection";
 import PolicyCallout from "@/components/policy/PolicyCallout";
 import PolicyTable from "@/components/policy/PolicyTable";
+import SEOHead from "@/components/SEOHead";
 
 const META = [
   ["Issuing entity", "GlyphLock LLC (Arizona Entity No. 23831258)"],
@@ -36,6 +37,7 @@ const Bullets = ({ items }) => (
 export default function CodeOfEthics() {
   return (
     <div className="min-h-screen w-full py-12 px-4 md:px-8">
+      <SEOHead />
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center gap-3 mb-3">
           <ShieldCheck className="w-6 h-6 text-blue-400" />

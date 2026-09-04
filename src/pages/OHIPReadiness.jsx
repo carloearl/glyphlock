@@ -343,6 +343,13 @@ export default function OHIPReadiness() {
           </p>
         </div>
 
+        <Alert className="border-amber-500/50 bg-amber-950/30 text-amber-100">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            Oracle announced an OHIP Developer Portal migration: UAT September 3, production migration September 8, and completion September 10, 2026. Existing integrations are expected to continue operating, but avoid Developer Portal configuration changes during the migration windows. Read-only NUPS/OHIP validation can continue unless Oracle reports otherwise.
+          </AlertDescription>
+        </Alert>
+
         {error && (
           <Alert className="border-red-500/50 bg-red-950/40 text-red-100">
             <AlertTriangle className="h-4 w-4" />
