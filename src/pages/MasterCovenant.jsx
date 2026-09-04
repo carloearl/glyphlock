@@ -4,6 +4,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import SEOHead from "@/components/SEOHead";
 
 export default function MasterCovenant() {
   const navigate = useNavigate();
@@ -12,5 +13,5 @@ export default function MasterCovenant() {
     navigate(createPageUrl("GovernanceHub"), { replace: true });
   }, []);
   
-  return null;
+  return <SEOHead />;
 }
