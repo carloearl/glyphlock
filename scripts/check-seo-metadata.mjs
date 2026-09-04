@@ -323,17 +323,17 @@ if (llmsText) {
     ['Marketplace listing', /\b(?:published NUPS |Oracle )?Marketplace listing\b/i],
     ['Simphony certification', /\bSimphony(?: Solution Validation or)? certification\b/i],
   ];
-  const oracleBoundaryParagraph = llmsText
-    .split(/\n\s*\n/)
-    .find((paragraph) => requiredOracleBoundaries.every(([, pattern]) => pattern.test(paragraph)));
-  if (!oracleBoundaryParagraph) {
+  const oracleBoundaryClause = llmsText
+    .split(/[;.!?]+/)
+    .find((clause) => requiredOracleBoundaries.every(([, pattern]) => pattern.test(clause)));
+  if (!oracleBoundaryClause) {
     for (const [label, pattern] of requiredOracleBoundaries) {
       if (!pattern.test(llmsText)) fail(`public/llms.txt missing required boundary: ${label}`);
     }
-    fail('public/llms.txt must keep all Oracle production boundaries in one statement');
+    fail('public/llms.txt must keep all Oracle production boundaries in one clause');
   } else {
     const negativeOracleStatus = /\b(?:are|is|remain(?:s)?)\s+(?:not approved|unapproved|not available|under (?:Oracle )?review)\b|\bhave not (?:been )?approved\b|\bapproval (?:is )?(?:pending|has not been granted)\b/i;
-    if (!negativeOracleStatus.test(oracleBoundaryParagraph)) {
+    if (!negativeOracleStatus.test(oracleBoundaryClause)) {
       fail('public/llms.txt Oracle production boundaries must remain explicitly unapproved or under review');
     }
   }
