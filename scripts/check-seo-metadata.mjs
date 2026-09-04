@@ -202,7 +202,9 @@ if (indexHtml) {
   const gaConfigCount = (indexHtml.match(/gtag\(['"]config['"],\s*['"]G-8ND3NFNM48['"]/g) || []).length;
   if (gaLoaderCount !== 1) fail(`index.html must load the GlyphLock GA4 tag exactly once (found ${gaLoaderCount})`);
   if (gaConfigCount !== 1) fail(`index.html must configure G-8ND3NFNM48 exactly once (found ${gaConfigCount})`);
+  if (!/send_page_view\s*:\s*false/.test(indexHtml)) fail('Initial GA4 config must retain send_page_view: false for SPA route tracking');
   if (indexHtml.includes('G-XXXXXXXXXX')) fail('index.html contains the retired GA placeholder');
+  if (/data-seo-source\s*=\s*["']builder["']/i.test(indexHtml)) fail('index.html contains a Base44 builder JSON-LD marker');
   if (/glyphlock\.com/i.test(indexHtml)) fail('index.html contains a retired glyphlock.com reference');
 }
 
@@ -355,8 +357,8 @@ if (footer && !footer.includes('https://github.com/carloearl/glyphlock')) {
   fail('Footer GitHub social must be https://github.com/carloearl/glyphlock');
 }
 const seoHead = sourceContents['src/components/SEOHead.jsx'];
-if (seoHead && (seoHead.includes("setAttribute('id', 'identity-schema')") || seoHead.includes('identityScript.textContent'))) {
-  fail('SEOHead must not inject or overwrite the static identity-schema');
+if (seoHead && seoHead.includes('identity-schema')) {
+  fail('SEOHead must not create, update, or remove the static identity-schema');
 }
 const sdkDocs = sourceContents['src/pages/SDKDocs.jsx'];
 if (sdkDocs && !sdkDocs.includes('https://github.com/carloearl/glyphlock')) {
