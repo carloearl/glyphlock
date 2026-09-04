@@ -315,8 +315,16 @@ if (sitemapXml) {
 
 const llmsText = sourceContents['public/llms.txt'];
 if (llmsText) {
-  for (const required of ['107857124', '17363', '4-463913260838', '1654123', '1655445', 'Production access', 'Marketplace listing', 'Simphony certification']) {
-    if (!llmsText.includes(required)) fail(`public/llms.txt missing required boundary or identifier: ${required}`);
+  for (const required of ['107857124', '17363', '4-463913260838', '1654123', '1655445']) {
+    if (!llmsText.includes(required)) fail(`public/llms.txt missing required identifier: ${required}`);
+  }
+  const requiredOracleBoundaries = [
+    ['Production access', /\bproduction(?: OPERA Cloud)? access\b/i],
+    ['Marketplace listing', /\b(?:published NUPS |Oracle )?Marketplace listing\b/i],
+    ['Simphony certification', /\bSimphony(?: Solution Validation or)? certification\b/i],
+  ];
+  for (const [label, pattern] of requiredOracleBoundaries) {
+    if (!pattern.test(llmsText)) fail(`public/llms.txt missing required boundary: ${label}`);
   }
   for (const stale of ['/CaseStudies', '/CaseStudyTruthStrike', '/CaseStudyAIBinding']) {
     if (llmsText.includes(stale)) fail(`public/llms.txt contains retired route: ${stale}`);
