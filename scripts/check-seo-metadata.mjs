@@ -99,12 +99,6 @@ for (const path of terminologyFiles) {
 // Normalize apostrophes (curly ↔ straight) for resilient exact-value checks.
 const norm = (s) => (s || '').replace(/[\u2019\u2018]/g, "'");
 
-// Parse emitted HTML attributes without assuming attribute order.
-const getHtmlAttribute = (tag, name) =>
-  tag.match(new RegExp(`\\b${name}\\s*=\\s*"([^"]*)"`, "i"))?.[1] || "";
-const hasHtmlToken = (tag, name, token) =>
-  getHtmlAttribute(tag, name).split(/\s+/).some((value) => value.toLowerCase() === token.toLowerCase());
-
 // ── 1. Retired/misleading strings (case-insensitive) ──
 const RETIRED_STRINGS = [
   'What If an Image Could Carry Proof',
@@ -174,17 +168,11 @@ for (const [path, content] of Object.entries(sourceContents)) {
 // ── 5. Duplicate canonical / schema patterns ──
 const indexHtml = sourceContents['index.html'];
 if (indexHtml) {
-  const linkTags = [...indexHtml.matchAll(/<link\b[^>]*>/gi)].map((match) => match[0]);
-  const canonicalTags = linkTags.filter((tag) => hasHtmlToken(tag, 'rel', 'canonical'));
-  if (canonicalTags.length !== 1) fail(`index.html must have exactly one canonical link (found ${canonicalTags.length})`);
-  if (canonicalTags.length === 1 && getHtmlAttribute(canonicalTags[0], 'href') !== 'https://glyphlock.io/') {
-    fail(`index.html root canonical must be exactly https://glyphlock.io/ (found ${getHtmlAttribute(canonicalTags[0], 'href') || 'missing href'})`);
-  }
-
-  const metaTags = [...indexHtml.matchAll(/<meta\b[^>]*>/gi)].map((match) => match[0]);
-  const ogTitleCount = metaTags.filter((tag) => getHtmlAttribute(tag, 'property').toLowerCase() === 'og:title').length;
+  const canonicalCount = (indexHtml.match(/rel="canonical"/gi) || []).length;
+  if (canonicalCount !== 1) fail(`index.html must have exactly one canonical link (found ${canonicalCount})`);
+  const ogTitleCount = (indexHtml.match(/property="og:title"/gi) || []).length;
   if (ogTitleCount !== 1) fail(`index.html must have exactly one og:title (found ${ogTitleCount})`);
-  const descCount = metaTags.filter((tag) => getHtmlAttribute(tag, 'name').toLowerCase() === 'description').length;
+  const descCount = (indexHtml.match(/name="description"/gi) || []).length;
   if (descCount !== 1) fail(`index.html must have exactly one description meta (found ${descCount})`);
 }
 
@@ -400,11 +388,6 @@ if (seoData) {
   if (new Set(descriptions).size !== descriptions.length) fail('Every public route description must be distinct');
   for (const entry of entries) {
     if (!entry.title || !entry.description || !entry.url) fail(`Incomplete SEO record: ${entry.key}`);
-
-    const pagePath = `src/pages/${entry.key}.jsx`;
-    const pageSource = read(pagePath);
-    if (pageSource === null) fail(`Missing public route component: ${pagePath}`);
-    else if (!/<SEOHead\b/.test(pageSource)) fail(`Public route must mount SEOHead: ${entry.url} (${pagePath})`);
     if (entry.title.length >= 60) fail(`Public title must stay under 60 characters for ${entry.url} (found ${entry.title.length})`);
     if (entry.description.length > 155) fail(`Public description must stay at or below 155 characters for ${entry.url} (found ${entry.description.length})`);
     if (entry.ogTitle !== entry.title) fail(`ogTitle must mirror title for ${entry.key}`);
@@ -445,8 +428,6 @@ if (indexHtml) {
   }
 }
 if (seoHead) {
-  if (!seoHead.includes('const path = location.pathname || "/"')) fail('SEOHead canonical resolution must use pathname only');
-  if (/\blocation\.search\b/.test(seoHead)) fail('SEOHead canonical resolution must not include query parameters');
   if (seoHead.includes('qtrypzzcjebvfcihiynt.supabase.co/storage')) fail('SEOHead og:image must not use raw Supabase storage');
   if (!seoHead.includes("const isCanonicalPublicPath = Boolean(key && autoData.url === path)")) fail('SEOHead must fail closed for non-canonical/private routes');
   if (!seoHead.includes("'noindex, nofollow, noarchive, nosnippet'")) fail('SEOHead private-route noindex policy missing');

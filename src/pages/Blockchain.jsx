@@ -12,7 +12,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { motion, useInView } from "framer-motion";
 import { toast } from "sonner";
 import HelpPanel from '@/components/global/HelpPanel';
-import SEOHead from '@/components/SEOHead';
 
 export default function Blockchain() {
   const heroRef = useRef(null);
@@ -341,7 +340,6 @@ export default function Blockchain() {
 
   return (
       <>
-      <SEOHead />
       <HelpPanel
         title="Blockchain Tools Guide"
         sections={[

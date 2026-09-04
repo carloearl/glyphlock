@@ -7,7 +7,6 @@ import NUPSBuyerVideo from "@/components/nups/landing/NUPSBuyerVideo";
 import KioskSimulator from "@/components/nups/landing/KioskSimulator";
 import CommandDeckHero from "@/components/nups/landing/CommandDeckHero";
 import DemoRecordingSection from "@/components/home/DemoRecordingSection";
-import SEOHead from "@/components/SEOHead";
 
 // DACO-20260626 — Landing-page bypass allow-list.
 // These emails skip the marketing landing and venue-mode gate, landing
@@ -63,7 +62,6 @@ export default function NUPSLanding() {
 
   return (
     <>
-      <SEOHead />
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 
