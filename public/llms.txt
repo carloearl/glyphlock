@@ -2,6 +2,13 @@
 
 GlyphLock LLC is an Arizona limited liability company founded on May 24, 2025, in El Mirage, Arizona. GlyphLock develops evidence infrastructure for identity, permission, secure QR, venue operations, financial accountability, APIs, hardware-assisted workflows, and governance.
 
+## DCE
+
+DCE is GlyphLock's evidence-backed venue operations application. It connects door and ID operations, transaction-level agreements, VIP evidence, card and service-fee accounting, staff and entertainer actions, driver identity and payouts, receipts and processor references, shift reconciliation, operational analytics, append-oriented audit history, and PDF/JSON evidence exports. DCE is designed to preserve a reviewable chain from venue entry through final closeout and dispute review.
+
+Public DCE page: https://glyphlock.io/DCE
+Application: https://dce.glyphlock.io
+
 ## NUPS
 
 NUPS means Nexus Unified Portal System. It is venue-operations software that connects identity, role, contract, shift, register, payout, reconciliation, and audit records. NUPS can package references from payment and hospitality systems, but those source systems remain authoritative for the events they control.
@@ -20,6 +27,7 @@ These identifiers document enrollment and development activity. Oracle Cloud Mar
 
 - Home: https://glyphlock.io/
 - About GlyphLock LLC: https://glyphlock.io/About
+- DCE venue operations: https://glyphlock.io/DCE
 - NUPS: https://glyphlock.io/NUPSLanding
 - Technical Evidence: https://glyphlock.io/TechnicalEvidence
 - Oracle OHIP evidence: https://glyphlock.io/CaseStudyOracleOHIP
