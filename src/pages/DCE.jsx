@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, FileSignature, ShieldCheck, ScanLine, Receipt, Users, FileDown } from 'lucide-react';
+import { ArrowRight, FileSignature, ShieldCheck, ScanLine, Receipt, Users, FileDown, DoorOpen, CreditCard, Car, BadgeDollarSign, BarChart3, Clock3 } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
 
 const DCE_LOGO = 'https://media.base44.com/images/public/697a087fb354faebb72df54b/f609c57bf_09966cca-7be7-406f-9a2c-788f3a24ec5a.png';
@@ -8,40 +8,76 @@ const DCE_URL = 'https://dce.glyphlock.io';
 
 const features = [
   {
-    icon: FileSignature,
-    title: 'A CONTRACT PER TRANSACTION',
-    text: 'Every card transaction captures its own fresh agreement — amount, service window, terms and clickwrap assent recorded at the moment of sale.',
+    icon: DoorOpen,
+    title: 'DOOR + ID OPERATIONS',
+    text: 'Scan IDs, register guests, track cover charges, promo discounts and comps, and attribute every entry event to the staff member who handled it.',
     accent: '#ec4899',
   },
   {
-    icon: ScanLine,
-    title: 'ID ASSIST, OPERATOR CONFIRMED',
-    text: 'PDF417 government-ID scanning auto-fills identity fields. The operator confirms the record — the scanner never signs for anyone.',
+    icon: FileSignature,
+    title: 'TRANSACTION-LEVEL AGREEMENTS',
+    text: 'Qualifying card transactions create fresh agreements capturing the amount, service window, terms, customer assent and responsible staff actions at the moment of sale.',
     accent: '#f59e0b',
   },
   {
-    icon: Receipt,
-    title: 'RECEIPT + PROCESSOR REFERENCES',
-    text: 'Receipt data and processor / terminal references are linked to the contract so the money trail and the agreement stay reconcilable.',
+    icon: ShieldCheck,
+    title: 'VIP EVIDENCE CHAIN',
+    text: 'VIP activity connects identity, agreement, receipt, payment references, manager authorization, timestamps and supporting evidence into one reviewable record.',
     accent: '#22d3ee',
   },
   {
-    icon: Users,
-    title: 'ROLE-SCOPED STAFF ACTIONS',
-    text: 'Staff, hostess and manager actions are attributed and role-gated, with manager review on the events that require it.',
+    icon: CreditCard,
+    title: 'SALES + SERVICE-FEE ACCOUNTING',
+    text: 'Door, bar and VIP activity stay separated by payment method with configurable pricing, card service fees, discounts and comps while preserving gross versus net.',
     accent: '#8b5cf6',
   },
   {
-    icon: ShieldCheck,
-    title: 'APPEND-ORIENTED AUDIT TRAIL',
-    text: 'Contract lifecycle events are recorded as history. Corrections create traceable adjustments instead of silently rewriting the record.',
+    icon: Car,
+    title: 'DRIVER IDENTITY + PAYOUTS',
+    text: 'Link driver drop-offs, promotional referrals and eligible payouts directly to the guest or transaction that created them instead of a disconnected paper ledger.',
     accent: '#10b981',
   },
   {
-    icon: FileDown,
-    title: 'PDF + JSON EVIDENCE EXPORT',
-    text: 'Each package exports as a human-readable PDF and a machine-readable JSON evidence bundle for review, disputes and retention.',
+    icon: Users,
+    title: 'STAFF + ROLE CONTROL',
+    text: 'Owner, admin, manager and staff permissions gate sensitive actions. Events remain attributed to authenticated operators with manager approval where required.',
     accent: '#38bdf8',
+  },
+  {
+    icon: Clock3,
+    title: 'ENTERTAINER + SHIFT OPERATIONS',
+    text: 'Track entertainer check-in, check-out, show activity and applicable payouts alongside the rest of the venue shift in one operational timeline.',
+    accent: '#f472b6',
+  },
+  {
+    icon: Receipt,
+    title: 'RECEIPTS + PROCESSOR REFERENCES',
+    text: 'Receipt data, terminal references and authorization details stay linked to the underlying agreement and transaction so the money trail remains reconcilable.',
+    accent: '#fbbf24',
+  },
+  {
+    icon: BadgeDollarSign,
+    title: 'SHIFT RECONCILIATION',
+    text: 'Bring cash, card sales, service fees, cover revenue, VIP, bar, discounts, comps, driver payouts and recorded deductions into a structured closeout.',
+    accent: '#34d399',
+  },
+  {
+    icon: BarChart3,
+    title: 'OPERATIONAL ANALYTICS',
+    text: 'Review Door, Bar, VIP, Drivers, Staff and Entertainer activity while keeping the underlying records available to explain exactly where the numbers came from.',
+    accent: '#a78bfa',
+  },
+  {
+    icon: ScanLine,
+    title: 'APPEND-ORIENTED AUDIT HISTORY',
+    text: 'Material events are preserved as history. Corrections create traceable adjustments instead of silently replacing the original record.',
+    accent: '#fb7185',
+  },
+  {
+    icon: FileDown,
+    title: 'DISPUTE-READY EVIDENCE EXPORT',
+    text: 'Generate human-readable PDF documentation and machine-readable JSON evidence bundles for reconciliation, retention, review and chargeback workflows.',
+    accent: '#60a5fa',
   },
 ];
 
@@ -49,8 +85,8 @@ export default function DCE() {
   return (
     <>
       <SEOHead
-        title="DCE Evidence — Digital Contract & Evidence App | Powered by GlyphLock"
-        description="DCE Evidence is the GlyphLock digital-contract and evidence application: one agreement per card transaction, clickwrap assent, receipt and processor references, role-scoped staff actions, and linked PDF/JSON evidence exports."
+        title="DCE — Evidence-Backed Venue Operations | Powered by GlyphLock"
+        description="DCE connects venue identity, door operations, sales, VIP agreements, staff actions, driver payouts, shift reconciliation and dispute evidence into one auditable operating record."
         url="/DCE"
       />
 
@@ -91,10 +127,10 @@ export default function DCE() {
               transition={{ delay: 0.12, duration: 0.8 }}
               className="mt-10 text-[clamp(2.1rem,6vw,4.4rem)] font-black leading-[.92] tracking-[-.045em] text-white drop-shadow-[0_4px_18px_rgba(0,0,0,.9)]"
             >
-              ONE SWIPE. ONE CONTRACT.
+              ONE SHIFT. ONE SYSTEM.
               <br />
               <span className="bg-gradient-to-r from-pink-200 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">
-                ONE REVIEWABLE EVIDENCE CHAIN.
+                EVERY DOLLAR. EVERY ACTION. EVIDENCED.
               </span>
             </motion.h1>
 
@@ -104,9 +140,9 @@ export default function DCE() {
               transition={{ delay: 0.22, duration: 0.8 }}
               className="mx-auto mt-7 max-w-3xl text-base leading-relaxed text-white/95 drop-shadow-[0_3px_12px_rgba(0,0,0,.92)] md:text-xl"
             >
-              DCE Evidence is the digital contract and evidence application in the GlyphLock ecosystem. It turns a card
-              transaction into a complete, reviewable record: the agreement the customer actually accepted, who handled it,
-              what was charged, and the exportable evidence that backs all three.
+              DCE is GlyphLock's evidence-backed venue operations layer. Door entry, identity, sales, VIP agreements,
+              staff actions, driver activity, payouts and shift closeout move through one connected operational record,
+              preserving the timestamps and evidence needed to explain what happened and where the money went.
             </motion.p>
 
             <motion.div
@@ -139,9 +175,9 @@ export default function DCE() {
           <div className="mb-12 max-w-4xl">
             <div className="mb-4 font-mono text-[10px] tracking-[.28em] text-pink-300 md:text-xs">// WHAT DCE DOES</div>
             <h2 className="text-3xl font-black leading-[.95] tracking-[-.04em] text-white drop-shadow-[0_4px_16px_rgba(0,0,0,.9)] md:text-5xl lg:text-6xl">
-              THE AGREEMENT, THE IDENTITY, THE MONEY,
+              FROM THE FRONT DOOR TO FINAL CLOSEOUT.
               <br />
-              <span className="bg-gradient-to-r from-pink-300 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">AND THE PROOF — IN ONE RECORD.</span>
+              <span className="bg-gradient-to-r from-pink-300 via-fuchsia-400 to-amber-300 bg-clip-text text-transparent">ONE CONNECTED EVIDENCE CHAIN.</span>
             </h2>
           </div>
 
@@ -187,7 +223,7 @@ export default function DCE() {
                 SEE THE LIVE DCE APPLICATION.
               </h2>
               <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-100 md:text-lg">
-                DCE runs as its own application at dce.glyphlock.io, supported by NUPS and powered by GlyphLock.
+                See the operational system behind the evidence: identity, door, sales, VIP, drivers, staff, payouts, closeout and dispute-ready records, supported by NUPS and powered by GlyphLock.
               </p>
               <a
                 href={DCE_URL}
@@ -195,7 +231,7 @@ export default function DCE() {
                 rel="noreferrer"
                 className="group mt-8 inline-flex items-center gap-2 rounded-xl border border-pink-100/80 bg-pink-200 px-8 py-4 font-black text-slate-950 shadow-[0_0_36px_rgba(236,72,153,.55)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] hover:bg-white"
               >
-                LAUNCH DCE EVIDENCE
+                ENTER DCE
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </a>
             </div>
