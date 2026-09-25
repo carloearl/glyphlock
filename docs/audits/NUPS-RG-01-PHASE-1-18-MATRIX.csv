@@ -1,0 +1,52 @@
+Namespace,Phase,Requirement ID,Requirement,User-facing promise,Backend promise,Route,Component,Role,Mode,Viewport,Source evidence,Live evidence,Verdict,Blocker,Recovery action,Confidence
+GL-MASTER-23,1,P01-R01,Application boot and rout…,Baseline,Baseline,/,src/App.jsx; src/page…,Public,All,All,Evidence,Baseline,PROVEN_LIVE,,RG-02,High
+GL-MASTER-23,1,P01-R02,Canonical source-to-publi…,Baseline,Baseline,All,build/release pipeline,Owner/Admin,All,All,Evidence,Baseline,REACHABLE_PARTIAL_OR_BROKEN,No durable commit…,RG-02,High
+GL-MASTER-23,2,P02-R01,Public brand and homepage,Baseline,Baseline,/,src/pages/Home.jsx; s…,Public,All,All,Evidence,Baseline,PROVEN_LIVE,,RG-02,High
+GL-MASTER-23,2,P02-R02,Responsive homepage accep…,Baseline,Baseline,/,Home/Layout/global CSS,Public,All,390x844;8…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Viewport acceptan…,RG-02,Medium
+GL-MASTER-23,3,P03-R01,Secure QR creation surface,Baseline,Baseline,/SecureQRStudio,src/pages/SecureQRStu…,Public/Auth,All,All,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Interactive brows…,RG-02,Medium
+GL-MASTER-23,3,P03-R02,QR persistence and verifi…,Baseline,Baseline,/v/:ref; /OfflineVe…,VerifyDispatch; Offli…,Public/Auth,All,All,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,No live round-tri…,RG-02,High
+GL-MASTER-23,4,P04-R01,QR multi-mode information…,Baseline,Baseline,/SecureQRStudio,SecureQRStudio plus q…,Public/Auth,All,All,Evidence,Baseline,CONFLICTING_OR_AMBIGUOUS,Cannot prove whet…,RG-02,High
+GL-MASTER-23,4,P04-R02,Bulk/custom/security/hotz…,Baseline,Baseline,/SecureQRStudio,src/components/qr/**;…,Auth,All,All,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Built source is n…,RG-02,Medium
+GL-MASTER-23,5,P05-R01,QR intelligence scoring a…,Baseline,Baseline,/SecureQRStudio,evaluateQrRisk; enric…,Auth,All,All,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Provider and live…,RG-02,High
+GL-MASTER-23,5,P05-R02,AI-provider runtime matur…,Baseline,Baseline,N/A,provider functions/in…,System,All,N/A,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Provider account…,RG-02,High
+GL-MASTER-23,6,P06-R01,QR Omega remediation,Baseline,Baseline,/SecureQRStudio,QR Studio/OMEGA source,Public/Auth,All,All,Evidence,Baseline,DOCUMENTED_ONLY,Execution reports…,RG-02,Medium
+GL-MASTER-23,6,P06-R02,QR visual acceptance,Baseline,Baseline,/SecureQRStudio,QR UI,Public/Auth,All,Four view…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Visual proof unav…,RG-02,Medium
+GL-MASTER-23,7,P07-R01,GlyphBot reasoning/tool b…,Baseline,Baseline,/GlyphBot,GlyphBot.jsx; glyphbo…,Auth,All,All,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Provider/runtime…,RG-02,High
+GL-MASTER-23,7,P07-R02,Governed memory and writes,Baseline,Baseline,/GlyphBot,GlyphBotMemory; Glyph…,Auth,All,All,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Source checks are…,RG-02,High
+GL-MASTER-23,8,P08-R01,GlyphBot user interface,Baseline,Baseline,/GlyphBot,src/pages/GlyphBot.js…,Auth,All,All,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Authenticated/pro…,RG-02,Medium
+GL-MASTER-23,8,P08-R02,Conversation persistence…,Baseline,Baseline,/GlyphBot,conversationSave/List…,Auth,All,All,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,No authenticated…,RG-02,High
+GL-MASTER-23,9,P09-R01,TTS and voice functions,Baseline,Baseline,/GlyphBot,textToSpeech*; VoiceP…,Auth,All,Audio-cap…,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,No provider/brows…,RG-02,High
+GL-MASTER-23,9,P09-R02,Audible browser playback…,Baseline,Baseline,/GlyphBot,ttsEngine/audio compo…,Auth,All,Mobile/ta…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Hardware/browser…,RG-02,Medium
+GL-MASTER-23,10,P10-R01,Cross-app knowledge/searc…,Baseline,Baseline,/GlyphBot,glyphlockKnowledge; g…,Auth,All,All,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Provider/connecto…,RG-02,High
+GL-MASTER-23,10,P10-R02,Integration maturity is a…,Baseline,Baseline,/ProviderConsole; /…,Integration maturity…,Admin,All,Desktop/t…,Evidence,Baseline,REACHABLE_PARTIAL_OR_BROKEN,Connector presenc…,RG-02,High
+GL-MASTER-23,11,P11-R01,Image generation/editing…,Baseline,Baseline,/ImageGenerator; /I…,ImageGenerator; Image…,Auth,All,All,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Provider/runtime…,RG-02,High
+GL-MASTER-23,11,P11-R02,Image output audit and pe…,Baseline,Baseline,/ImageLab,Image entities/functi…,Auth,All,All,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Live persistence…,RG-02,High
+GL-MASTER-23,12,P12-R01,Public NUPS landing and k…,Baseline,Baseline,/NUPSLanding; /NUPS…,NUPSLanding.jsx; NUPS…,Public,All,Mobile/ta…,Evidence,Baseline,REACHABLE_PARTIAL_OR_BROKEN,Published build i…,RG-02,High
+GL-MASTER-23,12,P12-R02,Live access request entry,Baseline,Baseline,/NUPSKiosk?panel=li…,AccessRequestForm; nu…,Public/Auth,REAL,Mobile,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Source is not dep…,RG-02,High
+GL-MASTER-23,12,P12-R03,Mode/venue/workspace shell,Baseline,Baseline,NUPS operator routes,NUPSAppShell; operati…,All roles,REAL/DEMO…,All,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Requires separate…,RG-02,High
+GL-MASTER-23,12,P12-R04,Route and navigation cons…,Baseline,Baseline,NUPS route tree,src/App.jsx; NUPSAppS…,All roles,All,All,Evidence,Baseline,REACHABLE_PARTIAL_OR_BROKEN,Navigation archit…,RG-02,High
+GL-MASTER-23,13,P13-R01,Access request and approv…,Baseline,Baseline,/AccessRequests,AccessRequests.jsx; n…,Owner/Admin,REAL/DEMO…,Mobile/ta…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Human OTP and two…,RG-02,High
+GL-MASTER-23,13,P13-R02,Staff and entertainer onb…,Baseline,Baseline,/Contracts; staff a…,OnboardingPacket; Sta…,Manager/Admin,REAL/DEMO,Tablet,Evidence,Baseline,REACHABLE_PARTIAL_OR_BROKEN,Live persistence…,RG-02,High
+GL-MASTER-23,13,P13-R03,"PIN assignment, first-use…",Baseline,Baseline,/NUPSKiosk,KioskPinPad; nupsCloc…,Staff/Manager,REAL,Approved…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Hardware/session…,RG-02,High
+GL-MASTER-23,13,P13-R04,Role-specific routing and…,Baseline,Baseline,Role-specific routes,roleClass.js; roleHom…,All roles,All,All,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Role matrix has s…,RG-02,High
+GL-MASTER-23,13,P13-R05,Dedicated driver experien…,Baseline,Baseline,/NUPSKiosk; /Driver…,roleClass.js; roleHom…,Driver,REAL,Mobile,Evidence,Baseline,ABSENT,No explicit drive…,RG-02,High
+GL-MASTER-23,14,P14-R01,"GlyphBucks issue, sale, a…",Baseline,Baseline,/GlyphBucks,GlyphBucksConsole; cr…,Manager/Admin,REAL/DEMO,Tablet/de…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Requires authoriz…,RG-02,High
+GL-MASTER-23,14,P14-R02,Liability accounting inva…,Baseline,Baseline,Accounting/GlyphBuc…,POSTransaction; ledge…,Manager/Admin,All,N/A,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Static/policy pro…,RG-02,High
+GL-MASTER-23,14,P14-R03,"Press, inventory, QR veri…",Baseline,Baseline,/GlyphBucks; /VIPBi…,Press view; bill prin…,Manager/Admin,REAL/DEMO,Printer/s…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Physical hardware…,RG-02,High
+GL-MASTER-23,15,P15-R01,Register and POS workflow,Baseline,Baseline,/Register; /BarRegi…,RegisterConsole; POSC…,Cashier/Manag…,REAL/DEMO,Tablet,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Authenticated ter…,RG-02,High
+GL-MASTER-23,15,P15-R02,Governed transaction writ…,Baseline,Baseline,POS routes,writeEntity/server ga…,Authorized PO…,REAL/DEMO…,N/A,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Static/policy pro…,RG-02,High
+GL-MASTER-23,15,P15-R03,"Receipt, barcode, and QR…",Baseline,Baseline,/Receipts; /v/:ref,Receipts; receiptServ…,Cashier/Manag…,REAL/DEMO,Printer/s…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Printer/scanner a…,RG-02,High
+GL-MASTER-23,15,P15-R04,Cross-venue transaction r…,Baseline,Baseline,/NUPSHub,NUPSHub.jsx; POSTrans…,Staff/Manager,All,All,Evidence,Baseline,REACHABLE_PARTIAL_OR_BROKEN,Sensitive-read ch…,RG-02,High
+GL-MASTER-23,16,P16-R01,VIP contract workflow,Baseline,Baseline,/VIPSale; /VIPComma…,VIP workflow componen…,Hostess/Clien…,REAL/DEMO,Tablet/mo…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Human handoffs re…,RG-02,High
+GL-MASTER-23,16,P16-R02,"Close night, Z report, an…",Baseline,Baseline,/Tonight; /admin/se…,Tonight; closePOSBatc…,Manager/Admin,REAL/DEMO,Tablet/de…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Requires posted t…,RG-02,High
+GL-MASTER-23,16,P16-R03,"Accounting, trial balance…",Baseline,Baseline,/Accounting; /admin…,Accounting/ledger/rec…,Admin,REAL/DEMO,Desktop/t…,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Source and policy…,RG-02,High
+GL-MASTER-23,16,P16-R04,Payroll and contractor se…,Baseline,Baseline,Payroll/contractor…,PayrollRecord; Contra…,Admin/Manager,REAL/DEMO,Desktop,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Live records not…,RG-02,High
+GL-MASTER-23,16,P16-R05,Single authoritative busi…,Baseline,Baseline,NUPS routes,App.jsx; NUPSAppShell…,All roles,All,All,Evidence,Baseline,REACHABLE_PARTIAL_OR_BROKEN,Shadowed/duplicat…,RG-02,High
+GL-MASTER-23,17,P17-R01,"Provider checkout, webhoo…",Baseline,Baseline,Payment/return/reco…,stripe*; PaymentRecor…,Customer/Mana…,REAL,Browser/p…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,Provider account/…,RG-02,High
+GL-MASTER-23,17,P17-R02,Payment reconciliation an…,Baseline,Baseline,/admin/payment-reco…,Reconciliation/Resolu…,Manager/Admin,REAL/DEMO,Desktop/t…,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,No posted mismatc…,RG-02,High
+GL-MASTER-23,17,P17-R03,Production dependency sec…,Baseline,Baseline,Build pipeline,package.json/package-…,System,All,N/A,Evidence,Baseline,REACHABLE_PARTIAL_OR_BROKEN,Known advisories…,RG-02,High
+GL-MASTER-23,17,P17-R04,Live processor acceptance,Baseline,Baseline,Provider/payment ro…,PaymentProvider; Inte…,Owner/Admin,REAL,Provider/…,Evidence,Baseline,BLOCKED_HUMAN_OR_HARDWARE_PROOF,External provider…,RG-02,High
+GL-MASTER-23,18,P18-R01,"SDK documentation, downlo…",Baseline,Baseline,/SDKDocs; /Develope…,SDKDocs; downloadSDK;…,Developer/Adm…,All,Desktop,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,No consumer proof.,RG-02,High
+GL-MASTER-23,18,P18-R02,RDP/RDK deliverables,Baseline,Baseline,Unknown,Unknown,Developer,All,Desktop,Evidence,Baseline,ABSENT,Acronyms and acce…,RG-02,High
+GL-MASTER-23,18,P18-R03,Partner and integration m…,Baseline,Baseline,/PartnerPortal; /Pr…,Partner/Provider/OHIP…,Partner/Admin,All,Desktop,Evidence,Baseline,REACHABLE_PARTIAL_OR_BROKEN,UI claims can out…,RG-02,High
+GL-MASTER-23,18,P18-R04,Release engineering and g…,Baseline,Baseline,N/A,CI/workflows/write ga…,System,All,N/A,Evidence,Baseline,SOURCE_ONLY_NOT_LIVE,Engineering contr…,RG-02,High
