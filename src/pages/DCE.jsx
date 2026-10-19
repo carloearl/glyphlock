@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, FileSignature, ShieldCheck, ScanLine, Receipt, Users, FileDown, DoorOpen, CreditCard, Car, BadgeDollarSign, BarChart3, Clock3 } from 'lucide-react';
 import SEOHead from '@/components/SEOHead';
@@ -82,6 +82,7 @@ const features = [
 ];
 
 export default function DCE() {
+  const [videoFailed, setVideoFailed] = useState(false);
   return (
     <>
       <SEOHead
@@ -181,10 +182,17 @@ export default function DCE() {
             <p className="mb-7 max-w-3xl text-sm leading-relaxed text-slate-200 md:text-base">An illustrative look at the proposed unified entry and exit monitoring experience: directional guest tracking, operator activity, admissions, occupancy, and transaction events on a single operational screen.</p>
             <div className="overflow-hidden rounded-[24px] border border-pink-300/35 bg-[#060910] shadow-[0_0_48px_rgba(236,72,153,.2)]">
               <div className="relative aspect-video w-full">
-                <video className="h-full w-full object-contain" controls playsInline preload="metadata" poster="/dce-concept-poster.jpg" aria-label="DCE illustrative front door monitoring proof-of-concept video">
-                  <source src="/dce-front-door-concept.mp4" type="video/mp4" />
-                  Your browser does not support video playback.
-                </video>
+                {videoFailed ? (
+                  <div className="flex h-full w-full flex-col items-center justify-center gap-3 bg-[#070b17] px-6 text-center" role="status">
+                    <span className="text-sm font-semibold text-cyan-200">Concept video is temporarily unavailable</span>
+                    <span className="text-xs text-slate-300">The demonstration media needs to be uploaded before playback can begin.</span>
+                  </div>
+                ) : (
+                  <video className="h-full w-full object-contain" autoPlay muted loop playsInline controls preload="auto" onError={() => setVideoFailed(true)} aria-label="DCE illustrative front door monitoring proof-of-concept video">
+                    <source src="/dce-front-door-concept.mp4" type="video/mp4" />
+                    Your browser does not support video playback.
+                  </video>
+                )}
               </div>
               <div className="border-t border-white/10 px-4 py-3 text-xs leading-relaxed text-slate-300 md:px-6">Illustrative product concept. Numbers, faces, transactions, and monitoring overlays are sample visuals, not live venue data. Video does not establish that every depicted function is deployed or independently validated.</div>
             </div>
