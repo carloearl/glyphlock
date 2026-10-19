@@ -170,6 +170,27 @@ export default function DCE() {
           </div>
         </section>
 
+        {/* PUBLIC PROOF-OF-CONCEPT VISUALIZATION */}
+        <section id="concept-preview" className="relative mx-auto max-w-7xl px-5 pb-12 md:pb-20" aria-labelledby="dce-concept-heading">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <span className="font-mono text-[10px] tracking-[.25em] text-cyan-300 md:text-xs">// DCE SYSTEM VISUALIZATION</span>
+              <span className="rounded-full border border-cyan-300/40 bg-cyan-300/10 px-3 py-1 font-mono text-[10px] tracking-widest text-cyan-100">CONCEPT PREVIEW · NOT LIVE FOOTAGE</span>
+            </div>
+            <h2 id="dce-concept-heading" className="mb-4 text-3xl font-black tracking-tight text-white md:text-5xl">SEE THE FRONT DOOR. <span className="text-sky-300">SEE THE EVIDENCE.</span></h2>
+            <p className="mb-7 max-w-3xl text-sm leading-relaxed text-slate-200 md:text-base">An illustrative look at the proposed unified entry and exit monitoring experience: directional guest tracking, operator activity, admissions, occupancy, and transaction events on a single operational screen.</p>
+            <div className="overflow-hidden rounded-[24px] border border-pink-300/35 bg-[#060910] shadow-[0_0_48px_rgba(236,72,153,.2)]">
+              <div className="relative aspect-video w-full">
+                <video className="h-full w-full object-contain" controls playsInline preload="metadata" poster="/dce-concept-poster.jpg" aria-label="DCE illustrative front door monitoring proof-of-concept video">
+                  <source src="/dce-front-door-concept.mp4" type="video/mp4" />
+                  Your browser does not support video playback.
+                </video>
+              </div>
+              <div className="border-t border-white/10 px-4 py-3 text-xs leading-relaxed text-slate-300 md:px-6">Illustrative product concept. Numbers, faces, transactions, and monitoring overlays are sample visuals, not live venue data. Video does not establish that every depicted function is deployed or independently validated.</div>
+            </div>
+          </div>
+        </section>
+
         {/* WHAT IT DOES */}
         <section id="how-it-works" className="relative mx-auto max-w-7xl px-5 py-16 md:py-24">
           <div className="mb-12 max-w-4xl">
