@@ -5,6 +5,7 @@ import SEOHead from '@/components/SEOHead';
 
 const DCE_LOGO = 'https://media.base44.com/images/public/697a087fb354faebb72df54b/f609c57bf_09966cca-7be7-406f-9a2c-788f3a24ec5a.png';
 const DCE_URL = 'https://dce.glyphlock.io';
+const DCE_CONCEPT_VIDEO = 'https://base44.app/api/apps/697a087fb354faebb72df54b/files/mp/public/697a087fb354faebb72df54b/8851687fd_image.mp4';
 
 const features = [
   {
@@ -189,12 +190,21 @@ export default function DCE() {
                   </div>
                 ) : (
                   <video className="h-full w-full object-contain" autoPlay muted loop playsInline controls preload="auto" onError={() => setVideoFailed(true)} aria-label="DCE illustrative front door monitoring proof-of-concept video">
-                    <source src="/dce-front-door-concept.mp4" type="video/mp4" />
+                    <source src={DCE_CONCEPT_VIDEO} type="video/mp4" />
                     Your browser does not support video playback.
                   </video>
                 )}
               </div>
               <div className="border-t border-white/10 px-4 py-3 text-xs leading-relaxed text-slate-300 md:px-6">Illustrative product concept. Numbers, faces, transactions, and monitoring overlays are sample visuals, not live venue data. Video does not establish that every depicted function is deployed or independently validated.</div>
+            </div>
+            <aside className="mt-6 rounded-2xl border border-cyan-300/30 bg-[#060c18]/90 p-5 shadow-[0_0_30px_rgba(34,211,238,.09)] md:p-7" aria-label="GlyphLock DCE intellectual property and concept disclosure">
+              <div className="mb-3 font-mono text-[10px] font-bold tracking-[.22em] text-cyan-300">GLYPHLOCK®-STYLE BRAND IDENTIFICATION · INTELLECTUAL PROPERTY NOTICE</div>
+              <h3 className="text-xl font-black tracking-tight text-white md:text-2xl">GLYPHLOCK DCE | DOCUMENTED SYSTEM CONCEPT</h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-200">Public concept disclosure dated October 19, 2026. GlyphLock LLC identifies this demonstration as its presentation of a proposed integrated venue entry-and-exit monitoring interface, linking directional guest events, operator actions, admissions, occupancy indicators, transaction records, and an auditable operations timeline. The video is an illustrative visualization, not evidence that every depicted camera, biometric, or recognition capability has been built, tested, or deployed.</p>
+              <p className="mt-3 text-sm leading-relaxed text-slate-200">© 2026 GlyphLock LLC. All rights reserved. GLYPHLOCK and DCE are used here to identify GlyphLock's products and services; trademark registration is not asserted. Original audiovisual content, software expression, documentation, graphics, and other protectable material are subject to applicable copyright law. No license to reproduce or redistribute this presentation is granted by its public display, except as permitted by law or written authorization.</p>
+              <p className="mt-3 text-xs leading-relaxed text-slate-400">This dated notice records a public description, not patent priority, patent filing, issued patent protection, proof of invention ownership, or a guarantee against independent development. Patent rights, if any, depend on applicable filings and law. No claim of patent-pending status is made for the depicted concept.</p>
+              <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[10px] tracking-[.12em] text-cyan-200">SOURCE: GLYPHLOCK LLC · DCE PRODUCT CONCEPT · PUBLIC DISCLOSURE 2026-10-19</div>
+            </aside>
             </div>
           </div>
         </section>
