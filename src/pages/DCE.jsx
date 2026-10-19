@@ -205,7 +205,6 @@ export default function DCE() {
               <p className="mt-3 text-xs leading-relaxed text-slate-400">This dated notice records a public description, not patent priority, patent filing, issued patent protection, proof of invention ownership, or a guarantee against independent development. Patent rights, if any, depend on applicable filings and law. No claim of patent-pending status is made for the depicted concept.</p>
               <div className="mt-4 border-t border-white/10 pt-3 font-mono text-[10px] tracking-[.12em] text-cyan-200">SOURCE: GLYPHLOCK LLC · DCE PRODUCT CONCEPT · PUBLIC DISCLOSURE 2026-10-19</div>
             </aside>
-            </div>
           </div>
         </section>
 
