@@ -59,6 +59,7 @@ export const NAV_SECTIONS = [
     label: "NUPS",
     visibility: "public",
     items: [
+      { label: "Three Systems. One Objective.", page: "NUPSSystemsOverview", href: "/nups/three-systems-one-objective", visibility: "public" },
       { label: "Open NUPS Portal", page: "NUPSLanding", visibility: "public" },
       { label: "DCE Evidence", page: "DCE", visibility: "public" },
       { label: "Oracle OHIP Integration", page: "NUPSLanding#nups-integrations", visibility: "public" },
@@ -125,6 +126,7 @@ export const FOOTER_LINKS = {
     // Single public entry point. Every operator surface (Hub, Register,
     // Receipts, Driver Payouts, Front Door, Tonight, Accounting,
     // Contracts) lives inside the NUPS sidebar after authentication.
+    { label: "Three Systems. One Objective.", page: "NUPSSystemsOverview", href: "/nups/three-systems-one-objective", visibility: "public" },
     { label: "Open NUPS Portal", page: "NUPSLanding", visibility: "public" },
     { label: "DCE Evidence", page: "DCE", visibility: "public" },
     { label: "Oracle OHIP Integration", page: "NUPSLanding#nups-integrations", visibility: "public" },
