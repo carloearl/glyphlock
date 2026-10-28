@@ -144,11 +144,11 @@ export default function NUPSSystemsOverview() {
           .systems-door { scroll-margin-top: 2rem; display: grid; grid-template-columns: 1fr auto; gap: 1.5rem; align-items: center; margin-top: 1.2rem; padding: 1.35rem 1.5rem; border: 1px solid rgba(174, 194, 230, .16); border-radius: 16px; background: rgba(7, 12, 28, .72); }
           .systems-door h3 { margin: 0 0 .35rem; font-size: 1.12rem; }
           .systems-door p { max-width: 720px; margin: 0; color: var(--systems-muted); font-size: .91rem; line-height: 1.55; }
-          .systems-release { display: inline-flex; gap: .5rem; align-items: center; margin-top: .7rem; color: #ffd18a; font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+          .systems-release { display: inline-flex; gap: .5rem; align-items: center; margin-top: .85rem; padding: .45rem .65rem; border: 1px solid rgba(255, 187, 100, .28); border-radius: 999px; color: #ffd18a; background: rgba(255, 187, 100, .08); font-size: .72rem; font-weight: 850; letter-spacing: .09em; text-transform: uppercase; }
           .systems-release-dot { width: 7px; height: 7px; border-radius: 50%; background: #ffbb64; box-shadow: 0 0 13px rgba(255, 187, 100, .55); }
           .systems-door-actions { display: flex; flex-direction: column; align-items: flex-end; gap: .55rem; }
-          .systems-door-actions a { display: inline-flex; gap: .55rem; align-items: center; color: #e7edf9; font-size: .88rem; font-weight: 750; text-decoration: none; }
-          .systems-door-actions a:hover { color: var(--systems-cyan); }
+          .systems-door-actions button { display: inline-flex; min-height: 46px; gap: .55rem; align-items: center; justify-content: center; padding: .7rem .95rem; border: 1px solid rgba(174, 194, 230, .18); border-radius: 12px; color: #8995ad; background: rgba(255, 255, 255, .035); font: inherit; font-size: .86rem; font-weight: 750; cursor: not-allowed; }
+          .systems-door-actions button:disabled { opacity: 1; }
           .systems-door-actions small { color: #74809a; font-size: .73rem; text-align: right; }
           .systems-note { margin-top: 1.2rem; color: #75819b; font-size: .77rem; line-height: 1.6; }
           @media (max-width: 960px) {
@@ -200,16 +200,16 @@ export default function NUPSSystemsOverview() {
 
           <section className="systems-door" id="glyphlock-door-download" aria-labelledby="door-release-heading">
             <div>
-              <div className="systems-kicker">GlyphLock Door for Windows</div>
-              <h3 id="door-release-heading">Paid desktop download</h3>
-              <p>The release page is reserved for the signed Windows installer and its purchase flow. The installer and payment rail are not published yet; this section will become the download destination when the desktop release is complete.</p>
-              <div className="systems-release"><span className="systems-release-dot" /> Release package and checkout in preparation</div>
+              <div className="systems-kicker">Windows desktop edition</div>
+              <h3 id="door-release-heading">GlyphLock Door paid download</h3>
+              <p>The Windows download will include the finished desktop release and its purchase flow. We’ll open the download here once the installer is packaged and checkout is ready.</p>
+              <div className="systems-release"><span className="systems-release-dot" /> Coming soon</div>
             </div>
             <div className="systems-door-actions">
-              <a href="#glyphlock-door-download" aria-label="GlyphLock Door paid Windows download release status">
-                <Download size={17} /> Windows download
-              </a>
-              <small>Paid download opens after release</small>
+              <button type="button" disabled aria-label="GlyphLock Door paid Windows download coming soon">
+                <Download size={17} /> Download coming soon
+              </button>
+              <small>Paid release · Windows</small>
             </div>
           </section>
 
