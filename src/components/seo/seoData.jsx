@@ -294,7 +294,20 @@ export const SEO_DATA = {
     changefreq: "weekly",
     internalLinks: ["/SecureQRStudio", "/Pricing", "/GlyphLockFinancial"],
   },
-  "NUPSSystemsOverview": {\n    title: "Three Systems. One Objective. | NUPS, DCE & GlyphLock Door",\n    description: "Explore NUPS, the complete venue operations platform and GlyphLock flagship, alongside DCE and the upcoming paid GlyphLock Door Windows release.",\n    keywords: ["NUPS venue operations", "Nexus Unified Portal System", "DCE", "Digital Contract Engine", "GlyphLock Door", "Windows door software", "venue operations systems"],\n    h1: "Three Systems. One Objective.",\n    url: "/nups/three-systems-one-objective",\n    ogTitle: "Three Systems. One Objective. | GlyphLock Venue Systems",\n    ogDescription: "One complete venue platform, one focused evidence workflow, and one dedicated Windows door station.",\n    schemaType: "WebPage",\n    priority: 0.95,\n    changefreq: "weekly",\n    internalLinks: ["/NUPSLanding", "/DCE", "/Contact"],\n  },\n  "GlyphLockFinancial": {
+  "NUPSSystemsOverview": {
+    title: "Three Systems. One Objective. | NUPS, DCE & GlyphLock Door",
+    description: "Explore NUPS, the complete venue operations platform and GlyphLock flagship, alongside DCE and the upcoming paid GlyphLock Door Windows release.",
+    keywords: ["NUPS venue operations", "Nexus Unified Portal System", "DCE", "Digital Contract Engine", "GlyphLock Door", "Windows door software", "venue operations systems"],
+    h1: "Three Systems. One Objective.",
+    url: "/nups/three-systems-one-objective",
+    ogTitle: "Three Systems. One Objective. | GlyphLock Venue Systems",
+    ogDescription: "One complete venue platform, one focused evidence workflow, and one dedicated Windows door station.",
+    schemaType: "WebPage",
+    priority: 0.95,
+    changefreq: "weekly",
+    internalLinks: ["/NUPSLanding", "/DCE", "/Contact"],
+  },
+  "GlyphLockFinancial": {
     title: "GlyphLock Financial | Settlement, Payout & Record Workflows",
     description: "Connect authorized payment references, split rules, payout destinations, settlement status, reconciliation, and audit records across venue operations.",
     keywords: ["GlyphLock Financial", "settlement workflow", "payout records", "split rules", "reconciliation", "venue financial records"],
