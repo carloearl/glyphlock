@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowDownRight, ArrowRight, BadgeCheck, Building2, ClipboardCheck, Cloud, Download, DoorOpen, FileCheck2, MonitorDown, ShieldCheck, WalletCards, Wine } from "lucide-react";
+import { ArrowDownRight, ArrowRight, BadgeCheck, Building2, ClipboardCheck, Download, DoorOpen, FileCheck2, MonitorDown, ShieldCheck, WalletCards, Wine } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 
 const products = [
