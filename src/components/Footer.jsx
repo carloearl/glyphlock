@@ -31,7 +31,7 @@ const LinkGroup = ({ title, links, hoverColor = "hover:text-blue-400" }) => (
       {links && links.map((link) => (
         <li key={link.page}>
           <Link 
-            to={createPageUrl(link.page)} 
+            to={link.href || createPageUrl(link.page)} 
             className={`text-[13px] text-slate-400 ${hoverColor} transition-colors duration-200 leading-tight block`}
           >
             {link.label}
@@ -236,7 +236,7 @@ export default function Footer() {
             {CLEAN_FOOTER_LINKS.legal && CLEAN_FOOTER_LINKS.legal.map((link) => (
               <Link 
                 key={link.page} 
-                to={createPageUrl(link.page)} 
+                to={link.href || createPageUrl(link.page)} 
                 className="text-[11px] text-slate-600 hover:text-slate-300 transition-colors duration-200"
               >
                 {link.label}
