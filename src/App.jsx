@@ -308,7 +308,7 @@ const AuthenticatedApp = () => {
       <Routes>
         <Route path="/" element={<MainPage />} />
         <Route path="/SecureQRStudio" element={<SecureQRStudio />} />
-        <Route path="/DCE" element={<DCE />} />
+        <Route path="/nups/three-systems-one-objective" element={<Pages.NUPSSystemsOverview />} />\n        <Route path="/DCE" element={<DCE />} />
         <Route path="/dce" element={<DCE />} />
         <Route path="/Qr" element={<Navigate to="/SecureQRStudio" replace />} />
         <Route path="/qr" element={<Navigate to="/SecureQRStudio" replace />} />
