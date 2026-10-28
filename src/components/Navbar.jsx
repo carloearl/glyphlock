@@ -219,7 +219,7 @@ const NavItem = ({ section, isOpen, onToggle, index, user }) => {
                      transition={{ delay: idx * 0.06, duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] }}
                    >
                      <Link
-                       to={createPageUrl(item.page)}
+                       to={item.href || createPageUrl(item.page)}
                        onClick={() => {
                          if (item.requiresAccessToken) {
                            sessionStorage.setItem("nups_access_token", crypto.randomUUID());
@@ -588,7 +588,7 @@ export default function Navbar({ user, onLogin, onLogout }) {
                        transition={{ delay: sectionIdx * 0.1 + itemIdx * 0.05 }}
                      >
                        <Link
-                         to={createPageUrl(item.page)}
+                         to={item.href || createPageUrl(item.page)}
                          onClick={() => {
                            setMobileMenuOpen(false);
                            if (item.requiresAccessToken) {
