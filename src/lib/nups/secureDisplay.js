@@ -4,7 +4,7 @@ export function isEmbeddedPreview() {
   if (typeof window === "undefined") return false;
   try {
     const hostname = window.location?.hostname || "";
-    const isBase44PreviewHost = hostname.startsWith("preview--") && hostname.endsWith(".base44.app");
+    const isBase44PreviewHost = hostname.startsWith("preview") && hostname.endsWith(".base44.app");
     return window.self !== window.top || isBase44PreviewHost;
   } catch {
     return true;
