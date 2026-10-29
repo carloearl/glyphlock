@@ -3,7 +3,9 @@ const STANDALONE_QUERY = "(display-mode: standalone)";
 export function isEmbeddedPreview() {
   if (typeof window === "undefined") return false;
   try {
-    return window.self !== window.top;
+    const hostname = window.location?.hostname || "";
+    const isBase44PreviewHost = hostname.startsWith("preview--") && hostname.endsWith(".base44.app");
+    return window.self !== window.top || isBase44PreviewHost;
   } catch {
     return true;
   }
