@@ -7,7 +7,7 @@ import {
   Coins, Crown, ShieldAlert, ClipboardCheck, Search as SearchIcon,
   TrendingUp, BarChart3, Users, Package, Heart, DollarSign, Music,
   Star, Sparkles, KeyRound, ClipboardList, Megaphone,
-  Mic2, Archive, BookOpen, Stamp,
+  Mic2, Archive, BookOpen, Stamp, Network,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useActiveVenue } from "@/hooks/useActiveVenue";
@@ -56,6 +56,7 @@ const NAV_SECTIONS = [
     label: "Operations · Tonight's Flow",
     items: [
       { id: "dashboard",    label: "Dashboard",             icon: LayoutDashboard, to: "/NUPSHub" },
+      { id: "unified",       label: "Unified Venue System",  icon: Network,         to: "/NUPSUnifiedOperations" },
       { id: "frontdoor",    label: "1 · Open Night",        icon: DoorOpen,        to: "/FrontDoor" },
       { id: "entertainers", label: "2 · Check In Talent",   icon: Mic2,            to: "/EntertainerCheckIn" },
       { id: "register",     label: "3 · Register",          icon: ShoppingCart,    to: "/Register" },
