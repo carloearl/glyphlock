@@ -29,10 +29,28 @@ Deno.serve(async (req) => {
       const product = await get('https://trusthub.twilio.com/v1/TrustProducts/' + bundle);
       enrollment = { checked: true, status: product.status ?? null, name: product.friendly_name ?? null, lastUpdated: product.date_updated ?? null };
     }
+    // Inventory active numbers without changing Twilio configuration.
+    // Only the privileged caller can see complete numbers.
+    const numbers = [];
+    let nextUrl = 'https://api.twilio.com/2010-04-01/Accounts/' + sid + '/IncomingPhoneNumbers.json?PageSize=100';
+    for (let page = 0; nextUrl && page < 10; page++) {
+      const inventory = await get(nextUrl);
+      for (const item of inventory.incoming_phone_numbers ?? []) {
+        numbers.push({
+          number: item.phone_number,
+          friendlyName: item.friendly_name ?? null,
+          sidMasked: item.sid ? item.sid.slice(0, 4) + '…' + item.sid.slice(-4) : null,
+          capabilities: item.capabilities ?? null
+        });
+      }
+      const next = inventory.next_page_uri;
+      nextUrl = next ? new URL(next, 'https://api.twilio.com').toString() : null;
+    }
     return Response.json({
       configured: true, authenticated: true, accountStatus: account.status ?? null,
       accountSidMasked: sid.slice(0, 4) + '…' + sid.slice(-4),
       enrollment,
+      numbers,
       aAttestationVerified: false,
       note: 'Read-only account check. A attestation requires assigned phone numbers and controlled outbound call evidence.'
     }, { headers: { 'Cache-Control': 'no-store' } });
