@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ArrowRight, BadgeCheck, Building2, ClipboardCheck, DoorOpen, ExternalLink,
-  FileCheck2, MonitorDown, Network, ShieldCheck, ShoppingCart, Users, WalletCards,
+  ArrowRight, Building2, ClipboardCheck, DoorOpen, ExternalLink,
+  FileCheck2, MonitorDown, Network, ShieldCheck, ShoppingCart, Users,
 } from "lucide-react";
 import NUPSAppShell from "@/components/nups/shell/NUPSAppShell";
 import RoleClassGuard from "@/components/nups/RoleClassGuard";
