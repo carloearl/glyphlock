@@ -45,6 +45,7 @@ const {
   LedgerTrialBalance, AccountingHub, RegistryAdmin, AdminDataManager,
   ArchitecturalDecisionRegister, NUPSAdminPortal, VIPShowVerify, OfflineVerify,
   VerifyDispatch, VIPShowContracts, VIPCommandCenter, NUPSKiosk, VIPSale,
+  NUPSUnifiedOperations,
   AccessRequests, RoleViews, DJHome, GlyphBotMixer, SecureQRStudio,
 } = Pages;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -102,7 +103,7 @@ const AuthenticatedApp = () => {
     '/frontdoor', '/entertainercheckin', '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome', '/glyphlockfinancialpage',
     '/nupsinfrastructurepage', '/demo/', '/clubtv', '/fablestage', '/mobilescanner',
     // NUPS operator surface — kiosk-wrapped
-    '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
+    '/nupshub', '/hub', '/nupsunifiedoperations', '/register', '/registerconsole', '/barregister',
     '/receipts', '/driverpayouts', '/glyphbuckshub', '/glyphbucks',
     '/accounting', '/tonight', '/contracts', '/contractshub', '/vipbillprinter', '/dancedollarscontract',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
@@ -125,7 +126,7 @@ const AuthenticatedApp = () => {
     '/nupslanding', '/landing', '/nupsgateway',
     '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin',
     '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome',
-    '/nupshub', '/hub', '/register', '/registerconsole', '/barregister',
+    '/nupshub', '/hub', '/nupsunifiedoperations', '/register', '/registerconsole', '/barregister',
     '/receipts', '/driverpayouts', '/glyphbuckshub', '/glyphbucks',
     '/accounting', '/tonight', '/contracts', '/contractshub', '/vipbillprinter',
     '/managerconsole', '/peoplearchive', '/ledgertrialbalance', '/admin/ledger',
@@ -208,6 +209,8 @@ const AuthenticatedApp = () => {
         <Route path="/mobilescanner" element={<MobileScanner />} />
         {/* NUPS operator surface */}
         <Route path="/NUPSHub" element={<NUPSHub />} />
+        <Route path="/NUPSUnifiedOperations" element={<NUPSUnifiedOperations />} />
+        <Route path="/nupsunifiedoperations" element={<NUPSUnifiedOperations />} />
         <Route path="/nupshub" element={<NUPSHub />} />
         <Route path="/Hub" element={<NUPSHub />} />
         {/* DACO 003 §2: MANAGER + ADMIN only. */}
@@ -358,6 +361,8 @@ const AuthenticatedApp = () => {
         <Route path="/DriverPayouts" element={<DriverPayouts />} />
         <Route path="/driverpayouts" element={<DriverPayouts />} />
         <Route path="/NUPSHub" element={<NUPSHub />} />
+        <Route path="/NUPSUnifiedOperations" element={<NUPSUnifiedOperations />} />
+        <Route path="/nupsunifiedoperations" element={<NUPSUnifiedOperations />} />
         <Route path="/nupshub" element={<NUPSHub />} />
         <Route path="/Hub" element={<NUPSHub />} />
         <Route path="/GlyphBotMixer" element={<GlyphBotMixer />} />
