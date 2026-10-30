@@ -1,3 +1,4 @@
+import { calculatePayrollTaxes } from './taxes2026.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.43';
 import {
   ACCOUNT_ID,
@@ -171,7 +172,17 @@ async function listChecks(base44: any, actor: any, body: any) {
 
 async function createDraft(base44: any, actor: any, body: any) {
   const scope = await resolveScope(base44, actor, body);
-  const validation = validateDraftInput(body);
+  let draftInput = body;
+  let taxCalculation = null;
+  if (body.tax_profile) {
+    if (String(body.issue_date || '').slice(0, 4) !== '2026') throw new PayrollError('tax_year_mismatch', 400);
+    try { taxCalculation = calculatePayrollTaxes(body.gross_cents, body.tax_profile); }
+    catch { throw new PayrollError('tax_settings_invalid', 400); }
+    const taxCodes = new Set(['FEDERAL', 'SOCIAL_SECURITY', 'MEDICARE', 'ADDITIONAL_MEDICARE', 'ARIZONA']);
+    const extras = (Array.isArray(body.deductions) ? body.deductions : []).filter((d: any) => !taxCodes.has(d.code));
+    draftInput = { ...body, deductions: [...taxCalculation.deductions, ...extras] };
+  }
+  const validation = validateDraftInput(draftInput);
   if (!validation.ok) return json({ error: 'invalid_draft', errors: validation.errors }, 400);
 
   const idempotencyKey = String(body?.idempotency_key || '').trim();
@@ -224,6 +235,7 @@ async function createDraft(base44: any, actor: any, body: any) {
     ytd_note: String(body?.ytd_note || '').slice(0, 300) || null,
     bank_name: BANK_NAME,
     check_stock: CHECK_STOCK,
+    tax_calculation: taxCalculation ? { version: taxCalculation.version, profile: body.tax_profile, deductions: taxCalculation.deductions } : null,
     memo: normalized.memo,
     status: 'DRAFT',
     idempotency_key: idempotencyKey,
