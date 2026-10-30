@@ -52,7 +52,9 @@ import NUPSMISReport from "./NUPSMISReport.jsx";
 import { useActiveVenue } from '../hooks/useActiveVenue';
 import { mapNUPSRoleToRBAC, hasPermission } from '../config/roles.js';
 import { GLYPHLOCK_DISCLAIMER } from '@/constants/legalDisclaimer';
-import { readNUPSSession, writeNUPSSession, clearNUPSSession } from '@/lib/nups/persistentSession';
+import { writeNUPSSession, clearNUPSSession } from '@/lib/nups/persistentSession';
+
+import { ownerDashboardRole } from '@/lib/nups/ownerDashboardIdentity';
 
 // Shown when a tab has content but the current role isn't permitted to see it —
 // prevents the "click a tab, nothing appears, looks broken" experience.
@@ -108,15 +110,6 @@ export default function NUPSOwner() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const sessionUser = readNUPSSession();
-        if (sessionUser) {
-          setUser(sessionUser);
-          const mapped = mapNUPSRoleToRBAC(sessionUser._highestRole || sessionUser.role);
-          setRbacRole(mapped);
-          setAuthChecked(true);
-          return;
-        }
-
         const isAuth = await base44.auth.isAuthenticated();
         if (!isAuth) { navigate('/NUPSLogin'); return; }
         const currentUser = await base44.auth.me();
@@ -129,15 +122,11 @@ export default function NUPSOwner() {
           console.warn("RBAC payload unavailable, falling back to base44 role:", e);
         }
 
-        const OWNER_TIER = ["PLATFORM_ADMIN", "VENUE_OWNER", "VENUE_MANAGER"];
-        const hasOwnerAccess = permissionsData?.venue_access?.some(
-          va => OWNER_TIER.includes(va.role_key)
-        ) || currentUser.role === "admin";
-
-        if (!hasOwnerAccess) { navigate('/NUPSStaff'); return; }
+        const resolvedRole = ownerDashboardRole(currentUser, permissionsData);
+        if (!['SOVEREIGN', 'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER'].includes(resolvedRole)) { navigate('/NUPSStaff'); return; }
 
         currentUser._rbac = permissionsData;
-        currentUser._highestRole = permissionsData?.highest_role || (currentUser.role === "admin" ? "VENUE_OWNER" : null);
+        currentUser._highestRole = resolvedRole;
         const mapped = mapNUPSRoleToRBAC(currentUser._highestRole || currentUser.role);
         setRbacRole(mapped);
         writeNUPSSession(currentUser);
@@ -248,7 +237,7 @@ export default function NUPSOwner() {
   const canRBAC = hasPermission(rbacRole, 'ACCESS_RBAC');
   const canVoid = hasPermission(rbacRole, 'VOID_TRANSACTIONS');
 
-  const isAdminUser = user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin';
+  const isAdminUser = user?._highestRole === 'SOVEREIGN' || user?._highestRole === 'PLATFORM_ADMIN' || user?._highestRole === 'VENUE_OWNER' || user?.role === 'admin';
   const isOracleIntegrationOwner =
     String(user?.email || '').trim().toLowerCase() ===
     'carloearl@glyphlock.com';

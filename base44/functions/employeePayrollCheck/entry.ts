@@ -19,6 +19,8 @@ import {
 
 const json = (body: Record<string, unknown>, status = 200) => Response.json(body, { status });
 
+// Same authenticated canonical owner identities as nupsAccessControl. No username/local-part matching.
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
 const nowIso = () => new Date().toISOString();
 const normalizeEmail = (value: unknown) => String(value || '').trim().toLowerCase();
 
@@ -36,18 +38,19 @@ async function resolveActor(base44: any) {
 
   const email = normalizeEmail(user.email);
   const platformRole = String(user.role || '');
+  const sovereign = SOVEREIGN_EMAILS.has(email);
   // Platform admins select an active venue explicitly; an old staff/demo
   // profile must not override their authenticated platform role and scope.
-  const nups = platformRole.toLowerCase() === 'admin'
+  const nups = sovereign || platformRole.toLowerCase() === 'admin'
     ? null
     : await resolveNupsAccount(base44, email);
-  const nupsRole = String(nups?.role || '');
+  const nupsRole = sovereign ? 'SOVEREIGN' : String(nups?.role || '');
   const actor = {
     email,
     userId: String(user.id || ''),
     platformRole,
     nupsRole,
-    platformAdmin: platformRole.toLowerCase() === 'admin',
+    platformAdmin: sovereign || platformRole.toLowerCase() === 'admin',
     venueId: String(nups?.venue_id || '').trim(),
     accountMode: nups
       ? String(nups.access_mode || (nups.is_demo ? 'DEMO' : 'REAL')).toUpperCase()
