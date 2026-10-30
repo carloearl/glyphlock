@@ -84,7 +84,7 @@ export function stampFor(record = {}, { reprinted = false } = {}) {
   const status = String(record.status || 'DRAFT').toUpperCase();
   if (status === 'PAID') return { label: 'PAID RECORD — NON-NEGOTIABLE COPY', stamp: 'NON-NEGOTIABLE', negotiable: false };
   if (status === 'VOID') return { label: 'VOID — NON-NEGOTIABLE COPY', stamp: 'NON-NEGOTIABLE', negotiable: false };
-  if (status === 'DRAFT') return { label: 'DRAFT — NON-NEGOTIABLE', stamp: 'NON-NEGOTIABLE', negotiable: false };
+  if (status !== 'REVIEWED') return { label: 'DRAFT — NON-NEGOTIABLE', stamp: 'NON-NEGOTIABLE', negotiable: false };
   if (reprinted) return { label: 'REPRINT — NON-NEGOTIABLE COPY', stamp: 'NON-NEGOTIABLE', negotiable: false };
   return {
     label: 'REVIEWED — UNSIGNED, PRINT ON PREPRINTED CHASE STOCK',
