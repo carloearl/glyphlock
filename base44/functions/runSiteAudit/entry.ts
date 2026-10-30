@@ -246,6 +246,8 @@ VERIFIED REPOSITORY:
 - branch: ${repo.branch}
 - commit_sha: ${repo.commitSha}
 - inventory_file_count: ${repo.inventoryCount}
+- source_coverage: ${JSON.stringify(repo.coverage || null)}
+- This is a bounded sample unless source_coverage explicitly demonstrates otherwise. Zero findings do not certify a clean repository.
 
 VERIFIED SOURCE PATHS (${verifiedPaths.length} files with contents supplied):
 ${verifiedPaths.join('\n') || 'NONE'}
