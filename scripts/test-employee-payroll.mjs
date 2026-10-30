@@ -9,10 +9,12 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  STOCK_START_NUMBER,
   allocateCheckNumber,
   accountKeyFor,
   documentStamp,
   isOwnerOrAdmin,
+  parseStockCheckNumber,
   scopeDecision,
   validateDraftInput,
   validateReview,
@@ -244,40 +246,52 @@ function makeRepo({ sequence = null, existingChecks = [], staleReads = 0 } = {})
   };
 }
 
+test('stock check numbers are read and printed in the 26-### format', () => {
+  assert.equal(STOCK_START_NUMBER, 395);
+  assert.equal(parseStockCheckNumber('26-395'), 395);
+  assert.equal(parseStockCheckNumber('395'), 395);
+  assert.equal(parseStockCheckNumber(' 26-396 '), 396);
+  assert.equal(parseStockCheckNumber(397), 397);
+  assert.equal(parseStockCheckNumber('26-'), null);
+  assert.equal(parseStockCheckNumber('abc'), null);
+  assert.equal(parseStockCheckNumber(''), null);
+});
+
 test('concurrent drafts never share a check number', async () => {
   const repo = makeRepo({ staleReads: 2 });
   const accountKey = accountKeyFor('VENUE_A', 'REAL');
 
   const [first, second] = await Promise.all([
-    allocateCheckNumber(repo, { accountKey, stockStartNumber: 10001 }),
-    allocateCheckNumber(repo, { accountKey, stockStartNumber: 10001 }),
+    allocateCheckNumber(repo, { accountKey, stockStartNumber: '26-395' }),
+    allocateCheckNumber(repo, { accountKey, stockStartNumber: '26-395' }),
   ]);
 
   assert.notEqual(first.checkNumber, second.checkNumber);
-  assert.deepEqual([first.checkNumber, second.checkNumber].sort(), ['10001', '10002']);
-  assert.equal(repo.sequence.next_number, 10003);
+  assert.deepEqual([first.checkNumber, second.checkNumber].sort(), ['26-395', '26-396']);
+  assert.equal(repo.sequence.next_number, 397);
 });
 
 test('five-way concurrency still yields distinct sequential numbers', async () => {
   const repo = makeRepo({
-    sequence: { id: 'seq-1', account_key: 'acct', next_number: 10001 },
+    sequence: { id: 'seq-1', account_key: 'acct', next_number: 395 },
     staleReads: 5,
   });
   const results = await Promise.all(Array.from({ length: 5 }, () =>
-    allocateCheckNumber(repo, { accountKey: 'acct', stockStartNumber: 10001 })));
+    allocateCheckNumber(repo, { accountKey: 'acct', stockStartNumber: '26-395' })));
 
   const numbers = results.map((r) => r.checkNumber);
   assert.equal(new Set(numbers).size, 5);
-  assert.deepEqual(numbers.map(Number).sort((a, b) => a - b), [10001, 10002, 10003, 10004, 10005]);
+  assert.ok(numbers.every((n) => /^26-\d+$/.test(n)), numbers.join(','));
+  assert.deepEqual(numbers.map(parseStockCheckNumber).sort((a, b) => a - b), [395, 396, 397, 398, 399]);
 });
 
 test('a number already present on a check is skipped', async () => {
   const repo = makeRepo({
-    sequence: { id: 'seq-1', account_key: 'acct', next_number: 10001 },
-    existingChecks: ['10001', '10002'],
+    sequence: { id: 'seq-1', account_key: 'acct', next_number: 395 },
+    existingChecks: ['26-395', '26-396'],
   });
-  const allocated = await allocateCheckNumber(repo, { accountKey: 'acct', stockStartNumber: 10001 });
-  assert.equal(allocated.checkNumber, '10003');
+  const allocated = await allocateCheckNumber(repo, { accountKey: 'acct', stockStartNumber: '26-395' });
+  assert.equal(allocated.checkNumber, '26-397');
 });
 
 test('first allocation requires the physical stock start number', async () => {
@@ -290,7 +304,7 @@ test('first allocation requires the physical stock start number', async () => {
 
 test('allocation initializes a new account sequence at the stock number', async () => {
   const repo = makeRepo();
-  const allocated = await allocateCheckNumber(repo, { accountKey: 'acct', stockStartNumber: 20050 });
-  assert.equal(allocated.checkNumber, '20050');
-  assert.equal(repo.sequence.next_number, 20051);
+  const allocated = await allocateCheckNumber(repo, { accountKey: 'acct', stockStartNumber: STOCK_START_NUMBER });
+  assert.equal(allocated.checkNumber, '26-395');
+  assert.equal(repo.sequence.next_number, 396);
 });

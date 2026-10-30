@@ -11,7 +11,7 @@ const EMPTY_FORM = {
   period_end: '',
   issue_date: '',
   memo: '',
-  stock_start_number: '',
+  stock_start_number: '26-395',
   ytd_status: 'UNAVAILABLE',
   ytd_gross: '',
   ytd_deductions: '',
@@ -43,7 +43,7 @@ const MESSAGES = {
   ytd_status_required: 'Choose a YTD status.',
   ytd_opening_figures_required: 'Enter verified opening YTD gross, deductions and net.',
   ytd_net_mismatch: 'Opening YTD net must equal gross minus deductions.',
-  stock_start_number_required: 'Enter the next check number printed on the Chase stock.',
+  stock_start_number_required: 'Enter the next check number printed on the Chase stock, e.g. 26-395.',
   invalid_draft: 'Review the highlighted fields.',
   owner_or_admin_required: 'Only an owner or admin can prepare employee checks.',
   autofocus_failed: 'Could not read the form.',
@@ -111,7 +111,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         ytd_gross_cents: form.ytd_status === 'VERIFIED_OPENING' ? toCents(form.ytd_gross) : null,
         ytd_deductions_cents: form.ytd_status === 'VERIFIED_OPENING' ? toCents(form.ytd_deductions) : null,
         ytd_net_cents: form.ytd_status === 'VERIFIED_OPENING' ? toCents(form.ytd_net) : null,
-        stock_start_number: form.stock_start_number ? Number(form.stock_start_number) : undefined,
+        stock_start_number: form.stock_start_number ? form.stock_start_number.trim() : undefined,
         idempotency_key: idempotencyKey.current,
       };
       const data = await createDraft(payload);
@@ -182,7 +182,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         </label>
         <label className="text-xs text-slate-400">
           First check number on the Chase stock
-          <input className={fieldClass} inputMode="numeric" placeholder="10001" value={form.stock_start_number} onChange={(e) => update({ stock_start_number: e.target.value })} />
+          <input className={fieldClass} placeholder="26-395" value={form.stock_start_number} onChange={(e) => update({ stock_start_number: e.target.value })} />
         </label>
         <label className="text-xs text-slate-400">
           Year-to-date
