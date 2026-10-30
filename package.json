@@ -55,7 +55,7 @@
     "check:glyphlock-batch18-documentation": "node scripts/check-glyphlock-batch18-documentation.mjs",
     "test:glyphlock-batch18-runtime": "node scripts/test-glyphlock-batch18-runtime.mjs",
     "test:employee-payroll": "node --test scripts/test-employee-payroll.mjs",
-    "test:payroll-publish": "node --test scripts/test-payroll-publish.mjs scripts/test-owner-transactions-array.mjs",
+    "test:payroll-publish": "node --test scripts/test-payroll-publish.mjs scripts/test-owner-transactions-array.mjs scripts/test-payroll-taxes.mjs scripts/test-payroll-stock.mjs",
     "test:public-search": "node --test scripts/test-public-search.mjs"
   },
   "dependencies": {
