@@ -50,3 +50,25 @@ test('Payroll route and Admin menu replace Legacy payroll entry',()=>{
  assert.match(app,/path="\/Payroll"/);assert.match(nav,/label: "Payroll"[\s\S]{0,120}to: "\/Payroll"/);
  assert.doesNotMatch(nav,/id: "lg-payroll"/);
 });
+
+test('staff role cannot read or save payroll even with a venue request',async()=>{
+ const s=setup();s.client.auth.me=async()=>({email:'staff@example.com',role:'user'});
+ s.client.asServiceRole.entities.NUPSUser={filter:async()=>[{role:'DOORMAN',platform_email:'staff@example.com',venue_id:'venue',status:'active',access_mode:'REAL'}]};
+ assert.equal((await s.call({action:'workspace'})).status,403);
+ assert.equal((await s.call({action:'save_employee',employee:{}})).status,403);
+});
+test('older paycheck pages preserve tenant scope and report more records',async()=>{
+ const s=setup();let query,limit,skip;
+ s.client.asServiceRole.entities.EmployeePayrollCheck.filter=async(q,sort,l,offset)=>{query=q;limit=l;skip=offset;return Array.from({length:201},(_,i)=>({id:String(i)}));};
+ const res=await s.call({action:'list',skip:200});
+ assert.equal(res.status,200);const body=await res.json();
+ assert.equal(body.records.length,200);assert.equal(body.has_more,true);
+ assert.equal(skip,200);assert.equal(limit,201);assert.equal(query.account_key,'GLYPHLOCK_LLC:venue:REAL');
+});
+test('invalid pagination is rejected',async()=>{
+ const s=setup();assert.equal((await s.call({action:'list',skip:-1})).status,400);
+});
+test('client cannot choose employee storage scope or inject undeclared properties',async()=>{
+ const s=setup();const res=await s.call({action:'save_employee',employee:{employee_name:'Test',employee_ref:'EMP1',base_salary_cents:400000,pay_type:'SALARY',pay_periods:12,pay_day:15,status:'ACTIVE',account_key:'other',mode:'DEMO',venue_id:'other',routing_number:'not-stored'}});
+ const {employee}=await res.json();assert.equal(res.status,200);assert.equal(employee.mode,'REAL');assert.equal(employee.venue_id,'venue');assert.equal(employee.routing_number,undefined);
+});
