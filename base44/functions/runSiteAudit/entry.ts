@@ -60,7 +60,8 @@ function sourcePriority(path: string, auditType: string) {
   return score;
 }
 
-async function fetchRepositoryEvidence(auditType: string) {
+async function fetchRepositoryEvidence(auditType: string, requestedPaths: string[] = []) {
+  const prioritizedPaths = new Set((Array.isArray(requestedPaths) ? requestedPaths : []).filter(path => typeof path === 'string').slice(0, 10).map(path => path.trim()));
   const headers = {
     Accept: 'application/vnd.github+json',
     'User-Agent': 'GlyphLock-Evidence-Auditor/2.0',
@@ -84,7 +85,7 @@ async function fetchRepositoryEvidence(auditType: string) {
     .map((entry: AnyRecord) => ({ path: String(entry.path), size: Number(entry.size || 0), sha: String(entry.sha || '') }));
 
   const candidates = [...inventory]
-    .sort((a, b) => sourcePriority(b.path, auditType) - sourcePriority(a.path, auditType) || a.path.localeCompare(b.path));
+    .sort((a, b) => (Number(prioritizedPaths.has(b.path)) - Number(prioritizedPaths.has(a.path))) || sourcePriority(b.path, auditType) - sourcePriority(a.path, auditType) || a.path.localeCompare(b.path));
   const selected: Array<{ path: string; size: number; sha: string }> = [];
   let selectedBytes = 0;
   for (const file of candidates) {
@@ -118,6 +119,14 @@ async function fetchRepositoryEvidence(auditType: string) {
     inventoryCount: inventory.length,
     inventoryPaths: inventory.map((file) => file.path),
     sources,
+    coverage: {
+      sampled: sources.length < inventory.length || tree.truncated === true,
+      filesScanned: sources.length, inventoryCount: inventory.length,
+      inventoryTruncated: tree.truncated === true,
+      selectionLimit: MAX_SOURCE_FILES, byteLimit: MAX_SOURCE_BYTES,
+      failedReads: selected.length - sources.length,
+      requestedPathsNotScanned: [...prioritizedPaths].filter(path => !sources.some(source => source.path === path)),
+    },
   };
 }
 
@@ -160,6 +169,8 @@ async function fetchPageSpeedEvidence(url: string) {
     const endpoint = new URL('https://www.googleapis.com/pagespeedonline/v5/runPagespeed');
     endpoint.searchParams.set('url', url);
     endpoint.searchParams.set('strategy', 'mobile');
+    const apiKey = Deno.env.get('PAGESPEED_API_KEY');
+    if (apiKey) endpoint.searchParams.set('key', apiKey);
     for (const category of ['performance', 'accessibility', 'seo', 'best-practices']) {
       endpoint.searchParams.append('category', category);
     }
@@ -368,7 +379,7 @@ Deno.serve(async (req) => {
     auditId = audit.id;
 
     const [repo, pageSpeed, crawler] = await Promise.all([
-      fetchRepositoryEvidence(auditType).catch((error) => ({
+      fetchRepositoryEvidence(auditType, body.source_paths).catch((error) => ({
         repository: REPOSITORY,
         branch: REPOSITORY_BRANCH,
         commitSha: '',
@@ -440,7 +451,7 @@ Deno.serve(async (req) => {
       seo_measurement_status: seoMeasured ? 'measured' : 'no_data_available',
       ux_measurement_status: uxMeasured ? 'measured' : 'no_data_available',
       invalid_findings_discarded: invalidFindingsDiscarded,
-      evidence_summary: JSON.stringify({ page_speed_scores: pageSpeed.categoryScores, page_speed_status: pageSpeed.status, crawler_status: crawler.status, crawler_scan_id: crawler.scan_id || null }),
+      evidence_summary: JSON.stringify({ source_coverage: repo.coverage || null, page_speed_scores: pageSpeed.categoryScores, page_speed_status: pageSpeed.status, crawler_status: crawler.status, crawler_scan_id: crawler.scan_id || null }),
       execution_time_ms: executionTime,
       auto_fixes_applied: 0,
     };
@@ -455,6 +466,7 @@ Deno.serve(async (req) => {
       source_commit_sha: repo.commitSha,
       files_scanned: repo.sources.length,
       source_inventory_count: repo.inventoryCount,
+      source_coverage: repo.coverage || null,
       measurement_status: {
         security: update.security_measurement_status,
         performance: update.performance_measurement_status,
