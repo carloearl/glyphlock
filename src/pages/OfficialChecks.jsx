@@ -59,7 +59,6 @@ export default function OfficialChecks() {
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scopeKey]);
 
   return (
