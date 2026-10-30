@@ -317,8 +317,14 @@ Deno.serve(async (req) => {
       }
     } catch (e) { console.error('Public sources failed:', e); }
 
-    for (const q of subQueries) {
-      const { results, provider } = await runProviderChain(base44, q, perQuery);
+    // Four concurrent queries keep deep research responsive without an
+    // unbounded burst. Aggregate in query order for stable citations.
+    for (let start = 0; start < subQueries.length; start += 4) {
+      const batch = subQueries.slice(start, start + 4);
+      const responses = await Promise.all(batch.map(q => runProviderChain(base44, q, perQuery)));
+      for (let index = 0; index < batch.length; index++) {
+      const q = batch[index];
+      const { results, provider } = responses[index];
       if (provider !== 'none') providersUsed.add(provider);
       for (const r of results) {
         const key = (r.url || r.title || '').toLowerCase();
@@ -327,6 +333,8 @@ Deno.serve(async (req) => {
           aggregated.push({ ...r, query: q });
         }
       }
+    }
+
     }
 
     // DACO REV A §1a — the premium gemini_3_1_pro synthesis pass runs ONLY in
