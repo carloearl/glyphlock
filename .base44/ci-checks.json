@@ -34,6 +34,7 @@
     "check:nups-batch17-browser-acceptance",
     "check:glyphlock-batch18-documentation",
     "test:employee-payroll",
+    "test:payroll-publish",
     "test:public-search"
   ]
 }
