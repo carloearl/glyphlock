@@ -160,7 +160,7 @@ function PayStub({ record, stamp }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1.5px solid #9090b0' }}>
         <div style={{ borderRight: '1.5px solid #9090b0' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', background: '#dde0f0', borderBottom: '1px solid #9090b0' }}>
-            {['EARNINGS', 'AMOUNT', 'YTD'].map((h) => (
+            {['EARNINGS', 'AMOUNT', 'OPENING YTD'].map((h) => (
               <div key={h} style={{ padding: '3px 8px', fontWeight: 700, fontSize: 7.5, color: INK, borderRight: '1px solid #9090b0', textAlign: h === 'EARNINGS' ? 'left' : 'right' }}>{h}</div>
             ))}
           </div>
@@ -185,7 +185,7 @@ function PayStub({ record, stamp }) {
 
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', background: '#dde0f0', borderBottom: '1px solid #9090b0' }}>
-            {['DEDUCTION (OPERATOR VERIFIED)', 'AMOUNT', 'YTD'].map((h) => (
+            {['DEDUCTION (OPERATOR VERIFIED)', 'AMOUNT', 'OPENING YTD'].map((h) => (
               <div key={h} style={{ padding: '3px 8px', fontWeight: 700, fontSize: 7.5, color: INK, borderRight: '1px solid #9090b0', textAlign: h === 'DEDUCTION (OPERATOR VERIFIED)' ? 'left' : 'right' }}>{h}</div>
             ))}
           </div>
@@ -216,7 +216,7 @@ function PayStub({ record, stamp }) {
 
       <div style={{ padding: '4px 16px', display: 'flex', justifyContent: 'space-between', background: '#f4f4f8', borderTop: '1px solid #ccc', gap: 10 }}>
         <div style={{ fontSize: 7, color: '#888' }}>
-          {stamp.label} · {EMPLOYER.name} · AZ ENTITY #{EMPLOYER.entityNumber}
+          {stamp.label} · Opening YTD is before this check · {EMPLOYER.name}
         </div>
         <div style={{ fontSize: 7, color: '#888' }}>
           CHECK #{record.check_number} · ISSUE DATE {fmtDate(record.issue_date)} · PERIOD {periodLabel(record)}
@@ -227,14 +227,14 @@ function PayStub({ record, stamp }) {
 }
 
 export default function EmployeeCheckDocument({ record, printId }) {
-  const stamp = stampFor(record);
+  const stamp = stampFor(record, { reprinted: true });
 
   return (
     <div id={printId} style={{ width: 816, background: '#fff', border: '1.5px solid #7090b0', boxShadow: '0 6px 32px rgba(0,0,0,0.2)' }}>
       <CheckFace record={record} stamp={stamp} />
       <div style={{ height: 18, background: '#f2f2f8', borderTop: '1px solid #ccd', borderBottom: '1px solid #ccd', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <span style={{ fontSize: 7.5, color: '#a0a0b0', letterSpacing: '0.12em', fontStyle: 'italic' }}>
-          DETACH AND RETAIN UPPER PORTION FOR YOUR RECORDS
+          DETACH AND RETAIN THE PAY STUB BELOW FOR YOUR RECORDS
         </span>
       </div>
       <PayStub record={record} stamp={stamp} />
