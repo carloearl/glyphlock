@@ -176,8 +176,10 @@ async function listChecks(base44: any, actor: any, body: any) {
 
 async function createDraft(base44: any, actor: any, body: any) {
   const scope = await resolveScope(base44, actor, body);
+  const payType = String(body.pay_type || 'SALARY').toUpperCase();
+  if (!['SALARY', 'HOURLY'].includes(payType)) throw new PayrollError('invalid_pay_type', 400);
   let earnings = null;
-  if (body.pay_type === 'HOURLY') {
+  if (payType === 'HOURLY') {
     if (!body.tax_profile) throw new PayrollError('tax_settings_invalid', 400);
     try { earnings = calculateHourlyEarnings({ ...body.hourly_earnings, period_start: body.period_start, period_end: body.period_end }); }
     catch (failure: any) { throw new PayrollError(failure.message || 'invalid_hourly_earnings', 400); }
@@ -185,7 +187,7 @@ async function createDraft(base44: any, actor: any, body: any) {
   } else if (body.hourly_earnings || (body.tips_paid_cents ?? 0) !== 0) {
     throw new PayrollError('earnings_mismatch', 400);
   }
-  let draftInput = { ...body, tips_paid_cents: earnings?.tips_paid_cents || 0 };
+  let draftInput = { ...body, pay_type: payType, tips_paid_cents: earnings?.tips_paid_cents || 0 };
   let taxCalculation = null;
   if (body.tax_profile) {
     if (String(body.issue_date || '').slice(0, 4) !== '2026') throw new PayrollError('tax_year_mismatch', 400);
@@ -322,7 +324,9 @@ async function saveEmployee(base44: any, actor: any, body: any) {
   const name = String(input.employee_name || '').trim();
   const ref = String(input.employee_ref || '').trim();
   if (!name || name.length > 120 || ref.length > 80
-      || !Number.isSafeInteger(input.base_salary_cents) || input.base_salary_cents <= 0 || input.base_salary_cents > 10000000000
+      || !Number.isSafeInteger(input.base_salary_cents) || input.base_salary_cents < 0 || input.base_salary_cents > 10000000000
+      || (input.pay_type === 'SALARY' && input.base_salary_cents <= 0)
+      || (input.pay_type === 'HOURLY' && (!Number.isSafeInteger(input.hourly_rate_cents) || input.hourly_rate_cents <= 0 || input.hourly_rate_cents > 10000000000))
       || !['SALARY', 'HOURLY'].includes(input.pay_type)
       || ![2, 4, 12, 24, 26, 52].includes(input.pay_periods)
       || !Number.isInteger(input.pay_day) || input.pay_day < 1 || input.pay_day > 28
@@ -331,13 +335,14 @@ async function saveEmployee(base44: any, actor: any, body: any) {
   const data = {
     account_key: scope.accountKey, venue_id: scope.venueId, mode: scope.mode,
     employee_name: name, employee_ref: ref, base_salary_cents: input.base_salary_cents,
+    hourly_rate_cents: input.pay_type === 'HOURLY' ? input.hourly_rate_cents : 0,
     pay_type: input.pay_type, pay_periods: input.pay_periods, pay_day: input.pay_day,
     status: input.status, notes: String(input.notes || ''), updated_by: actor.email, updated_at: nowIso(),
   };
   const employee = id ? await E.EmployeePayrollProfile.update(id, data) : await E.EmployeePayrollProfile.create(data);
   await auditWrite(base44, actor, scope, {
     entity: 'EmployeePayrollProfile', operation: id ? 'update' : 'create',
-    fields: ['employee_name', 'employee_ref', 'base_salary_cents', 'pay_periods', 'pay_day', 'status'],
+    fields: ['employee_name', 'employee_ref', 'base_salary_cents', 'hourly_rate_cents', 'pay_periods', 'pay_day', 'status'],
     reference: employee.id,
   });
   return json({ ok: true, employee });

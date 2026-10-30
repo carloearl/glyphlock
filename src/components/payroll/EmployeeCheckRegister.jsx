@@ -41,7 +41,7 @@ export default function EmployeeCheckRegister({ records = [], loading = false, s
   async function handleReview(record) {
     const confirmed = window.confirm(
       `Review check #${record.check_number} for ${record.employee_name}?\n\n`
-      + `Gross ${fmtCents(record.gross_cents)} · Deductions ${fmtCents(record.total_deductions_cents)} · Net ${fmtCents(record.net_cents)}\n`
+      + `Gross ${fmtCents(record.gross_cents)} · Deductions ${fmtCents(record.total_deductions_cents)} · Tips already paid ${fmtCents(record.tips_paid_cents || 0)} · Net check ${fmtCents(record.net_cents)}\n`
       + `Issue date ${fmtDate(record.issue_date)} · Period ${periodLabel(record)}\n\n`
       + 'You are confirming the deductions and totals you entered are correct. '
       + 'No check is signed, issued or paid by this action.',

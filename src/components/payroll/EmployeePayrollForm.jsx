@@ -81,6 +81,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
 
   const update = (patch) => {
     if (patch.pay_type === 'HOURLY') setAutomaticTaxes(true);
+    if (patch.pay_type && patch.pay_type !== form.pay_type) { setTaxProfile(null); setCalculatorKey(key => key + 1); }
     if (patch.employee_name !== undefined && patch.employee_name !== form.employee_name) {
       setTaxProfile(null); setCalculatorKey((key) => key + 1);
     }
@@ -220,7 +221,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
         </label>
       </div>
 
-      {hourly && <HourlyEarningsCalculator key={employee?.id || 'hourly'} initialRate={employee?.hourly_rate_cents || null} onChange={setHourlyInput} result={earnings.result} error={MESSAGES[earnings.error] || earnings.error}/>}
+      {hourly && <HourlyEarningsCalculator key={(employee?.id || 'hourly') + ':' + form.employee_name} initialRate={employee?.hourly_rate_cents || null} onChange={setHourlyInput} result={earnings.result} error={MESSAGES[earnings.error] || earnings.error}/>}
 
       {form.ytd_status === 'VERIFIED_OPENING' && (
         <div className="grid gap-3 sm:grid-cols-3">
@@ -269,6 +270,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
         <div>Tips already paid: <span className="font-mono text-slate-100">{(tipsPaid / 100).toFixed(2)}</span></div>
         <div>Net check: <span className="font-mono text-slate-100">{automaticTaxes && !taxCalculation.result ? 'Pending tax settings' : Number.isFinite(netCents) ? (netCents / 100).toFixed(2) : '—'}</span></div>
       </div>
+
+      {netCents < 0 && <p role="alert" className="text-xs text-red-300">{MESSAGES.insufficient_cash_for_withholding}</p>}
 
       <p className="flex items-start gap-2 text-[11px] leading-relaxed text-amber-200/80">
         <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
