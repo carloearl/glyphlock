@@ -48,6 +48,20 @@ test('check prefix cannot silently change to 26-',()=>{
  assert.equal(policy.parseStockCheckNumber('27-395'),null);
  assert.equal(policy.parseStockCheckNumber('26-395'),395);
 });
+test('one account save lock excludes concurrent retries until persistence completes',async()=>{
+ let locked=false, release;
+ const held=new Promise(resolve=>{release=resolve;});
+ const repo={readSequence:async()=>({id:'seq'}),token:()=>crypto.randomUUID(),acquireWriteLock:async()=>{if(locked)return false;locked=true;return true;},releaseWriteLock:async()=>{locked=false;}};
+ let writes=0;
+ const first=policy.withPayrollWriteLock(repo,'account',async()=>{writes++;await held;return 'saved';});
+ await new Promise(resolve=>setTimeout(resolve,0));
+ await assert.rejects(()=>policy.withPayrollWriteLock(repo,'account',async()=>{writes++;}),/payroll_save_in_progress/);
+ release();assert.equal(await first,'saved');assert.equal(writes,1);
+ assert.equal(await policy.withPayrollWriteLock(repo,'account',async()=> 'replay'),'replay');
+});
+test('numbering must be provisioned before a payroll save',async()=>{
+ await assert.rejects(()=>policy.withPayrollWriteLock({readSequence:async()=>null},'account',async()=>{}),/numbering_setup_required/);
+});
 test('unrecognized statuses never produce a negotiable check face',()=>{
  assert.equal(policy.documentStamp({status:'BROKEN'}).negotiable,false);
  assert.equal(stampFor({status:'BROKEN'}).negotiable,false);
