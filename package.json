@@ -53,7 +53,8 @@
     "check:glyphlock-batch18-runtime": "node scripts/check-glyphlock-batch18-runtime.mjs",
     "check:nups-batch17-browser-acceptance": "node scripts/check-nups-batch17-browser-acceptance.mjs",
     "check:glyphlock-batch18-documentation": "node scripts/check-glyphlock-batch18-documentation.mjs",
-    "test:glyphlock-batch18-runtime": "node scripts/test-glyphlock-batch18-runtime.mjs"
+    "test:glyphlock-batch18-runtime": "node scripts/test-glyphlock-batch18-runtime.mjs",
+    "test:employee-payroll": "node --test scripts/test-employee-payroll.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.57",

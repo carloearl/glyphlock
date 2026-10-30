@@ -11,6 +11,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'r
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import DCE from './pages/DCE';
+import OfficialChecksPage from './pages/OfficialChecks';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { recordNavigation } from '@/lib/nups/navStack';
 import { isCanonicalPublicSeoPath } from '@/components/seo/seoData';
@@ -28,7 +29,7 @@ import '@/styles/nups-print.css';
 const { Pages, Layout, mainPage } = pagesConfig;
 const {
   AnalyticsDashboard, SettlementReports, GovernanceHub, CodeOfEthics,
-  EmailDeliveryLogPage, NUPSPostLogin, SystemAudit, OfficialChecks, NUPSLanding,
+  EmailDeliveryLogPage, NUPSPostLogin, SystemAudit, NUPSLanding,
   NUPSSandbox, NUPSPaymentReturn, NUPSTraining, NUPSOwner, NUPSStaff,
   NUPSPostImplementationReport, CaseStudyNUPS, CaseStudyOracleOHIP,
   NUPSDemoManager, NUPSStateDiff, DailyPerformanceReport, NUPSMISReport,
@@ -310,6 +311,10 @@ const AuthenticatedApp = () => {
         <Route path="/SecureQRStudio" element={<SecureQRStudio />} />
         <Route path="/DCE" element={<DCE />} />
         <Route path="/dce" element={<DCE />} />
+        {/* Employee payroll check preparation — owner/admin only. The same
+            component also mounts inside Legacy NUPS → Payroll. */}
+        <Route path="/OfficialChecks" element={<RoleClassGuard allow={["ADMIN"]}><OfficialChecksPage /></RoleClassGuard>} />
+        <Route path="/officialchecks" element={<RoleClassGuard allow={["ADMIN"]}><OfficialChecksPage /></RoleClassGuard>} />
         <Route path="/Qr" element={<Navigate to="/SecureQRStudio" replace />} />
         <Route path="/qr" element={<Navigate to="/SecureQRStudio" replace />} />
         {/* Retired public case-study aliases converge on the canonical evidence library. */}

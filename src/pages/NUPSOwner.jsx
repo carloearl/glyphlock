@@ -530,6 +530,19 @@ export default function NUPSOwner() {
                     </div>
                   </CardContent>
                 </Card>
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded border border-indigo-500/30 bg-indigo-950/20 p-3">
+                  <div>
+                    <div className="text-sm font-bold text-indigo-100">Employee check preparation</div>
+                    <div className="text-xs text-indigo-100/70">
+                      Employee (W-2) drafts, verified deductions and printable checks on Chase preprinted stock.
+                    </div>
+                  </div>
+                  {isAdminUser && (
+                    <Button variant="outline" size="sm" onClick={() => navigate('/OfficialChecks')}>
+                      Open employee check desk
+                    </Button>
+                  )}
+                </div>
                 <TipBreakdown transactions={realTransactions} />
                 <PayrollReport />
                 <OfficialChecks />

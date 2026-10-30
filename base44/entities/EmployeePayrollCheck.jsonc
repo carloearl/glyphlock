@@ -1,0 +1,216 @@
+{
+  "name": "EmployeePayrollCheck",
+  "type": "object",
+  "description": "Employee (W-2) payroll check preparation record. Integer cents only. Deductions are user-entered and explicitly verified; no tax rates are computed and no bank account or routing numbers are stored.",
+  "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "check_id": {
+      "type": "string",
+      "description": "Stable identifier for the check record."
+    },
+    "check_number": {
+      "type": "string",
+      "description": "Permanent, account-scoped check number allocated server-side from the preprinted Chase stock sequence."
+    },
+    "account_key": {
+      "type": "string",
+      "description": "Numbering and tenant scope: GLYPHLOCK_LLC:<venue>:<mode>."
+    },
+    "account_id": {
+      "type": "string",
+      "default": "GLYPHLOCK_LLC"
+    },
+    "venue_id": {
+      "type": "string",
+      "description": "Tenant scope resolved server-side, never chosen by the client."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "REAL",
+        "DEMO"
+      ],
+      "default": "REAL"
+    },
+    "is_demo": {
+      "type": "boolean",
+      "default": false
+    },
+    "employee_name": {
+      "type": "string",
+      "description": "Employee name as it will appear on the check."
+    },
+    "employee_ref": {
+      "type": "string",
+      "description": "Optional internal employee reference. Never a Social Security number."
+    },
+    "pay_type": {
+      "type": "string",
+      "enum": [
+        "SALARY",
+        "HOURLY"
+      ],
+      "default": "SALARY"
+    },
+    "period_start": {
+      "type": "string",
+      "format": "date",
+      "description": "Earning period start. NOT the check date."
+    },
+    "period_end": {
+      "type": "string",
+      "format": "date",
+      "description": "Earning period end. NOT the check date."
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Actual check date printed on the face of the check."
+    },
+    "gross_cents": {
+      "type": "number",
+      "description": "Gross wages in integer cents."
+    },
+    "deductions": {
+      "type": "array",
+      "description": "Explicit, user-entered and user-verified deductions. No rate is inferred.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "amount_cents": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "total_deductions_cents": {
+      "type": "number",
+      "default": 0
+    },
+    "net_cents": {
+      "type": "number",
+      "description": "gross_cents - total_deductions_cents. Must never be negative."
+    },
+    "no_deductions_confirmed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Operator affirmation that no withholding applies to this draft. Required when deductions is empty."
+    },
+    "ytd_status": {
+      "type": "string",
+      "enum": [
+        "VERIFIED_OPENING",
+        "UNAVAILABLE"
+      ],
+      "default": "UNAVAILABLE",
+      "description": "YTD figures are shown only when the operator supplied and verified an opening balance; otherwise the stub prints Unavailable."
+    },
+    "ytd_gross_cents": {
+      "type": "number"
+    },
+    "ytd_deductions_cents": {
+      "type": "number"
+    },
+    "ytd_net_cents": {
+      "type": "number"
+    },
+    "ytd_note": {
+      "type": "string"
+    },
+    "bank_name": {
+      "type": "string",
+      "default": "Chase",
+      "description": "Display name only. Routing/account numbers are never stored."
+    },
+    "check_stock": {
+      "type": "string",
+      "default": "PREPRINTED_CHASE_STOCK"
+    },
+    "memo": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "DRAFT",
+        "REVIEWED",
+        "VOID",
+        "PAID"
+      ],
+      "default": "DRAFT",
+      "description": "DRAFT drafts print NON-NEGOTIABLE. REVIEWED records are unsigned and still not negotiable without an authorized signature. PAID/VOID reprints are always marked non-negotiable copies."
+    },
+    "reviewed_by": {
+      "type": "string"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "review_note": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "description": "Client-supplied key that makes draft creation replay-safe."
+    },
+    "created_by_email": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "check_id",
+    "check_number",
+    "account_key",
+    "venue_id",
+    "mode",
+    "employee_name",
+    "period_start",
+    "period_end",
+    "issue_date",
+    "gross_cents",
+    "deductions",
+    "total_deductions_cents",
+    "net_cents",
+    "ytd_status",
+    "bank_name",
+    "status",
+    "idempotency_key",
+    "created_at"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    }
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "PayrollCheckSequence",
+  "type": "object",
+  "description": "Server-only, account-scoped check number sequence for employee payroll. Allocation uses compare-and-set on next_number so concurrent drafts can never share a check number.",
+  "properties": {
+    "description": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "account_key": {
+      "type": "string",
+      "description": "GLYPHLOCK_LLC:<venue>:<mode>"
+    },
+    "next_number": {
+      "type": "number",
+      "description": "The next check number that may be allocated from the preprinted Chase stock."
+    },
+    "last_allocated": {
+      "type": "number"
+    },
+    "last_token": {
+      "type": "string",
+      "description": "Compare-and-set winner token for the most recent allocation."
+    },
+    "last_allocated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_actor_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_key",
+    "next_number"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    }
+  }
+}
