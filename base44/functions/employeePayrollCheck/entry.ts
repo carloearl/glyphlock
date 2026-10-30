@@ -158,15 +158,18 @@ function buildNumberingRepo(base44: any) {
 
 async function listChecks(base44: any, actor: any, body: any) {
   const scope = await resolveScope(base44, actor, body);
+  const skip = body.skip ?? 0;
+  if (!Number.isSafeInteger(skip) || skip < 0) throw new PayrollError('invalid_page', 400);
   const rows = await base44.asServiceRole.entities.EmployeePayrollCheck.filter(
     { account_key: scope.accountKey },
     '-created_date',
-    200,
+    201, skip,
   );
   return json({
     ok: true,
     scope,
-    records: rows || [],
+    records: (rows || []).slice(0, 200),
+    has_more: rows.length > 200,
   });
 }
 
@@ -246,6 +249,7 @@ async function createDraft(base44: any, actor: any, body: any) {
   await auditWrite(base44, actor, scope, {
     operation: 'create',
     fields: ['check_number', 'employee_name', 'gross_cents', 'net_cents', 'issue_date', 'status'],
+    reference: record.check_number,
   });
 
   return json({ ok: true, record });
@@ -277,6 +281,7 @@ async function reviewCheck(base44: any, actor: any, body: any) {
   await auditWrite(base44, actor, scope, {
     operation: 'update',
     fields: ['status', 'reviewed_by', 'reviewed_at'],
+    reference: record.check_number,
   });
 
   return json({ ok: true, record: updated });

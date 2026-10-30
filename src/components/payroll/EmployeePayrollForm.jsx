@@ -234,7 +234,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
       )}
 
       <label className="flex items-center gap-2 text-sm text-indigo-200"><input type="checkbox" checked={automaticTaxes} onChange={e=>setAutomaticTaxes(e.target.checked)}/>Automatically calculate 2026 payroll taxes</label>
-      {automaticTaxes && <PayrollTaxCalculator key={calculatorKey} onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
+      {automaticTaxes && <PayrollTaxCalculator key={calculatorKey} payPeriods={employee?.pay_periods || 12} onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
       <div className="space-y-2 rounded border border-slate-800 p-3">
         <div className="flex items-center justify-between">
           <div className="text-xs font-semibold text-slate-200">Other deductions (post-tax, entered by you)</div>

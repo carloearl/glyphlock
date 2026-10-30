@@ -1,7 +1,7 @@
 import React,{useEffect,useState} from 'react';
 import {toCents,fmtCents} from '@/lib/payroll/checkFormat';
-export default function PayrollTaxCalculator({onChange,result,error}){
- const [p,setP]=useState({tax_year:2026,filing_status:'',pay_periods:12,step2_checked:false,step3_cents:0,step4a_cents:0,step4b_cents:0,step4c_cents:0,az_rate_bps:200,az_extra_cents:0,ytd_ss_wages_cents:null,ytd_medicare_wages_cents:null,elections_verified:false});
+export default function PayrollTaxCalculator({onChange,result,error,payPeriods=12}){
+ const [p,setP]=useState({tax_year:2026,filing_status:'',pay_periods:payPeriods,step2_checked:false,step3_cents:0,step4a_cents:0,step4b_cents:0,step4c_cents:0,az_rate_bps:200,az_extra_cents:0,ytd_ss_wages_cents:null,ytd_medicare_wages_cents:null,elections_verified:false});
  const update=(key,value)=>setP(old=>({...old,[key]:value}));
  useEffect(()=>{onChange(p);},[p,onChange]);
  const cls='mt-1 w-full rounded border border-slate-700 bg-slate-950 px-2 py-2 text-sm text-white';
