@@ -36,6 +36,7 @@
     "test:employee-payroll",
     "test:payroll-publish",
     "test:public-search",
-    "test:agent-brain"
+    "test:agent-brain",
+    "test:open-audit"
   ]
 }

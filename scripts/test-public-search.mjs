@@ -109,3 +109,36 @@ test('deep provider queries run with bounded concurrency', async () => {
   assert.ok(peak > 1, 'deep queries should overlap to avoid a serial timeout');
   assert.ok(peak <= 4, 'provider concurrency must stay bounded');
 });
+test('configured SearXNG supplies real HTTP results before commercial providers', async () => {
+  const h = harness(url => url.startsWith('https://search.example.org/search?') ? { results: [{ title: 'Official public source', url: 'https://example.org/source', content: 'Published work', engines: ['bing'] }] } : null, { SEARXNG_BASE_URL: 'https://search.example.org' });
+  const result = await h.context.runProviderChain({}, 'Example public project', 5);
+  assert.equal(result.provider, 'searxng');
+  assert.equal(result.results[0].url, 'https://example.org/source');
+  assert.ok(h.calls[0].includes('format=json'));
+});
+
+test('SearXNG failure preserves fallback engines', async () => {
+  const h = harness(url => url.includes('duckduckgo.com') ? { Heading: 'Public source', AbstractText: 'Published', AbstractURL: 'https://example.org' } : null, { SEARXNG_BASE_URL: 'https://search.example.org' });
+  const result = await h.context.runProviderChain({}, 'Public project', 5);
+  assert.equal(result.provider, 'duckduckgo');
+  assert.equal(result.diagnostics.find(x => x.provider === 'searxng').status, 'unavailable');
+});
+
+test('unconfigured SearXNG is reported honestly', async () => {
+  const h = harness(() => null);
+  const result = await h.context.runProviderChain({}, 'Public project', 5);
+  assert.equal(result.diagnostics.find(x => x.provider === 'searxng').status, 'not_configured');
+});
+
+test('invalid private SearXNG endpoint is never fetched', async () => {
+  const h = harness(() => null, { SEARXNG_BASE_URL: 'https://127.0.0.1' });
+  const result = await h.context.runProviderChain({}, 'Public project', 5);
+  assert.equal(h.calls.some(url => url.includes('127.0.0.1')), false);
+  assert.equal(result.diagnostics.find(x => x.provider === 'searxng').status, 'invalid_configuration');
+});
+
+test('public source sweep includes open GitHub repository evidence', async () => {
+  const h = harness(url => url.includes('api.github.com/search/repositories') ? { items: [{ full_name: 'searxng/searxng', description: 'Public metasearch project', html_url: 'https://github.com/searxng/searxng', language: 'Python', license: { spdx_id: 'AGPL-3.0' } }] } : null);
+  const result = await h.context.runPublicSources('SearXNG');
+  assert.ok(result.results.some(x => x.source === 'github-repositories' && x.url === 'https://github.com/searxng/searxng'));
+});

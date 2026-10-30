@@ -57,7 +57,8 @@
     "test:employee-payroll": "node --test scripts/test-employee-payroll.mjs",
     "test:payroll-publish": "node --test scripts/test-payroll-publish.mjs scripts/test-owner-transactions-array.mjs scripts/test-payroll-taxes.mjs scripts/test-payroll-stock.mjs scripts/test-payroll-workspace.mjs scripts/test-payroll-hourly.mjs scripts/test-payroll-owner-access.mjs",
     "test:public-search": "node --test scripts/test-public-search.mjs",
-    "test:agent-brain": "node --test scripts/test-agent-brain.mjs"
+    "test:agent-brain": "node --test scripts/test-agent-brain.mjs",
+    "test:open-audit": "node --test scripts/test-open-audit.mjs"
   },
   "dependencies": {
     "@base44/sdk": "^0.8.57",

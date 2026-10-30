@@ -18,6 +18,34 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.38';
 async function runProviderChain(base44, query, num) {
   let results = null;
   let provider = 'none';
+  const diagnostics = [];
+  const searxngBase = Deno.env.get('SEARXNG_BASE_URL');
+  if (!searxngBase) {
+    diagnostics.push({ provider: 'searxng', status: 'not_configured' });
+  } else {
+    try {
+      const base = new URL(searxngBase);
+      const host = base.hostname.toLowerCase();
+      if (base.protocol !== 'https:' || base.username || base.password ||
+          !host.includes('.') || host.includes(':') || /(^|\.)(localhost|local|internal)$/.test(host) ||
+          /^(127\.|10\.|0\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host)) {
+        throw new Error('Use a public HTTPS SearXNG endpoint');
+      }
+      const endpoint = new URL(base.pathname.replace(/\/$/, '') + '/search', base.origin);
+      endpoint.searchParams.set('q', query);
+      endpoint.searchParams.set('format', 'json');
+      const data = await pubFetch(endpoint.toString(), { timeout: 8000, redirect: 'error' });
+      const rows = Array.isArray(data?.results) ? data.results : [];
+      const mapped = rows.filter(x => /^https?:\/\//.test(x.url || '')).slice(0, Math.min(100, Math.max(1, num))).map(x => ({
+        title: x.title || x.url, snippet: x.content || '', url: x.url,
+        source: 'searxng', engines: Array.isArray(x.engines) ? x.engines : [],
+      }));
+      diagnostics.push({ provider: 'searxng', status: data ? (mapped.length ? 'measured' : 'empty') : 'unavailable', resultCount: mapped.length });
+      if (mapped.length) return { results: mapped, provider: 'searxng', diagnostics };
+    } catch {
+      diagnostics.push({ provider: 'searxng', status: 'invalid_configuration' });
+    }
+  }
 
   // TRACK 4.2 fix — all provider-chain fetches route through pubFetch
   // (8s per-request timeout) so a hung provider cannot stall the message.
@@ -56,7 +84,7 @@ async function runProviderChain(base44, query, num) {
     }
   }
 
-  return { results: results || [], provider };
+  return { results: results || [], provider, diagnostics };
 }
 
 // Reliability helper — every keyless source fetch goes through this so a
@@ -80,7 +108,7 @@ async function pubFetch(url, { timeout = 6000, ...opts } = {}) {
     if (!r.ok) return null;
     return await r.json();
   } catch (e) {
-    console.error(`pubFetch failed for ${url.slice(0, 80)}:`, e?.message || e);
+    console.error(`Public provider request failed (${new URL(url).hostname})`);
     return null;
   } finally {
     clearTimeout(timer);
@@ -93,6 +121,16 @@ async function runPublicSources(query) {
   const out = [];
   const providers = new Set();
   const tasks = [
+    // Public open-source project evidence; no personal-contact enrichment.
+    (async () => {
+      const data = await pubFetch(`https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&per_page=10`);
+      (Array.isArray(data?.items) ? data.items : []).forEach(x => out.push({
+        title: `Repository: ${x.full_name || x.name}`,
+        snippet: `${x.description || ''} · ${x.language || 'Language unspecified'} · ${x.license?.spdx_id || 'License unverified'}`,
+        url: x.html_url, source: 'github-repositories',
+      }));
+      if (data?.items?.length) providers.add('github-repositories');
+    })(),
     // Wikipedia search — index of matching articles
     (async () => {
       const data = await pubFetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srlimit=8&format=json&origin=*`);
@@ -303,6 +341,7 @@ Deno.serve(async (req) => {
     const seen = new Set();
     const aggregated = [];
     const providersUsed = new Set();
+    const engineDiagnostics = [];
 
     // KEYLESS public-record scraper (Wikipedia, GDELT news, CourtListener,
     // SEC EDGAR, Hacker News, Wayback, Wikidata, Federal Register, OpenFEC,
@@ -324,7 +363,8 @@ Deno.serve(async (req) => {
       const responses = await Promise.all(batch.map(q => runProviderChain(base44, q, perQuery)));
       for (let index = 0; index < batch.length; index++) {
       const q = batch[index];
-      const { results, provider } = responses[index];
+      const { results, provider, diagnostics } = responses[index];
+      engineDiagnostics.push(...(diagnostics || []).map(item => ({ ...item, query: q })));
       if (provider !== 'none') providersUsed.add(provider);
       for (const r of results) {
         const key = (r.url || r.title || '').toLowerCase();
@@ -420,6 +460,7 @@ Research public professional history, published work, business roles, licenses, 
       results: aggregated,
       aiSummary,
       sourceCount: aggregated.length,
+      engineDiagnostics,
       summary,
       timestamp: new Date().toISOString(),
     });
