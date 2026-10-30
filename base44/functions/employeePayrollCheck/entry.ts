@@ -1,3 +1,4 @@
+import { calculateHourlyEarnings } from './hourlyEarnings.js';
 import { calculatePayrollTaxes } from './taxes2026.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.43';
 import {
@@ -175,7 +176,16 @@ async function listChecks(base44: any, actor: any, body: any) {
 
 async function createDraft(base44: any, actor: any, body: any) {
   const scope = await resolveScope(base44, actor, body);
-  let draftInput = body;
+  let earnings = null;
+  if (body.pay_type === 'HOURLY') {
+    if (!body.tax_profile) throw new PayrollError('tax_settings_invalid', 400);
+    try { earnings = calculateHourlyEarnings({ ...body.hourly_earnings, period_start: body.period_start, period_end: body.period_end }); }
+    catch (failure: any) { throw new PayrollError(failure.message || 'invalid_hourly_earnings', 400); }
+    if (body.gross_cents !== earnings.gross_cents || body.tips_paid_cents !== earnings.tips_paid_cents) throw new PayrollError('earnings_mismatch', 400);
+  } else if (body.hourly_earnings || (body.tips_paid_cents ?? 0) !== 0) {
+    throw new PayrollError('earnings_mismatch', 400);
+  }
+  let draftInput = { ...body, tips_paid_cents: earnings?.tips_paid_cents || 0 };
   let taxCalculation = null;
   if (body.tax_profile) {
     if (String(body.issue_date || '').slice(0, 4) !== '2026') throw new PayrollError('tax_year_mismatch', 400);
@@ -183,7 +193,7 @@ async function createDraft(base44: any, actor: any, body: any) {
     catch { throw new PayrollError('tax_settings_invalid', 400); }
     const taxCodes = new Set(['FEDERAL', 'SOCIAL_SECURITY', 'MEDICARE', 'ADDITIONAL_MEDICARE', 'ARIZONA']);
     const extras = (Array.isArray(body.deductions) ? body.deductions : []).filter((d: any) => !taxCodes.has(d.code));
-    draftInput = { ...body, deductions: [...taxCalculation.deductions, ...extras] };
+    draftInput = { ...draftInput, deductions: [...taxCalculation.deductions, ...extras] };
   }
   const validation = validateDraftInput(draftInput);
   if (!validation.ok) return json({ error: 'invalid_draft', errors: validation.errors }, 400);
@@ -238,6 +248,8 @@ async function createDraft(base44: any, actor: any, body: any) {
     ytd_note: String(body?.ytd_note || '').slice(0, 300) || null,
     bank_name: BANK_NAME,
     check_stock: CHECK_STOCK,
+    hourly_earnings: earnings,
+    tips_paid_cents: normalized.tips_paid_cents,
     tax_calculation: taxCalculation ? { version: taxCalculation.version, profile: body.tax_profile, deductions: taxCalculation.deductions } : null,
     memo: normalized.memo,
     status: 'DRAFT',
