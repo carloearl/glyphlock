@@ -279,6 +279,21 @@ export function documentStamp(record = {}, { reprinted = false } = {}) {
  *   token() -> string
  * }
  */
+/** Serialize draft persistence on the pre-provisioned bank sequence. No expiry:
+ * a crashed writer requires reconciliation rather than unsafe lock takeover. */
+export async function withPayrollWriteLock(repo, accountKey, work) {
+  const sequence = await repo.readSequence(accountKey);
+  if (!sequence) throw new PayrollError('numbering_setup_required', 409);
+  const token = repo.token();
+  if (!await repo.acquireWriteLock(sequence.id, token)) {
+    throw new PayrollError('payroll_save_in_progress', 409);
+  }
+  try { return await work(); }
+  finally { await repo.releaseWriteLock(sequence.id, token); }
+}
+
+export const sequenceKeyFor = (mode) => `${ACCOUNT_ID}:CHASE:${mode}`;
+
 export async function allocateCheckNumber(repo, { accountKey, stockStartNumber, maxAttempts = 8 } = {}) {
   if (!accountKey) throw new PayrollError('account_key_required', 400);
 
