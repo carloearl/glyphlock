@@ -11,8 +11,9 @@ function date(value) {
 function amount(n) { return Number.isSafeInteger(n)&&n>=0&&n<=10000000000; }
 export function calculateHourlyEarnings(input = {}) {
  if(input.records_verified!==true) throw new Error('earnings_records_required');
+ if(typeof input.jurisdiction!=='string'||!Object.hasOwn(WAGE_RULES_2026,input.jurisdiction)) throw new Error('work_location_required');
  const minimum=WAGE_RULES_2026[input.jurisdiction];
- if(!minimum) throw new Error('work_location_required');
+ if(!Number.isSafeInteger(minimum)||minimum<=0) throw new Error('work_location_required');
  const start=date(input.period_start),end=date(input.period_end);
  if(!String(input.period_start).startsWith('2026-')||!String(input.period_end).startsWith('2026-')) throw new Error('wage_year_unsupported');
  if(end<start) throw new Error('period_end_before_start');
