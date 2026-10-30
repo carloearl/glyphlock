@@ -28,6 +28,9 @@ export default function AgentBrainPanel() {
   const [activeChangeSetId, setActiveChangeSetId] = useState(null);
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
+  const subscriptionRef = useRef(null);
+
+  useEffect(() => () => subscriptionRef.current?.(), []);
 
   // Safety guards - ensure arrays are always valid
   const safeMessages = Array.isArray(messages) ? messages : [];
@@ -147,18 +150,15 @@ export default function AgentBrainPanel() {
       const initialMessages = Array.isArray(conv.messages) ? conv.messages : [];
       setMessages(initialMessages);
 
-      const unsubscribe = base44.agents.subscribeToConversation(conv.id, (data) => {
+      subscriptionRef.current?.();
+      subscriptionRef.current = base44.agents.subscribeToConversation(conv.id, (data) => {
         if (data && data.messages) {
           const newMessages = Array.isArray(data.messages) ? data.messages : [];
           setMessages(newMessages);
         }
       });
 
-      return () => {
-        if (typeof unsubscribe === 'function') {
-          unsubscribe();
-        }
-      };
+      return conv;
     } catch (error) {
       console.error('Failed to init agent:', error);
       toast.error('Failed to initialize Agent Brain');
@@ -231,12 +231,9 @@ export default function AgentBrainPanel() {
   const sendMessage = async () => {
     if (!input.trim() || sending) return;
 
-    let activeConversation = conversation;
-    if (!activeConversation) {
-      await initConversation();
-      activeConversation = conversation;
-    }
-
+    setSending(true);
+    try {
+    const activeConversation = conversation || await initConversation();
     if (!activeConversation) return;
 
     const userInput = input.trim();
@@ -252,9 +249,7 @@ export default function AgentBrainPanel() {
     setMessages([...prevMessages, userMessage]);
     setInput('');
     setUploadedFiles([]);
-    setSending(true);
 
-    try {
       // All modes route to the live agent. The agent's own instructions
       // enforce its scope (scan / read / report — no code mutation), so the
       // mode prefix is only a context hint, not a trust boundary.
