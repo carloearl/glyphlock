@@ -124,6 +124,7 @@ const NAV_SECTIONS = [
   {
     label: "Admin",
     items: [
+      { id: "payroll", label: "Payroll", icon: DollarSign, to: "/Payroll" },
       // Admin/Owner role-view switcher — open any role's live workspace.
       { id: "roleviews", label: "Role Views",      icon: Users,         to: "/RoleViews" },
       // §6 daily back-office checklist — same back office, guided order.
@@ -158,7 +159,6 @@ const NAV_SECTIONS = [
       // Analytics & Reports = ONE tab. Reports opens with OwnerAnalytics —
       // the "analytics" link pointed at a tab that doesn't exist (blank pane).
       { id: "lg-reports",   label: "Reports & Analytics", icon: BarChart3, to: "/NUPSOwner?tab=reports" },
-      { id: "lg-payroll",   label: "Payroll",       icon: DollarSign,    to: "/NUPSOwner?tab=payroll" },
       { id: "lg-inventory", label: "Inventory",     icon: Package,       to: "/NUPSOwner?tab=inventory" },
       { id: "lg-audit",     label: "Audit Log",     icon: ClipboardList, to: "/NUPSOwner?tab=audit" },
       { id: "lg-admin",     label: "Admin Console", icon: KeyRound,      to: "/NUPSOwner?tab=admin" },

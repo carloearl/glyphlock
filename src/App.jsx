@@ -11,7 +11,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from 'r
 import { setupIframeMessaging } from './lib/iframe-messaging';
 import PageNotFound from './lib/PageNotFound';
 import DCE from './pages/DCE';
-import OfficialChecksPage from './pages/OfficialChecks';
+import PayrollPage from './pages/Payroll';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { recordNavigation } from '@/lib/nups/navStack';
 import { isCanonicalPublicSeoPath } from '@/components/seo/seoData';
@@ -98,6 +98,7 @@ const AuthenticatedApp = () => {
   // Fullscreen pages that must render WITHOUT the GlyphLock layout wrapper.
   // All NUPS operator pages live here so kiosk mode shows only the NUPS UI.
   const fullscreenPaths = [
+    '/payroll', '/officialchecks',
     '/nupslanding', '/landing', '/nupsgateway', '/nupstraining', '/unauthorized',
     '/nupssandbox', '/nupslogin', '/nupspaymentreturn', '/nupsowner', '/nupsstaff',
     '/frontdoor', '/entertainercheckin', '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome', '/glyphlockfinancialpage',
@@ -123,6 +124,7 @@ const AuthenticatedApp = () => {
   // mode on mount so the entire NUPS system runs locked from first entry.
   // Exit requires Manager PIN.
   const nupsKioskRoots = [
+    '/payroll', '/officialchecks',
     '/nupslanding', '/landing', '/nupsgateway',
     '/nupsowner', '/nupsstaff', '/frontdoor', '/entertainercheckin',
     '/staffhome', '/hostesshome', '/doormanhome', '/entertainerhome',
@@ -148,6 +150,8 @@ const AuthenticatedApp = () => {
       // Kiosk routes get the Back button inside the kiosk strip (KioskShell);
       // a second floating one stacked/overlaid content (overlay audit 2026-07-17).
       <>{!isNupsPaymentReturn && <RoleClassBadge />}{!isNupsKioskRoute && !isNupsPaymentReturn && <GlobalBackButton />}<Routes>
+        <Route path="/Payroll" element={<RoleClassGuard allow={["ADMIN"]}><PayrollPage /></RoleClassGuard>} />
+        <Route path="/OfficialChecks" element={<Navigate to="/Payroll" replace />} />
         <Route path="/NUPSLanding" element={<NUPSLanding />} />
         <Route path="/nupslanding" element={<NUPSLanding />} />
         <Route path="/landing" element={<NUPSLanding />} />
@@ -311,10 +315,6 @@ const AuthenticatedApp = () => {
         <Route path="/SecureQRStudio" element={<SecureQRStudio />} />
         <Route path="/DCE" element={<DCE />} />
         <Route path="/dce" element={<DCE />} />
-        {/* Employee payroll check preparation — owner/admin only. The same
-            component also mounts inside Legacy NUPS → Payroll. */}
-        <Route path="/OfficialChecks" element={<RoleClassGuard allow={["ADMIN"]}><OfficialChecksPage /></RoleClassGuard>} />
-        <Route path="/officialchecks" element={<RoleClassGuard allow={["ADMIN"]}><OfficialChecksPage /></RoleClassGuard>} />
         <Route path="/Qr" element={<Navigate to="/SecureQRStudio" replace />} />
         <Route path="/qr" element={<Navigate to="/SecureQRStudio" replace />} />
         {/* Retired public case-study aliases converge on the canonical evidence library. */}

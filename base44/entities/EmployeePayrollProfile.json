@@ -1,0 +1,79 @@
+{
+  "name": "EmployeePayrollProfile",
+  "type": "object",
+  "description": "Owner-managed employee salary and schedule settings. Scoped by venue and ledger; no SSN or bank credentials. Check-specific tax elections remain on each check.",
+  "properties": {
+    "account_key": {
+      "type": "string"
+    },
+    "venue_id": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "employee_name": {
+      "type": "string"
+    },
+    "employee_ref": {
+      "type": "string"
+    },
+    "pay_type": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "updated_by": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "base_salary_cents": {
+      "type": "number"
+    },
+    "pay_periods": {
+      "type": "number"
+    },
+    "pay_day": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "account_key",
+    "venue_id",
+    "mode",
+    "employee_name",
+    "base_salary_cents",
+    "pay_type",
+    "pay_periods",
+    "pay_day",
+    "status"
+  ],
+  "rls": {
+    "read": {
+      "user_condition": {
+        "role": "admin"
+      }
+    },
+    "create": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "update": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    },
+    "delete": {
+      "user_condition": {
+        "role": "__SERVER_ONLY_BLOCK__"
+      }
+    }
+  }
+}
