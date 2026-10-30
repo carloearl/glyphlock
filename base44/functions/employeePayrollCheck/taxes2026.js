@@ -28,6 +28,7 @@ export function calculatePayrollTaxes(gross,p={}){
  for(const key of ['step3_cents','step4a_cents','step4b_cents','step4c_cents','az_extra_cents','ytd_ss_wages_cents','ytd_medicare_wages_cents'])if(!money(p[key]))throw new Error(`Enter ${key.replaceAll('_',' ')}.`);
  if(![0,50,100,150,200,250,300,350].includes(p.az_rate_bps))throw new Error('Select an Arizona A-4 withholding election.');
  if(p.az_rate_bps===0&&p.az_exempt_confirmed!==true)throw new Error('Zero Arizona withholding requires a current exemption election.');
+ if(p.federal_exempt!==undefined&&typeof p.federal_exempt!=='boolean')throw new Error('Federal exemption must be true or false.');
  if(p.federal_exempt===true&&p.federal_exempt_confirmed!==true)throw new Error('Confirm a current federal exemption election.');
  const periods=p.pay_periods;
  const adjustment=p.step2_checked?0:(p.filing_status==='MARRIED'?1290000:860000);
@@ -35,7 +36,7 @@ export function calculatePayrollTaxes(gross,p={}){
  const table=(p.step2_checked?MULTIPLE:STANDARD)[p.filing_status];
  const row=table.filter(r=>annual>=r[0]*100).at(-1);
  const annualTax=row[1]*100+(annual-row[0]*100)*row[2]/10000;
- const federal=p.federal_exempt?0:Math.round(Math.max(0,(annualTax-p.step3_cents)/periods)+p.step4c_cents);
+ const federal=p.federal_exempt===true?0:Math.round(Math.max(0,(annualTax-p.step3_cents)/periods)+p.step4c_cents);
  const ss=rate(Math.min(gross,Math.max(0,18450000-p.ytd_ss_wages_cents)),620);
  const medicare=rate(gross,145);
  const additional=rate(Math.max(0,p.ytd_medicare_wages_cents+gross-20000000)-Math.max(0,p.ytd_medicare_wages_cents-20000000),90);
