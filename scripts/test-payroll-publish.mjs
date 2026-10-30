@@ -30,6 +30,15 @@ test('same email local-part cannot borrow another account owner role',async()=>{
  const res=await handlerFor(state.client)(new Request('https://example.com',{method:'POST',body:JSON.stringify({action:'list',venue_id:'other-venue',mode:'REAL'})}));
  assert.equal(res.status,403);assert.equal(state.usernameLookups,0);
 });
+test('platform admin is not locked to an old staff demo profile',async()=>{
+ const client={auth:{me:async()=>({email:'admin@example.com',role:'admin',id:'admin'})},asServiceRole:{entities:{
+  NUPSUser:{filter:async()=>[{role:'DOORMAN',venue_id:'dream_palace',is_demo:true}]},
+  Venue:{get:async()=>({id:'venue-document',venue_id:'dream_palace',status:'active'})},
+  EmployeePayrollCheck:{filter:async()=>[]},
+ }}};
+ const res=await handlerFor(client)(new Request('https://example.com',{method:'POST',body:JSON.stringify({action:'list',venue_id:'venue-document',mode:'REAL'})}));
+ assert.equal(res.status,200);assert.deepEqual((await res.json()).records,[]);
+});
 test('invalid calendar dates cannot appear on payroll',()=>{
  const result=policy.validateDraftInput({employee_name:'Test Employee',period_start:'2026-02-30',period_end:'2026-03-01',issue_date:'2026-02-30',gross_cents:400000,deductions:[],no_deductions_confirmed:true,ytd_status:'UNAVAILABLE'});
  assert.ok(result.errors.includes('period_start_required'));assert.ok(result.errors.includes('issue_date_required'));
