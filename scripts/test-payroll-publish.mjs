@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
 import ts from 'typescript';
+import * as taxes from '../base44/functions/employeePayrollCheck/taxes2026.js';
 import * as policy from '../base44/functions/employeePayrollCheck/payrollPolicy.js';
 import { stampFor } from '../src/lib/payroll/checkFormat.js';
 const source=readFileSync('base44/functions/employeePayrollCheck/entry.ts','utf8');
@@ -10,7 +11,7 @@ function handlerFor(client){
  let handler;
  const module={exports:{}};
  vm.runInNewContext(ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{
-  module,exports:module.exports, require:name=>name.includes('payrollPolicy')?policy:{createClientFromRequest:()=>client},
+  module,exports:module.exports, require:name=>name.includes('payrollPolicy')?policy:name.includes('taxes2026')?taxes:{createClientFromRequest:()=>client},
   Deno:{serve:fn=>{handler=fn;}},Response,Request,crypto,console,
  });
  return handler;
