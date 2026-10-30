@@ -34,12 +34,8 @@
     "check:nups-batch17-browser-acceptance",
     "check:glyphlock-batch18-documentation",
     "test:employee-payroll",
-<<<<<<< HEAD
     "test:payroll-publish",
-    "test:public-search"
-=======
     "test:public-search",
     "test:agent-brain"
->>>>>>> origin/main
   ]
 }
