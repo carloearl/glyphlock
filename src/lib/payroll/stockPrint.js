@@ -26,7 +26,7 @@ export function openStockPrint(record,profile,options){
  const html=buildStockHtml(record,profile,options);
  const win=window.open('','_blank','width=900,height=950');
  if(!win)throw new Error('Allow pop-ups for this site to open the print sheet.');
- win.document.write(html);win.document.close();
  win.onload=()=>{win.focus();win.print();};
+ win.document.write(html);win.document.close();
  return win;
 }
