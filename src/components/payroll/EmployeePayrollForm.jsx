@@ -1,5 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Plus, Trash2, FilePlus2, ShieldAlert } from 'lucide-react';
+import PayrollTaxCalculator from './PayrollTaxCalculator';
+import { calculatePayrollTaxes } from '../../../base44/functions/employeePayrollCheck/taxes2026.js';
 import { createDraft } from '@/lib/payroll/payrollApi';
 import { sumDeductionCents, toCents } from '@/lib/payroll/checkFormat';
 
@@ -55,6 +57,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [deductions, setDeductions] = useState([]);
   const [noDeductions, setNoDeductions] = useState(false);
+  const [automaticTaxes, setAutomaticTaxes] = useState(true);
+  const [taxProfile, setTaxProfile] = useState(null);
   const [errors, setErrors] = useState([]);
   const [saving, setSaving] = useState(false);
   const idempotencyKey = useRef(crypto.randomUUID());
@@ -62,7 +66,12 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
   const update = (patch) => setForm((prev) => ({ ...prev, ...patch }));
 
   const grossCents = toCents(form.gross);
-  const deductionCents = useMemo(() => sumDeductionCents(deductions.map((item) => ({
+  const taxCalculation = useMemo(() => {
+    if (!automaticTaxes) return { result: null, error: '' };
+    try { return { result: calculatePayrollTaxes(grossCents, taxProfile || {}), error: '' }; }
+    catch (error) { return { result: null, error: error.message }; }
+  }, [automaticTaxes, grossCents, taxProfile]);
+  const deductionCents = (taxCalculation.result?.total_deductions_cents || 0) + useMemo(() => sumDeductionCents(deductions.map((item) => ({
     amount_cents: toCents(item.amount),
   }))), [deductions]);
   const netCents = Number.isFinite(grossCents) ? grossCents - deductionCents : NaN;
@@ -84,7 +93,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
     event.preventDefault();
     setErrors([]);
 
-    const rows = deductions
+    if (automaticTaxes && taxCalculation.error) { setErrors([taxCalculation.error]); return; }
+    const extraRows = deductions
       .filter((item) => item.label.trim() || item.amount.trim())
       .map((item) => ({
         code: item.code.trim() || item.label.trim(),
@@ -92,6 +102,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         amount_cents: toCents(item.amount),
       }));
 
+    const rows = [...(taxCalculation.result?.deductions || []), ...extraRows];
     setSaving(true);
     try {
       const payload = {
@@ -106,7 +117,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         deductions: rows,
         total_deductions_cents: sumDeductionCents(rows),
         net_cents: grossCents - sumDeductionCents(rows),
-        no_deductions_confirmed: noDeductions,
+        no_deductions_confirmed: automaticTaxes ? rows.length === 0 : noDeductions,
+        tax_profile: automaticTaxes ? taxProfile : undefined,
         ytd_status: form.ytd_status,
         ytd_gross_cents: form.ytd_status === 'VERIFIED_OPENING' ? toCents(form.ytd_gross) : null,
         ytd_deductions_cents: form.ytd_status === 'VERIFIED_OPENING' ? toCents(form.ytd_deductions) : null,
@@ -208,9 +220,11 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         </div>
       )}
 
+      <label className="flex items-center gap-2 text-sm text-indigo-200"><input type="checkbox" checked={automaticTaxes} onChange={e=>setAutomaticTaxes(e.target.checked)}/>Automatically calculate 2026 payroll taxes</label>
+      {automaticTaxes && <PayrollTaxCalculator onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
       <div className="space-y-2 rounded border border-slate-800 p-3">
         <div className="flex items-center justify-between">
-          <div className="text-xs font-semibold text-slate-200">Deductions (entered and verified by you)</div>
+          <div className="text-xs font-semibold text-slate-200">Other deductions (post-tax, entered by you)</div>
           <button type="button" onClick={addDeduction} className="inline-flex items-center gap-1 rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-300 hover:border-indigo-400">
             <Plus className="h-3 w-3" /> Add deduction
           </button>
@@ -241,7 +255,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
       <p className="flex items-start gap-2 text-[11px] leading-relaxed text-amber-200/80">
         <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         Bank: Chase, preprinted stock only. No routing or account numbers are collected, stored, logged or printed,
-        and this workflow does not calculate, file or guarantee any tax withholding.
+        and calculated withholding uses the selected 2026 employee settings. Tax deposits and filings are handled separately.
       </p>
 
       {errors.length > 0 && (
