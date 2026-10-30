@@ -72,3 +72,30 @@ test('client cannot choose employee storage scope or inject undeclared propertie
  const s=setup();const res=await s.call({action:'save_employee',employee:{employee_name:'Test',employee_ref:'EMP1',base_salary_cents:400000,pay_type:'SALARY',pay_periods:12,pay_day:15,status:'ACTIVE',account_key:'other',mode:'DEMO',venue_id:'other',routing_number:'not-stored'}});
  const {employee}=await res.json();assert.equal(res.status,200);assert.equal(employee.mode,'REAL');assert.equal(employee.venue_id,'venue');assert.equal(employee.routing_number,undefined);
 });
+
+test('deferred save from REAL cannot start an old load or navigate after switching to DEMO',async()=>{
+ let cursor=0;const state=[];const effects=[];const requests=[];const navigations=[];
+ const hooks={
+  useState:init=>{const i=cursor++;if(!(i in state))state[i]=typeof init==='function'?init():init;return[state[i],value=>{state[i]=typeof value==='function'?value(state[i]):value;}];},
+  useRef:init=>{const i=cursor++;if(!(i in state))state[i]={current:init};return state[i];},
+  useCallback:fn=>fn,useEffect:fn=>effects.push(fn),
+ };
+ const pending=[];
+ const api={listChecks:scope=>{requests.push(scope.mode);return new Promise(resolve=>pending.push(()=>resolve({records:[],has_more:false})));},loadPayrollWorkspace:async()=>({employees:[],activity:[]})};
+ const jsx=(type,props)=>({type,props});
+ const module={exports:{}};
+ const source=readFileSync('src/pages/Payroll.jsx','utf8');
+ vm.runInNewContext(ts.transpileModule(source,{fileName:'Payroll.jsx',compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,allowJs:true}}).outputText,{
+  module,exports:module.exports,require:name=>name==='react'?hooks:name==='react/jsx-runtime'?{jsx,jsxs:jsx}:name==='react-router-dom'?{useSearchParams:()=>[new URLSearchParams('tab=new'),p=>navigations.push(p)]}:name.includes('useActiveVenue')?{useActiveVenue:()=>({id:'venue',name:'Venue'})}:name.includes('payrollApi')?api:name.includes('checkFormat')?{fmtCents:n=>String(n)}:{default:name},
+ });
+ function render(){cursor=0;effects.length=0;return module.exports.default();}
+ function nodes(node){return !node||typeof node!=='object'?[]:[node,...[node.props?.children].flat(Infinity).flatMap(nodes)];}
+ let tree=render();effects.shift()();pending.shift()();await new Promise(resolve=>setTimeout(resolve,0));
+ tree=render();const form=nodes(tree).find(n=>String(n.type).includes('EmployeePayrollForm'));assert.ok(form);
+ const deferredCompletion=form.props.onCreated;
+ nodes(tree).find(n=>n.props?.['aria-label']==='Payroll ledger').props.onChange({target:{value:'DEMO'}});
+ render();effects.shift()();
+ deferredCompletion();
+ assert.deepEqual(requests,['REAL','DEMO']);assert.equal(navigations.length,0);
+ pending.splice(0).forEach(resolve=>resolve());
+});
