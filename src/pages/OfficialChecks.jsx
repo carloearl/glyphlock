@@ -95,8 +95,8 @@ export default function OfficialChecks() {
       <div className="flex items-start gap-2 rounded border border-amber-500/30 bg-amber-950/20 p-3 text-[11px] leading-relaxed text-amber-100/80">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
         <p>
-          Withholding amounts are entered and verified by you — this workflow performs no tax calculation and makes no
-          tax-compliance claim. Bank routing and account numbers are never collected, stored, logged or printed; the
+          Automatic withholding uses the employee’s verified 2026 W-4/A-4 settings and prior taxable wages.
+          Review each calculation before printing; manual deductions remain available for payroll handled separately. Bank routing and account numbers are never collected, stored, logged or printed; the
           bank line reads Chase and the check is printed on preprinted stock. Drafts are non-negotiable until reviewed,
           and every check prints unsigned: no signature is generated.
         </p>
