@@ -158,7 +158,9 @@ export function validateDraftInput(input = {}) {
     errors.push('deduction_total_mismatch');
   }
 
-  const netCents = grossCents === null ? null : grossCents - totalDeductions;
+  const tipsPaid = input.tips_paid_cents ?? 0;
+  if (!isCents(tipsPaid) || tipsPaid < 0 || (grossCents !== null && tipsPaid > grossCents)) errors.push('tips_paid_invalid');
+  const netCents = grossCents === null ? null : grossCents - totalDeductions - tipsPaid;
   if (netCents !== null && netCents < 0) errors.push('net_negative');
   if (input.net_cents !== undefined && input.net_cents !== null && input.net_cents !== netCents) {
     errors.push('net_mismatch');
@@ -202,6 +204,7 @@ export function validateDraftInput(input = {}) {
       deductions,
       total_deductions_cents: totalDeductions,
       net_cents: netCents,
+      tips_paid_cents: tipsPaid,
       no_deductions_confirmed: input.no_deductions_confirmed === true,
       memo: trimText(input.memo, 120) || null,
       bank_name: BANK_NAME,
@@ -225,8 +228,10 @@ export function validateReview(record = {}, input = {}) {
   const total = deductions.reduce((sum, item) => sum + (Number(item?.amount_cents) || 0), 0);
   if (!Number.isInteger(record.gross_cents) || record.gross_cents <= 0) errors.push('gross_amount_required');
   if (!Number.isInteger(record.net_cents) || record.net_cents < 0) errors.push('net_invalid');
+  const tipsPaid = record.tips_paid_cents ?? 0;
+  if (!isCents(tipsPaid) || tipsPaid < 0) errors.push('tips_paid_invalid');
   if (Number.isInteger(record.gross_cents) && Number.isInteger(record.net_cents)
-    && record.gross_cents - total !== record.net_cents) {
+    && record.gross_cents - total - tipsPaid !== record.net_cents) {
     errors.push('net_mismatch');
   }
   if (Number(record.total_deductions_cents) !== total) errors.push('deduction_total_mismatch');

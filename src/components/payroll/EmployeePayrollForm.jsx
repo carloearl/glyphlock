@@ -1,13 +1,15 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Plus, Trash2, FilePlus2, ShieldAlert } from 'lucide-react';
 import PayrollTaxCalculator from './PayrollTaxCalculator';
+import HourlyEarningsCalculator from './HourlyEarningsCalculator';
+import { calculateHourlyEarnings } from '../../../base44/functions/employeePayrollCheck/hourlyEarnings.js';
 import { calculatePayrollTaxes } from '../../../base44/functions/employeePayrollCheck/taxes2026.js';
 import { createDraft } from '@/lib/payroll/payrollApi';
 import { sumDeductionCents, toCents } from '@/lib/payroll/checkFormat';
 
 const EMPTY_FORM = {
   employee_name: '',
-  pay_type: 'SALARY',
+  pay_type: 'HOURLY',
   gross: '',
   period_start: '',
   period_end: '',
@@ -20,13 +22,20 @@ const EMPTY_FORM = {
   ytd_net: '',
 };
 
-const PRESETS = [
-  { label: 'Aug 2026', period_start: '2026-08-01', period_end: '2026-08-31' },
-  { label: 'Sep 2026', period_start: '2026-09-01', period_end: '2026-09-30' },
-  { label: 'Oct 2026', period_start: '2026-10-01', period_end: '2026-10-31' },
-];
-
 const MESSAGES = {
+  earnings_records_required: 'Verify workweek and tip records before calculating.',
+  work_location_required: 'Select the applicable work location.',
+  workweek_date_required: 'Enter the earning period and each employer workweek start date.',
+  wage_year_unsupported: 'Hourly wage rules currently cover earning periods in 2026.',
+  hourly_rate_below_minimum: 'Hourly base pay must meet the full applicable minimum. Tips do not reduce it.',
+  regular_hours_over_40: 'Enter no more than 40 regular hours per workweek; enter overtime separately.',
+  hours_invalid: 'Enter valid regular and overtime hours for each workweek.',
+  workweek_overlap: 'Use distinct workweeks starting on the same employer workweek day.',
+  workweek_outside_period: 'Each workweek must overlap the selected earning period.',
+  tips_paid_exceed_reported: 'Enter valid tip amounts; already-paid tips cannot exceed reported tips.',
+  insufficient_cash_for_withholding: 'Available wages cannot cover withholding on paid tips. A payroll specialist must handle collection priority and uncollected taxes before a check is prepared.',
+  earnings_mismatch: 'Earnings changed during calculation. Review hours, tips and totals.',
+
   employee_name_required: 'Enter the employee name.',
   period_start_required: 'Enter the earning period start.',
   period_end_required: 'Enter the earning period end.',
@@ -38,7 +47,7 @@ const MESSAGES = {
   duplicate_deduction_code: 'Two deductions use the same code.',
   deduction_total_mismatch: 'Deduction total does not match the listed deductions.',
   deductions_missing_or_unconfirmed: 'Enter each deduction, or confirm that none apply.',
-  net_mismatch: 'Net does not equal gross minus deductions.',
+  net_mismatch: 'Net check must equal taxable gross minus deductions minus tips already paid.',
   net_negative: 'Deductions exceed gross wages.',
   bank_details_not_accepted: 'Bank routing and account numbers are never accepted here.',
   bank_must_be_chase: 'This workflow prints on Chase preprinted stock only.',
@@ -63,6 +72,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
   const [deductions, setDeductions] = useState([]);
   const [noDeductions, setNoDeductions] = useState(false);
   const [automaticTaxes, setAutomaticTaxes] = useState(true);
+  const [hourlyInput, setHourlyInput] = useState(null);
   const [taxProfile, setTaxProfile] = useState(null);
   const [calculatorKey, setCalculatorKey] = useState(0);
   const [errors, setErrors] = useState([]);
@@ -70,13 +80,22 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
   const idempotencyKey = useRef(crypto.randomUUID());
 
   const update = (patch) => {
+    if (patch.pay_type === 'HOURLY') setAutomaticTaxes(true);
+    if (patch.pay_type && patch.pay_type !== form.pay_type) { setTaxProfile(null); setCalculatorKey(key => key + 1); }
     if (patch.employee_name !== undefined && patch.employee_name !== form.employee_name) {
       setTaxProfile(null); setCalculatorKey((key) => key + 1);
     }
     setForm((prev) => ({ ...prev, ...patch }));
   };
 
-  const grossCents = toCents(form.gross);
+  const hourly = form.pay_type === 'HOURLY';
+  const earnings = useMemo(() => {
+    if (!hourly) return { result: null, error: '' };
+    try { return { result: calculateHourlyEarnings({ ...hourlyInput, period_start: form.period_start, period_end: form.period_end }), error: '' }; }
+    catch (failure) { return { result: null, error: failure.message }; }
+  }, [hourly, hourlyInput, form.period_start, form.period_end]);
+  const tipsPaid = hourly ? earnings.result?.tips_paid_cents || 0 : 0;
+  const grossCents = hourly ? earnings.result?.gross_cents ?? NaN : toCents(form.gross);
   const taxCalculation = useMemo(() => {
     if (!automaticTaxes) return { result: null, error: '' };
     try { return { result: calculatePayrollTaxes(grossCents, taxProfile || {}), error: '' }; }
@@ -85,16 +104,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
   const deductionCents = (taxCalculation.result?.total_deductions_cents || 0) + useMemo(() => sumDeductionCents(deductions.map((item) => ({
     amount_cents: toCents(item.amount),
   }))), [deductions]);
-  const netCents = Number.isFinite(grossCents) ? grossCents - deductionCents : NaN;
-
-  const applyPreset = (preset) => update({
-    employee_name: 'Carlo Rene Earl',
-    pay_type: 'SALARY',
-    gross: '4000.00',
-    period_start: preset.period_start,
-    period_end: preset.period_end,
-    memo: 'Employee salary',
-  });
+  const netCents = Number.isFinite(grossCents) ? grossCents - deductionCents - tipsPaid : NaN;
 
   const addDeduction = () => setDeductions((prev) => [...prev, { code: '', label: '', amount: '' }]);
   const updateDeduction = (index, patch) => setDeductions((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)));
@@ -104,6 +114,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
     event.preventDefault();
     setErrors([]);
 
+    if (hourly && earnings.error) { setErrors([earnings.error]); return; }
+    if (netCents < 0) { setErrors(['insufficient_cash_for_withholding']); return; }
     if (automaticTaxes && taxCalculation.error) { setErrors([taxCalculation.error]); return; }
     const extraRows = deductions
       .filter((item) => item.label.trim() || item.amount.trim())
@@ -128,7 +140,9 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
         gross_cents: grossCents,
         deductions: rows,
         total_deductions_cents: sumDeductionCents(rows),
-        net_cents: grossCents - sumDeductionCents(rows),
+        net_cents: grossCents - sumDeductionCents(rows) - tipsPaid,
+        tips_paid_cents: tipsPaid,
+        hourly_earnings: hourly ? hourlyInput : undefined,
         no_deductions_confirmed: automaticTaxes ? rows.length === 0 : noDeductions,
         tax_profile: automaticTaxes ? taxProfile : undefined,
         ytd_status: form.ytd_status,
@@ -159,18 +173,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
           <h3 className="text-sm font-bold text-slate-100">New employee check draft</h3>
           <p className="text-xs text-slate-400">Drafts are non-negotiable until every required field is reviewed.</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              onClick={() => applyPreset(preset)}
-              className="rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-300 hover:border-indigo-400 hover:text-indigo-300"
-            >
-              {preset.label} preset
-            </button>
-          ))}
-        </div>
+
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -186,8 +189,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
           </select>
         </label>
         <label className="text-xs text-slate-400">
-          Gross wages (USD)
-          <input className={fieldClass} inputMode="decimal" placeholder="4000.00" value={form.gross} onChange={(e) => update({ gross: e.target.value })} />
+          {hourly ? 'Taxable gross — calculated below' : 'Gross wages (USD)'}
+          <input className={fieldClass} inputMode="decimal" disabled={hourly} placeholder={hourly ? "Enter hours and tips below" : "Enter gross salary"} value={hourly ? (Number.isFinite(grossCents) ? (grossCents / 100).toFixed(2) : "") : form.gross} onChange={(e) => update({ gross: e.target.value })} />
         </label>
         <label className="text-xs text-slate-400">
           Earning period start
@@ -218,6 +221,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
         </label>
       </div>
 
+      {hourly && <HourlyEarningsCalculator key={(employee?.id || 'hourly') + ':' + form.employee_name} initialRate={employee?.hourly_rate_cents || null} onChange={setHourlyInput} result={earnings.result} error={MESSAGES[earnings.error] || earnings.error}/>}
+
       {form.ytd_status === 'VERIFIED_OPENING' && (
         <div className="grid gap-3 sm:grid-cols-3">
           {[
@@ -233,8 +238,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
         </div>
       )}
 
-      <label className="flex items-center gap-2 text-sm text-indigo-200"><input type="checkbox" checked={automaticTaxes} onChange={e=>setAutomaticTaxes(e.target.checked)}/>Automatically calculate 2026 payroll taxes</label>
-      {automaticTaxes && <PayrollTaxCalculator key={calculatorKey} payPeriods={employee?.pay_periods || 12} onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
+      <label className="flex items-center gap-2 text-sm text-indigo-200"><input type="checkbox" checked={automaticTaxes} disabled={hourly} onChange={e=>setAutomaticTaxes(e.target.checked)}/>Automatically calculate 2026 payroll taxes</label>
+      {automaticTaxes && <PayrollTaxCalculator key={calculatorKey} payPeriods={employee?.pay_periods || (hourly ? 26 : 12)} onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
       <div className="space-y-2 rounded border border-slate-800 p-3">
         <div className="flex items-center justify-between">
           <div className="text-xs font-semibold text-slate-200">Other deductions (post-tax, entered by you)</div>
@@ -262,8 +267,11 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
       <div className="grid gap-2 rounded border border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300 sm:grid-cols-3">
         <div>Gross: <span className="font-mono text-slate-100">{Number.isFinite(grossCents) ? (grossCents / 100).toFixed(2) : '—'}</span></div>
         <div>Deductions: <span className="font-mono text-slate-100">{automaticTaxes && !taxCalculation.result ? 'Pending tax settings' : (deductionCents / 100).toFixed(2)}</span></div>
-        <div>Net: <span className="font-mono text-slate-100">{automaticTaxes && !taxCalculation.result ? 'Pending tax settings' : Number.isFinite(netCents) ? (netCents / 100).toFixed(2) : '—'}</span></div>
+        <div>Tips already paid: <span className="font-mono text-slate-100">{(tipsPaid / 100).toFixed(2)}</span></div>
+        <div>Net check: <span className="font-mono text-slate-100">{automaticTaxes && !taxCalculation.result ? 'Pending tax settings' : Number.isFinite(netCents) ? (netCents / 100).toFixed(2) : '—'}</span></div>
       </div>
+
+      {netCents < 0 && <p role="alert" className="text-xs text-red-300">{MESSAGES.insufficient_cash_for_withholding}</p>}
 
       <p className="flex items-start gap-2 text-[11px] leading-relaxed text-amber-200/80">
         <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -279,7 +287,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {}, employee = 
 
       <button
         type="submit"
-        disabled={saving || (automaticTaxes && !taxCalculation.result)}
+        disabled={saving || (hourly && !earnings.result) || (automaticTaxes && !taxCalculation.result) || netCents < 0}
         className="inline-flex items-center gap-2 rounded bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400 disabled:opacity-60"
       >
         <FilePlus2 className="h-4 w-4" />

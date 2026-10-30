@@ -1,3 +1,4 @@
+import * as hourly from '../base44/functions/employeePayrollCheck/hourlyEarnings.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -8,7 +9,7 @@ import * as taxes from '../base44/functions/employeePayrollCheck/taxes2026.js';
 function handler(client) {
  let serve;const module={exports:{}};
  vm.runInNewContext(ts.transpileModule(readFileSync('base44/functions/employeePayrollCheck/entry.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{
- module,exports:module.exports,require:n=>n.includes('payrollPolicy')?policy:n.includes('taxes2026')?taxes:{createClientFromRequest:()=>client},
+ module,exports:module.exports,require:n=>n.includes('hourlyEarnings')?hourly:n.includes('payrollPolicy')?policy:n.includes('taxes2026')?taxes:{createClientFromRequest:()=>client},
  Deno:{serve:fn=>{serve=fn;}},Request,Response,crypto,console});
  return async body=>serve(new Request('https://example.com',{method:'POST',body:JSON.stringify({venue_id:'venue',mode:'REAL',...body})}));
 }
@@ -98,4 +99,36 @@ test('deferred save from REAL cannot start an old load or navigate after switchi
  deferredCompletion();
  assert.deepEqual(requests,['REAL','DEMO']);assert.equal(navigations.length,0);
  pending.splice(0).forEach(resolve=>resolve());
+});
+
+test('authenticated canonical owner retains payroll access despite old staff profiles',async()=>{
+ const s=setup();s.client.auth.me=async()=>({email:'carloearl@glyphlock.com',role:'user',id:'owner'});
+ s.client.asServiceRole.entities.NUPSUser={filter:async()=>{throw new Error('stale staff lookup must not override owner identity');}};
+ assert.equal((await s.call({action:'workspace'})).status,200);
+});
+test('hourly draft recomputes wages and blocks tampered gross or paid-tip offsets',async()=>{
+ const s=setup();const earnings={jurisdiction:'AZ',hourly_rate_cents:1515,records_verified:true,weeks:[{week_start:'2026-10-05',regular_hours_hundredths:4000,overtime_hours_hundredths:0,reported_tips_cents:20000,tips_paid_cents:20000}]};
+ const body={action:'create_draft',pay_type:'hourly',period_start:'2026-10-01',period_end:'2026-10-31',tax_profile:{},hourly_earnings:earnings,gross_cents:1,tips_paid_cents:0};
+ const res=await s.call(body);assert.equal(res.status,400);assert.equal((await res.json()).error,'earnings_mismatch');
+});
+test('hourly employee rate persists separately from default salary',async()=>{
+ const s=setup();const res=await s.call({action:'save_employee',employee:{employee_name:'Hourly Employee',employee_ref:'EMP2',pay_type:'HOURLY',base_salary_cents:0,hourly_rate_cents:1515,pay_periods:26,pay_day:15,status:'ACTIVE'}});
+ assert.equal(res.status,200);const {employee}=await res.json();assert.equal(employee.hourly_rate_cents,1515);assert.equal(employee.base_salary_cents,0);
+});
+test('hourly saved check stores wage/tip snapshot and taxes gross before the paid-tip offset',async()=>{
+ const s=setup();const E=s.client.asServiceRole.entities;
+ const seq={id:'sequence',next_number:395};let saved;
+ E.PayrollCheckSequence={filter:async()=>[seq],get:async()=>seq,updateMany:async(q,op)=>{Object.assign(seq,op.$set||{});for(const k of Object.keys(op.$unset||{}))delete seq[k];}};
+ E.EmployeePayrollCheck={filter:async()=>[],create:async data=>{saved={id:'check',...data};return saved;}};
+ const profile={tax_year:2026,filing_status:'SINGLE',pay_periods:52,step2_checked:false,step3_cents:0,step4a_cents:0,step4b_cents:0,step4c_cents:0,az_rate_bps:200,az_extra_cents:0,ytd_ss_wages_cents:0,ytd_medicare_wages_cents:0,elections_verified:true};
+ const calc=taxes.calculatePayrollTaxes(80600,profile);
+ const res=await s.call({action:'create_draft',pay_type:'HOURLY',employee_name:'Hourly Employee',period_start:'2026-10-01',period_end:'2026-10-31',issue_date:'2026-10-30',tax_profile:profile,hourly_earnings:{jurisdiction:'AZ',hourly_rate_cents:1515,records_verified:true,weeks:[{week_start:'2026-10-05',regular_hours_hundredths:4000,overtime_hours_hundredths:0,reported_tips_cents:20000,tips_paid_cents:20000}]},gross_cents:80600,tips_paid_cents:20000,deductions:calc.deductions,total_deductions_cents:calc.total_deductions_cents,net_cents:calc.net_cents-20000,ytd_status:'UNAVAILABLE',idempotency_key:'hourly-test-request-1',stock_start_number:'26-395'});
+ assert.equal(res.status,200,JSON.stringify(await res.clone().json()));assert.equal(saved.gross_cents,80600);assert.equal(saved.hourly_earnings.wage_cents,60600);assert.equal(saved.net_cents,calc.net_cents-20000);assert.equal(saved.tips_paid_cents,20000);assert.equal(saved.total_deductions_cents,calc.total_deductions_cents);
+ assert.equal(saved.status,'DRAFT');assert.equal(saved.check_number,'26-395');
+});
+
+test('handler rejects prototype jurisdiction names before numbering or persistence',async()=>{
+ const s=setup();
+ const res=await s.call({action:'create_draft',pay_type:'HOURLY',period_start:'2026-10-01',period_end:'2026-10-31',tax_profile:{},hourly_earnings:{jurisdiction:'toString',hourly_rate_cents:1,records_verified:true,weeks:[{week_start:'2026-10-05',regular_hours_hundredths:4000,overtime_hours_hundredths:0,reported_tips_cents:0,tips_paid_cents:0}]},gross_cents:40,tips_paid_cents:0});
+ assert.equal(res.status,400);assert.equal((await res.json()).error,'work_location_required');
 });

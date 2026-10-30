@@ -129,8 +129,6 @@ const NAV_SECTIONS = [
       { id: "roleviews", label: "Role Views",      icon: Users,         to: "/RoleViews" },
       // §6 daily back-office checklist — same back office, guided order.
       { id: "backoffice",label: "Back Office Workflow", icon: ClipboardList, to: "/NUPSAdminPortal" },
-      // Employee W-2 payroll check preparation on preprinted Chase stock.
-      { id: "payroll",   label: "Payroll Checks",     icon: Banknote,      to: "/OfficialChecks", adminOnly: true },
       {
         id: "audit",       label: "Audit",            icon: ShieldCheck, to: "/admin/audit-integrity",
         children: [

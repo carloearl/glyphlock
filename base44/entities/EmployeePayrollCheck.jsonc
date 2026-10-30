@@ -1,7 +1,7 @@
 {
   "name": "EmployeePayrollCheck",
   "type": "object",
-  "description": "Employee (W-2) payroll check preparation record. Integer cents only. Deductions are user-entered and explicitly verified; no tax rates are computed and no bank account or routing numbers are stored.",
+  "description": "Employee payroll check preparation. Server-calculated hourly wages/tips and withholding snapshots; integer cents; no bank credentials.",
   "properties": {
     "description": {
       "type": "string",
@@ -102,7 +102,7 @@
     },
     "net_cents": {
       "type": "number",
-      "description": "gross_cents - total_deductions_cents. Must never be negative."
+      "description": "Taxable gross minus deductions minus reported tips already paid, in integer cents. Never negative."
     },
     "no_deductions_confirmed": {
       "type": "boolean",
@@ -173,6 +173,15 @@
     "created_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "hourly_earnings": {
+      "type": "object",
+      "description": "Versioned server-calculated full-minimum hourly wages, overtime, reported tips and verified workweeks."
+    },
+    "tips_paid_cents": {
+      "type": "number",
+      "default": 0,
+      "description": "Reported tips already received by employee. Reduces net check, never tax deductions or taxable gross."
     }
   },
   "required": [

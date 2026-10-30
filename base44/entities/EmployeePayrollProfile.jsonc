@@ -41,6 +41,10 @@
     },
     "pay_day": {
       "type": "number"
+    },
+    "hourly_rate_cents": {
+      "type": "number",
+      "description": "Default full hourly cash wage, integer cents; local minimum checked on each paycheck."
     }
   },
   "required": [

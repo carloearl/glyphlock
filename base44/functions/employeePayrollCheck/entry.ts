@@ -1,3 +1,4 @@
+import { calculateHourlyEarnings } from './hourlyEarnings.js';
 import { calculatePayrollTaxes } from './taxes2026.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.43';
 import {
@@ -18,6 +19,8 @@ import {
 
 const json = (body: Record<string, unknown>, status = 200) => Response.json(body, { status });
 
+// Same authenticated canonical owner identities as nupsAccessControl. No username/local-part matching.
+const SOVEREIGN_EMAILS = new Set(['carloearl@glyphlock.com', 'carloearl@gmail.com']);
 const nowIso = () => new Date().toISOString();
 const normalizeEmail = (value: unknown) => String(value || '').trim().toLowerCase();
 
@@ -35,18 +38,19 @@ async function resolveActor(base44: any) {
 
   const email = normalizeEmail(user.email);
   const platformRole = String(user.role || '');
+  const sovereign = SOVEREIGN_EMAILS.has(email);
   // Platform admins select an active venue explicitly; an old staff/demo
   // profile must not override their authenticated platform role and scope.
-  const nups = platformRole.toLowerCase() === 'admin'
+  const nups = sovereign || platformRole.toLowerCase() === 'admin'
     ? null
     : await resolveNupsAccount(base44, email);
-  const nupsRole = String(nups?.role || '');
+  const nupsRole = sovereign ? 'SOVEREIGN' : String(nups?.role || '');
   const actor = {
     email,
     userId: String(user.id || ''),
     platformRole,
     nupsRole,
-    platformAdmin: platformRole.toLowerCase() === 'admin',
+    platformAdmin: sovereign || platformRole.toLowerCase() === 'admin',
     venueId: String(nups?.venue_id || '').trim(),
     accountMode: nups
       ? String(nups.access_mode || (nups.is_demo ? 'DEMO' : 'REAL')).toUpperCase()
@@ -175,7 +179,18 @@ async function listChecks(base44: any, actor: any, body: any) {
 
 async function createDraft(base44: any, actor: any, body: any) {
   const scope = await resolveScope(base44, actor, body);
-  let draftInput = body;
+  const payType = String(body.pay_type || 'SALARY').toUpperCase();
+  if (!['SALARY', 'HOURLY'].includes(payType)) throw new PayrollError('invalid_pay_type', 400);
+  let earnings = null;
+  if (payType === 'HOURLY') {
+    if (!body.tax_profile) throw new PayrollError('tax_settings_invalid', 400);
+    try { earnings = calculateHourlyEarnings({ ...body.hourly_earnings, period_start: body.period_start, period_end: body.period_end }); }
+    catch (failure: any) { throw new PayrollError(failure.message || 'invalid_hourly_earnings', 400); }
+    if (body.gross_cents !== earnings.gross_cents || body.tips_paid_cents !== earnings.tips_paid_cents) throw new PayrollError('earnings_mismatch', 400);
+  } else if (body.hourly_earnings || (body.tips_paid_cents ?? 0) !== 0) {
+    throw new PayrollError('earnings_mismatch', 400);
+  }
+  let draftInput = { ...body, pay_type: payType, tips_paid_cents: earnings?.tips_paid_cents || 0 };
   let taxCalculation = null;
   if (body.tax_profile) {
     if (String(body.issue_date || '').slice(0, 4) !== '2026') throw new PayrollError('tax_year_mismatch', 400);
@@ -183,7 +198,7 @@ async function createDraft(base44: any, actor: any, body: any) {
     catch { throw new PayrollError('tax_settings_invalid', 400); }
     const taxCodes = new Set(['FEDERAL', 'SOCIAL_SECURITY', 'MEDICARE', 'ADDITIONAL_MEDICARE', 'ARIZONA']);
     const extras = (Array.isArray(body.deductions) ? body.deductions : []).filter((d: any) => !taxCodes.has(d.code));
-    draftInput = { ...body, deductions: [...taxCalculation.deductions, ...extras] };
+    draftInput = { ...draftInput, deductions: [...taxCalculation.deductions, ...extras] };
   }
   const validation = validateDraftInput(draftInput);
   if (!validation.ok) return json({ error: 'invalid_draft', errors: validation.errors }, 400);
@@ -238,6 +253,8 @@ async function createDraft(base44: any, actor: any, body: any) {
     ytd_note: String(body?.ytd_note || '').slice(0, 300) || null,
     bank_name: BANK_NAME,
     check_stock: CHECK_STOCK,
+    hourly_earnings: earnings,
+    tips_paid_cents: normalized.tips_paid_cents,
     tax_calculation: taxCalculation ? { version: taxCalculation.version, profile: body.tax_profile, deductions: taxCalculation.deductions } : null,
     memo: normalized.memo,
     status: 'DRAFT',
@@ -310,7 +327,9 @@ async function saveEmployee(base44: any, actor: any, body: any) {
   const name = String(input.employee_name || '').trim();
   const ref = String(input.employee_ref || '').trim();
   if (!name || name.length > 120 || ref.length > 80
-      || !Number.isSafeInteger(input.base_salary_cents) || input.base_salary_cents <= 0 || input.base_salary_cents > 10000000000
+      || !Number.isSafeInteger(input.base_salary_cents) || input.base_salary_cents < 0 || input.base_salary_cents > 10000000000
+      || (input.pay_type === 'SALARY' && input.base_salary_cents <= 0)
+      || (input.pay_type === 'HOURLY' && (!Number.isSafeInteger(input.hourly_rate_cents) || input.hourly_rate_cents <= 0 || input.hourly_rate_cents > 10000000000))
       || !['SALARY', 'HOURLY'].includes(input.pay_type)
       || ![2, 4, 12, 24, 26, 52].includes(input.pay_periods)
       || !Number.isInteger(input.pay_day) || input.pay_day < 1 || input.pay_day > 28
@@ -319,13 +338,14 @@ async function saveEmployee(base44: any, actor: any, body: any) {
   const data = {
     account_key: scope.accountKey, venue_id: scope.venueId, mode: scope.mode,
     employee_name: name, employee_ref: ref, base_salary_cents: input.base_salary_cents,
+    hourly_rate_cents: input.pay_type === 'HOURLY' ? input.hourly_rate_cents : 0,
     pay_type: input.pay_type, pay_periods: input.pay_periods, pay_day: input.pay_day,
     status: input.status, notes: String(input.notes || ''), updated_by: actor.email, updated_at: nowIso(),
   };
   const employee = id ? await E.EmployeePayrollProfile.update(id, data) : await E.EmployeePayrollProfile.create(data);
   await auditWrite(base44, actor, scope, {
     entity: 'EmployeePayrollProfile', operation: id ? 'update' : 'create',
-    fields: ['employee_name', 'employee_ref', 'base_salary_cents', 'pay_periods', 'pay_day', 'status'],
+    fields: ['employee_name', 'employee_ref', 'base_salary_cents', 'hourly_rate_cents', 'pay_periods', 'pay_day', 'status'],
     reference: employee.id,
   });
   return json({ ok: true, employee });
