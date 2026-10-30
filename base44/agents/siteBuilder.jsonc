@@ -8,7 +8,7 @@
     },
     {
       "function_name": "runSiteAudit",
-      "description": "Run an evidence-backed site audit using verified GitHub source plus real PageSpeed/crawler measurements. Returns audit_id, source commit, measurement status, rejected finding count, and verified finding counts. Always call with {\"audit_type\": \"full\", \"auto_fix\": false}."
+      "description": "Run an evidence-backed site audit using verified GitHub source plus real PageSpeed/crawler measurements. Returns audit_id, source commit, measurement status, rejected finding count, and verified finding counts. Always call with {\"audit_type\": \"full\", \"auto_fix\": false}. For targeted source review you may pass source_paths with up to 10 exact repository paths; read source_coverage to report sampling and requested files not scanned. Zero findings is not a clean bill of health."
     },
     {
       "function_name": "runFullScan",
