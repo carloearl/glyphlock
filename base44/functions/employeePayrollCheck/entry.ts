@@ -22,9 +22,8 @@ async function resolveNupsAccount(base44: any, email: string) {
   const E = base44.asServiceRole.entities;
   const byEmail = await E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 1).catch(() => []);
   if (byEmail?.[0]) return byEmail[0];
-  const username = email.split('@')[0];
-  const byUsername = await E.NUPSUser.filter({ username, status: 'active' }, '-created_date', 1).catch(() => []);
-  return byUsername?.[0] || null;
+  // Only a full, authenticated email binding can grant a payroll role.
+  return null;
 }
 
 async function resolveActor(base44: any) {
