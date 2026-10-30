@@ -7,6 +7,8 @@ import {
   PayrollError,
   accountKeyFor,
   allocateCheckNumber,
+  withPayrollWriteLock,
+  sequenceKeyFor,
   isOwnerOrAdmin,
   scopeDecision,
   validateDraftInput,
@@ -105,15 +107,26 @@ function buildNumberingRepo(base44: any) {
   const E = base44.asServiceRole.entities;
   return {
     async readSequence(accountKey: string) {
-      const rows = await E.PayrollCheckSequence.filter({ account_key: accountKey }, '-created_date', 1);
+      const rows = await E.PayrollCheckSequence.filter({ account_key: accountKey }, 'created_date', 2);
+      if (rows.length > 1) throw new PayrollError('numbering_setup_conflict', 409);
       return rows?.[0] || null;
     },
-    async createSequence({ account_key, next_number }: any) {
-      try {
-        return await E.PayrollCheckSequence.create({ account_key, next_number });
-      } catch {
-        return null;
-      }
+    async createSequence() {
+      // Provision exactly one sequence during owner setup, never in a save race.
+      throw new PayrollError('numbering_setup_required', 409);
+    },
+    async acquireWriteLock(id: string, token: string) {
+      await E.PayrollCheckSequence.updateMany(
+        { id, $or: [{ write_lock_token: { $exists: false } }, { write_lock_token: null }] },
+        { $set: { write_lock_token: token, write_lock_at: nowIso() } },
+      );
+      return (await E.PayrollCheckSequence.get(id))?.write_lock_token === token;
+    },
+    async releaseWriteLock(id: string, token: string) {
+      await E.PayrollCheckSequence.updateMany(
+        { id, write_lock_token: token },
+        { $unset: { write_lock_token: '', write_lock_at: '' } },
+      );
     },
     async claimSequence({ id, expected, next, token }: any) {
       await E.PayrollCheckSequence.updateMany(
@@ -132,7 +145,7 @@ function buildNumberingRepo(base44: any) {
     },
     async findCheckByNumber(accountKey: string, checkNumber: string) {
       const rows = await E.EmployeePayrollCheck.filter(
-        { account_key: accountKey, check_number: checkNumber },
+        { account_id: ACCOUNT_ID, mode: accountKey.split(':').at(-1), check_number: checkNumber },
         null,
         1,
       ).catch(() => []);
@@ -166,6 +179,9 @@ async function createDraft(base44: any, actor: any, body: any) {
     throw new PayrollError('idempotency_key_required', 400);
   }
 
+  const repo = buildNumberingRepo(base44);
+  const sequenceKey = sequenceKeyFor(scope.mode);
+  return await withPayrollWriteLock(repo, sequenceKey, async () => {
   const E = base44.asServiceRole.entities;
   const replay = (await E.EmployeePayrollCheck.filter(
     { account_key: scope.accountKey, idempotency_key: idempotencyKey },
@@ -174,8 +190,8 @@ async function createDraft(base44: any, actor: any, body: any) {
   ).catch(() => []))?.[0];
   if (replay) return json({ ok: true, replay: true, record: replay });
 
-  const allocation = await allocateCheckNumber(buildNumberingRepo(base44), {
-    accountKey: scope.accountKey,
+  const allocation = await allocateCheckNumber(repo, {
+    accountKey: sequenceKey,
     // Defaults to the physical Chase stock in use (26-395); the operator may
     // still supply a later number when a sheet is partly used.
     stockStartNumber: body?.stock_start_number ?? STOCK_START_NUMBER,
@@ -221,6 +237,7 @@ async function createDraft(base44: any, actor: any, body: any) {
   });
 
   return json({ ok: true, record });
+  });
 }
 
 async function reviewCheck(base44: any, actor: any, body: any) {
