@@ -1,5 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { Plus, Trash2, FilePlus2, ShieldAlert } from 'lucide-react';
+import PayrollTaxCalculator from './PayrollTaxCalculator';
+import { calculatePayrollTaxes } from '../../../base44/functions/employeePayrollCheck/taxes2026.js';
 import { createDraft } from '@/lib/payroll/payrollApi';
 import { sumDeductionCents, toCents } from '@/lib/payroll/checkFormat';
 
@@ -44,6 +46,11 @@ const MESSAGES = {
   ytd_opening_figures_required: 'Enter verified opening YTD gross, deductions and net.',
   ytd_net_mismatch: 'Opening YTD net must equal gross minus deductions.',
   stock_start_number_required: 'Enter the next check number printed on the Chase stock, e.g. 26-395.',
+  numbering_setup_required: 'Chase check numbering needs owner setup.',
+  numbering_setup_conflict: 'Numbering configuration needs reconciliation before saving.',
+  payroll_save_in_progress: 'Another payroll draft is saving. Wait briefly and retry this same draft.',
+  tax_settings_invalid: 'Check the employee tax elections and prior taxable wages.',
+  tax_year_mismatch: 'The 2026 calculator requires an actual issue date in 2026.',
   invalid_draft: 'Review the highlighted fields.',
   owner_or_admin_required: 'Only an owner or admin can prepare employee checks.',
   autofocus_failed: 'Could not read the form.',
@@ -55,14 +62,27 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [deductions, setDeductions] = useState([]);
   const [noDeductions, setNoDeductions] = useState(false);
+  const [automaticTaxes, setAutomaticTaxes] = useState(true);
+  const [taxProfile, setTaxProfile] = useState(null);
+  const [calculatorKey, setCalculatorKey] = useState(0);
   const [errors, setErrors] = useState([]);
   const [saving, setSaving] = useState(false);
   const idempotencyKey = useRef(crypto.randomUUID());
 
-  const update = (patch) => setForm((prev) => ({ ...prev, ...patch }));
+  const update = (patch) => {
+    if (patch.employee_name !== undefined && patch.employee_name !== form.employee_name) {
+      setTaxProfile(null); setCalculatorKey((key) => key + 1);
+    }
+    setForm((prev) => ({ ...prev, ...patch }));
+  };
 
   const grossCents = toCents(form.gross);
-  const deductionCents = useMemo(() => sumDeductionCents(deductions.map((item) => ({
+  const taxCalculation = useMemo(() => {
+    if (!automaticTaxes) return { result: null, error: '' };
+    try { return { result: calculatePayrollTaxes(grossCents, taxProfile || {}), error: '' }; }
+    catch (error) { return { result: null, error: error.message }; }
+  }, [automaticTaxes, grossCents, taxProfile]);
+  const deductionCents = (taxCalculation.result?.total_deductions_cents || 0) + useMemo(() => sumDeductionCents(deductions.map((item) => ({
     amount_cents: toCents(item.amount),
   }))), [deductions]);
   const netCents = Number.isFinite(grossCents) ? grossCents - deductionCents : NaN;
@@ -84,7 +104,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
     event.preventDefault();
     setErrors([]);
 
-    const rows = deductions
+    if (automaticTaxes && taxCalculation.error) { setErrors([taxCalculation.error]); return; }
+    const extraRows = deductions
       .filter((item) => item.label.trim() || item.amount.trim())
       .map((item) => ({
         code: item.code.trim() || item.label.trim(),
@@ -92,6 +113,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         amount_cents: toCents(item.amount),
       }));
 
+    const rows = [...(taxCalculation.result?.deductions || []), ...extraRows];
     setSaving(true);
     try {
       const payload = {
@@ -106,7 +128,8 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         deductions: rows,
         total_deductions_cents: sumDeductionCents(rows),
         net_cents: grossCents - sumDeductionCents(rows),
-        no_deductions_confirmed: noDeductions,
+        no_deductions_confirmed: automaticTaxes ? rows.length === 0 : noDeductions,
+        tax_profile: automaticTaxes ? taxProfile : undefined,
         ytd_status: form.ytd_status,
         ytd_gross_cents: form.ytd_status === 'VERIFIED_OPENING' ? toCents(form.ytd_gross) : null,
         ytd_deductions_cents: form.ytd_status === 'VERIFIED_OPENING' ? toCents(form.ytd_deductions) : null,
@@ -117,6 +140,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
       const data = await createDraft(payload);
       idempotencyKey.current = crypto.randomUUID();
       setForm(EMPTY_FORM);
+      setTaxProfile(null); setCalculatorKey((key) => key + 1);
       setDeductions([]);
       setNoDeductions(false);
       onCreated?.(data.record);
@@ -208,9 +232,11 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         </div>
       )}
 
+      <label className="flex items-center gap-2 text-sm text-indigo-200"><input type="checkbox" checked={automaticTaxes} onChange={e=>setAutomaticTaxes(e.target.checked)}/>Automatically calculate 2026 payroll taxes</label>
+      {automaticTaxes && <PayrollTaxCalculator key={calculatorKey} onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
       <div className="space-y-2 rounded border border-slate-800 p-3">
         <div className="flex items-center justify-between">
-          <div className="text-xs font-semibold text-slate-200">Deductions (entered and verified by you)</div>
+          <div className="text-xs font-semibold text-slate-200">Other deductions (post-tax, entered by you)</div>
           <button type="button" onClick={addDeduction} className="inline-flex items-center gap-1 rounded border border-slate-700 px-2 py-1 text-[11px] text-slate-300 hover:border-indigo-400">
             <Plus className="h-3 w-3" /> Add deduction
           </button>
@@ -228,20 +254,20 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         ))}
         <label className="flex items-start gap-2 text-[11px] text-slate-400">
           <input type="checkbox" checked={noDeductions} onChange={(e) => setNoDeductions(e.target.checked)} className="mt-0.5" />
-          I verified that no withholding applies to this draft.
+          I verified that no manual withholding applies (used only with automatic taxes off).
         </label>
       </div>
 
       <div className="grid gap-2 rounded border border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300 sm:grid-cols-3">
         <div>Gross: <span className="font-mono text-slate-100">{Number.isFinite(grossCents) ? (grossCents / 100).toFixed(2) : '—'}</span></div>
-        <div>Deductions: <span className="font-mono text-slate-100">{(deductionCents / 100).toFixed(2)}</span></div>
-        <div>Net: <span className="font-mono text-slate-100">{Number.isFinite(netCents) ? (netCents / 100).toFixed(2) : '—'}</span></div>
+        <div>Deductions: <span className="font-mono text-slate-100">{automaticTaxes && !taxCalculation.result ? 'Pending tax settings' : (deductionCents / 100).toFixed(2)}</span></div>
+        <div>Net: <span className="font-mono text-slate-100">{automaticTaxes && !taxCalculation.result ? 'Pending tax settings' : Number.isFinite(netCents) ? (netCents / 100).toFixed(2) : '—'}</span></div>
       </div>
 
       <p className="flex items-start gap-2 text-[11px] leading-relaxed text-amber-200/80">
         <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         Bank: Chase, preprinted stock only. No routing or account numbers are collected, stored, logged or printed,
-        and this workflow does not calculate, file or guarantee any tax withholding.
+        and calculated withholding uses the selected 2026 employee settings. Tax deposits and filings are handled separately.
       </p>
 
       {errors.length > 0 && (
@@ -252,7 +278,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
 
       <button
         type="submit"
-        disabled={saving}
+        disabled={saving || (automaticTaxes && !taxCalculation.result)}
         className="inline-flex items-center gap-2 rounded bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400 disabled:opacity-60"
       >
         <FilePlus2 className="h-4 w-4" />

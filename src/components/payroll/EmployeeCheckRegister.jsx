@@ -3,6 +3,8 @@ import { Printer, CheckCircle2, Loader2 } from 'lucide-react';
 import EmployeeCheckDocument from '@/components/payroll/EmployeeCheckDocument';
 import { printNode, printNodes } from '@/lib/payroll/printCheck';
 import { fmtCents, fmtDate, periodLabel, stampFor } from '@/lib/payroll/checkFormat';
+import StockPrintSettings from './StockPrintSettings';
+import { DEFAULT_STOCK_PROFILE, openStockPrint } from '@/lib/payroll/stockPrint';
 import { reviewCheck } from '@/lib/payroll/payrollApi';
 
 const STATUS_STYLES = {
@@ -14,6 +16,8 @@ const STATUS_STYLES = {
 
 export default function EmployeeCheckRegister({ records = [], loading = false, scope = {}, onReviewed, onError }) {
   const [busyId, setBusyId] = useState(null);
+  const [stockProfile, setStockProfile] = useState(() => structuredClone(DEFAULT_STOCK_PROFILE));
+  const stockSettings = <StockPrintSettings profile={stockProfile} onChange={setStockProfile} onError={onError}/>;
 
   function handlePrint(record) {
     const result = printNode(`chk-${record.id}`, `Check #${record.check_number} · GlyphLock LLC`);
@@ -64,14 +68,15 @@ export default function EmployeeCheckRegister({ records = [], loading = false, s
 
   if (!records.length) {
     return (
-      <div className="rounded border border-slate-800 bg-slate-900/40 p-8 text-center text-sm text-slate-400">
+      <div className="space-y-4">{stockSettings}<div className="rounded border border-slate-800 bg-slate-900/40 p-8 text-center text-sm text-slate-400">
         No employee check drafts yet. Prepare one above — nothing is issued, signed or paid automatically.
-      </div>
+      </div></div>
     );
   }
 
   return (
     <div className="space-y-6">
+      {stockSettings}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-xs text-slate-400">
           {records.length} draft{records.length === 1 ? '' : 's'} in {scope.mode || 'REAL'} mode. Drafts print non-negotiable.
@@ -81,7 +86,7 @@ export default function EmployeeCheckRegister({ records = [], loading = false, s
           onClick={handlePrintAll}
           className="inline-flex items-center gap-2 rounded border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-200 hover:border-indigo-400"
         >
-          <Printer className="h-3.5 w-3.5" /> Print all ({records.length})
+          <Printer className="h-3.5 w-3.5" /> Print all copies ({records.length})
         </button>
       </div>
 
@@ -109,6 +114,7 @@ export default function EmployeeCheckRegister({ records = [], loading = false, s
               </div>
 
               <div className="flex items-center gap-3">
+                {record.status === "REVIEWED" && scope.mode === "REAL" && <button type="button" disabled={!stockProfile.alignment_confirmed} onClick={()=>{try{openStockPrint(record,stockProfile);}catch(e){onError?.(e.message);}}} className="rounded border border-emerald-400 px-3 py-2 text-xs disabled:opacity-40">Print on Chase stock</button>}
                 <div className="text-right">
                   <div className="text-[10px] uppercase tracking-wide text-slate-500">Net</div>
                   <div className="font-mono text-sm font-bold text-emerald-300">{fmtCents(record.net_cents)}</div>
@@ -129,7 +135,7 @@ export default function EmployeeCheckRegister({ records = [], loading = false, s
                   onClick={() => handlePrint(record)}
                   className="inline-flex items-center gap-1.5 rounded bg-indigo-500 px-3 py-2 text-xs font-bold text-white hover:bg-indigo-400"
                 >
-                  <Printer className="h-3.5 w-3.5" /> Print
+                  <Printer className="h-3.5 w-3.5" /> Print copy
                 </button>
               </div>
             </div>

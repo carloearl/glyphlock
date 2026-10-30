@@ -74,6 +74,10 @@
       "type": "number",
       "description": "Gross wages in integer cents."
     },
+    "tax_calculation": {
+      "type": "object",
+      "description": "Versioned server calculation and transcribed 2026 W-4/A-4 payroll settings. No SSN."
+    },
     "deductions": {
       "type": "array",
       "description": "Explicit, user-entered and user-verified deductions. No rate is inferred.",

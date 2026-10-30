@@ -4,7 +4,7 @@
  */
 const PRINT_STYLES = `*{box-sizing:border-box;margin:0;padding:0;}
 body{background:#fff;display:flex;justify-content:center;padding:.3in;}
-@media print{body{padding:.1in;}@page{size:8.5in 9in;margin:0;}}`;
+@media print{body{padding:0;}@page{size:8.5in 11in;margin:0;}}`;
 
 export function printNode(elementId, title) {
   const element = document.getElementById(elementId);
@@ -38,7 +38,7 @@ export function printNodes(elementIds, title) {
   win.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
 <style>${PRINT_STYLES}body{display:block;padding:.2in;}
 .check-page{page-break-after:always;}
-@media print{@page{size:8.5in 9in;margin:0;}}</style></head>
+@media print{@page{size:8.5in 11in;margin:0;}}</style></head>
 <body>${parts.map((html) => `<div class="check-page">${html}</div>`).join('')}
 <script>window.onload=()=>{setTimeout(()=>window.print(),500);}<\/script></body></html>`);
   win.document.close();

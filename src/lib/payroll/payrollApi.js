@@ -5,7 +5,16 @@ import { base44 } from '@/api/base44Client';
  * The client never decides tenant, mode, check number, status or totals.
  */
 async function call(payload) {
-  const response = await base44.functions.invoke('employeePayrollCheck', payload);
+  let response;
+  try { response = await base44.functions.invoke('employeePayrollCheck', payload); }
+  catch (failure) {
+    const details = failure?.response?.data;
+    if (!details?.error) throw failure;
+    const error = new Error(details.error);
+    error.code = details.error;
+    error.errors = details.errors || [];
+    throw error;
+  }
   const data = response?.data || {};
   if (data.error) {
     const error = new Error(data.error);

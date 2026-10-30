@@ -1,3 +1,4 @@
+import { calculatePayrollTaxes } from './taxes2026.js';
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.43';
 import {
   ACCOUNT_ID,
@@ -7,6 +8,8 @@ import {
   PayrollError,
   accountKeyFor,
   allocateCheckNumber,
+  withPayrollWriteLock,
+  sequenceKeyFor,
   isOwnerOrAdmin,
   scopeDecision,
   validateDraftInput,
@@ -22,9 +25,8 @@ async function resolveNupsAccount(base44: any, email: string) {
   const E = base44.asServiceRole.entities;
   const byEmail = await E.NUPSUser.filter({ platform_email: email, status: 'active' }, '-created_date', 1).catch(() => []);
   if (byEmail?.[0]) return byEmail[0];
-  const username = email.split('@')[0];
-  const byUsername = await E.NUPSUser.filter({ username, status: 'active' }, '-created_date', 1).catch(() => []);
-  return byUsername?.[0] || null;
+  // Only a full, authenticated email binding can grant a payroll role.
+  return null;
 }
 
 async function resolveActor(base44: any) {
@@ -32,8 +34,12 @@ async function resolveActor(base44: any) {
   if (!user?.email) throw new PayrollError('authentication_required', 401);
 
   const email = normalizeEmail(user.email);
-  const nups = await resolveNupsAccount(base44, email);
   const platformRole = String(user.role || '');
+  // Platform admins select an active venue explicitly; an old staff/demo
+  // profile must not override their authenticated platform role and scope.
+  const nups = platformRole.toLowerCase() === 'admin'
+    ? null
+    : await resolveNupsAccount(base44, email);
   const nupsRole = String(nups?.role || '');
   const actor = {
     email,
@@ -102,15 +108,26 @@ function buildNumberingRepo(base44: any) {
   const E = base44.asServiceRole.entities;
   return {
     async readSequence(accountKey: string) {
-      const rows = await E.PayrollCheckSequence.filter({ account_key: accountKey }, '-created_date', 1);
+      const rows = await E.PayrollCheckSequence.filter({ account_key: accountKey }, 'created_date', 2);
+      if (rows.length > 1) throw new PayrollError('numbering_setup_conflict', 409);
       return rows?.[0] || null;
     },
-    async createSequence({ account_key, next_number }: any) {
-      try {
-        return await E.PayrollCheckSequence.create({ account_key, next_number });
-      } catch {
-        return null;
-      }
+    async createSequence() {
+      // Provision exactly one sequence during owner setup, never in a save race.
+      throw new PayrollError('numbering_setup_required', 409);
+    },
+    async acquireWriteLock(id: string, token: string) {
+      await E.PayrollCheckSequence.updateMany(
+        { id, $or: [{ write_lock_token: { $exists: false } }, { write_lock_token: null }] },
+        { $set: { write_lock_token: token, write_lock_at: nowIso() } },
+      );
+      return (await E.PayrollCheckSequence.get(id))?.write_lock_token === token;
+    },
+    async releaseWriteLock(id: string, token: string) {
+      await E.PayrollCheckSequence.updateMany(
+        { id, write_lock_token: token },
+        { $unset: { write_lock_token: '', write_lock_at: '' } },
+      );
     },
     async claimSequence({ id, expected, next, token }: any) {
       await E.PayrollCheckSequence.updateMany(
@@ -129,10 +146,10 @@ function buildNumberingRepo(base44: any) {
     },
     async findCheckByNumber(accountKey: string, checkNumber: string) {
       const rows = await E.EmployeePayrollCheck.filter(
-        { account_key: accountKey, check_number: checkNumber },
+        { account_id: ACCOUNT_ID, mode: accountKey.split(':').at(-1), check_number: checkNumber },
         null,
         1,
-      ).catch(() => []);
+      );
       return rows?.[0] || null;
     },
     token: () => crypto.randomUUID(),
@@ -155,7 +172,17 @@ async function listChecks(base44: any, actor: any, body: any) {
 
 async function createDraft(base44: any, actor: any, body: any) {
   const scope = await resolveScope(base44, actor, body);
-  const validation = validateDraftInput(body);
+  let draftInput = body;
+  let taxCalculation = null;
+  if (body.tax_profile) {
+    if (String(body.issue_date || '').slice(0, 4) !== '2026') throw new PayrollError('tax_year_mismatch', 400);
+    try { taxCalculation = calculatePayrollTaxes(body.gross_cents, body.tax_profile); }
+    catch { throw new PayrollError('tax_settings_invalid', 400); }
+    const taxCodes = new Set(['FEDERAL', 'SOCIAL_SECURITY', 'MEDICARE', 'ADDITIONAL_MEDICARE', 'ARIZONA']);
+    const extras = (Array.isArray(body.deductions) ? body.deductions : []).filter((d: any) => !taxCodes.has(d.code));
+    draftInput = { ...body, deductions: [...taxCalculation.deductions, ...extras] };
+  }
+  const validation = validateDraftInput(draftInput);
   if (!validation.ok) return json({ error: 'invalid_draft', errors: validation.errors }, 400);
 
   const idempotencyKey = String(body?.idempotency_key || '').trim();
@@ -163,16 +190,19 @@ async function createDraft(base44: any, actor: any, body: any) {
     throw new PayrollError('idempotency_key_required', 400);
   }
 
+  const repo = buildNumberingRepo(base44);
+  const sequenceKey = sequenceKeyFor(scope.mode);
+  return await withPayrollWriteLock(repo, sequenceKey, async () => {
   const E = base44.asServiceRole.entities;
   const replay = (await E.EmployeePayrollCheck.filter(
     { account_key: scope.accountKey, idempotency_key: idempotencyKey },
     '-created_date',
     1,
-  ).catch(() => []))?.[0];
+  ))?.[0];
   if (replay) return json({ ok: true, replay: true, record: replay });
 
-  const allocation = await allocateCheckNumber(buildNumberingRepo(base44), {
-    accountKey: scope.accountKey,
+  const allocation = await allocateCheckNumber(repo, {
+    accountKey: sequenceKey,
     // Defaults to the physical Chase stock in use (26-395); the operator may
     // still supply a later number when a sheet is partly used.
     stockStartNumber: body?.stock_start_number ?? STOCK_START_NUMBER,
@@ -205,6 +235,7 @@ async function createDraft(base44: any, actor: any, body: any) {
     ytd_note: String(body?.ytd_note || '').slice(0, 300) || null,
     bank_name: BANK_NAME,
     check_stock: CHECK_STOCK,
+    tax_calculation: taxCalculation ? { version: taxCalculation.version, profile: body.tax_profile, deductions: taxCalculation.deductions } : null,
     memo: normalized.memo,
     status: 'DRAFT',
     idempotency_key: idempotencyKey,
@@ -218,6 +249,7 @@ async function createDraft(base44: any, actor: any, body: any) {
   });
 
   return json({ ok: true, record });
+  });
 }
 
 async function reviewCheck(base44: any, actor: any, body: any) {
