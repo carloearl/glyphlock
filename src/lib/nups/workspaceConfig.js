@@ -108,7 +108,7 @@ export const WORKSPACES = {
       { label: "Analytics", to: "/NUPSOwner?tab=analytics", icon: TrendingUp },
       { label: "Staff", to: "/NUPSOwner?tab=staff", icon: Users },
       { label: "Reports", to: "/NUPSOwner?tab=reports", icon: BarChart3 },
-      { label: "Payroll", to: "/NUPSOwner?tab=payroll", icon: DollarSign },
+      { label: "Payroll", to: "/Payroll", icon: DollarSign },
       { label: "Inventory", to: "/NUPSOwner?tab=inventory", icon: Package },
     ],
   },

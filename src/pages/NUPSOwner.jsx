@@ -45,7 +45,7 @@ import ActivityAuditPanel from "../components/admin/ActivityAuditPanel.jsx";
 import StaffOnboardingPanel from "../components/nups/StaffOnboardingPanel.jsx";
 import FraudAlertMonitor from "../components/nups/FraudAlertMonitor.jsx";
 import VenueSettings from "../components/nups/VenueSettings.jsx";
-import OfficialChecks from "./OfficialChecks.jsx";
+
 import OfflineSyncBanner from "../components/nups/OfflineSyncBanner.jsx";
 import HardwareStatusPanel from "../components/nups/hardware/HardwareStatusPanel.jsx";
 import NUPSMISReport from "./NUPSMISReport.jsx";
@@ -264,7 +264,7 @@ export default function NUPSOwner() {
     { key: 'staff',      label: 'Staff',          icon: Users },
     { key: 'customers',  label: 'Customers',      icon: Heart },
     { key: 'marketing',  label: 'Marketing',      icon: Megaphone },
-    { key: 'payroll',    label: 'Payroll',        icon: DollarSign },
+    { key: 'payroll',    label: 'Payroll History', icon: DollarSign },
     { key: 'reports',    label: 'Reports',        icon: FileText },
     { key: 'inventory',  label: 'Inventory',      icon: Package },
     { key: 'audit',      label: 'Audit Log',      icon: Shield },
@@ -538,14 +538,14 @@ export default function NUPSOwner() {
                     </div>
                   </div>
                   {isAdminUser && (
-                    <Button variant="outline" size="sm" onClick={() => navigate('/OfficialChecks')}>
+                    <Button variant="outline" size="sm" onClick={() => navigate('/Payroll')}>
                       Open employee check desk
                     </Button>
                   )}
                 </div>
                 <TipBreakdown transactions={realTransactions} />
                 <PayrollReport />
-                <OfficialChecks />
+                <p className="text-sm text-slate-400">Employee payroll has moved to Admin → Payroll. Existing historical reports remain here.</p>
               </div>
             ) : <NoAccessNote label="Payroll" />
           )}

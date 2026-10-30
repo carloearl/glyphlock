@@ -90,9 +90,9 @@ async function resolveScope(base44: any, actor: any, body: any) {
   };
 }
 
-async function auditWrite(base44: any, actor: any, scope: any, { operation, fields }: any) {
+async function auditWrite(base44: any, actor: any, scope: any, { operation, fields, entity = 'EmployeePayrollCheck', reference = '' }: any) {
   await base44.asServiceRole.entities.MigrationAuditLog.create({
-    entity_name: 'EmployeePayrollCheck',
+    entity_name: entity,
     operation,
     result: 'allowed',
     actor_id: actor.userId || actor.email,
@@ -100,7 +100,7 @@ async function auditWrite(base44: any, actor: any, scope: any, { operation, fiel
     fields_changed: fields,
     mode: scope.mode,
     venue_id: scope.venueId,
-    notes: `employee_payroll:${scope.accountKey}: by ${actor.email}`,
+    notes: `employee_payroll:${scope.accountKey}: ${reference} by ${actor.email}`,
   }).catch(() => null);
 }
 
@@ -158,15 +158,18 @@ function buildNumberingRepo(base44: any) {
 
 async function listChecks(base44: any, actor: any, body: any) {
   const scope = await resolveScope(base44, actor, body);
+  const skip = body.skip ?? 0;
+  if (!Number.isSafeInteger(skip) || skip < 0) throw new PayrollError('invalid_page', 400);
   const rows = await base44.asServiceRole.entities.EmployeePayrollCheck.filter(
     { account_key: scope.accountKey },
     '-created_date',
-    200,
+    201, skip,
   );
   return json({
     ok: true,
     scope,
-    records: rows || [],
+    records: (rows || []).slice(0, 200),
+    has_more: rows.length > 200,
   });
 }
 
@@ -246,6 +249,7 @@ async function createDraft(base44: any, actor: any, body: any) {
   await auditWrite(base44, actor, scope, {
     operation: 'create',
     fields: ['check_number', 'employee_name', 'gross_cents', 'net_cents', 'issue_date', 'status'],
+    reference: record.check_number,
   });
 
   return json({ ok: true, record });
@@ -277,9 +281,54 @@ async function reviewCheck(base44: any, actor: any, body: any) {
   await auditWrite(base44, actor, scope, {
     operation: 'update',
     fields: ['status', 'reviewed_by', 'reviewed_at'],
+    reference: record.check_number,
   });
 
   return json({ ok: true, record: updated });
+}
+
+async function workspace(base44: any, actor: any, body: any) {
+  const scope = await resolveScope(base44, actor, body);
+  const E = base44.asServiceRole.entities;
+  const [employees, activity] = await Promise.all([
+    E.EmployeePayrollProfile.filter({ account_key: scope.accountKey }, 'employee_name', 1000),
+    E.MigrationAuditLog.filter({ entity_name: { $in: ['EmployeePayrollCheck', 'EmployeePayrollProfile'] }, venue_id: scope.venueId, mode: scope.mode }, '-created_date', 1000),
+  ]);
+  return json({ ok: true, scope, employees, activity, employee_limit: 1000, activity_limit: 1000 });
+}
+
+async function saveEmployee(base44: any, actor: any, body: any) {
+  const scope = await resolveScope(base44, actor, body);
+  const input = body.employee || {};
+  const id = String(input.id || '').trim();
+  const E = base44.asServiceRole.entities;
+  if (id) {
+    const prior = await E.EmployeePayrollProfile.get(id);
+    if (!prior) throw new PayrollError('employee_not_found', 404);
+    if (prior.account_key !== scope.accountKey) throw new PayrollError('cross_tenant_write_blocked', 403);
+  }
+  const name = String(input.employee_name || '').trim();
+  const ref = String(input.employee_ref || '').trim();
+  if (!name || name.length > 120 || ref.length > 80
+      || !Number.isSafeInteger(input.base_salary_cents) || input.base_salary_cents <= 0 || input.base_salary_cents > 10000000000
+      || !['SALARY', 'HOURLY'].includes(input.pay_type)
+      || ![2, 4, 12, 24, 26, 52].includes(input.pay_periods)
+      || !Number.isInteger(input.pay_day) || input.pay_day < 1 || input.pay_day > 28
+      || !['ACTIVE', 'INACTIVE'].includes(input.status)
+      || String(input.notes || '').length > 500) throw new PayrollError('invalid_employee_settings', 400);
+  const data = {
+    account_key: scope.accountKey, venue_id: scope.venueId, mode: scope.mode,
+    employee_name: name, employee_ref: ref, base_salary_cents: input.base_salary_cents,
+    pay_type: input.pay_type, pay_periods: input.pay_periods, pay_day: input.pay_day,
+    status: input.status, notes: String(input.notes || ''), updated_by: actor.email, updated_at: nowIso(),
+  };
+  const employee = id ? await E.EmployeePayrollProfile.update(id, data) : await E.EmployeePayrollProfile.create(data);
+  await auditWrite(base44, actor, scope, {
+    entity: 'EmployeePayrollProfile', operation: id ? 'update' : 'create',
+    fields: ['employee_name', 'employee_ref', 'base_salary_cents', 'pay_periods', 'pay_day', 'status'],
+    reference: employee.id,
+  });
+  return json({ ok: true, employee });
 }
 
 Deno.serve(async (req) => {
@@ -291,6 +340,8 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action || 'list');
 
+    if (action === 'workspace') return await workspace(base44, actor, body);
+    if (action === 'save_employee') return await saveEmployee(base44, actor, body);
     if (action === 'list') return await listChecks(base44, actor, body);
     if (action === 'create_draft') return await createDraft(base44, actor, body);
     if (action === 'review') return await reviewCheck(base44, actor, body);

@@ -30,3 +30,5 @@ export const listChecks = (scope = {}) => call({ action: 'list', ...scope });
 export const createDraft = (payload = {}) => call({ action: 'create_draft', ...payload });
 
 export const reviewCheck = (payload = {}) => call({ action: 'review', ...payload });
+export const loadPayrollWorkspace = (scope = {}) => call({ action: 'workspace', ...scope });
+export const savePayrollEmployee = (scope, employee) => call({ action: 'save_employee', ...scope, employee });

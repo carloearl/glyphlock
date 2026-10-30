@@ -33,7 +33,7 @@ export const FEATURE_REGISTRY_SEED = [
   { feature_id: "payout_log",         label: "Payout Log",       route: "/admin/payout-history", icon: "ScrollText",    group: "Accounting", order: 50, roles: ["Manager"], keywords: ["payout history", "driver log", "disbursements"] },
   { feature_id: "analytics",          label: "Analytics",        route: "/NUPSOwner?tab=analytics", icon: "TrendingUp", group: "Accounting", order: 60, roles: ["Manager"], keywords: ["analytics", "trends", "performance", "owner analytics"] },
   { feature_id: "reports",            label: "Reports",          route: "/NUPSOwner?tab=reports", icon: "FileText",     group: "Accounting", order: 70, roles: ["Manager"], keywords: ["reports", "sales report", "daily summary", "z report"] },
-  { feature_id: "payroll",            label: "Payroll",          route: "/NUPSOwner?tab=payroll", icon: "DollarSign",   group: "Accounting", order: 80, roles: ["Manager"], keywords: ["payroll", "1099", "w-9", "tax forms", "entertainer payout", "tips"] },
+  { feature_id: "payroll",            label: "Payroll",          route: "/Payroll", icon: "DollarSign",   group: "Admin", order: 80, roles: ["Owner", "Administrator"], keywords: ["payroll", "1099", "w-9", "tax forms", "entertainer payout", "tips"] },
   { feature_id: "inventory",          label: "Inventory",        route: "/NUPSOwner?tab=inventory", icon: "Package",    group: "Accounting", order: 90, roles: ["Manager", "Bartender"], keywords: ["inventory", "stock", "products", "cash drawer"] },
 
   // ── CONTRACTS (sub-routes share /Contracts) ──────────────────────

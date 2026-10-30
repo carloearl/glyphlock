@@ -58,8 +58,8 @@ const MESSAGES = {
 
 const fieldClass = 'w-full rounded-md border border-slate-700 bg-slate-950/60 px-3 py-2 text-sm text-slate-100 outline-none focus:border-indigo-400';
 
-export default function EmployeePayrollForm({ onCreated, scope = {} }) {
-  const [form, setForm] = useState(EMPTY_FORM);
+export default function EmployeePayrollForm({ onCreated, scope = {}, employee = null }) {
+  const [form, setForm] = useState(() => employee ? { ...EMPTY_FORM, employee_name: employee.employee_name, employee_ref: employee.employee_ref || '', pay_type: employee.pay_type, gross: (employee.base_salary_cents / 100).toFixed(2) } : EMPTY_FORM);
   const [deductions, setDeductions] = useState([]);
   const [noDeductions, setNoDeductions] = useState(false);
   const [automaticTaxes, setAutomaticTaxes] = useState(true);
@@ -119,6 +119,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
       const payload = {
         ...scope,
         employee_name: form.employee_name,
+        employee_ref: employee?.employee_name === form.employee_name ? employee.employee_ref || '' : '',
         pay_type: form.pay_type,
         period_start: form.period_start,
         period_end: form.period_end,
@@ -233,7 +234,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
       )}
 
       <label className="flex items-center gap-2 text-sm text-indigo-200"><input type="checkbox" checked={automaticTaxes} onChange={e=>setAutomaticTaxes(e.target.checked)}/>Automatically calculate 2026 payroll taxes</label>
-      {automaticTaxes && <PayrollTaxCalculator key={calculatorKey} onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
+      {automaticTaxes && <PayrollTaxCalculator key={calculatorKey} payPeriods={employee?.pay_periods || 12} onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
       <div className="space-y-2 rounded border border-slate-800 p-3">
         <div className="flex items-center justify-between">
           <div className="text-xs font-semibold text-slate-200">Other deductions (post-tax, entered by you)</div>
