@@ -31,8 +31,12 @@ async function resolveActor(base44: any) {
   if (!user?.email) throw new PayrollError('authentication_required', 401);
 
   const email = normalizeEmail(user.email);
-  const nups = await resolveNupsAccount(base44, email);
   const platformRole = String(user.role || '');
+  // Platform admins select an active venue explicitly; an old staff/demo
+  // profile must not override their authenticated platform role and scope.
+  const nups = platformRole.toLowerCase() === 'admin'
+    ? null
+    : await resolveNupsAccount(base44, email);
   const nupsRole = String(nups?.role || '');
   const actor = {
     email,
