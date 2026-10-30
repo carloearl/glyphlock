@@ -46,6 +46,11 @@ const MESSAGES = {
   ytd_opening_figures_required: 'Enter verified opening YTD gross, deductions and net.',
   ytd_net_mismatch: 'Opening YTD net must equal gross minus deductions.',
   stock_start_number_required: 'Enter the next check number printed on the Chase stock, e.g. 26-395.',
+  numbering_setup_required: 'Chase check numbering needs owner setup.',
+  numbering_setup_conflict: 'Numbering configuration needs reconciliation before saving.',
+  payroll_save_in_progress: 'Another payroll draft is saving. Wait briefly and retry this same draft.',
+  tax_settings_invalid: 'Check the employee tax elections and prior taxable wages.',
+  tax_year_mismatch: 'The 2026 calculator requires an actual issue date in 2026.',
   invalid_draft: 'Review the highlighted fields.',
   owner_or_admin_required: 'Only an owner or admin can prepare employee checks.',
   autofocus_failed: 'Could not read the form.',
@@ -59,11 +64,17 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
   const [noDeductions, setNoDeductions] = useState(false);
   const [automaticTaxes, setAutomaticTaxes] = useState(true);
   const [taxProfile, setTaxProfile] = useState(null);
+  const [calculatorKey, setCalculatorKey] = useState(0);
   const [errors, setErrors] = useState([]);
   const [saving, setSaving] = useState(false);
   const idempotencyKey = useRef(crypto.randomUUID());
 
-  const update = (patch) => setForm((prev) => ({ ...prev, ...patch }));
+  const update = (patch) => {
+    if (patch.employee_name !== undefined && patch.employee_name !== form.employee_name) {
+      setTaxProfile(null); setCalculatorKey((key) => key + 1);
+    }
+    setForm((prev) => ({ ...prev, ...patch }));
+  };
 
   const grossCents = toCents(form.gross);
   const taxCalculation = useMemo(() => {
@@ -129,6 +140,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
       const data = await createDraft(payload);
       idempotencyKey.current = crypto.randomUUID();
       setForm(EMPTY_FORM);
+      setTaxProfile(null); setCalculatorKey((key) => key + 1);
       setDeductions([]);
       setNoDeductions(false);
       onCreated?.(data.record);
@@ -221,7 +233,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
       )}
 
       <label className="flex items-center gap-2 text-sm text-indigo-200"><input type="checkbox" checked={automaticTaxes} onChange={e=>setAutomaticTaxes(e.target.checked)}/>Automatically calculate 2026 payroll taxes</label>
-      {automaticTaxes && <PayrollTaxCalculator onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
+      {automaticTaxes && <PayrollTaxCalculator key={calculatorKey} onChange={setTaxProfile} result={taxCalculation.result} error={taxCalculation.error}/>}
       <div className="space-y-2 rounded border border-slate-800 p-3">
         <div className="flex items-center justify-between">
           <div className="text-xs font-semibold text-slate-200">Other deductions (post-tax, entered by you)</div>
