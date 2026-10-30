@@ -11,6 +11,14 @@
       "type": "string",
       "description": "GLYPHLOCK_LLC:<venue>:<mode>"
     },
+    "write_lock_token": {
+      "type": "string",
+      "description": "Server-owned exclusive payroll save lock."
+    },
+    "write_lock_at": {
+      "type": "string",
+      "format": "date-time"
+    },
     "next_number": {
       "type": "number",
       "description": "The next check number that may be allocated from the preprinted Chase stock."
