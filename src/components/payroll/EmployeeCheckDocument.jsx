@@ -166,7 +166,7 @@ function PayStub({ record, stamp }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', borderBottom: '1px solid #e0e0ec' }}>
             <div style={{ padding: '3px 8px', fontSize: 8.5, color: '#222' }}>
-              {record.pay_type === 'HOURLY' ? 'Hourly wages' : 'Salary'} · {periodLabel(record)}
+              {record.pay_type === 'HOURLY' ? 'Hourly wages + reported tips' : 'Salary'} · {periodLabel(record)}
             </div>
             <div style={{ padding: '3px 8px', fontSize: 8.5, textAlign: 'right', fontFamily: "'Courier New', monospace" }}>{fmtCents(record.gross_cents)}</div>
             <div style={{ padding: '3px 8px', fontSize: 8.5, textAlign: 'right', fontFamily: "'Courier New', monospace", color: '#555' }}>{ytd(record.ytd_gross_cents)}</div>
@@ -176,8 +176,13 @@ function PayStub({ record, stamp }) {
             <div style={{ padding: '4px 8px', fontWeight: 700, fontSize: 8.5, textAlign: 'right', fontFamily: "'Courier New', monospace" }}>{fmtCents(record.gross_cents)}</div>
             <div style={{ padding: '4px 8px', fontWeight: 700, fontSize: 8.5, textAlign: 'right', fontFamily: "'Courier New', monospace", color: '#555' }}>{ytd(record.ytd_gross_cents)}</div>
           </div>
+          {record.hourly_earnings && <div style={{ padding: '5px 8px', fontSize: 8, color: '#334' }}>
+            Regular wages {fmtCents(record.hourly_earnings.regular_cents)} · Overtime {fmtCents(record.hourly_earnings.overtime_cents)} · Reported tips {fmtCents(record.hourly_earnings.reported_tips_cents)}<br />
+            Regular hours {record.hourly_earnings.regular_hours_hundredths / 100} · Overtime hours {record.hourly_earnings.overtime_hours_hundredths / 100} · Rate {fmtCents(record.hourly_earnings.hourly_rate_cents)}/hr<br />
+            Tips already paid (not a tax deduction): {fmtCents(record.tips_paid_cents || 0)}
+          </div>}
           <div style={{ background: '#e4e6ff', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', borderTop: '1px solid #9090b0' }}>
-            <div style={{ padding: '4px 8px', fontWeight: 700, fontSize: 8.5, color: '#006600' }}>NET PAY</div>
+            <div style={{ padding: '4px 8px', fontWeight: 700, fontSize: 8.5, color: '#006600' }}>NET CHECK</div>
             <div style={{ padding: '4px 8px', fontWeight: 700, fontSize: 8.5, textAlign: 'right', fontFamily: "'Courier New', monospace", color: '#006600' }}>{fmtCents(record.net_cents)}</div>
             <div style={{ padding: '4px 8px', fontWeight: 700, fontSize: 8.5, textAlign: 'right', fontFamily: "'Courier New', monospace", color: '#555' }}>{ytd(record.ytd_net_cents)}</div>
           </div>
@@ -208,7 +213,7 @@ function PayStub({ record, stamp }) {
           </div>
           <div style={{ background: '#eeeef8', padding: '4px 8px', borderTop: '1px solid #9090b0', lineHeight: 1.5 }}>
             <div style={{ fontSize: 7.5, color: '#556' }}>
-              Withholding is entered and verified by the operator. This system performs no tax calculation and makes no tax-compliance claim.
+              Withholding uses the saved employee elections and server calculation when automatic taxes are selected; other deductions are operator verified. Net check excludes reported tips already paid.
             </div>
           </div>
         </div>

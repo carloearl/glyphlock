@@ -1,3 +1,4 @@
+import * as hourly from '../base44/functions/employeePayrollCheck/hourlyEarnings.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
@@ -8,7 +9,7 @@ import * as taxes from '../base44/functions/employeePayrollCheck/taxes2026.js';
 function handler(client) {
  let serve;const module={exports:{}};
  vm.runInNewContext(ts.transpileModule(readFileSync('base44/functions/employeePayrollCheck/entry.ts','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{
- module,exports:module.exports,require:n=>n.includes('payrollPolicy')?policy:n.includes('taxes2026')?taxes:{createClientFromRequest:()=>client},
+ module,exports:module.exports,require:n=>n.includes('hourlyEarnings')?hourly:n.includes('payrollPolicy')?policy:n.includes('taxes2026')?taxes:{createClientFromRequest:()=>client},
  Deno:{serve:fn=>{serve=fn;}},Request,Response,crypto,console});
  return async body=>serve(new Request('https://example.com',{method:'POST',body:JSON.stringify({venue_id:'venue',mode:'REAL',...body})}));
 }

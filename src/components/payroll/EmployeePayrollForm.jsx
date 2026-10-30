@@ -47,7 +47,7 @@ const MESSAGES = {
   duplicate_deduction_code: 'Two deductions use the same code.',
   deduction_total_mismatch: 'Deduction total does not match the listed deductions.',
   deductions_missing_or_unconfirmed: 'Enter each deduction, or confirm that none apply.',
-  net_mismatch: 'Net does not equal gross minus deductions.',
+  net_mismatch: 'Net check must equal taxable gross minus deductions minus tips already paid.',
   net_negative: 'Deductions exceed gross wages.',
   bank_details_not_accepted: 'Bank routing and account numbers are never accepted here.',
   bank_must_be_chase: 'This workflow prints on Chase preprinted stock only.',
