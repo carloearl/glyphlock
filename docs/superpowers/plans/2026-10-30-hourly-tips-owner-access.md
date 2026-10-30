@@ -22,3 +22,5 @@
 - https://azdor.gov/forms/withholding-forms/arizona-withholding-percentage-election
 
 **Rollback:** Revert this task's squash commit; retain all employee/check records and sequences. Restore previous source/schema from0deee271d71c06836ed2607d4d37f2171fc87785 plus preserved subsequent main changes. Newly stored hourly checks retain their snapshots; avoid re-reviewing/reprinting them under a renderer that does not understand paid tips. No automatic downgrade or destructive migration.
+
+**Verification completed:** 36 configured checks, 67 payroll tests (48 publish/hourly/access plus19 employee tests), lint, typecheck and production build passed. Existing chunk-size warning remains. Independent review found an inherited-object-key jurisdiction bypass; own-property/positive-integer checks and red-green calculator/handler regressions closed it. Focused re-review found no remaining blocker. No production check or payroll profile data was created by verification.
