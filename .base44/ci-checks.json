@@ -33,6 +33,7 @@
     "check:glyphlock-batch18-runtime",
     "check:nups-batch17-browser-acceptance",
     "check:glyphlock-batch18-documentation",
-    "test:employee-payroll"
+    "test:employee-payroll",
+    "test:public-search"
   ]
 }

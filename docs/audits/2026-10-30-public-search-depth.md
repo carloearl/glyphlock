@@ -11,3 +11,10 @@ Validation: eight deterministic tests reproduce provider fallback, evidence grou
 Production impact: not deployed. Live mode will issue more external search requests and may cost more; rate limits/quotas still depend on provider configuration. External providers and signed-in browser workflow have not been smoke-tested. Public repository web research returned tool errors, so no new third-party search framework was installed. No claim of exhaustive public-web coverage is made.
 
 Rollback: revert this PR to the base SHA above. No data/schema migration is required. Release only after required GitHub checks pass and a signed-in Live search smoke test confirms citations, identity uncertainty and provider failure behavior.
+
+
+## Release follow-through
+
+Updated the task branch with latest main b2f20e5773f38660a5537dc50475efd205d81045, preserving the concurrent payroll work. Resolved the five SEO blockers: shorten DCE description to 152 characters, synchronize Open Graph copy, and explicitly require the existing DCE route alongside the updated 42-route inventory. No SEO check was disabled. The full 32-check Base44 CI suite now passes. Registered the eight search regression tests in the normal Base44 CI extension point (33 checks after registration). No GitHub workflow changes.
+
+Deployment remains pending required GitHub CI and merge. Search-related release does not change or clear any separate Batch 17 operational NO-GO boundary.
