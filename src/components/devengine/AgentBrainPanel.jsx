@@ -233,22 +233,22 @@ export default function AgentBrainPanel() {
 
     setSending(true);
     try {
-    const activeConversation = conversation || await initConversation();
-    if (!activeConversation) return;
+      const activeConversation = conversation || await initConversation();
+      if (!activeConversation) return;
 
-    const userInput = input.trim();
-    const fileUrls = uploadedFiles.map(f => f.url);
+      const userInput = input.trim();
+      const fileUrls = uploadedFiles.map(f => f.url);
     
-    const userMessage = {
-      role: 'user',
-      content: userInput,
-      ...(fileUrls.length > 0 && { file_urls: fileUrls })
-    };
+      const userMessage = {
+        role: 'user',
+        content: userInput,
+        ...(fileUrls.length > 0 && { file_urls: fileUrls })
+      };
 
-    const prevMessages = Array.isArray(messages) ? messages : [];
-    setMessages([...prevMessages, userMessage]);
-    setInput('');
-    setUploadedFiles([]);
+      const prevMessages = Array.isArray(messages) ? messages : [];
+      setMessages([...prevMessages, userMessage]);
+      setInput('');
+      setUploadedFiles([]);
 
       // All modes route to the live agent. The agent's own instructions
       // enforce its scope (scan / read / report — no code mutation), so the
