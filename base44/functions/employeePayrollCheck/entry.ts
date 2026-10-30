@@ -3,6 +3,7 @@ import {
   ACCOUNT_ID,
   BANK_NAME,
   CHECK_STOCK,
+  STOCK_START_NUMBER,
   PayrollError,
   accountKeyFor,
   allocateCheckNumber,
@@ -172,7 +173,9 @@ async function createDraft(base44: any, actor: any, body: any) {
 
   const allocation = await allocateCheckNumber(buildNumberingRepo(base44), {
     accountKey: scope.accountKey,
-    stockStartNumber: body?.stock_start_number,
+    // Defaults to the physical Chase stock in use (26-395); the operator may
+    // still supply a later number when a sheet is partly used.
+    stockStartNumber: body?.stock_start_number ?? STOCK_START_NUMBER,
   });
 
   const normalized = validation.normalized;

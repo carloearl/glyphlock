@@ -9,6 +9,23 @@
 export const ACCOUNT_ID = 'GLYPHLOCK_LLC';
 export const BANK_NAME = 'Chase';
 export const CHECK_STOCK = 'PREPRINTED_CHASE_STOCK';
+
+// Preprinted Chase stock in use: numbers read 26-395, 26-396, …
+export const STOCK_NUMBER_PREFIX = '26-';
+export const STOCK_START_NUMBER = 395;
+
+/** Numeric suffix of a stock check number: '26-395' or '395' -> 395. */
+export function parseStockCheckNumber(value) {
+  const text = String(value ?? '').trim().toUpperCase().replace(/\s+/g, '');
+  if (!text) return null;
+  const digits = text.includes('-') ? text.slice(text.lastIndexOf('-') + 1) : text;
+  if (!/^\d+$/.test(digits)) return null;
+  const parsed = Number(digits);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+/** Rendered check number for the printed stock, e.g. 395 -> '26-395'. */
+export const formatCheckNumber = (sequenceNumber) => `${STOCK_NUMBER_PREFIX}${sequenceNumber}`;
 export const MODES = Object.freeze(['REAL', 'DEMO']);
 export const YTD_STATUSES = Object.freeze(['VERIFIED_OPENING', 'UNAVAILABLE']);
 export const OWNER_ADMIN_NUPS_ROLES = Object.freeze(['PLATFORM_ADMIN', 'VENUE_OWNER', 'SOVEREIGN']);
@@ -267,8 +284,8 @@ export async function allocateCheckNumber(repo, { accountKey, stockStartNumber, 
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const sequence = await repo.readSequence(accountKey);
     if (!sequence) {
-      const start = Number(stockStartNumber);
-      if (!Number.isInteger(start) || start <= 0) {
+      const start = parseStockCheckNumber(stockStartNumber);
+      if (!start) {
         throw new PayrollError('stock_start_number_required', 400);
       }
       await repo.createSequence({ account_key: accountKey, next_number: start });
@@ -289,10 +306,11 @@ export async function allocateCheckNumber(repo, { accountKey, stockStartNumber, 
     });
     if (!claimed) continue;
 
-    const existing = await repo.findCheckByNumber(accountKey, String(expected));
+    const checkNumber = formatCheckNumber(expected);
+    const existing = await repo.findCheckByNumber(accountKey, checkNumber);
     if (existing) continue;
 
-    return { checkNumber: String(expected), token };
+    return { checkNumber, token };
   }
 
   throw new PayrollError('check_number_allocation_failed', 409);
