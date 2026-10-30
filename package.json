@@ -55,8 +55,13 @@
     "check:glyphlock-batch18-documentation": "node scripts/check-glyphlock-batch18-documentation.mjs",
     "test:glyphlock-batch18-runtime": "node scripts/test-glyphlock-batch18-runtime.mjs",
     "test:employee-payroll": "node --test scripts/test-employee-payroll.mjs",
+<<<<<<< HEAD
     "test:payroll-publish": "node --test scripts/test-payroll-publish.mjs scripts/test-owner-transactions-array.mjs scripts/test-payroll-taxes.mjs scripts/test-payroll-stock.mjs",
     "test:public-search": "node --test scripts/test-public-search.mjs"
+=======
+    "test:public-search": "node --test scripts/test-public-search.mjs",
+    "test:agent-brain": "node --test scripts/test-agent-brain.mjs"
+>>>>>>> origin/main
   },
   "dependencies": {
     "@base44/sdk": "^0.8.57",
