@@ -21,7 +21,7 @@ function harness(responses, env = {}) {
     createClientFromRequest: () => base44,
     fetch: async url => {
       calls.push(url);
-      const payload = responses(url);
+      const payload = await responses(url);
       return { ok: payload !== null, json: async () => payload };
     },
     console: { error() {} }, setTimeout, clearTimeout, AbortController, Response, URL,
@@ -93,4 +93,19 @@ test('Live research uses deep public search through the existing toggle', async 
   vm.runInContext(clientSource + '\nglobalThis.client = glyphbotClient;', context);
   await context.client.sendMessage([{ role: 'user', content: 'Research Example Person professional work' }], { realTime: true });
   assert.equal(options.deep, true);
+});
+
+
+test('deep provider queries run with bounded concurrency', async () => {
+  let active = 0, peak = 0;
+  const h = harness(async url => {
+    if (!url.includes('serpapi.com')) return null;
+    active++; peak = Math.max(peak, active);
+    await new Promise(resolve => setTimeout(resolve, 2));
+    active--;
+    return { organic_results: [{ title: 'Official profile', link: 'https://example.org/profile', snippet: 'Published work' }] };
+  }, { SERP_API_KEY: 'test' });
+  await h.search({ query: 'Example Person', deep: true });
+  assert.ok(peak > 1, 'deep queries should overlap to avoid a serial timeout');
+  assert.ok(peak <= 4, 'provider concurrency must stay bounded');
 });
