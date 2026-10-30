@@ -18,7 +18,8 @@ export const STOCK_START_NUMBER = 395;
 export function parseStockCheckNumber(value) {
   const text = String(value ?? '').trim().toUpperCase().replace(/\s+/g, '');
   if (!text) return null;
-  const digits = text.includes('-') ? text.slice(text.lastIndexOf('-') + 1) : text;
+  if (!/^(?:26-)?\d+$/.test(text)) return null;
+  const digits = text.startsWith(STOCK_NUMBER_PREFIX) ? text.slice(STOCK_NUMBER_PREFIX.length) : text;
   if (!/^\d+$/.test(digits)) return null;
   const parsed = Number(digits);
   return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
@@ -49,7 +50,7 @@ const isIsoDate = (value) => {
   const text = String(value || '');
   if (!ISO_DATE.test(text)) return false;
   const parsed = new Date(`${text}T00:00:00Z`);
-  return !Number.isNaN(parsed.getTime());
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === text;
 };
 
 const isCents = (value) => Number.isInteger(value) && value >= 0;
@@ -249,7 +250,7 @@ export function documentStamp(record = {}, { reprinted = false } = {}) {
   if (status === 'VOID') {
     return { label: 'VOID — NON-NEGOTIABLE COPY', stamp: NONNEGOTIABLE, negotiable: false };
   }
-  if (status === 'DRAFT') {
+  if (status !== 'REVIEWED') {
     return { label: 'DRAFT — NON-NEGOTIABLE', stamp: NONNEGOTIABLE, negotiable: false };
   }
   if (reprinted) {
