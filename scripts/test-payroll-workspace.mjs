@@ -126,3 +126,9 @@ test('hourly saved check stores wage/tip snapshot and taxes gross before the pai
  assert.equal(res.status,200,JSON.stringify(await res.clone().json()));assert.equal(saved.gross_cents,80600);assert.equal(saved.hourly_earnings.wage_cents,60600);assert.equal(saved.net_cents,calc.net_cents-20000);assert.equal(saved.tips_paid_cents,20000);assert.equal(saved.total_deductions_cents,calc.total_deductions_cents);
  assert.equal(saved.status,'DRAFT');assert.equal(saved.check_number,'26-395');
 });
+
+test('handler rejects prototype jurisdiction names before numbering or persistence',async()=>{
+ const s=setup();
+ const res=await s.call({action:'create_draft',pay_type:'HOURLY',period_start:'2026-10-01',period_end:'2026-10-31',tax_profile:{},hourly_earnings:{jurisdiction:'toString',hourly_rate_cents:1,records_verified:true,weeks:[{week_start:'2026-10-05',regular_hours_hundredths:4000,overtime_hours_hundredths:0,reported_tips_cents:0,tips_paid_cents:0}]},gross_cents:40,tips_paid_cents:0});
+ assert.equal(res.status,400);assert.equal((await res.json()).error,'work_location_required');
+});

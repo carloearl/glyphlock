@@ -39,3 +39,9 @@ test('employee form contains no named employee, salary or month presets',()=>{
  const source=readFileSync('src/components/payroll/EmployeePayrollForm.jsx','utf8');
  assert.ok(!source.includes('const PRESETS'));assert.ok(!source.includes('Carlo Rene Earl'));assert.ok(!source.includes('4000.00'));
 });
+
+test('inherited jurisdiction names cannot bypass the minimum wage floor',()=>{
+ for(const jurisdiction of ['toString','constructor','__proto__']){
+  assert.throws(()=>earnings.calculateHourlyEarnings({...input,jurisdiction,hourly_rate_cents:1}),/work_location_required/);
+ }
+});
