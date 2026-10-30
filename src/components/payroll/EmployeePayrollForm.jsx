@@ -254,14 +254,14 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
         ))}
         <label className="flex items-start gap-2 text-[11px] text-slate-400">
           <input type="checkbox" checked={noDeductions} onChange={(e) => setNoDeductions(e.target.checked)} className="mt-0.5" />
-          I verified that no withholding applies to this draft.
+          I verified that no manual withholding applies (used only with automatic taxes off).
         </label>
       </div>
 
       <div className="grid gap-2 rounded border border-slate-800 bg-slate-950/40 p-3 text-xs text-slate-300 sm:grid-cols-3">
         <div>Gross: <span className="font-mono text-slate-100">{Number.isFinite(grossCents) ? (grossCents / 100).toFixed(2) : '—'}</span></div>
-        <div>Deductions: <span className="font-mono text-slate-100">{(deductionCents / 100).toFixed(2)}</span></div>
-        <div>Net: <span className="font-mono text-slate-100">{Number.isFinite(netCents) ? (netCents / 100).toFixed(2) : '—'}</span></div>
+        <div>Deductions: <span className="font-mono text-slate-100">{automaticTaxes && !taxCalculation.result ? 'Pending tax settings' : (deductionCents / 100).toFixed(2)}</span></div>
+        <div>Net: <span className="font-mono text-slate-100">{automaticTaxes && !taxCalculation.result ? 'Pending tax settings' : Number.isFinite(netCents) ? (netCents / 100).toFixed(2) : '—'}</span></div>
       </div>
 
       <p className="flex items-start gap-2 text-[11px] leading-relaxed text-amber-200/80">
@@ -278,7 +278,7 @@ export default function EmployeePayrollForm({ onCreated, scope = {} }) {
 
       <button
         type="submit"
-        disabled={saving}
+        disabled={saving || (automaticTaxes && !taxCalculation.result)}
         className="inline-flex items-center gap-2 rounded bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400 disabled:opacity-60"
       >
         <FilePlus2 className="h-4 w-4" />
