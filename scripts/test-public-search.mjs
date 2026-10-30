@@ -80,3 +80,17 @@ test('successful primary search retains its results without fallback calls', asy
   assert.equal(result.provider, 'serpapi');
   assert.equal(h.calls.length, 1);
 });
+
+const clientSource = (await readFile(new URL('../src/components/glyphlock/bot/logic/glyphbotClient.jsx', import.meta.url), 'utf8'))
+  .replace(/^import .*;$/gm, '').replace(/^export default .*;$/gm, '').replace(/^export \{.*\};$/gm, '');
+test('Live research uses deep public search through the existing toggle', async () => {
+  let options;
+  const context = vm.createContext({
+    PERSONAS: {}, console,
+    searchService: { query: async (_query, _max, opts) => { options = opts; return { success: true, summary: 'Public professional profile', results: [] }; } },
+    askGlyphBot: async () => ({ text: 'Answer', model: 'test' }),
+  });
+  vm.runInContext(clientSource + '\nglobalThis.client = glyphbotClient;', context);
+  await context.client.sendMessage([{ role: 'user', content: 'Research Example Person professional work' }], { realTime: true });
+  assert.equal(options.deep, true);
+});
