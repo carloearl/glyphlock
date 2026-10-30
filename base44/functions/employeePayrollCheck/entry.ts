@@ -148,7 +148,7 @@ function buildNumberingRepo(base44: any) {
         { account_id: ACCOUNT_ID, mode: accountKey.split(':').at(-1), check_number: checkNumber },
         null,
         1,
-      ).catch(() => []);
+      );
       return rows?.[0] || null;
     },
     token: () => crypto.randomUUID(),
@@ -187,7 +187,7 @@ async function createDraft(base44: any, actor: any, body: any) {
     { account_key: scope.accountKey, idempotency_key: idempotencyKey },
     '-created_date',
     1,
-  ).catch(() => []))?.[0];
+  ))?.[0];
   if (replay) return json({ ok: true, replay: true, record: replay });
 
   const allocation = await allocateCheckNumber(repo, {
