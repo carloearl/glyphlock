@@ -61,7 +61,7 @@
     "test:open-audit": "node --test scripts/test-open-audit.mjs"
   },
   "dependencies": {
-    "@base44/sdk": "^0.8.61",
+    "@base44/sdk": "^0.8.62",
     "@base44/vite-plugin": "^1.0.52",
     "@hcaptcha/react-hcaptcha": "^1.10.1",
     "@hello-pangea/dnd": "^17.0.0",
