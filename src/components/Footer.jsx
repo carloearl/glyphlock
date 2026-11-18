@@ -163,11 +163,15 @@ export default function Footer() {
 
         {/* ─── CONTACT BAR ─── */}
         <div className="py-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-center gap-6 text-[13px] text-slate-500">
-          <a href="mailto:carloearl@glyphlock.com" className="flex items-center gap-2 hover:text-blue-400 transition-colors" aria-label="Email GlyphLock support">
+          <a href="mailto:sales@glyphlock.io" className="flex items-center gap-2 hover:text-blue-400 transition-colors" aria-label="Email GlyphLock sales">
+            <Mail size={14} /> sales@glyphlock.io
+          </a>
+          <span className="hidden sm:block text-white/10">|</span>
+          <a href="mailto:carloearl@glyphlock.com" className="flex items-center gap-2 hover:text-blue-400 transition-colors" aria-label="Email GlyphLock">
             <Mail size={14} /> carloearl@glyphlock.com
           </a>
           <span className="hidden sm:block text-white/10">|</span>
-          <a href="tel:+14808865588" className="flex items-center gap-2 hover:text-blue-400 transition-colors" aria-label="Call GlyphLock support">
+          <a href="tel:+14808865588" className="flex items-center gap-2 hover:text-blue-400 transition-colors" aria-label="Call GlyphLock">
             <Phone size={14} /> (480) 886-5588
           </a>
           <span className="hidden sm:block text-white/10">|</span>
