@@ -81,7 +81,7 @@ export default function Contact() {
       <SEOHead 
         title="Contact GlyphLock - Creative Infrastructure & Partnership Inquiries"
         description="Contact GlyphLock for ecosystem architecture, partnership opportunities, creator protection infrastructure, and enterprise consultations. El Mirage, AZ | (480) 886-5588 | sales@glyphlock.io"
-        keywords="contact GlyphLock, creative infrastructure, ecosystem partnership, creator protection, licensing inquiry, enterprise consultation, GlyphLock business inquiries, El Mirage Arizona"
+        keywords="contact GlyphLock, creative infrastructure, ecosystem partnership, creator protection, licensing inquiry, enterprise consultation, GlyphLock business inquiries, business inquiries, El Mirage Arizona"
         url="/contact"
       />
       <div className="min-h-screen bg-black text-white pt-16 md:pt-32 pb-12 md:pb-24 relative overflow-x-hidden w-full">
