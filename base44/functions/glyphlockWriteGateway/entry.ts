@@ -430,10 +430,10 @@ Deno.serve(async (req) => {
       const contact = await E.ContactEvent.create({ contact_email: contactEmail, contact_name: contactName, subject, message, status: 'pending', ip_address: anonymousRef });
       let deliveryStatus = 'sent'; let errorMessage = '';
       try {
-        await base44.integrations.Core.SendEmail({ to: 'carloearl@glyphlock.com', subject: `Contact Form: ${subject}`, body: `Name: ${contactName}\nEmail: ${contactEmail}\n\nMessage:\n${message}` });
+        await base44.integrations.Core.SendEmail({ to: 'sales@glyphlock.io', subject: `Contact Form: ${subject}`, body: `Name: ${contactName}\nEmail: ${contactEmail}\n\nMessage:\n${message}` });
       } catch (error) { deliveryStatus = 'failed'; errorMessage = text(error?.message || 'Send failed', 500); }
       const after = await E.ContactEvent.update(contact.id, { status: deliveryStatus });
-      await E.EmailDeliveryLog.create({ source: 'contact_form', recipient: 'carloearl@glyphlock.com', subject: `Contact Form: ${subject}`, reference: contact.id, organization: '', contact_email: contactEmail, status: deliveryStatus, error_message: errorMessage, attempted_at: new Date().toISOString() }).catch(() => null);
+      await E.EmailDeliveryLog.create({ source: 'contact_form', recipient: 'sales@glyphlock.io', subject: `Contact Form: ${subject}`, reference: contact.id, organization: '', contact_email: contactEmail, status: deliveryStatus, error_message: errorMessage, attempted_at: new Date().toISOString() }).catch(() => null);
       value = { id: after.id, delivery_status: deliveryStatus, delivery_error: errorMessage };
       audit = { ...audit, entity_name: 'ContactEvent', record_id: after.id, operation: 'create', scope_type: 'PUBLIC_INTAKE', owner_ref: contactEmail, after: { contact_email_hash: await sha256(contactEmail), status: deliveryStatus }, fields_changed: ['contact_email', 'contact_name', 'subject', 'message', 'status'], metadata: { source: 'contact_form', delivery_status: deliveryStatus }, severity: 'medium' };
     } else if (action === 'preferences_save') {
