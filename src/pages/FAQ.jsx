@@ -96,7 +96,7 @@ export default function FAQ() {
                   href="mailto:carloearl@glyphlock.com"
                   className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold px-6 py-3 rounded-xl transition-all text-sm"
                 >
-                  Contact Support <ArrowRight size={16} />
+                  Contact GlyphLock <ArrowRight size={16} />
                 </a>
                 <Link
                   to={createPageUrl("GlyphBot")}
