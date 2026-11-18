@@ -24,8 +24,8 @@ export default function StructuredData({ type = "Organization", data = {} }) {
       "contactPoint": [{
         "@type": "ContactPoint",
         "telephone": "+1-480-886-5588",
-        "email": "carloearl@glyphlock.com",
-        "contactType": "customer support",
+        "email": "sales@glyphlock.io",
+        "contactType": "sales inquiries",
         "areaServed": "US"
       }],
       "sameAs": [
