@@ -80,8 +80,8 @@ export default function Contact() {
     <>
       <SEOHead 
         title="Contact GlyphLock - Creative Infrastructure & Partnership Inquiries"
-        description="Contact GlyphLock for ecosystem architecture, partnership opportunities, creator protection infrastructure, and enterprise consultations. El Mirage, AZ | (480) 886-5588 | carloearl@glyphlock.com"
-        keywords="contact GlyphLock, creative infrastructure, ecosystem partnership, creator protection, licensing inquiry, enterprise consultation, GlyphLock support, El Mirage Arizona"
+        description="Contact GlyphLock for ecosystem architecture, partnership opportunities, creator protection infrastructure, and enterprise consultations. El Mirage, AZ | (480) 886-5588 | sales@glyphlock.io"
+        keywords="contact GlyphLock, creative infrastructure, ecosystem partnership, creator protection, licensing inquiry, enterprise consultation, GlyphLock business inquiries, El Mirage Arizona"
         url="/contact"
       />
       <div className="min-h-screen bg-black text-white pt-16 md:pt-32 pb-12 md:pb-24 relative overflow-x-hidden w-full">
@@ -113,7 +113,7 @@ export default function Contact() {
 
           <div ref={cardsRef} className="flex flex-col md:grid md:grid-cols-3 gap-4 md:gap-8 mb-12 md:mb-16">
             {[
-              { icon: Mail, title: "Email", content: "carloearl@glyphlock.com", href: "mailto:carloearl@glyphlock.com", color: "text-[#3B82F6]" },
+              { icon: Mail, title: "Sales", content: "sales@glyphlock.io", href: "mailto:sales@glyphlock.io", color: "text-[#3B82F6]" },
               { icon: Phone, title: "Phone", content: "(480) 886-5588", href: "tel:+14808865588", color: "text-[#8B5CF6]" },
               { icon: MapPin, title: "Location", content: "El Mirage, Arizona", color: "text-white" }
             ].map((item, idx) => (
@@ -198,7 +198,7 @@ export default function Contact() {
                     <GlyphInput
                       id="subject"
                       type="text"
-                      placeholder="Consultation / Partnership / Support"
+                      placeholder="Sales / Partnership / General Inquiry"
                       value={formData.subject}
                       onChange={(e) => setFormData({...formData, subject: e.target.value})}
                       maxLength={200}
