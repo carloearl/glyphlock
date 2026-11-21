@@ -143,6 +143,23 @@ const STATUS_STYLE = {
 };
 const STATUS_TEXT = { pass: "Pass", warn: "Check", fail: "Fail" };
 
+// GlyphBot's card nodes run the forge (wired in GlyphBotPrimeCard.jsx).
+const CARD_COMMAND_LABELS = {
+  strike: "Strike: forge it",
+  rift: "Rift: surprise me",
+  aegis: "Aegis: auto-fix",
+  mirror: "Mirror: snap the vibe",
+  ascend: "Ascend: AI forge",
+};
+const CARD_LEGEND = [
+  ["Strike", "forges it"],
+  ["Rift", "surprises you"],
+  ["Aegis", "fixes it"],
+  ["Mirror", "snaps the vibe"],
+  ["Ascend", "AI forge"],
+  ["Core", "flips to the lore"],
+];
+
 export default function GlyphBotForge() {
   const { isAuthenticated, navigateToLogin } = useAuth();
   const shared = useMemo(() => readSharedSpec(), []);
@@ -384,6 +401,23 @@ Rules:
     notify(ok ? "Share link copied" : "Couldn't copy the link");
   };
 
+  // Commands GlyphBot's own nodes run. Recreated each render, read through a ref in the card.
+  const askForPrompt = () => {
+    const box = document.getElementById("forge-prompt");
+    if (box) {
+      box.scrollIntoView({ behavior: "smooth", block: "center" });
+      box.focus({ preventScroll: true });
+    }
+    notify("Tell GlyphBot what to build");
+  };
+  const cardCommands = {
+    strike: () => (prompt.trim() ? forgeLocal(prompt) : askForPrompt()),
+    rift: remix,
+    aegis: autoFix,
+    mirror: () => photoInput.current && photoInput.current.click(),
+    ascend: () => (prompt.trim() ? forgeAi() : askForPrompt()),
+  };
+
   const deviceWidth = DEVICES.find((d) => d.id === device)?.width;
   const report = view.report;
   const fixable = !aiBuild && report.checks.some((c) => c.fix);
@@ -404,47 +438,65 @@ Rules:
         <div className="absolute bottom-0 right-0 h-[420px] w-[520px] rounded-full bg-purple-600/10 blur-[120px]" />
       </div>
 
-      <main className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 sm:px-6 lg:pt-28">
-        {/* Hero */}
+      {/* Hero: GlyphBot fills the screen and runs the forge from his own nodes */}
+      <section
+        className="relative flex min-h-[100svh] flex-col items-center justify-center px-4 pb-8 pt-20 sm:pt-24"
+        aria-label="GlyphBot Prime"
+      >
+        <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold tracking-[0.2em] text-cyan-300">
+          GLYPHBOT PRIME · UI FORGE
+        </span>
+        <GlyphBotPrimeCard
+          phase={phase}
+          fit
+          commands={cardCommands}
+          commandLabels={CARD_COMMAND_LABELS}
+          className="flex w-full max-w-3xl justify-center"
+        />
+        <div className="mt-4 w-full max-w-md text-center" aria-live="polite">
+          <p className="text-xs font-bold tracking-[0.2em] text-slate-500">GLYPHBOT SAYS</p>
+          <p className="mt-1 text-sm font-semibold text-slate-200">{status}</p>
+          <div className="mt-2 flex justify-center gap-1" aria-hidden="true">
+            {TIERS.map((name, i) => (
+              <span
+                key={name}
+                title={name}
+                className={`h-1.5 w-4 rounded-full transition-colors duration-300 ${i <= phase && phase > 0 ? "bg-cyan-300" : "bg-white/10"}`}
+              />
+            ))}
+          </div>
+        </div>
+        <ul className="mt-4 flex max-w-2xl flex-wrap justify-center gap-2 text-xs" aria-label="What GlyphBot's nodes do">
+          {CARD_LEGEND.map(([node, action]) => (
+            <li key={node} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-slate-300">
+              <b className="text-cyan-200">{node}</b> {action}
+            </li>
+          ))}
+        </ul>
+        <a
+          href="#forge"
+          className="mt-5 inline-flex min-h-[44px] items-center rounded-2xl border border-white/10 px-5 text-sm font-bold text-slate-300 transition hover:border-cyan-400/40 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-cyan-300"
+        >
+          Open the forge ↓
+        </a>
+      </section>
+
+      <main id="forge" className="relative mx-auto max-w-5xl scroll-mt-20 px-4 pb-24 pt-6 sm:px-6">
+        {/* Intro */}
         <header className="mb-8 max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold tracking-[0.2em] text-cyan-300">
-            GLYPHBOT PRIME · UI FORGE
-          </span>
-          <h1 className="mt-4 text-3xl font-black leading-tight sm:text-5xl">
+          <h1 className="text-3xl font-black leading-tight sm:text-5xl">
             Describe it.{" "}
             <span className="bg-gradient-to-r from-cyan-300 via-fuchsia-300 to-amber-200 bg-clip-text text-transparent">
               GlyphBot forges it.
             </span>
           </h1>
           <p className="mt-3 text-base text-slate-400 sm:text-lg">
-            Type a button, toggle, loader or card in plain words. GlyphBot Prime builds it live, hands you
-            HTML, CSS, JavaScript and React, then audits it. The better the build, the higher the card ascends.
+            Type a button, toggle, loader or card in plain words, or tap GlyphBot's nodes above. He builds it live,
+            hands you HTML, CSS, JavaScript and React, then audits it. The better the build, the higher he ascends.
           </p>
         </header>
 
-        <div className="grid gap-6 lg:grid-cols-[300px_minmax(0,1fr)] lg:gap-8">
-          {/* Mascot column */}
-          <aside className="flex flex-col items-center gap-4 lg:sticky lg:top-24 lg:self-start">
-            <GlyphBotPrimeCard phase={phase} scale={10} />
-            <div
-              className="w-full max-w-[300px] rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-center"
-              aria-live="polite"
-            >
-              <p className="text-xs font-bold tracking-[0.2em] text-slate-500">GLYPHBOT SAYS</p>
-              <p className="mt-1 text-sm font-semibold text-slate-200">{status}</p>
-              <div className="mt-3 flex justify-center gap-1" aria-hidden="true">
-                {TIERS.map((name, i) => (
-                  <span
-                    key={name}
-                    title={name}
-                    className={`h-1.5 w-4 rounded-full transition-colors duration-300 ${i <= phase && phase > 0 ? "bg-cyan-300" : "bg-white/10"}`}
-                  />
-                ))}
-              </div>
-              <p className="mt-3 text-xs text-slate-500">Tap the card to flip it and read the lore.</p>
-            </div>
-          </aside>
-
+        <div>
           {/* Forge column */}
           <section className="min-w-0 space-y-6">
             {/* Prompt */}
