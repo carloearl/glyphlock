@@ -79,9 +79,11 @@ export default function GlyphBotPrimeCard({
   }, [fit, scale]);
 
   // Commands: a tap on a node runs the page's action instead of the CSS panel.
+  // The page may pass a new commands object each render; the listener reads cmdRef.
+  const hasCommands = Boolean(commands);
   useEffect(() => {
     const root = host.current;
-    if (!root || !commands) return undefined;
+    if (!root || !hasCommands) return undefined;
     const names = commandLabels || {};
     for (const [sel, name] of NODE_COMMANDS) {
       const node = root.querySelector(sel);
@@ -120,7 +122,7 @@ export default function GlyphBotPrimeCard({
       clearTimeout(pulseTimer);
       root.removeEventListener("click", onClick, true);
     };
-  }, [commands, commandLabels]);
+  }, [hasCommands, commandLabels]);
 
   // Live tilt: pointer on desktop, motion sensor on phones. Off for reduced motion.
   useEffect(() => {
