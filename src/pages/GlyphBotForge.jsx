@@ -145,19 +145,18 @@ const STATUS_TEXT = { pass: "Pass", warn: "Check", fail: "Fail" };
 
 // GlyphBot's card nodes run the forge (wired in GlyphBotPrimeCard.jsx).
 const CARD_COMMAND_LABELS = {
-  strike: "Strike: forge it",
-  rift: "Rift: surprise me",
-  aegis: "Aegis: auto-fix",
-  mirror: "Mirror: snap the vibe",
-  ascend: "Ascend: AI forge",
+  strike: "FORGE IT",
+  rift: "SURPRISE ME",
+  aegis: "AUTO-FIX",
+  mirror: "SNAP THE VIBE",
 };
 const CARD_LEGEND = [
-  ["Strike", "forges it"],
-  ["Rift", "surprises you"],
-  ["Aegis", "fixes it"],
-  ["Mirror", "snaps the vibe"],
-  ["Ascend", "AI forge"],
-  ["Core", "flips to the lore"],
+  ["Strike", "forge it"],
+  ["Rift", "surprise me"],
+  ["Aegis", "auto-fix"],
+  ["Mirror", "snap the vibe"],
+  ["Ascend", "climb to Omega"],
+  ["Core", "flip to the lore"],
 ];
 
 export default function GlyphBotForge() {
@@ -216,6 +215,22 @@ export default function GlyphBotForge() {
       setPhase(p);
       await sleep(target > 8 ? 110 : 150);
     }
+  }, []);
+
+  // On arrival GlyphBot climbs from Void to the tier the starter build earned.
+  useEffect(() => {
+    if (shared) return undefined;
+    const target = audit(spec).tier.phase;
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setPhase(target);
+      return undefined;
+    }
+    const run = ++forgeRun.current;
+    const t = setTimeout(() => animateClimb(run, target), 700);
+    return () => clearTimeout(t);
+    // Runs once on load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const forgeLocal = useCallback(async (text) => {
@@ -401,21 +416,17 @@ Rules:
     notify(ok ? "Share link copied" : "Couldn't copy the link");
   };
 
-  // Commands GlyphBot's own nodes run. Recreated each render, read through a ref in the card.
-  const askForPrompt = () => {
-    const box = document.getElementById("forge-prompt");
-    if (box) {
-      box.scrollIntoView({ behavior: "smooth", block: "center" });
-      box.focus({ preventScroll: true });
-    }
-    notify("Tell GlyphBot what to build");
-  };
+  // Actions inside GlyphBot's panels. Recreated each render, read through a ref in the card.
+  // Strike with an empty prompt forges one of the examples, so the page never jumps away.
   const cardCommands = {
-    strike: () => (prompt.trim() ? forgeLocal(prompt) : askForPrompt()),
+    strike: () => {
+      const text = prompt.trim() || EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)];
+      if (!prompt.trim()) setPrompt(text);
+      forgeLocal(text);
+    },
     rift: remix,
     aegis: autoFix,
     mirror: () => photoInput.current && photoInput.current.click(),
-    ascend: () => (prompt.trim() ? forgeAi() : askForPrompt()),
   };
 
   const deviceWidth = DEVICES.find((d) => d.id === device)?.width;
@@ -451,6 +462,7 @@ Rules:
           fit
           commands={cardCommands}
           commandLabels={CARD_COMMAND_LABELS}
+          onPhase={setPhase}
           className="flex w-full max-w-3xl justify-center"
         />
         <div className="mt-4 w-full max-w-md text-center" aria-live="polite">
@@ -491,7 +503,7 @@ Rules:
             </span>
           </h1>
           <p className="mt-3 text-base text-slate-400 sm:text-lg">
-            Type a button, toggle, loader or card in plain words, or tap GlyphBot's nodes above. He builds it live,
+            Type a button, toggle, loader or card in plain words, or tap a node on GlyphBot above to open its panel. He builds it live,
             hands you HTML, CSS, JavaScript and React, then audits it. The better the build, the higher he ascends.
           </p>
         </header>
