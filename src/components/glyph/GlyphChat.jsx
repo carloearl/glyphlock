@@ -93,6 +93,9 @@ const CARD_CSS = `
 .gcd-a a { color: color-mix(in srgb, var(--gcc) 55%, #fff); text-decoration: underline; text-underline-offset: 2px; }
 .gcd-dots span { width: 6px; height: 6px; border-radius: 99px; display: inline-block; background: var(--gcc); animation: gcd-dot 1s ease-in-out infinite; }
 .gcd-dots span:nth-child(2) { animation-delay: .15s; } .gcd-dots span:nth-child(3) { animation-delay: .3s; }
+.gcd-face { animation: gcd-face-in .35s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes gcd-face-in { from { opacity: 0; transform: scale(.96); } }
+@media (prefers-reduced-motion: reduce) { .gcd-face { animation: none; } }
 .gcd-caret { display: inline-block; width: 6px; height: 15px; margin-left: 2px; vertical-align: middle; border-radius: 1px; background: var(--gcc); animation: gcd-blink 1s steps(1) infinite; }
 .gcd-in { background: rgba(6,7,11,.82); border: 1px solid color-mix(in srgb, var(--gcc) 40%, transparent); border-radius: 99px; transition: border-color .2s, box-shadow .2s; }
 .gcd-in:focus-within { border-color: var(--gcc); box-shadow: 0 0 0 3px color-mix(in srgb, var(--gcc) 22%, transparent); }
@@ -327,11 +330,7 @@ export default function GlyphChat({ onClose, onGrab, onPhase, pagePath = "", pag
         aria-live="polite"
       >
         {empty ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="h-full min-h-[300px] flex flex-col justify-center"
-          >
+          <div className="gcd-face h-full min-h-[300px] flex flex-col justify-center">
             {/* The card's bay: three nodes, the emblem, three nodes. */}
             <div className="grid items-center" style={{ gridTemplateColumns: "64px 1fr 64px" }}>
               <div className="flex flex-col items-center gap-5">
@@ -347,7 +346,7 @@ export default function GlyphChat({ onClose, onGrab, onPhase, pagePath = "", pag
             <p className="mt-4 text-center gcd-say text-[13px] text-[color:var(--dim)]">
               Tap a node, or ask me anything about GlyphLock.
             </p>
-          </motion.div>
+          </div>
         ) : (
           <div className="space-y-3 py-3">
             {messages.map((msg) => (
