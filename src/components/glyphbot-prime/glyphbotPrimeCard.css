@@ -1,5 +1,5 @@
 /* GLYPHBOT PRIME: Singularity Edition. Card styles, all scoped under .gb.
-   The card needs no JavaScript; the UI Forge page drives its phase radios.
+   The card works without JavaScript; GlyphBotPrimeCard.jsx adds fit-to-screen, live tilt and node commands.
    The whole card scales from one value: .gb { font-size }. */
 
 @property --gbc { syntax: "<color>"; inherits: true; initial-value: #8b93a7; }
