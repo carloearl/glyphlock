@@ -299,7 +299,7 @@ From venue register and payouts to AI features and QR tooling — built and main
           <div className="flex flex-wrap justify-center gap-4">
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
               <Link
-                to={createPageUrl('Consultation')}
+                to={`${createPageUrl('Consultation')}?mode=build`}
                 className="inline-flex items-center gap-2 px-8 py-4 font-black text-sm uppercase tracking-wide text-black transition-all duration-300"
                 style={{
                   background: 'linear-gradient(135deg, #06b6d4, #4f46e5)',

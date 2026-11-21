@@ -75,7 +75,7 @@ export default function TechServicesPreview() {
       </div>
 
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-        <Link to={createPageUrl("Consultation")} className="w-full sm:w-auto">
+        <Link to={`${createPageUrl("Consultation")}?mode=build`} className="w-full sm:w-auto">
           <Button size="lg" className="w-full bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white font-bold">
             Start a Project
           </Button>

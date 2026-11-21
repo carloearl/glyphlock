@@ -486,7 +486,7 @@ function CommandCTA() {
             </p>
           </div>
           <div className="flex min-w-[240px] flex-col gap-3">
-            <Link to={createPageUrl('Consultation')} className="gl-energy-button group inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-50/80 bg-cyan-200 px-7 py-4 font-black text-slate-950 shadow-[0_0_34px_rgba(34,211,238,.60),0_0_90px_rgba(34,211,238,.22)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] hover:bg-white hover:shadow-[0_0_60px_rgba(255,255,255,.75),0_0_130px_rgba(34,211,238,.35)]">
+            <Link to={`${createPageUrl('Consultation')}?mode=build`} className="gl-energy-button group inline-flex items-center justify-center gap-2 rounded-xl border border-cyan-50/80 bg-cyan-200 px-7 py-4 font-black text-slate-950 shadow-[0_0_34px_rgba(34,211,238,.60),0_0_90px_rgba(34,211,238,.22)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] hover:bg-white hover:shadow-[0_0_60px_rgba(255,255,255,.75),0_0_130px_rgba(34,211,238,.35)]">
               <Sparkles className="h-4 w-4" /> START A PROJECT <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
             <Link to={createPageUrl('Services')} className="gl-energy-button inline-flex items-center justify-center gap-2 rounded-xl border border-blue-300/[.45] bg-blue-500/[.12] px-7 py-4 font-black text-blue-100 shadow-[0_0_25px_rgba(59,130,246,.22)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.03] hover:border-blue-200/70 hover:bg-blue-400/20 hover:shadow-[0_0_48px_rgba(59,130,246,.48)]">

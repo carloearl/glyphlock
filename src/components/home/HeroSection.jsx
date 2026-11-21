@@ -66,7 +66,7 @@ export default function HeroSection() {
             className="mt-8 flex flex-wrap gap-3"
           >
             <Link
-              to={createPageUrl('Consultation')}
+              to={`${createPageUrl('Consultation')}?mode=build`}
               className="gl-energy-button group inline-flex items-center gap-2 rounded-xl border border-white/[.85] bg-cyan-100 px-7 py-4 font-black text-slate-950 shadow-[0_0_34px_rgba(34,211,238,.68),0_0_100px_rgba(34,211,238,.25)] transition-all duration-300 hover:-translate-y-1 hover:scale-[1.045] hover:bg-white hover:shadow-[0_0_60px_rgba(255,255,255,.82),0_0_140px_rgba(34,211,238,.38)]"
             >
               <Sparkles className="h-4 w-4" /> BUILD WITH GLYPHLOCK <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />

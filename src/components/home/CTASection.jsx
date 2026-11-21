@@ -28,7 +28,7 @@ export default function CTASection() {
       alert('Please enter a valid email address');
       return;
     }
-    window.location.href = createPageUrl("Consultation") + `?email=${encodeURIComponent(email)}`;
+    window.location.href = createPageUrl("Consultation") + `?mode=build&email=${encodeURIComponent(email)}`;
   };
 
   const benefits = [
