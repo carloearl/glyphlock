@@ -229,8 +229,6 @@ export default function GlyphBotForge() {
     const run = ++forgeRun.current;
     const t = setTimeout(() => animateClimb(run, target), 700);
     return () => clearTimeout(t);
-    // Runs once on load.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const forgeLocal = useCallback(async (text) => {
