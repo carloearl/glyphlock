@@ -97,7 +97,6 @@ export default function GlyphChat({ onClose, pagePath = "", pageName = "", initi
     } else if (window.matchMedia?.("(min-width: 768px)").matches) {
       inputRef.current?.focus();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const visible = showAllMessages || messages.length <= 50 ? messages : messages.slice(-50);
