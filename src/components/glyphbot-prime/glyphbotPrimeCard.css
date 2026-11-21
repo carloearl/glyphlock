@@ -1,0 +1,496 @@
+/* GLYPHBOT PRIME: Singularity Edition. Card styles, all scoped under .gb.
+   The card needs no JavaScript; the UI Forge page drives its phase radios.
+   The whole card scales from one value: .gb { font-size }. */
+
+@property --gbc { syntax: "<color>"; inherits: true; initial-value: #8b93a7; }
+@property --gbc2 { syntax: "<color>"; inherits: true; initial-value: #3a4152; }
+@property --gblvl { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --gbpct { syntax: "<integer>"; inherits: true; initial-value: 0; }
+@property --gbero { syntax: "<number>"; inherits: true; initial-value: 0; }
+@property --gbomg { syntax: "<number>"; inherits: true; initial-value: 0; }
+
+.gb {
+  --gbink: #e9ecf5;
+  --gbdim: #8d94a8;
+  --gbr: 1.6em;
+  font-size: 10px;
+  position: relative;
+  display: inline-block;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  color: var(--gbink);
+  line-height: 1.3;
+  text-align: left;
+}
+.gb *, .gb *::before, .gb *::after { box-sizing: border-box; }
+.gb svg { width: 1.5em; height: 1.5em; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+.gb .gb-in { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; pointer-events: none; }
+.gb .gb-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ---------- STAGE + PHASE STATE ---------- */
+.gb .gb-stage {
+  position: relative;
+  width: 24em;
+  height: 36em;
+  counter-reset: gbsync var(--gbpct);
+  transition: --gbc .9s ease, --gbc2 .9s ease, --gblvl .9s ease, --gbpct .9s ease, --gbero .9s ease, --gbomg 1.1s ease;
+}
+.gb .gb-stage, .gb #gb-p0:checked ~ .gb-stage {
+  --gbc: #8b93a7; --gbc2: #3a4152; --gblvl: 0; --gbpct: 0; --gbero: 0; --gbomg: 0; --gbamp: 1.2;
+  --gbnum: "PH 00"; --gbpn: "VOID"; --gbtag: "THE SEED"; --gbsym: "○"; --gbtime: "DORMANT"; --gbswap: gb-sa; --gbwave: gb-wa;
+  --gbmo1: "SPARK"; --gbmo2: "CRACK"; --gbmo3: "VEIL"; --gbmo4: "GLINT";
+  --gbst1: "DMG 12"; --gbst2: "RANGE 1M"; --gbst3: "SHIELD 4%"; --gbst4: "REFLECT 2%";
+  --gbshape: polygon(50.0% 26.0%, 53.1% 26.2%, 56.2% 26.8%, 59.2% 27.8%, 62.0% 29.2%, 64.6% 31.0%, 67.0% 33.0%, 69.0% 35.4%, 70.8% 38.0%, 72.2% 40.8%, 73.2% 43.8%, 73.8% 46.9%, 74.0% 50.0%, 73.8% 53.1%, 73.2% 56.2%, 72.2% 59.2%, 70.8% 62.0%, 69.0% 64.6%, 67.0% 67.0%, 64.6% 69.0%, 62.0% 70.8%, 59.2% 72.2%, 56.2% 73.2%, 53.1% 73.8%, 50.0% 74.0%, 46.9% 73.8%, 43.8% 73.2%, 40.8% 72.2%, 38.0% 70.8%, 35.4% 69.0%, 33.0% 67.0%, 31.0% 64.6%, 29.2% 62.0%, 27.8% 59.2%, 26.8% 56.2%, 26.2% 53.1%, 26.0% 50.0%, 26.2% 46.9%, 26.8% 43.8%, 27.8% 40.8%, 29.2% 38.0%, 31.0% 35.4%, 33.0% 33.0%, 35.4% 31.0%, 38.0% 29.2%, 40.8% 27.8%, 43.8% 26.8%, 46.9% 26.2%);
+  --gbtex: radial-gradient(circle at 18% 28%, rgba(255,255,255,.55) 0 1px, transparent 1.6px), radial-gradient(circle at 78% 18%, rgba(255,255,255,.45) 0 1px, transparent 1.6px), radial-gradient(circle at 64% 74%, rgba(255,255,255,.4) 0 1px, transparent 1.6px), radial-gradient(circle at 28% 84%, rgba(255,255,255,.35) 0 1px, transparent 1.6px), radial-gradient(circle at 88% 58%, rgba(255,255,255,.45) 0 1px, transparent 1.6px), radial-gradient(circle at 42% 12%, rgba(255,255,255,.3) 0 1px, transparent 1.6px);
+}
+.gb #gb-p1:checked ~ .gb-stage {
+  --gbc: #f4f6ff; --gbc2: #9fb3ff; --gblvl: 1; --gbpct: 8; --gbero: 0.1; --gbomg: 0; --gbamp: 1.6;
+  --gbnum: "PH 01"; --gbpn: "WHITE"; --gbtag: "FIRST LIGHT"; --gbsym: "✦"; --gbtime: "STIRRING"; --gbswap: gb-sb; --gbwave: gb-wb;
+  --gbmo1: "FLASH"; --gbmo2: "SLIT"; --gbmo3: "GLOW"; --gbmo4: "ECHO";
+  --gbst1: "DMG 40"; --gbst2: "RANGE 4M"; --gbst3: "SHIELD 9%"; --gbst4: "REFLECT 6%";
+  --gbshape: polygon(50.0% 0.0%, 51.5% 6.8%, 53.1% 13.6%, 54.6% 20.4%, 56.1% 27.2%, 57.7% 34.0%, 59.2% 40.8%, 66.0% 42.3%, 72.8% 43.9%, 79.6% 45.4%, 86.4% 46.9%, 93.2% 48.5%, 100.0% 50.0%, 93.2% 51.5%, 86.4% 53.1%, 79.6% 54.6%, 72.8% 56.1%, 66.0% 57.7%, 59.2% 59.2%, 57.7% 66.0%, 56.1% 72.8%, 54.6% 79.6%, 53.1% 86.4%, 51.5% 93.2%, 50.0% 100.0%, 48.5% 93.2%, 46.9% 86.4%, 45.4% 79.6%, 43.9% 72.8%, 42.3% 66.0%, 40.8% 59.2%, 34.0% 57.7%, 27.2% 56.1%, 20.4% 54.6%, 13.6% 53.1%, 6.8% 51.5%, 0.0% 50.0%, 6.8% 48.5%, 13.6% 46.9%, 20.4% 45.4%, 27.2% 43.9%, 34.0% 42.3%, 40.8% 40.8%, 42.3% 34.0%, 43.9% 27.2%, 45.4% 20.4%, 46.9% 13.6%, 48.5% 6.8%);
+  --gbtex: repeating-conic-gradient(from 0deg at 50% 46%, rgba(244,246,255,0.11) 0 2deg, transparent 2deg 15deg);
+}
+.gb #gb-p2:checked ~ .gb-stage {
+  --gbc: #ff4646; --gbc2: #7a1020; --gblvl: 2; --gbpct: 17; --gbero: 0.18; --gbomg: 0; --gbamp: 2.0;
+  --gbnum: "PH 02"; --gbpn: "ALPHA"; --gbtag: "KINETIC"; --gbsym: "α"; --gbtime: "STIRRING"; --gbswap: gb-sa; --gbwave: gb-wa;
+  --gbmo1: "IGNITE"; --gbmo2: "TEAR"; --gbmo3: "PLATE"; --gbmo4: "REBOUND";
+  --gbst1: "DMG 95"; --gbst2: "RANGE 9M"; --gbst3: "SHIELD 15%"; --gbst4: "REFLECT 11%";
+  --gbshape: polygon(50.0% -2.0%, 52.8% 2.9%, 55.6% 7.8%, 58.4% 12.6%, 61.3% 17.5%, 64.1% 22.4%, 66.9% 27.2%, 69.7% 32.1%, 72.5% 37.0%, 75.3% 41.9%, 78.1% 46.8%, 81.0% 51.6%, 83.8% 56.5%, 86.6% 61.4%, 89.4% 66.2%, 92.2% 71.1%, 95.0% 76.0%, 89.4% 76.0%, 83.8% 76.0%, 78.1% 76.0%, 72.5% 76.0%, 66.9% 76.0%, 61.3% 76.0%, 55.6% 76.0%, 50.0% 76.0%, 44.4% 76.0%, 38.7% 76.0%, 33.1% 76.0%, 27.5% 76.0%, 21.9% 76.0%, 16.2% 76.0%, 10.6% 76.0%, 5.0% 76.0%, 7.8% 71.1%, 10.6% 66.2%, 13.4% 61.4%, 16.2% 56.5%, 19.0% 51.6%, 21.9% 46.8%, 24.7% 41.9%, 27.5% 37.0%, 30.3% 32.1%, 33.1% 27.2%, 35.9% 22.4%, 38.7% 17.5%, 41.6% 12.6%, 44.4% 7.8%, 47.2% 2.9%);
+  --gbtex: repeating-linear-gradient(60deg, rgba(255,70,70,0.17) 0 1px, transparent 1px 1.4em), repeating-linear-gradient(-60deg, rgba(255,70,70,0.17) 0 1px, transparent 1px 1.4em);
+}
+.gb #gb-p3:checked ~ .gb-stage {
+  --gbc: #ff8a1f; --gbc2: #7a3708; --gblvl: 3; --gbpct: 25; --gbero: 0.26; --gbomg: 0; --gbamp: 2.3;
+  --gbnum: "PH 03"; --gbpn: "BETA"; --gbtag: "HEAT"; --gbsym: "β"; --gbtime: "STIRRING"; --gbswap: gb-sb; --gbwave: gb-wb;
+  --gbmo1: "BLAZE"; --gbmo2: "SPLIT"; --gbmo3: "BULWARK"; --gbmo4: "RETURN";
+  --gbst1: "DMG 160"; --gbst2: "RANGE 15M"; --gbst3: "SHIELD 22%"; --gbst4: "REFLECT 17%";
+  --gbshape: polygon(50.0% 0.0%, 54.2% 4.2%, 58.3% 8.3%, 62.5% 12.5%, 66.7% 16.7%, 70.8% 20.8%, 75.0% 25.0%, 79.2% 29.2%, 83.3% 33.3%, 87.5% 37.5%, 91.7% 41.7%, 95.8% 45.8%, 100.0% 50.0%, 95.8% 54.2%, 91.7% 58.3%, 87.5% 62.5%, 83.3% 66.7%, 79.2% 70.8%, 75.0% 75.0%, 70.8% 79.2%, 66.7% 83.3%, 62.5% 87.5%, 58.3% 91.7%, 54.2% 95.8%, 50.0% 100.0%, 45.8% 95.8%, 41.7% 91.7%, 37.5% 87.5%, 33.3% 83.3%, 29.2% 79.2%, 25.0% 75.0%, 20.8% 70.8%, 16.7% 66.7%, 12.5% 62.5%, 8.3% 58.3%, 4.2% 54.2%, 0.0% 50.0%, 4.2% 45.8%, 8.3% 41.7%, 12.5% 37.5%, 16.7% 33.3%, 20.8% 29.2%, 25.0% 25.0%, 29.2% 20.8%, 33.3% 16.7%, 37.5% 12.5%, 41.7% 8.3%, 45.8% 4.2%);
+  --gbtex: repeating-radial-gradient(circle at 50% 118%, rgba(255,138,31,0.22) 0 1px, transparent 1.5px 1.1em);
+}
+.gb #gb-p4:checked ~ .gb-stage {
+  --gbc: #ffd60a; --gbc2: #6e5a00; --gblvl: 4; --gbpct: 33; --gbero: 0.34; --gbomg: 0; --gbamp: 2.6;
+  --gbnum: "PH 04"; --gbpn: "GAMMA"; --gbtag: "SIGHT"; --gbsym: "γ"; --gbtime: "ACCELERATING"; --gbswap: gb-sa; --gbwave: gb-wa;
+  --gbmo1: "PIERCE"; --gbmo2: "GATE"; --gbmo3: "LATTICE"; --gbmo4: "PRISM";
+  --gbst1: "DMG 240"; --gbst2: "RANGE 24M"; --gbst3: "SHIELD 30%"; --gbst4: "REFLECT 24%";
+  --gbshape: polygon(50.0% 0.0%, 55.3% 3.8%, 60.6% 7.7%, 65.9% 11.5%, 71.1% 15.4%, 76.4% 19.2%, 81.7% 23.0%, 87.0% 26.9%, 92.3% 30.7%, 97.6% 34.5%, 95.7% 40.1%, 93.9% 45.7%, 92.1% 51.3%, 90.3% 56.9%, 88.5% 62.5%, 86.7% 68.1%, 84.8% 73.7%, 83.0% 79.3%, 81.2% 84.9%, 79.4% 90.5%, 72.9% 90.5%, 66.3% 90.5%, 59.8% 90.5%, 53.3% 90.5%, 46.7% 90.5%, 40.2% 90.5%, 33.7% 90.5%, 27.1% 90.5%, 20.6% 90.5%, 18.8% 84.9%, 17.0% 79.3%, 15.2% 73.7%, 13.3% 68.1%, 11.5% 62.5%, 9.7% 56.9%, 7.9% 51.3%, 6.1% 45.7%, 4.3% 40.1%, 2.4% 34.5%, 7.2% 31.1%, 12.0% 27.6%, 16.7% 24.2%, 21.5% 20.7%, 26.2% 17.3%, 31.0% 13.8%, 35.7% 10.4%, 40.5% 6.9%, 45.2% 3.5%);
+  --gbtex: linear-gradient(rgba(255,214,10,0.15) 1px, transparent 1px) 0 0 / 1.6em 1.6em, linear-gradient(90deg, rgba(255,214,10,0.15) 1px, transparent 1px) 0 0 / 1.6em 1.6em;
+}
+.gb #gb-p5:checked ~ .gb-stage {
+  --gbc: #2ee87a; --gbc2: #0b5a2e; --gblvl: 5; --gbpct: 42; --gbero: 0.42; --gbomg: 0; --gbamp: 2.9;
+  --gbnum: "PH 05"; --gbpn: "DELTA"; --gbtag: "INTEGRATION"; --gbsym: "δ"; --gbtime: "ACCELERATING"; --gbswap: gb-sb; --gbwave: gb-wb;
+  --gbmo1: "SURGE"; --gbmo2: "CORRIDOR"; --gbmo3: "KEEP"; --gbmo4: "FACET";
+  --gbst1: "DMG 330"; --gbst2: "RANGE 36M"; --gbst3: "SHIELD 38%"; --gbst4: "REFLECT 32%";
+  --gbshape: polygon(50.0% 0.0%, 55.4% 3.1%, 60.8% 6.3%, 66.2% 9.4%, 71.7% 12.5%, 77.1% 15.6%, 82.5% 18.8%, 87.9% 21.9%, 93.3% 25.0%, 93.3% 31.3%, 93.3% 37.5%, 93.3% 43.8%, 93.3% 50.0%, 93.3% 56.2%, 93.3% 62.5%, 93.3% 68.8%, 93.3% 75.0%, 87.9% 78.1%, 82.5% 81.2%, 77.1% 84.4%, 71.7% 87.5%, 66.2% 90.6%, 60.8% 93.8%, 55.4% 96.9%, 50.0% 100.0%, 44.6% 96.9%, 39.2% 93.8%, 33.8% 90.6%, 28.3% 87.5%, 22.9% 84.4%, 17.5% 81.2%, 12.1% 78.1%, 6.7% 75.0%, 6.7% 68.8%, 6.7% 62.5%, 6.7% 56.2%, 6.7% 50.0%, 6.7% 43.8%, 6.7% 37.5%, 6.7% 31.2%, 6.7% 25.0%, 12.1% 21.9%, 17.5% 18.7%, 22.9% 15.6%, 28.3% 12.5%, 33.8% 9.4%, 39.2% 6.2%, 44.6% 3.1%);
+  --gbtex: repeating-linear-gradient(0deg, rgba(46,232,122,0.12) 0 1px, transparent 1px 1.3em), repeating-linear-gradient(60deg, rgba(46,232,122,0.12) 0 1px, transparent 1px 1.3em), repeating-linear-gradient(120deg, rgba(46,232,122,0.12) 0 1px, transparent 1px 1.3em);
+}
+.gb #gb-p6:checked ~ .gb-stage {
+  --gbc: #22e6e6; --gbc2: #0a5560; --gblvl: 6; --gbpct: 50; --gbero: 0.5; --gbomg: 0; --gbamp: 3.2;
+  --gbnum: "PH 06"; --gbpn: "EPSILON"; --gbtag: "LOAD-BEARING"; --gbsym: "ε"; --gbtime: "ACCELERATING"; --gbswap: gb-sa; --gbwave: gb-wa;
+  --gbmo1: "QUAKE"; --gbmo2: "SPAN"; --gbmo3: "PILLAR"; --gbmo4: "PARALLAX";
+  --gbst1: "DMG 430"; --gbst2: "RANGE 50M"; --gbst3: "SHIELD 46%"; --gbst4: "REFLECT 40%";
+  --gbshape: polygon(50.0% 0.0%, 56.5% 3.1%, 63.0% 6.3%, 69.5% 9.4%, 76.1% 12.6%, 82.6% 15.7%, 89.1% 18.8%, 90.5% 24.9%, 91.9% 30.9%, 93.2% 37.0%, 94.6% 43.0%, 96.0% 49.0%, 97.4% 55.1%, 98.7% 61.1%, 94.9% 66.0%, 91.0% 70.8%, 87.2% 75.7%, 83.3% 80.5%, 79.4% 85.4%, 75.6% 90.2%, 71.7% 95.0%, 65.5% 95.0%, 59.3% 95.0%, 53.1% 95.0%, 46.9% 95.0%, 40.7% 95.0%, 34.5% 95.0%, 28.3% 95.0%, 24.4% 90.2%, 20.6% 85.4%, 16.7% 80.5%, 12.8% 75.7%, 9.0% 70.8%, 5.1% 66.0%, 1.3% 61.1%, 2.6% 55.1%, 4.0% 49.0%, 5.4% 43.0%, 6.8% 37.0%, 8.1% 30.9%, 9.5% 24.9%, 10.9% 18.8%, 16.5% 16.1%, 22.1% 13.4%, 27.7% 10.8%, 33.2% 8.1%, 38.8% 5.4%, 44.4% 2.7%);
+  --gbtex: repeating-linear-gradient(90deg, rgba(34,230,230,0.2) 0 2px, transparent 2px 2.4em), linear-gradient(0deg, rgba(34,230,230,0.24), transparent 45%);
+}
+.gb #gb-p7:checked ~ .gb-stage {
+  --gbc: #3d86ff; --gbc2: #0d2a6e; --gblvl: 7; --gbpct: 58; --gbero: 0.58; --gbomg: 0; --gbamp: 3.5;
+  --gbnum: "PH 07"; --gbpn: "ZETA"; --gbtag: "THRESHOLD"; --gbsym: "ζ"; --gbtime: "ACCELERATING"; --gbswap: gb-sb; --gbwave: gb-wb;
+  --gbmo1: "BREACH"; --gbmo2: "WARP"; --gbmo3: "BASTION"; --gbmo4: "LOOP";
+  --gbst1: "DMG 540"; --gbst2: "RANGE 70M"; --gbst3: "SHIELD 54%"; --gbst4: "REFLECT 49%";
+  --gbshape: polygon(69.1% 3.8%, 73.6% 8.3%, 78.2% 12.8%, 82.7% 17.3%, 87.2% 21.8%, 91.7% 26.4%, 96.2% 30.9%, 96.2% 37.2%, 96.2% 43.6%, 96.2% 50.0%, 96.2% 56.4%, 96.2% 62.8%, 96.2% 69.1%, 91.7% 73.6%, 87.2% 78.2%, 82.7% 82.7%, 78.2% 87.2%, 73.6% 91.7%, 69.1% 96.2%, 62.8% 96.2%, 56.4% 96.2%, 50.0% 96.2%, 43.6% 96.2%, 37.2% 96.2%, 30.9% 96.2%, 26.4% 91.7%, 21.8% 87.2%, 17.3% 82.7%, 12.8% 78.2%, 8.3% 73.6%, 3.8% 69.1%, 3.8% 62.8%, 3.8% 56.4%, 3.8% 50.0%, 3.8% 43.6%, 3.8% 37.2%, 3.8% 30.9%, 8.3% 26.4%, 12.8% 21.8%, 17.3% 17.3%, 21.8% 12.8%, 26.4% 8.3%, 30.9% 3.8%, 37.2% 3.8%, 43.6% 3.8%, 50.0% 3.8%, 56.4% 3.8%, 62.8% 3.8%);
+  --gbtex: repeating-radial-gradient(circle at 50% 46%, rgba(61,134,255,0.2) 0 1px, transparent 1.5px 1.5em);
+}
+.gb #gb-p8:checked ~ .gb-stage {
+  --gbc: #6a5cff; --gbc2: #1d1670; --gblvl: 8; --gbpct: 67; --gbero: 0.66; --gbomg: 0; --gbamp: 3.8;
+  --gbnum: "PH 08"; --gbpn: "ETA"; --gbtag: "EVENT HORIZON"; --gbsym: "η"; --gbtime: "REWRITING"; --gbswap: gb-sa; --gbwave: gb-wa;
+  --gbmo1: "LENS"; --gbmo2: "FOLD"; --gbmo3: "HORIZON"; --gbmo4: "REWIND";
+  --gbst1: "DMG 660"; --gbst2: "RANGE 95M"; --gbst3: "SHIELD 62%"; --gbst4: "REFLECT 58%";
+  --gbshape: polygon(50.0% 0.0%, 53.6% 6.2%, 57.2% 12.4%, 60.9% 18.7%, 64.5% 24.9%, 71.7% 24.9%, 78.9% 24.9%, 86.1% 25.0%, 93.3% 25.0%, 89.7% 31.3%, 86.2% 37.5%, 82.6% 43.8%, 79.0% 50.0%, 82.6% 56.2%, 86.2% 62.5%, 89.7% 68.8%, 93.3% 75.0%, 86.1% 75.0%, 78.9% 75.1%, 71.7% 75.1%, 64.5% 75.1%, 60.9% 81.3%, 57.2% 87.6%, 53.6% 93.8%, 50.0% 100.0%, 46.4% 93.8%, 42.8% 87.6%, 39.1% 81.3%, 35.5% 75.1%, 28.3% 75.1%, 21.1% 75.1%, 13.9% 75.0%, 6.7% 75.0%, 10.3% 68.8%, 13.8% 62.5%, 17.4% 56.2%, 21.0% 50.0%, 17.4% 43.8%, 13.8% 37.5%, 10.3% 31.2%, 6.7% 25.0%, 13.9% 25.0%, 21.1% 24.9%, 28.3% 24.9%, 35.5% 24.9%, 39.1% 18.7%, 42.7% 12.4%, 46.4% 6.2%);
+  --gbtex: radial-gradient(circle at 50% 46%, #000 0 13%, rgba(106,92,255,0.45) 14.5%, transparent 30%), repeating-conic-gradient(from 0deg at 50% 46%, rgba(106,92,255,0.13) 0 6deg, transparent 6deg 12deg);
+}
+.gb #gb-p9:checked ~ .gb-stage {
+  --gbc: #a66bff; --gbc2: #3c1678; --gblvl: 9; --gbpct: 75; --gbero: 0.74; --gbomg: 0; --gbamp: 4.1;
+  --gbnum: "PH 09"; --gbpn: "THETA"; --gbtag: "SINGULARITY"; --gbsym: "θ"; --gbtime: "REWRITING"; --gbswap: gb-sb; --gbwave: gb-wb;
+  --gbmo1: "COLLAPSE"; --gbmo2: "SPIRAL"; --gbmo3: "ANCHOR"; --gbmo4: "PARADOX";
+  --gbst1: "DMG 790"; --gbst2: "RANGE 130M"; --gbst3: "SHIELD 71%"; --gbst4: "REFLECT 67%";
+  --gbshape: polygon(50.0% 0.0%, 55.3% 8.8%, 60.5% 17.7%, 69.9% 13.6%, 79.4% 9.5%, 78.8% 16.4%, 78.1% 23.2%, 77.5% 30.0%, 87.5% 32.3%, 97.6% 34.5%, 93.0% 39.7%, 88.5% 44.8%, 84.0% 50.0%, 90.8% 57.7%, 97.6% 65.5%, 87.5% 67.7%, 77.5% 70.0%, 78.1% 76.8%, 78.8% 83.6%, 79.4% 90.5%, 69.9% 86.4%, 60.5% 82.3%, 57.0% 88.2%, 53.5% 94.1%, 50.0% 100.0%, 44.7% 91.2%, 39.5% 82.3%, 30.1% 86.4%, 20.6% 90.5%, 21.2% 83.6%, 21.9% 76.8%, 22.5% 70.0%, 12.5% 67.7%, 2.4% 65.5%, 7.0% 60.3%, 11.5% 55.2%, 16.0% 50.0%, 9.2% 42.3%, 2.4% 34.5%, 12.5% 32.3%, 22.5% 30.0%, 21.9% 23.2%, 21.2% 16.4%, 20.6% 9.5%, 30.1% 13.6%, 39.5% 17.7%, 43.0% 11.8%, 46.5% 5.9%);
+  --gbtex: repeating-conic-gradient(from 0deg at 50% 46%, rgba(166,107,255,0.2) 0 10deg, transparent 10deg 30deg), repeating-radial-gradient(circle at 50% 46%, transparent 0 .8em, rgba(166,107,255,0.1) .8em 1em);
+}
+.gb #gb-p10:checked ~ .gb-stage {
+  --gbc: #b23cff; --gbc2: #3e0a66; --gblvl: 10; --gbpct: 83; --gbero: 0.82; --gbomg: 0; --gbamp: 4.4;
+  --gbnum: "PH 10"; --gbpn: "IOTA"; --gbtag: "SUPERNOVA"; --gbsym: "ι"; --gbtime: "REWRITING"; --gbswap: gb-sa; --gbwave: gb-wa;
+  --gbmo1: "NOVA"; --gbmo2: "BREACH"; --gbmo3: "CORONA"; --gbmo4: "HALO";
+  --gbst1: "DMG 930"; --gbst2: "RANGE 180M"; --gbst3: "SHIELD 80%"; --gbst4: "REFLECT 77%";
+  --gbshape: polygon(50.0% -2.0%, 52.6% 14.3%, 55.2% 30.7%, 65.6% 17.8%, 76.0% 5.0%, 70.1% 20.4%, 64.1% 35.9%, 79.6% 29.9%, 95.0% 24.0%, 82.2% 34.4%, 69.3% 44.8%, 85.7% 47.4%, 102.0% 50.0%, 85.7% 52.6%, 69.3% 55.2%, 82.2% 65.6%, 95.0% 76.0%, 79.6% 70.1%, 64.1% 64.1%, 70.1% 79.6%, 76.0% 95.0%, 65.6% 82.2%, 55.2% 69.3%, 52.6% 85.7%, 50.0% 102.0%, 47.4% 85.7%, 44.8% 69.3%, 34.4% 82.2%, 24.0% 95.0%, 29.9% 79.6%, 35.9% 64.1%, 20.4% 70.1%, 5.0% 76.0%, 17.8% 65.6%, 30.7% 55.2%, 14.3% 52.6%, -2.0% 50.0%, 14.3% 47.4%, 30.7% 44.8%, 17.8% 34.4%, 5.0% 24.0%, 20.4% 29.9%, 35.9% 35.9%, 29.9% 20.4%, 24.0% 5.0%, 34.4% 17.8%, 44.8% 30.7%, 47.4% 14.3%);
+  --gbtex: radial-gradient(circle at 50% 46%, rgba(255,255,255,.4), transparent 22%), repeating-conic-gradient(from 3deg at 50% 46%, rgba(178,60,255,0.32) 0 1deg, transparent 1deg 7deg);
+}
+.gb #gb-p11:checked ~ .gb-stage {
+  --gbc: #c9b8ff; --gbc2: #3a00ff; --gblvl: 11; --gbpct: 92; --gbero: 0.92; --gbomg: 0; --gbamp: 4.8;
+  --gbnum: "PH 11"; --gbpn: "KAPPA"; --gbtag: "BLACKLIGHT"; --gbsym: "κ"; --gbtime: "BREAKING"; --gbswap: gb-sb; --gbwave: gb-wb;
+  --gbmo1: "UV LANCE"; --gbmo2: "PHASE"; --gbmo3: "NULL FIELD"; --gbmo4: "INVERT";
+  --gbst1: "DMG 1080"; --gbst2: "RANGE 250M"; --gbst3: "SHIELD 90%"; --gbst4: "REFLECT 88%";
+  --gbshape: polygon(50.0% 0.0%, 57.6% 11.7%, 63.4% 7.8%, 69.1% 3.8%, 71.7% 17.6%, 78.5% 16.1%, 85.4% 14.6%, 82.4% 28.3%, 89.3% 29.6%, 96.2% 30.9%, 88.3% 42.4%, 94.1% 46.2%, 100.0% 50.0%, 88.3% 57.6%, 92.2% 63.4%, 96.2% 69.1%, 82.4% 71.7%, 83.9% 78.5%, 85.4% 85.4%, 71.7% 82.4%, 70.4% 89.3%, 69.1% 96.2%, 57.6% 88.3%, 53.8% 94.1%, 50.0% 100.0%, 42.4% 88.3%, 36.6% 92.2%, 30.9% 96.2%, 28.3% 82.4%, 21.5% 83.9%, 14.6% 85.4%, 17.6% 71.7%, 10.7% 70.4%, 3.8% 69.1%, 11.7% 57.6%, 5.9% 53.8%, 0.0% 50.0%, 11.7% 42.4%, 7.8% 36.6%, 3.8% 30.9%, 17.6% 28.3%, 16.1% 21.5%, 14.6% 14.6%, 28.3% 17.6%, 29.6% 10.7%, 30.9% 3.8%, 42.4% 11.7%, 46.2% 5.9%);
+  --gbtex: repeating-linear-gradient(0deg, rgba(123,44,255,.22) 0 1px, transparent 1px 3px), radial-gradient(circle at 50% 46%, rgba(58,0,255,.5), transparent 62%);
+}
+.gb #gb-p12:checked ~ .gb-stage {
+  --gbc: #fff4d6; --gbc2: #ffb800; --gblvl: 12; --gbpct: 100; --gbero: 0; --gbomg: 1; --gbamp: 1.0;
+  --gbnum: "PH 12"; --gbpn: "OMEGA"; --gbtag: "GOD EYE"; --gbsym: "Ω"; --gbtime: "FAILED"; --gbswap: gb-sa; --gbwave: gb-wa;
+  --gbmo1: "JUDGMENT"; --gbmo2: "ZERO POINT"; --gbmo3: "ABSOLUTE"; --gbmo4: "OMNI";
+  --gbst1: "DMG ∞"; --gbst2: "RANGE ∞"; --gbst3: "SHIELD 100%"; --gbst4: "REFLECT 100%";
+  --gbshape: polygon(50.0% 4.0%, 56.0% 4.4%, 61.9% 5.6%, 67.6% 7.5%, 73.0% 10.2%, 78.0% 13.5%, 82.5% 17.5%, 86.5% 22.0%, 89.8% 27.0%, 92.5% 32.4%, 94.4% 38.1%, 95.6% 44.0%, 96.0% 50.0%, 95.6% 56.0%, 94.4% 61.9%, 92.5% 67.6%, 89.8% 73.0%, 86.5% 78.0%, 82.5% 82.5%, 78.0% 86.5%, 73.0% 89.8%, 67.6% 92.5%, 61.9% 94.4%, 56.0% 95.6%, 50.0% 96.0%, 44.0% 95.6%, 38.1% 94.4%, 32.4% 92.5%, 27.0% 89.8%, 22.0% 86.5%, 17.5% 82.5%, 13.5% 78.0%, 10.2% 73.0%, 7.5% 67.6%, 5.6% 61.9%, 4.4% 56.0%, 4.0% 50.0%, 4.4% 44.0%, 5.6% 38.1%, 7.5% 32.4%, 10.2% 27.0%, 13.5% 22.0%, 17.5% 17.5%, 22.0% 13.5%, 27.0% 10.2%, 32.4% 7.5%, 38.1% 5.6%, 44.0% 4.4%);
+  --gbtex: repeating-conic-gradient(from 0deg at 50% 46%, rgba(255,214,120,.24) 0 2deg, transparent 2deg 10deg), radial-gradient(circle at 50% 46%, rgba(255,200,90,.38), transparent 56%);
+}
+.gb #gb-fin:checked ~ .gb-stage {
+  --gbc: #d7ddf2; --gbc2: #46506a; --gblvl: 12; --gbpct: 100; --gbero: 0; --gbomg: 0; --gbamp: 0.8;
+  --gbnum: "PH 00"; --gbpn: "VOID"; --gbtag: "RETURN"; --gbsym: "○"; --gbtime: "SUBDUED"; --gbswap: gb-sc; --gbwave: gb-wc;
+  --gbmo1: "AT REST"; --gbmo2: "SEALED"; --gbmo3: "AT REST"; --gbmo4: "STILL";
+  --gbst1: "DMG 0"; --gbst2: "RANGE 0M"; --gbst3: "SHIELD 100%"; --gbst4: "REFLECT 0%";
+  --gbshape: polygon(50.0% 24.0%, 53.4% 24.2%, 56.7% 24.9%, 59.9% 26.0%, 63.0% 27.5%, 65.8% 29.4%, 68.4% 31.6%, 70.6% 34.2%, 72.5% 37.0%, 74.0% 40.1%, 75.1% 43.3%, 75.8% 46.6%, 76.0% 50.0%, 75.8% 53.4%, 75.1% 56.7%, 74.0% 59.9%, 72.5% 63.0%, 70.6% 65.8%, 68.4% 68.4%, 65.8% 70.6%, 63.0% 72.5%, 59.9% 74.0%, 56.7% 75.1%, 53.4% 75.8%, 50.0% 76.0%, 46.6% 75.8%, 43.3% 75.1%, 40.1% 74.0%, 37.0% 72.5%, 34.2% 70.6%, 31.6% 68.4%, 29.4% 65.8%, 27.5% 63.0%, 26.0% 59.9%, 24.9% 56.7%, 24.2% 53.4%, 24.0% 50.0%, 24.2% 46.6%, 24.9% 43.3%, 26.0% 40.1%, 27.5% 37.0%, 29.4% 34.2%, 31.6% 31.6%, 34.2% 29.4%, 37.0% 27.5%, 40.1% 26.0%, 43.3% 24.9%, 46.6% 24.2%);
+  --gbtex: radial-gradient(circle at 50% 46%, rgba(215,221,242,.12), transparent 50%);
+}
+
+/* text bound to phase */
+.gb .gb-v-num::after { content: var(--gbnum); }
+.gb .gb-v-pn::after { content: var(--gbpn); }
+.gb .gb-v-tag::after { content: var(--gbtag); }
+.gb .gb-v-sym::after { content: var(--gbsym); }
+.gb .gb-v-time::after { content: var(--gbtime); }
+.gb .gb-v-sync::after { content: counter(gbsync) "%"; }
+.gb .gb-m1 .gb-v-mo::after { content: var(--gbmo1); } .gb .gb-m1 .gb-v-st::after { content: var(--gbst1); }
+.gb .gb-m2 .gb-v-mo::after { content: var(--gbmo2); } .gb .gb-m2 .gb-v-st::after { content: var(--gbst2); }
+.gb .gb-m3 .gb-v-mo::after { content: var(--gbmo3); } .gb .gb-m3 .gb-v-st::after { content: var(--gbst3); }
+.gb .gb-m4 .gb-v-mo::after { content: var(--gbmo4); } .gb .gb-m4 .gb-v-st::after { content: var(--gbst4); }
+.gb .gb-pnw { animation: var(--gbswap) .6s cubic-bezier(.2,.8,.2,1) both; }
+
+/* ---------- TILT: always floating, leans toward what you press or hover ---------- */
+.gb .gb-tilt { position: absolute; inset: 0; animation: gb-float 7s ease-in-out infinite; }
+.gb .gb-press {
+  position: absolute; inset: 0;
+  perspective: 70em;
+  --gbtx: 0deg; --gbty: 0deg; --gbts: 1;
+  transform: perspective(60em) rotateX(var(--gbtx)) rotateY(var(--gbty)) scale(var(--gbts));
+  transition: transform .35s cubic-bezier(.2,.8,.2,1);
+}
+.gb .gb-press:has(.gb-n-str:active) { --gbtx: 9deg; --gbty: -9deg; }
+.gb .gb-press:has(.gb-n-rft:active) { --gbtx: 9deg; --gbty: 9deg; }
+.gb .gb-press:has(.gb-n-aeg:active) { --gbtx: -9deg; --gbty: -9deg; }
+.gb .gb-press:has(.gb-n-mir:active) { --gbtx: -9deg; --gbty: 9deg; }
+.gb .gb-press:has(.gb-n-ana:active) { --gbty: -11deg; }
+.gb .gb-press:has(.gb-n-asc:active) { --gbty: 11deg; }
+.gb .gb-press:has(.gb-art:active) { --gbts: .96; }
+@media (hover: hover) {
+  .gb .gb-press:has(.gb-head:hover) { --gbtx: 5deg; }
+  .gb .gb-press:has(.gb-foot:hover) { --gbtx: -5deg; }
+  .gb .gb-press:has(.gb-col:first-child:hover) { --gbty: -6deg; }
+  .gb .gb-press:has(.gb-col:last-child:hover) { --gbty: 6deg; }
+  .gb .gb-press:has(.gb-art:hover) { --gbts: 1.02; }
+}
+
+/* ---------- FLIP: each face turns on its own, and swaps visibility at the halfway
+   point, so it flips cleanly even where 3D backfaces are unreliable ---------- */
+.gb .gb-face {
+  position: absolute; inset: 0;
+  border-radius: var(--gbr);
+  backface-visibility: hidden;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--gbc) 55%, transparent);
+  background:
+    radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--gbc) 20%, transparent), transparent 62%),
+    linear-gradient(170deg, #10131d, #06070b 70%);
+  box-shadow: 0 0 2.4em -.8em var(--gbc), inset 0 0 1.6em -1em var(--gbc);
+  transition: transform .9s cubic-bezier(.6,0,.2,1), visibility 0s linear .45s, box-shadow .9s ease, border-color .9s ease;
+  animation: gb-dipa .9s ease both;
+}
+.gb .gb-front { transform: rotateY(0deg); }
+.gb .gb-back { transform: rotateY(180deg); visibility: hidden; pointer-events: none; }
+.gb #gb-flip:checked ~ .gb-stage .gb-front { transform: rotateY(-180deg); visibility: hidden; pointer-events: none; }
+.gb #gb-flip:checked ~ .gb-stage .gb-back { transform: rotateY(0deg); visibility: visible; pointer-events: auto; }
+.gb #gb-flip:checked ~ .gb-stage .gb-face { animation-name: gb-dipb; }
+/* light sweep across the card while it turns */
+.gb .gb-sweep { position: absolute; inset: 0; z-index: 9; pointer-events: none; border-radius: var(--gbr); overflow: hidden; }
+.gb .gb-sweep::before {
+  content: ""; position: absolute; inset: 0 -60%;
+  background: linear-gradient(100deg, transparent 40%, color-mix(in srgb, var(--gbc) 55%, #fff) 50%, transparent 60%);
+  opacity: 0; animation: gb-sweepa .9s ease both;
+}
+.gb #gb-flip:checked ~ .gb-stage .gb-sweep::before { animation-name: gb-sweepb; }
+
+/* frame: corner brackets grow with every phase */
+.gb .gb-frame {
+  position: absolute; inset: .55em; pointer-events: none; z-index: 4; border-radius: 1.1em;
+  --gbL: calc(1.1em + var(--gblvl) * .25em);
+  background:
+    linear-gradient(var(--gbc), var(--gbc)) top left / var(--gbL) 2px no-repeat,
+    linear-gradient(var(--gbc), var(--gbc)) top left / 2px var(--gbL) no-repeat,
+    linear-gradient(var(--gbc), var(--gbc)) top right / var(--gbL) 2px no-repeat,
+    linear-gradient(var(--gbc), var(--gbc)) top right / 2px var(--gbL) no-repeat,
+    linear-gradient(var(--gbc), var(--gbc)) bottom left / var(--gbL) 2px no-repeat,
+    linear-gradient(var(--gbc), var(--gbc)) bottom left / 2px var(--gbL) no-repeat,
+    linear-gradient(var(--gbc), var(--gbc)) bottom right / var(--gbL) 2px no-repeat,
+    linear-gradient(var(--gbc), var(--gbc)) bottom right / 2px var(--gbL) no-repeat;
+  opacity: .5;
+}
+
+/* ---------- FRONT ---------- */
+.gb .gb-front { display: flex; flex-direction: column; padding: 1.3em 1.2em 1.2em; }
+.gb .gb-bg { position: absolute; inset: -12%; pointer-events: none; background: var(--gbtex); opacity: .5; animation: gb-breathe 9s ease-in-out infinite; }
+.gb #gb-p1:checked ~ .gb-stage .gb-bg, .gb #gb-p9:checked ~ .gb-stage .gb-bg, .gb #gb-p12:checked ~ .gb-stage .gb-bg { inset: -40%; animation: gb-spin 60s linear infinite; }
+.gb #gb-p9:checked ~ .gb-stage .gb-bg { animation-duration: 24s; }
+.gb .gb-front > :not(.gb-bg, .gb-frame) { position: relative; }
+.gb .gb-row { display: flex; justify-content: space-between; align-items: center; gap: .6em; }
+.gb .gb-pill { font-size: .85em; letter-spacing: .12em; padding: .25em .7em; border-radius: 99em; border: 1px solid color-mix(in srgb, var(--gbc) 60%, transparent); color: var(--gbc); background: color-mix(in srgb, var(--gbc) 10%, transparent); }
+.gb .gb-teth-tag { font-size: .8em; letter-spacing: .1em; color: var(--gbdim); }
+.gb .gb-teth-tag b { color: var(--gbc); }
+.gb .gb-head { text-align: center; }
+.gb .gb-title { margin-top: .45em; font-family: system-ui, "Segoe UI", sans-serif; font-weight: 900; font-size: 2.3em; letter-spacing: .14em; line-height: 1; color: #fff; text-shadow: 0 0 .5em color-mix(in srgb, var(--gbc) 70%, transparent); }
+.gb .gb-sub { font-size: .8em; letter-spacing: .32em; color: var(--gbdim); margin-top: .35em; }
+.gb .gb-pnw { margin-top: .4em; }
+.gb .gb-pn { font-size: 1.15em; letter-spacing: .22em; font-weight: 700; color: var(--gbc); text-shadow: 0 0 .7em var(--gbc); }
+.gb .gb-tag { margin-top: .1em; font-size: .75em; letter-spacing: .3em; color: color-mix(in srgb, var(--gbc) 70%, #fff); opacity: .8; }
+
+.gb .gb-bay { flex: 1; display: grid; grid-template-columns: 4.4em 1fr 4.4em; align-items: center; margin: .2em -.4em; }
+.gb .gb-col { display: flex; flex-direction: column; align-items: center; gap: 2.2em; }
+
+.gb .gb-node {
+  position: relative; width: 3em; height: 3em; border-radius: 50%;
+  display: grid; place-items: center;
+  color: var(--gbc);
+  background: radial-gradient(circle, color-mix(in srgb, var(--gbc) 22%, #0a0c12), #0a0c12 70%);
+  border: 1px solid color-mix(in srgb, var(--gbc) 65%, transparent);
+  box-shadow: 0 0 .9em -.2em color-mix(in srgb, var(--gbc) 70%, transparent);
+  transition: transform .2s ease, box-shadow .25s ease;
+}
+.gb .gb-node svg { width: 1.4em; height: 1.4em; }
+.gb .gb-nl { position: absolute; top: calc(100% + .35em); left: 50%; transform: translateX(-50%); font-size: .62em; letter-spacing: .14em; color: var(--gbdim); white-space: nowrap; pointer-events: none; }
+.gb .gb-hit { position: absolute; left: 50%; top: 50%; width: 4.4em; height: 4.4em; transform: translate(-50%, -50%); border-radius: 50%; cursor: pointer; z-index: 2; }
+@media (hover: hover) { .gb .gb-node:hover { transform: scale(1.1); box-shadow: 0 0 1.4em 0 color-mix(in srgb, var(--gbc) 80%, transparent); } }
+.gb .gb-node:active { transform: scale(.88); }
+.gb .gb-n-asc { color: #0a0c12; background: var(--gbc); box-shadow: 0 0 1.2em 0 color-mix(in srgb, var(--gbc) 80%, transparent); animation: gb-beckon 2.4s ease-in-out infinite; }
+.gb .gb-n-asc .gb-nl { color: var(--gbc); }
+.gb .gb-n-asc .gb-hit { display: none; }
+.gb #gb-p0:checked ~ .gb-stage .gb-a0, .gb #gb-p1:checked ~ .gb-stage .gb-a1, .gb #gb-p2:checked ~ .gb-stage .gb-a2,
+.gb #gb-p3:checked ~ .gb-stage .gb-a3, .gb #gb-p4:checked ~ .gb-stage .gb-a4, .gb #gb-p5:checked ~ .gb-stage .gb-a5,
+.gb #gb-p6:checked ~ .gb-stage .gb-a6, .gb #gb-p7:checked ~ .gb-stage .gb-a7, .gb #gb-p8:checked ~ .gb-stage .gb-a8,
+.gb #gb-p9:checked ~ .gb-stage .gb-a9, .gb #gb-p10:checked ~ .gb-stage .gb-a10, .gb #gb-p11:checked ~ .gb-stage .gb-a11,
+.gb #gb-p12:checked ~ .gb-stage .gb-a12, .gb #gb-fin:checked ~ .gb-stage .gb-af { display: block; }
+
+/* ---------- ART: emblem morphs into a new shape at every phase ---------- */
+.gb .gb-art { position: relative; width: 12.4em; height: 12.4em; justify-self: center; display: grid; place-items: center; }
+.gb .gb-art > * { position: absolute; }
+.gb .gb-art > .gb-flipcore { inset: 0; z-index: 3; border-radius: 50%; cursor: pointer; }
+.gb .gb-ring { inset: 0; border-radius: 50%; }
+.gb .gb-r1 {
+  background: repeating-conic-gradient(var(--gbc) 0 5deg, transparent 5deg calc(30deg - var(--gblvl) * 1.6deg));
+  mask: radial-gradient(circle, transparent 60%, #000 61% 66%, transparent 67%);
+  opacity: calc(.35 + var(--gblvl) * .05);
+  animation: gb-spin 22s linear infinite;
+}
+.gb .gb-r1::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background: conic-gradient(#ff4646, #ff8a1f, #ffd60a, #2ee87a, #22e6e6, #3d86ff, #6a5cff, #a66bff, #c9b8ff, #ff4646);
+  opacity: var(--gbomg);
+}
+/* Time: ticking clock face that erodes the card until Omega */
+.gb .gb-clock {
+  inset: -.5em; border-radius: 50%;
+  background: repeating-conic-gradient(var(--gbdim) 0 1.2deg, transparent 1.2deg 30deg);
+  mask: radial-gradient(circle, transparent 66%, #000 67% 72%, transparent 73%);
+  opacity: calc(var(--gbero) * .6);
+}
+.gb .gb-hand {
+  position: absolute; left: 50%; top: 50%; width: 50%; height: 1px;
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, transparent 30%, #ff6b6b);
+  opacity: var(--gbero);
+  animation: gb-spin 6s linear infinite;
+}
+/* tether: GlyphLock orbiting on a line from the core */
+.gb .gb-teth { inset: 0; animation: gb-spin 10s linear infinite; }
+.gb .gb-teth::before { content: ""; position: absolute; left: 50%; top: 50%; width: 38%; height: 1px; transform-origin: 0 50%; background: linear-gradient(90deg, var(--gbc), color-mix(in srgb, var(--gbc2) 80%, #fff)); opacity: .8; }
+.gb .gb-lock { position: absolute; left: 88%; top: 50%; width: .95em; height: .95em; transform: translate(-50%, -50%) rotate(45deg); border: 1.5px solid var(--gbc); background: #0a0c12; box-shadow: 0 0 .6em var(--gbc); }
+/* emblem */
+.gb .gb-core {
+  width: 5.2em; height: 5.2em;
+  clip-path: var(--gbshape);
+  transition: clip-path .9s cubic-bezier(.6,0,.2,1);
+  background: radial-gradient(circle at 50% 38%, #fff, var(--gbc) 42%, var(--gbc2) 100%);
+  opacity: calc(1 - var(--gbomg));
+  animation: gb-spin 30s linear infinite, gb-pulse 3s ease-in-out infinite;
+}
+.gb .gb-sym {
+  font-family: system-ui, "Segoe UI", sans-serif; font-weight: 900; font-size: 1.9em; line-height: 1;
+  color: #fff; text-shadow: 0 0 .4em var(--gbc), 0 0 .1em #000;
+  opacity: calc(1 - var(--gbomg));
+  animation: var(--gbswap) .7s cubic-bezier(.2,.8,.2,1) both;
+}
+/* Omega God Eye */
+.gb .gb-eye {
+  inset: 1.2em; border-radius: 50%;
+  background:
+    radial-gradient(circle, #000 0 13%, #fff 14% 16%, transparent 17%),
+    radial-gradient(circle, transparent 0 24%, #ffb800 25% 26.5%, transparent 27.5% 36%, rgba(255,244,214,.8) 37% 38%, transparent 39%),
+    repeating-conic-gradient(rgba(255,244,214,.75) 0 1deg, transparent 1deg 10deg);
+  mask: radial-gradient(circle, #000 55%, transparent 70%);
+  opacity: var(--gbomg);
+  transform: scale(calc(.6 + var(--gbomg) * .4));
+  animation: gb-spin 40s linear infinite reverse;
+}
+/* phase-change shockwave */
+.gb .gb-wave { inset: 2em; border-radius: 50%; border: 2px solid var(--gbc); opacity: 0; animation: var(--gbwave) .9s ease-out both; }
+/* Kappa: blacklight */
+.gb #gb-p11:checked ~ .gb-stage .gb-art { animation: gb-uv 2.2s steps(1) infinite; }
+.gb #gb-p11:checked ~ .gb-stage :is(.gb-r1, .gb-core) { filter: drop-shadow(0 0 .5em #3a00ff) drop-shadow(0 0 1em #7b2cff); }
+.gb #gb-p11:checked ~ .gb-stage .gb-face { background: radial-gradient(circle at 50% 46%, rgba(58,0,255,.35), transparent 62%), #050310; }
+.gb #gb-p11:checked ~ .gb-stage .gb-title { animation: gb-glitch 2.6s steps(1) infinite; }
+/* Omega: gold */
+.gb #gb-p12:checked ~ .gb-stage .gb-title { color: #fff4d6; text-shadow: 0 0 .5em #ffb800, 0 0 1.2em rgba(255,184,0,.6); }
+
+/* final line, only after the full Omega sequence */
+.gb .gb-final {
+  width: 8.6em; height: 8.6em; border-radius: 50%;
+  display: grid; place-items: center; text-align: center; padding: 1em;
+  background: radial-gradient(circle, rgba(6,7,11,.92) 55%, transparent 72%);
+  font-family: system-ui, "Segoe UI", sans-serif;
+  font-size: 1.12em; font-weight: 600; letter-spacing: .04em; line-height: 1.35; color: #fff;
+  text-shadow: 0 0 .8em rgba(215,221,242,.8);
+  opacity: 0; pointer-events: none; z-index: 2;
+}
+.gb #gb-fin:checked ~ .gb-stage .gb-final { animation: gb-final 2s ease 4.1s both; }
+.gb #gb-fin:checked ~ .gb-stage :is(.gb-core, .gb-sym) { animation: gb-dimcore 2s ease 4.1s both; }
+.gb #gb-fin:checked ~ .gb-stage :is(.gb-r1) { opacity: .3; }
+
+/* ---------- FOOTER ---------- */
+.gb .gb-bar { display: grid; grid-template-columns: repeat(12, 1fr); gap: .25em; }
+.gb .gb-bar i { height: .45em; border-radius: .2em; background: var(--gbc); box-shadow: 0 0 .5em color-mix(in srgb, var(--gbc) 70%, transparent); opacity: clamp(.14, calc(var(--gblvl) - var(--i) + 1), 1); }
+.gb .gb-stats { display: flex; justify-content: space-between; margin-top: .6em; font-size: .85em; letter-spacing: .1em; color: var(--gbdim); }
+.gb .gb-stats b { color: var(--gbink); font-weight: 700; }
+
+/* ---------- BACK: lore for the current phase ---------- */
+.gb .gb-back { padding: 1.5em 1.4em 1.3em; display: flex; flex-direction: column; gap: .8em; }
+.gb .gb-back .gb-bg { opacity: .3; }
+.gb .gb-back > :not(.gb-bg, .gb-frame) { position: relative; }
+.gb .gb-lp { display: none; flex: 1; flex-direction: column; gap: .5em; min-height: 0; animation: gb-sa .6s cubic-bezier(.2,.8,.2,1) both; }
+
+.gb #gb-p0:checked ~ .gb-stage .gb-lp-p0, .gb #gb-p1:checked ~ .gb-stage .gb-lp-p1, .gb #gb-p2:checked ~ .gb-stage .gb-lp-p2, .gb #gb-p3:checked ~ .gb-stage .gb-lp-p3, .gb #gb-p4:checked ~ .gb-stage .gb-lp-p4, .gb #gb-p5:checked ~ .gb-stage .gb-lp-p5, .gb #gb-p6:checked ~ .gb-stage .gb-lp-p6, .gb #gb-p7:checked ~ .gb-stage .gb-lp-p7, .gb #gb-p8:checked ~ .gb-stage .gb-lp-p8, .gb #gb-p9:checked ~ .gb-stage .gb-lp-p9, .gb #gb-p10:checked ~ .gb-stage .gb-lp-p10, .gb #gb-p11:checked ~ .gb-stage .gb-lp-p11, .gb #gb-p12:checked ~ .gb-stage .gb-lp-p12, .gb #gb-fin:checked ~ .gb-stage .gb-lp-fin { display: flex; }
+.gb .gb-lhead { display: flex; align-items: center; gap: .7em; }
+.gb .gb-lglyph { width: 2.1em; height: 2.1em; flex: none; display: grid; place-items: center; font-family: system-ui, "Segoe UI", sans-serif; font-weight: 900; font-size: 1.6em; color: #0a0c12; background: var(--gbc); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+.gb .gb-btitle { font-family: system-ui, "Segoe UI", sans-serif; font-size: 1.8em; font-weight: 900; letter-spacing: .1em; line-height: 1; color: var(--gbc); text-shadow: 0 0 .5em color-mix(in srgb, var(--gbc) 60%, transparent); }
+.gb .gb-btag { font-size: .75em; letter-spacing: .26em; color: var(--gbdim); margin-top: .3em; }
+.gb .gb-lore { margin: 0; font-size: 1.08em; line-height: 1.5; color: #dde1ec; border-left: 2px solid var(--gbc); padding-left: .8em; }
+.gb .gb-tmove { margin: auto 0 0; font-size: .9em; line-height: 1.4; color: #ffb3b3; }
+.gb .gb-tmove span { display: block; font-size: .85em; letter-spacing: .22em; color: var(--gbdim); }
+.gb .gb-ladder { display: grid; grid-template-columns: repeat(13, 1fr); gap: .22em; }
+.gb .gb-ladder i {
+  height: .7em; border-radius: .15em; background: var(--t);
+  opacity: clamp(.18, calc(var(--gblvl) - var(--i) + 1), 1);
+  outline: calc(max(0, 1 - max(var(--gblvl) - var(--i), var(--i) - var(--gblvl))) * 2px) solid #fff;
+  outline-offset: 1px;
+}
+
+.gb .gb-btn {
+  display: grid; place-items: center; min-height: 4.4em; padding: 0 1.2em;
+  border-radius: 1em; cursor: pointer;
+  font-size: 1em; font-weight: 700; letter-spacing: .18em; color: #0a0c12;
+  background: var(--gbc);
+  box-shadow: 0 0 1.2em -.2em color-mix(in srgb, var(--gbc) 80%, transparent);
+  transition: transform .15s ease, filter .2s ease;
+}
+@media (hover: hover) { .gb .gb-btn:hover { filter: brightness(1.12); } }
+.gb .gb-btn:active { transform: scale(.96); }
+
+/* ---------- PANELS: each one bursts out of its own corner, themed to the phase ---------- */
+.gb .gb-modals { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
+.gb .gb-modal { position: absolute; inset: 0; visibility: hidden; transition: visibility 0s linear .6s; }
+.gb .gb-scrim { position: absolute; inset: 0; border-radius: var(--gbr); background: rgba(4,5,9,.8); opacity: 0; transition: opacity .35s ease; cursor: pointer; }
+.gb .gb-box {
+  position: absolute; width: 18.4em; padding: 1.1em 1.2em 1.1em; text-align: center; overflow: hidden;
+  border-radius: 1.3em; border: 1px solid var(--gbc);
+  background: var(--gbtex), linear-gradient(170deg, #131828, #07080d);
+  box-shadow: 0 0 2.6em -.5em var(--gbc);
+  opacity: 0;
+  transition: opacity .3s ease, transform .6s cubic-bezier(.2,.9,.25,1.2), clip-path .6s cubic-bezier(.3,.8,.3,1);
+}
+.gb .gb-m1 .gb-box { top: 1em; left: 1em; transform-origin: 0 0; transform: scale(.2) rotate(-12deg); clip-path: circle(0% at 0 0); }
+.gb .gb-m2 .gb-box { top: 1em; right: 1em; transform-origin: 100% 0; transform: scale(.2) rotate(12deg); clip-path: circle(0% at 100% 0); }
+.gb .gb-m3 .gb-box { bottom: 1em; left: 1em; transform-origin: 0 100%; transform: scale(.2) rotate(12deg); clip-path: circle(0% at 0 100%); }
+.gb .gb-m4 .gb-box { bottom: 1em; right: 1em; transform-origin: 100% 100%; transform: scale(.2) rotate(-12deg); clip-path: circle(0% at 100% 100%); }
+.gb .gb-m1 .gb-box::before, .gb .gb-m2 .gb-box::before, .gb .gb-m3 .gb-box::before, .gb .gb-m4 .gb-box::before {
+  content: ""; position: absolute; width: 5em; height: 5em; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--gbc) 70%, transparent), transparent 70%);
+}
+.gb .gb-m1 .gb-box::before { top: -2.5em; left: -2.5em; }
+.gb .gb-m2 .gb-box::before { top: -2.5em; right: -2.5em; }
+.gb .gb-m3 .gb-box::before { bottom: -2.5em; left: -2.5em; }
+.gb .gb-m4 .gb-box::before { bottom: -2.5em; right: -2.5em; }
+.gb #gb-m1:checked ~ .gb-stage .gb-m1, .gb #gb-m2:checked ~ .gb-stage .gb-m2,
+.gb #gb-m3:checked ~ .gb-stage .gb-m3, .gb #gb-m4:checked ~ .gb-stage .gb-m4 { visibility: visible; pointer-events: auto; transition-delay: 0s; }
+.gb #gb-m1:checked ~ .gb-stage .gb-m1 :is(.gb-scrim, .gb-box), .gb #gb-m2:checked ~ .gb-stage .gb-m2 :is(.gb-scrim, .gb-box),
+.gb #gb-m3:checked ~ .gb-stage .gb-m3 :is(.gb-scrim, .gb-box), .gb #gb-m4:checked ~ .gb-stage .gb-m4 :is(.gb-scrim, .gb-box) { opacity: 1; }
+.gb #gb-m1:checked ~ .gb-stage .gb-m1 .gb-box { transform: none; clip-path: circle(150% at 0 0); }
+.gb #gb-m2:checked ~ .gb-stage .gb-m2 .gb-box { transform: none; clip-path: circle(150% at 100% 0); }
+.gb #gb-m3:checked ~ .gb-stage .gb-m3 .gb-box { transform: none; clip-path: circle(150% at 0 100%); }
+.gb #gb-m4:checked ~ .gb-stage .gb-m4 .gb-box { transform: none; clip-path: circle(150% at 100% 100%); }
+.gb .gb-box > * { position: relative; }
+.gb .gb-mtop { display: flex; justify-content: space-between; align-items: center; font-size: .8em; letter-spacing: .14em; }
+.gb .gb-mtop b { color: var(--gbc); }
+.gb .gb-mglyph { font-family: system-ui, "Segoe UI", sans-serif; font-weight: 900; font-size: 1.5em; color: var(--gbc); }
+.gb .gb-mico { width: 3.8em; height: 3.8em; margin: .7em auto .5em; border-radius: 50%; display: grid; place-items: center; color: var(--gbc); border: 1px solid var(--gbc); background: radial-gradient(circle, color-mix(in srgb, var(--gbc) 28%, transparent), transparent 70%); box-shadow: 0 0 calc(.8em + var(--gblvl) * .12em) -.1em var(--gbc); }
+.gb .gb-mico svg { width: 1.9em; height: 1.9em; }
+.gb .gb-mname { font-family: system-ui, "Segoe UI", sans-serif; font-weight: 900; font-size: 1.6em; letter-spacing: .2em; color: #fff; }
+.gb .gb-mmode { margin-top: .25em; font-size: .9em; letter-spacing: .2em; color: var(--gbc); text-shadow: 0 0 .6em var(--gbc); }
+.gb .gb-mtext { margin: .6em 0 .7em; font-size: 1em; line-height: 1.45; color: #c9cede; }
+.gb .gb-meter { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: .8em; font-size: .85em; letter-spacing: .12em; color: var(--gbink); }
+.gb .gb-meter i { height: .55em; border-radius: 1em; background: linear-gradient(90deg, var(--gbc) calc(4% + var(--gblvl) * 8%), rgba(255,255,255,.08) 0); }
+
+/* ---------- OMEGA RESOLUTION: flash bang, black out, return to Void ---------- */
+.gb .gb-fx { position: absolute; inset: 0; border-radius: var(--gbr); pointer-events: none; opacity: 0; z-index: 30; }
+.gb .gb-flash { background: radial-gradient(circle, #fff 0 18%, transparent 60%), conic-gradient(#ff4646, #ff8a1f, #ffd60a, #2ee87a, #22e6e6, #3d86ff, #6a5cff, #a66bff, #c9b8ff, #ff4646); }
+.gb .gb-black { background: #000; }
+.gb #gb-fin:checked ~ .gb-stage .gb-flash { animation: gb-flash 4.2s linear both; }
+.gb #gb-fin:checked ~ .gb-stage .gb-black { animation: gb-black 4.2s linear both; }
+
+/* ---------- FOCUS (keyboard) ---------- */
+.gb .gb-ph:focus-visible ~ .gb-stage .gb-n-asc,
+.gb #gb-flip:focus-visible ~ .gb-stage .gb-n-ana,
+.gb #gb-flip:focus-visible ~ .gb-stage .gb-back .gb-btn,
+.gb #gb-m1:focus-visible ~ .gb-stage .gb-n-str,
+.gb #gb-m2:focus-visible ~ .gb-stage .gb-n-rft,
+.gb #gb-m3:focus-visible ~ .gb-stage .gb-n-aeg,
+.gb #gb-m4:focus-visible ~ .gb-stage .gb-n-mir,
+.gb .gb-mr:focus-visible ~ .gb-stage .gb-modal .gb-btn { outline: 2px solid #fff; outline-offset: 3px; }
+
+/* ---------- KEYFRAMES ---------- */
+@keyframes gb-spin { to { transform: rotate(1turn); } }
+@keyframes gb-pulse { 50% { filter: brightness(1.35); } }
+@keyframes gb-beckon { 50% { box-shadow: 0 0 1.8em .2em color-mix(in srgb, var(--gbc) 85%, transparent); } }
+@keyframes gb-sheen { 0%, 100% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } }
+@keyframes gb-breathe { 50% { transform: scale(1.06); } }
+@keyframes gb-float {
+  0%, 100% { transform: perspective(60em) rotateX(calc(var(--gbamp) * 1deg)) rotateY(calc(var(--gbamp) * -1.3deg)) translateY(0); }
+  50% { transform: perspective(60em) rotateX(calc(var(--gbamp) * -1deg)) rotateY(calc(var(--gbamp) * 1.3deg)) translateY(-.35em); }
+}
+@keyframes gb-dipa { 0%, 100% { scale: 1; } 50% { scale: .9; } }
+@keyframes gb-dipb { 0%, 100% { scale: 1; } 50% { scale: .9; } }
+@keyframes gb-sweepa { 0% { opacity: 0; transform: translateX(-40%); } 45% { opacity: .9; } 100% { opacity: 0; transform: translateX(40%); } }
+@keyframes gb-sweepb { 0% { opacity: 0; transform: translateX(40%); } 45% { opacity: .9; } 100% { opacity: 0; transform: translateX(-40%); } }
+@keyframes gb-uv { 0%, 100% { opacity: 1; } 47% { opacity: .78; } 50% { opacity: 1; } 83% { opacity: .9; } }
+@keyframes gb-glitch { 0%, 100% { text-shadow: 0 0 .5em #7b2cff; transform: none; } 92% { text-shadow: -.08em 0 #ff2bd6, .08em 0 #22e6e6; transform: translateX(.04em); } 95% { text-shadow: .1em 0 #ff2bd6, -.1em 0 #22e6e6; transform: translateX(-.05em) skewX(-6deg); } }
+@keyframes gb-sa { from { opacity: 0; transform: translateY(.4em); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes gb-sb { from { opacity: 0; transform: translateY(.4em); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes gb-sc { 0%, 70% { opacity: 0; filter: blur(3px); } to { opacity: 1; filter: none; } }
+@keyframes gb-wa { from { opacity: .9; transform: scale(.4); } to { opacity: 0; transform: scale(1.35); } }
+@keyframes gb-wb { from { opacity: .9; transform: scale(.4); } to { opacity: 0; transform: scale(1.35); } }
+@keyframes gb-wc { from { opacity: 0; } to { opacity: 0; } }
+@keyframes gb-flash {
+  0% { opacity: 0; transform: scale(.7); }
+  3% { opacity: 1; transform: scale(1.03); box-shadow: 0 0 4em 1.5em #fff; }
+  18% { opacity: 1; transform: scale(1.06); box-shadow: 0 0 5em 2em #fff; }
+  21%, 100% { opacity: 0; transform: scale(1.1); box-shadow: none; }
+}
+@keyframes gb-black { 0%, 17% { opacity: 0; } 20%, 80% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes gb-final { from { opacity: 0; transform: scale(.92); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes gb-dimcore { from { opacity: 1; } to { opacity: .18; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .gb .gb-tilt, .gb .gb-bg, .gb .gb-r1, .gb .gb-teth, .gb .gb-eye, .gb .gb-hand, .gb .gb-core, .gb .gb-n-asc { animation: none; }
+  .gb .gb-face { transition-duration: .4s, 0s, .4s, .4s; transition-delay: 0s, .2s, 0s, 0s; }
+  .gb #gb-fin:checked ~ .gb-stage .gb-flash { animation: gb-black 2.4s linear both; opacity: .5; }
+}
