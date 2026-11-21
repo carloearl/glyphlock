@@ -25,7 +25,7 @@ const CARD_W = 24;
 const CARD_H = 36;
 const MAX_TILT = 10; // degrees
 
-export function fitScale(width, height, { min = 8, max = 30, heightShare = 0.82 } = {}) {
+export function fitScale(width, height, { min = 8, max = 30, heightShare = 0.74 } = {}) {
   const w = Math.max(0, Number(width) || 0) / CARD_W;
   const h = (Math.max(0, Number(height) || 0) * heightShare) / CARD_H;
   return Math.round(Math.max(min, Math.min(max, w, h)) * 10) / 10;
