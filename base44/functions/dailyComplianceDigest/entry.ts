@@ -60,6 +60,12 @@ function buildHtmlBody({ date, venues }) {
 
 Deno.serve(async (req) => {
   try {
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+    const apiKeyHeader = req.headers.get('api_key') || req.headers.get('x-api-key');
+    if (!authHeader && !apiKeyHeader) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me().catch(() => null);
     if (!user?.id || !user?.email) {

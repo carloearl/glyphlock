@@ -19,6 +19,13 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
+    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
+    const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');
+    const apiKeyHeader = req.headers.get('api_key') || req.headers.get('x-api-key');
+    if (!authHeader && !apiKeyHeader) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const user = await base44.auth.me().catch(() => null);
     if (!user?.id || !user?.email) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
@@ -38,8 +45,6 @@ Deno.serve(async (req) => {
     if (!isAuthorized) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
-
-    const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
     const hours = Number(body?.hours) > 0 ? Number(body.hours) : 24;
     const dryRun = !!body?.dryRun;
 
