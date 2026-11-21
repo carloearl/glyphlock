@@ -24,6 +24,7 @@ function writeFlag(key) {
 export default function GlyphAssistant({ currentPageName = "" }) {
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [hello, setHello] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [session, setSession] = useState(0);
@@ -35,6 +36,7 @@ export default function GlyphAssistant({ currentPageName = "" }) {
       setPrompt(p);
       setSession((s) => s + 1);
     }
+    setMounted(true);
     setOpen(true);
   }, []);
 
@@ -101,8 +103,8 @@ export default function GlyphAssistant({ currentPageName = "" }) {
         </div>
       )}
 
-      {open && (
-        <div className="fixed inset-0 z-[99995]" role="dialog" aria-modal="true" aria-label="Glyph assistant">
+      {mounted && (
+        <div className={`fixed inset-0 z-[99995]${open ? "" : " hidden"}`} role="dialog" aria-modal="true" aria-label="Glyph assistant" aria-hidden={!open}>
           <div className="absolute inset-0 bg-black/50 md:bg-black/20" onClick={() => setOpen(false)} />
           <div
             className="absolute inset-x-0 bottom-0 h-[85dvh] rounded-t-2xl md:inset-x-auto md:right-4 md:bottom-4 md:w-[400px] md:h-[640px] md:max-h-[calc(100dvh-32px)] md:rounded-2xl overflow-hidden border border-cyan-400/25 shadow-[0_0_50px_rgba(34,211,238,0.25)]"
