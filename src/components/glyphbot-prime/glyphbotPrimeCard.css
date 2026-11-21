@@ -499,6 +499,9 @@
 .gbx { touch-action: manipulation; }
 .gbx-tilt { transform-style: preserve-3d; transition: transform .18s ease-out; will-change: transform; }
 .gbx-pulse .gb { animation: gbx-cmd .65s cubic-bezier(.2,.8,.2,1); }
+/* Panel action button (added by JS) sits above DISMISS, which becomes the quiet one. */
+.gb .gbx-act { width: 100%; border: 0; font-family: inherit; margin-top: .9em; }
+.gb .gbx-act + .gb-btn { min-height: 3.4em; margin-top: .6em; background: transparent; color: var(--gbink, #e8ecff); border: 1px solid var(--gbc); box-shadow: none; }
 @keyframes gbx-cmd {
   0% { filter: none; transform: scale(1); }
   35% { filter: brightness(1.55) drop-shadow(0 0 1.6em rgba(103, 232, 249, .65)); transform: scale(1.015); }
