@@ -19,7 +19,7 @@ export const GLYPHLOCK_KNOWLEDGE = {
     },
     {
       name: 'GlyphBot',
-      summary: 'GlyphLock\'s AI assistant. GlyphBot main offers security-focused personas including audits, debugging, and analysis. GlyphBot Jr is the friendly on-site helper for questions about GlyphLock features, navigation, and troubleshooting.',
+      summary: 'GlyphLock\'s AI assistant. GlyphBot main offers security-focused personas including audits, debugging, and analysis. Glyph (the orb in the bottom-right corner of every page) is the site-wide assistant for questions about GlyphLock features, navigation, and troubleshooting.',
     },
     {
       name: 'NUPS',
@@ -39,7 +39,7 @@ export const GLYPHLOCK_KNOWLEDGE = {
   contact: {
     email: 'carloearl@glyphlock.com',
     phone: '+1-480-886-5588',
-    support: 'GlyphBot Jr (on-site chat) is the fastest support channel; email for billing, technical, or partnership inquiries.',
+    support: 'Glyph (the on-site assistant, bottom-right orb) is the fastest support channel; email for billing, technical, or partnership inquiries.',
   },
   explicitly_unknown: [
     'Pricing specifics beyond what is published on the Pricing page — direct users to the Pricing page',

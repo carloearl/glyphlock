@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { HelpCircle, MessageSquare, X, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import GlyphBotJr from '@/components/glyphlock/bot/ui/GlyphBotJr';
 
 export default function UnifiedSidebar({ helpSections = [], helpTitle = "System Guide" }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // 'bot' or 'help'
+  const [activeModal, setActiveModal] = useState(null); // 'help' (Glyph chat opens via glyph:open)
   const [activeSection, setActiveSection] = useState(0);
   const [activeItem, setActiveItem] = useState(0);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -99,7 +98,7 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
               </div>
 
               <div className="p-6 space-y-4">
-                {/* GlyphBot Jr Option */}
+                {/* Glyph Option */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -107,14 +106,14 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setActiveModal('bot');
                     setIsOpen(false);
+                    window.dispatchEvent(new CustomEvent('glyph:open'));
                   }}
                   onTouchEnd={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    setActiveModal('bot');
                     setIsOpen(false);
+                    window.dispatchEvent(new CustomEvent('glyph:open'));
                   }}
                   className="p-5 rounded-2xl bg-gradient-to-br from-purple-500/15 to-indigo-500/15 border border-purple-400/35 hover:border-purple-400/60 hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] active:scale-[0.98] transition-all cursor-pointer"
                   style={{
@@ -130,8 +129,8 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
                       <MessageSquare className="w-6 h-6 text-purple-200" />
                     </div>
                     <div>
-                      <h4 className="text-base font-bold text-white">GlyphBot Jr</h4>
-                      <p className="text-xs text-purple-300/80">AI Assistant</p>
+                      <h4 className="text-base font-bold text-white">Glyph</h4>
+                      <p className="text-xs text-purple-300/80">Site assistant</p>
                     </div>
                   </div>
                   <p className="text-sm text-slate-300 leading-relaxed">
@@ -186,15 +185,6 @@ export default function UnifiedSidebar({ helpSections = [], helpTitle = "System 
             </motion.div>
           )}
         </AnimatePresence>
-
-      {/* GlyphBot Jr Modal - Force Expanded State */}
-      {activeModal === 'bot' && (
-        <div className="fixed inset-0 z-[999999] bg-black/50 backdrop-blur-sm flex items-end md:items-center justify-center" style={{ pointerEvents: 'auto', touchAction: 'manipulation' }}>
-          <div className="w-full h-[90vh] md:w-[480px] md:h-[700px] md:rounded-2xl overflow-hidden shadow-[0_0_60px_rgba(168,85,247,0.8)]">
-            <GlyphBotJr onClose={() => setActiveModal(null)} forceExpanded={true} />
-          </div>
-        </div>
-      )}
 
       {/* Help Panel Modal */}
       <AnimatePresence>
