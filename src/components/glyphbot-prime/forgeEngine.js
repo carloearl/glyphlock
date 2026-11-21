@@ -1022,6 +1022,22 @@ ${safeJs}
 // ----------------------------------------------------------------------------
 // GlyphBot audit: accessibility and polish checks with a 0-100 score.
 // ----------------------------------------------------------------------------
+// Repair label contrast. A solid fill always has a readable ink; a two-color
+// gradient may not (yellow into violet), so nudge each fill toward the side the
+// chosen ink reads against until both clear the bar.
+function textFix(t, need) {
+  if (t.effect === "glass") return { textMode: "auto", effect: "none" };
+  if (t.effect !== "gradient") return { textMode: "auto" };
+  const ink = bestTextOn(t.accent, t.accent2);
+  const toward = ink === INK_DARK ? "#ffffff" : "#000000";
+  const lift = (hex) => {
+    let c = hex;
+    for (let i = 0; i < 20 && contrast(ink, c) < need; i += 1) c = mix(c, toward, 0.08);
+    return c;
+  };
+  return { textMode: "auto", accent: lift(t.accent), accent2: lift(t.accent2) };
+}
+
 export function audit(spec) {
   const t = tokens(spec);
   const checks = [];
@@ -1037,7 +1053,7 @@ export function audit(spec) {
       title: "Text contrast",
       status: ratio >= need ? "pass" : ratio >= 3 ? "warn" : "fail",
       detail: `${ratio.toFixed(2)}:1 for the label on its fill. WCAG AA needs ${need}:1.`,
-      fix: ratio >= need ? null : { textMode: "auto", effect: t.effect === "glass" ? "none" : t.effect },
+      fix: ratio >= need ? null : textFix(t, need),
       weight: 30,
     });
   }
@@ -1187,4 +1203,81 @@ export function randomSpec(seed = Math.random) {
     theme: seed() > 0.8 ? "light" : "dark",
     textMode: "auto",
   });
+}
+
+// ----------------------------------------------------------------------------
+// Snap the vibe: pull a UI palette from a photo's pixels, on the device.
+// `data` is RGBA bytes (canvas ImageData.data), ideally from a small downscale.
+// Returns null when the photo has no strong colors (grey, black, washed out).
+// ----------------------------------------------------------------------------
+function rgbToHsv(r, g, b) {
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  let h = 0;
+  if (d) {
+    if (max === r) h = ((g - b) / d) % 6;
+    else if (max === g) h = (b - r) / d + 2;
+    else h = (r - g) / d + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+  return [h, max ? d / max : 0, max / 255];
+}
+
+function toHex(rgb) {
+  return `#${rgb.map((v) => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join("")}`;
+}
+
+// Lift (or deepen) a color until it reads as a control on the page: 3:1, WCAG 1.4.11.
+export function readableOn(hex, bg) {
+  let c = normalizeHex(hex);
+  const toward = luminance(bg) < 0.5 ? "#ffffff" : "#000000";
+  for (let i = 0; i < 12 && contrast(c, bg) < 3.2; i += 1) c = mix(c, toward, 0.12);
+  return c;
+}
+
+export function paletteFromPixels(data, theme = "dark") {
+  const BINS = 24; // 15 degrees each
+  const bins = Array.from({ length: BINS }, () => ({ w: 0, r: 0, g: 0, b: 0 }));
+  let counted = 0;
+  for (let i = 0; i + 3 < data.length; i += 4) {
+    if (data[i + 3] < 128) continue;
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    const [h, s, v] = rgbToHsv(r, g, b);
+    counted += 1;
+    if (s < 0.3 || v < 0.22) continue; // greys, shadows and blown highlights say nothing about the vibe
+    const w = s * s * v; // vivid pixels count most
+    const bin = bins[Math.floor(h / (360 / BINS)) % BINS];
+    bin.w += w;
+    bin.r += r * w;
+    bin.g += g * w;
+    bin.b += b * w;
+  }
+  if (!counted) return null;
+  const ranked = bins
+    .map((bin, idx) => ({ idx, w: bin.w, rgb: bin.w ? [bin.r / bin.w, bin.g / bin.w, bin.b / bin.w] : null }))
+    .filter((x) => x.rgb)
+    .sort((a, b) => b.w - a.w);
+  const total = ranked.reduce((n, x) => n + x.w, 0);
+  if (!ranked.length || total / counted < 0.02) return null;
+  const hueGap = (a, b) => Math.min(Math.abs(a - b), BINS - Math.abs(a - b));
+  const first = ranked[0];
+  const second = ranked.find((x) => hueGap(x.idx, first.idx) >= 3 && x.w >= first.w * 0.08);
+  const bg = tokens({ ...DEFAULT_SPEC, theme }).bg;
+  const accent = readableOn(toHex(first.rgb), bg);
+  const accent2 = second ? readableOn(toHex(second.rgb), bg) : readableOn(mix(accent, "#ffffff", 0.35), bg);
+  const swatches = [];
+  for (const x of ranked) {
+    if (swatches.length >= 5) break;
+    if (swatches.every((s) => hueGap(s.idx, x.idx) >= 2)) swatches.push(x);
+  }
+  return {
+    accent,
+    accent2,
+    swatches: swatches.map((x) => toHex(x.rgb)),
+    duo: Boolean(second),
+  };
 }

@@ -21,6 +21,7 @@ import {
   encodeSpec,
   decodeSpec,
   randomSpec,
+  paletteFromPixels,
 } from "@/components/glyphbot-prime/forgeEngine";
 
 const EXAMPLES = [
@@ -93,6 +94,42 @@ async function copyText(text) {
   }
 }
 
+// Snap the vibe: shrink the photo to at most 64px on the device and read its pixels.
+// The photo is never uploaded or stored.
+async function photoPixels(file) {
+  let src;
+  try {
+    src = await createImageBitmap(file);
+  } catch {
+    src = await new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(img);
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("unreadable photo"));
+      };
+      img.src = url;
+    });
+  }
+  const w0 = src.width || src.naturalWidth;
+  const h0 = src.height || src.naturalHeight;
+  if (!w0 || !h0) throw new Error("empty photo");
+  const scale = Math.min(1, 64 / Math.max(w0, h0));
+  const w = Math.max(1, Math.round(w0 * scale));
+  const h = Math.max(1, Math.round(h0 * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(src, 0, 0, w, h);
+  if (typeof src.close === "function") src.close();
+  return ctx.getImageData(0, 0, w, h).data;
+}
+
 function readSharedSpec() {
   if (typeof window === "undefined") return null;
   const m = window.location.hash.match(/(?:^#|&)forge=([A-Za-z0-9_-]+)/);
@@ -118,6 +155,8 @@ export default function GlyphBotForge() {
   const [codeTab, setCodeTab] = useState("html");
   const [toast, setToast] = useState("");
   const [showKnobs, setShowKnobs] = useState(false);
+  const [vibe, setVibe] = useState(null);
+  const photoInput = useRef(null);
   const forgeRun = useRef(0);
   const toastTimer = useRef(null);
 
@@ -258,7 +297,48 @@ Rules:
     notify("GlyphBot fixed what it could");
   };
 
+  const snapVibe = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+    if ((file.type && !file.type.startsWith("image/")) || file.size > 30 * 1024 * 1024) {
+      notify("Pick a photo under 30 MB");
+      return;
+    }
+    const run = ++forgeRun.current;
+    setAiBuild(null);
+    setMood("forging");
+    setPhase(1);
+    let pal = null;
+    try {
+      pal = paletteFromPixels(await photoPixels(file), spec.theme);
+    } catch {
+      pal = null;
+    }
+    if (forgeRun.current !== run) return;
+    if (!pal) {
+      setMood("error");
+      setPhase(0);
+      notify("No strong colors in that photo. Try a brighter one");
+      return;
+    }
+    const base = sanitizeSpec({
+      ...spec,
+      accent: pal.accent,
+      accent2: pal.accent2,
+      effect: pal.duo ? "gradient" : spec.effect === "gradient" ? "glow" : spec.effect,
+      textMode: "auto",
+    });
+    const next = applyFixes(base, audit(base));
+    setVibe(pal.swatches);
+    setSpec(next);
+    await animateClimb(run, audit(next).tier.phase);
+    if (forgeRun.current === run) setMood("done");
+    notify("Built from your photo. It never left your device");
+  };
+
   const remix = async () => {
+    setVibe(null);
     const run = ++forgeRun.current;
     const next = randomSpec();
     setAiBuild(null);
@@ -420,11 +500,27 @@ Rules:
                 >
                   Surprise me
                 </button>
+                <button
+                  type="button"
+                  onClick={() => photoInput.current && photoInput.current.click()}
+                  className="col-span-2 min-h-[48px] rounded-2xl border border-amber-300/40 bg-gradient-to-r from-amber-400/10 via-fuchsia-500/10 to-cyan-400/10 px-4 text-sm font-bold text-amber-100 transition hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-300 sm:col-span-1"
+                >
+                  Snap the vibe
+                </button>
+                <input ref={photoInput} type="file" accept="image/*" hidden onChange={snapVibe} />
               </div>
               <p className="mt-3 text-xs text-slate-500">
                 Forge runs in your browser, free, nothing is saved. AI forge sends your words to GlyphBot's AI and
-                needs a GlyphLock sign-in.
+                needs a GlyphLock sign-in. Snap the vibe reads a photo's colors on your device and never uploads it.
               </p>
+              {vibe && (
+                <div className="mt-3 flex items-center gap-2" aria-label="Colors pulled from your photo">
+                  <span className="text-xs text-slate-400">From your photo</span>
+                  {vibe.map((c) => (
+                    <span key={c} title={c} className="h-6 w-6 rounded-full border border-white/20" style={{ background: c }} />
+                  ))}
+                </div>
+              )}
             </form>
 
             {/* Preview */}
