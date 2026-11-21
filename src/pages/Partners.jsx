@@ -358,7 +358,7 @@ export default function Partners() {
                           Reolink Business Partner Club
                         </h3>
                         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
-                          GlyphLock LLC was approved as a member of the Reolink Business Partner Club on October 10, 2026. Membership gives GlyphLock a Reolink business account with partner pricing for the cameras used in venue deployments.
+                          GlyphLock LLC was approved as a member of the Reolink Business Partner Club in October 2026. Membership gives GlyphLock a Reolink business account with partner pricing on Reolink cameras.
                         </p>
                         <p className="mt-3 max-w-2xl text-xs leading-5 text-slate-500">
                           Membership is reviewed annually by Reolink. It is not a certification, endorsement, or joint product. Reolink is a trademark of its owner, used here only to name the program.
