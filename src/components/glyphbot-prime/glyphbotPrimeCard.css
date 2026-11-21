@@ -494,3 +494,17 @@
   .gb .gb-face { transition-duration: .4s, 0s, .4s, .4s; transition-delay: 0s, .2s, 0s, 0s; }
   .gb #gb-fin:checked ~ .gb-stage .gb-flash { animation: gb-black 2.4s linear both; opacity: .5; }
 }
+
+/* ---------- JS LAYER (GlyphBotPrimeCard.jsx): live tilt + command pulse ---------- */
+.gbx { touch-action: manipulation; }
+.gbx-tilt { transform-style: preserve-3d; transition: transform .18s ease-out; will-change: transform; }
+.gbx-pulse .gb { animation: gbx-cmd .65s cubic-bezier(.2,.8,.2,1); }
+@keyframes gbx-cmd {
+  0% { filter: none; transform: scale(1); }
+  35% { filter: brightness(1.55) drop-shadow(0 0 1.6em rgba(103, 232, 249, .65)); transform: scale(1.015); }
+  100% { filter: none; transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gbx-tilt { transition: none; transform: none !important; }
+  .gbx-pulse .gb { animation: none; }
+}
