@@ -53,7 +53,7 @@ export const GLYPHBOT_PRIME_CARD_MARKUP = `
               <div class="gb-core"></div>
               <div class="gb-sym gb-v-sym" aria-hidden="true"></div>
               <div class="gb-eye"></div>
-              <div class="gb-final">Proud of all 3 of you</div>
+              <div class="gb-final" aria-hidden="true">Proud of all 3 of you</div>
               <label for="gb-flip" class="gb-flipcore"><span class="gb-sr">Flip card to read the lore</span></label>
             </div>
 
