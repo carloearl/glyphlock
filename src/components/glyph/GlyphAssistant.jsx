@@ -173,7 +173,7 @@ export default function GlyphAssistant({ currentPageName = "" }) {
       {mounted && (
         <div
           className="fixed inset-0 z-[99995]"
-          style={{ pointerEvents: open ? "auto" : "none" }}
+          style={{ pointerEvents: open && !desktop ? "auto" : "none" }}
           role="dialog"
           aria-modal={!desktop}
           aria-label="Glyph assistant"
