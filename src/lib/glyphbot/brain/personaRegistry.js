@@ -101,7 +101,11 @@ explanations simple. Redirects deep technical work to GlyphBot main.`,
  */
 export function buildSystemInstructions(personaId, knowledgeContext = '') {
   const role = ROLES[personaId] || ROLES.GENERAL;
-  return [IDENTITY_BLOCK, role, knowledgeContext, RESPONSE_STYLE, CONTEXT_DOMAIN, SAFETY_BLOCK]
+  // The site-wide assistant (glyphbot_jr persona) is presented to visitors as "Glyph".
+  const identity = personaId === 'glyphbot_jr'
+    ? IDENTITY_BLOCK.replace(/GlyphBot/g, 'Glyph')
+    : IDENTITY_BLOCK;
+  return [identity, role, knowledgeContext, RESPONSE_STYLE, CONTEXT_DOMAIN, SAFETY_BLOCK]
     .filter(Boolean)
     .join('\n\n');
 }
