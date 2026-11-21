@@ -2,14 +2,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { X } from "lucide-react";
 import { motion, AnimatePresence, useDragControls } from "framer-motion";
-import GlyphOrb from "./GlyphOrb";
 import GlyphChat from "./GlyphChat";
+import GlyphEmblem, { EMBLEM_CSS, phaseVars } from "./GlyphEmblem";
+import { GLYPH_PHASES } from "./glyphPhases";
 
 /**
- * Glyph — site-wide chat widget.
- * - Living orb (eyes blink and follow the pointer) bottom-right on every page.
- * - Desktop: floating prism-glass widget above the orb; the page stays usable; orb toggles it.
- * - Phone: bottom sheet with a grab handle; drag down or tap outside to close.
+ * Glyph — site-wide chat, living inside the GlyphBot Prime card.
+ * - Launcher: a mini GlyphBot card bottom-right on every page; it shows the card's current phase.
+ * - Desktop: the full card flips open above the launcher; the page stays usable.
+ * - Phone: the card rises from the bottom; drag the top edge down or tap outside to close.
  * - Says hi once per browser session a few seconds after load.
  * - Anything on the site can open it: window.dispatchEvent(new CustomEvent('glyph:open', { detail: { prompt } }))
  */
@@ -35,15 +36,42 @@ function useIsDesktop() {
   return desk;
 }
 
-const PANEL_CSS = `
-.gw-frame { position: relative; padding: 1.5px; border-radius: inherit; height: 100%;
-  background: linear-gradient(120deg, #22d3ee, #6366f1, #a855f7, #ec4899, #f59e0b, #22d3ee);
-  background-size: 300% 300%; animation: gwPrism 8s linear infinite;
-  box-shadow: 0 24px 70px rgba(0,0,0,.6), 0 0 50px rgba(99,102,241,.35); }
-.gw-frame > .gw-inner { height: 100%; border-radius: inherit; overflow: hidden; }
-@keyframes gwPrism { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
-@media (prefers-reduced-motion: reduce) { .gw-frame { animation: none; } }
+const LAUNCH_CSS = `
+.gml { position: relative; width: 62px; height: 90px; border-radius: 12px; overflow: hidden; display: grid; place-items: center;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; isolation: isolate;
+  background: radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--gcc) 26%, transparent), transparent 65%), linear-gradient(170deg, #10131d, #06070b 70%);
+  border: 1px solid color-mix(in srgb, var(--gcc) 60%, transparent);
+  box-shadow: 0 0 1.4em -.3em var(--gcc), 0 10px 30px rgba(0,0,0,.55);
+  transition: --gcc .9s ease, --gcc2 .9s ease, transform .25s ease; animation: gml-float 4s ease-in-out infinite; }
+.gml-bg { position: absolute; inset: -20%; z-index: -1; background: var(--tex); opacity: .5; }
+.gml-frame { position: absolute; inset: 4px; border-radius: 9px; pointer-events: none; --L: 9px;
+  background:
+    linear-gradient(var(--gcc), var(--gcc)) top left / var(--L) 1.5px no-repeat, linear-gradient(var(--gcc), var(--gcc)) top left / 1.5px var(--L) no-repeat,
+    linear-gradient(var(--gcc), var(--gcc)) top right / var(--L) 1.5px no-repeat, linear-gradient(var(--gcc), var(--gcc)) top right / 1.5px var(--L) no-repeat,
+    linear-gradient(var(--gcc), var(--gcc)) bottom left / var(--L) 1.5px no-repeat, linear-gradient(var(--gcc), var(--gcc)) bottom left / 1.5px var(--L) no-repeat,
+    linear-gradient(var(--gcc), var(--gcc)) bottom right / var(--L) 1.5px no-repeat, linear-gradient(var(--gcc), var(--gcc)) bottom right / 1.5px var(--L) no-repeat;
+  opacity: .7; }
+.gml-ph { position: absolute; top: 8px; left: 0; right: 0; text-align: center; font-size: 7px; letter-spacing: .16em; color: var(--gcc); }
+.gml-nm { position: absolute; bottom: 8px; left: 0; right: 0; text-align: center; font-family: system-ui, "Segoe UI", sans-serif;
+  font-weight: 900; font-size: 9px; letter-spacing: .2em; color: #fff; text-shadow: 0 0 .5em var(--gcc); }
+.gml-btn:hover .gml { transform: perspective(500px) rotateY(-12deg) rotateX(6deg) scale(1.05); }
+.gml-btn.is-open .gml { animation: none; }
+@keyframes gml-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+@media (prefers-reduced-motion: reduce) { .gml { animation: none; } }
 `;
+
+function MiniCard({ phase }) {
+  const P = GLYPH_PHASES[phase];
+  return (
+    <span className="gml" style={phaseVars(phase)}>
+      <span className="gml-bg" />
+      <span className="gml-frame" />
+      <span className="gml-ph">{P.num}</span>
+      <GlyphEmblem size={50} phase={phase} />
+      <span className="gml-nm">GLYPH</span>
+    </span>
+  );
+}
 
 export default function GlyphAssistant({ currentPageName = "" }) {
   const location = useLocation();
@@ -55,6 +83,8 @@ export default function GlyphAssistant({ currentPageName = "" }) {
   const [hover, setHover] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [session, setSession] = useState(0);
+  const [phase, setPhase] = useState(0);
+  const onPhase = useCallback((p) => setPhase(p), []);
 
   const openGlyph = useCallback((p = "") => {
     setHello(false);
@@ -94,17 +124,17 @@ export default function GlyphAssistant({ currentPageName = "" }) {
 
   const panelVariants = desktop
     ? {
-        open: { opacity: 1, scale: 1, y: 0, visibility: "visible", transition: { type: "spring", stiffness: 380, damping: 30 } },
-        closed: { opacity: 0, scale: 0.85, y: 24, transition: { duration: 0.16 }, transitionEnd: { visibility: "hidden" } },
+        open: { opacity: 1, rotateY: 0, scale: 1, y: 0, visibility: "visible", transition: { type: "spring", stiffness: 260, damping: 26 } },
+        closed: { opacity: 0, rotateY: -75, scale: 0.7, y: 40, transition: { duration: 0.22 }, transitionEnd: { visibility: "hidden" } },
       }
     : {
-        open: { y: 0, visibility: "visible", transition: { type: "spring", stiffness: 320, damping: 34 } },
-        closed: { y: "105%", transition: { duration: 0.22 }, transitionEnd: { visibility: "hidden" } },
+        open: { y: 0, rotateX: 0, visibility: "visible", transition: { type: "spring", stiffness: 300, damping: 32 } },
+        closed: { y: "112%", rotateX: 18, transition: { duration: 0.24 }, transitionEnd: { visibility: "hidden" } },
       };
 
   return (
     <>
-      <style>{PANEL_CSS}</style>
+      <style>{EMBLEM_CSS + LAUNCH_CSS}</style>
 
       {showLauncher && (
         <div
@@ -117,12 +147,12 @@ export default function GlyphAssistant({ currentPageName = "" }) {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                className="relative max-w-[250px] rounded-2xl rounded-br-md bg-slate-900/90 backdrop-blur-xl border border-cyan-400/30 shadow-[0_10px_40px_rgba(0,0,0,0.55)] pl-4 pr-10 py-3 text-sm text-slate-100"
+                className="relative max-w-[250px] rounded-2xl rounded-br-md bg-[#0b0d14]/95 backdrop-blur-xl border border-white/15 shadow-[0_10px_40px_rgba(0,0,0,0.55)] pl-4 pr-10 py-3 text-sm text-slate-100"
                 style={{ pointerEvents: "auto" }}
                 role="status"
               >
                 <button type="button" className="text-left leading-snug" onClick={() => openGlyph()} style={{ touchAction: "manipulation" }}>
-                  Hey, I'm <strong className="bg-gradient-to-r from-cyan-300 to-violet-300 bg-clip-text text-transparent">Glyph</strong>. Need a hand finding something?
+                  Hey, I'm <strong className="font-black tracking-wider">GLYPH</strong>. Tap my card and ask me anything.
                 </button>
                 <button
                   type="button"
@@ -144,9 +174,9 @@ export default function GlyphAssistant({ currentPageName = "" }) {
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
-                  className="px-3 py-1.5 rounded-full bg-slate-900/90 border border-white/10 text-xs font-semibold text-slate-100 backdrop-blur-xl"
+                  className="px-3 py-1.5 rounded-full bg-[#0b0d14]/95 border border-white/15 text-[11px] font-mono tracking-[.16em] text-slate-100"
                 >
-                  Ask Glyph
+                  ASK GLYPH
                 </motion.span>
               )}
             </AnimatePresence>
@@ -157,14 +187,13 @@ export default function GlyphAssistant({ currentPageName = "" }) {
               onMouseLeave={() => setHover(false)}
               aria-label={open ? "Close Glyph" : "Open Glyph, the GlyphLock assistant"}
               aria-expanded={open}
-              whileHover={{ scale: 1.07 }}
               whileTap={{ scale: 0.92 }}
-              animate={hello && !open ? { y: [0, -6, 0] } : { y: 0 }}
-              transition={hello && !open ? { duration: 1.2, repeat: Infinity, repeatDelay: 1.4 } : { duration: 0.2 }}
-              className="relative rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
+              animate={hello && !open ? { rotate: [0, -6, 6, -3, 0] } : { rotate: 0 }}
+              transition={hello && !open ? { duration: 0.9, repeat: Infinity, repeatDelay: 1.6 } : { duration: 0.2 }}
+              className={`gml-btn rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70${open ? " is-open" : ""}`}
               style={{ touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
             >
-              <GlyphOrb size={62} pulse={hello && !open} track mood={open ? "happy" : "idle"} />
+              <MiniCard phase={phase} />
             </motion.button>
           </div>
         </div>
@@ -173,7 +202,7 @@ export default function GlyphAssistant({ currentPageName = "" }) {
       {mounted && (
         <div
           className="fixed inset-0 z-[99995]"
-          style={{ pointerEvents: open && !desktop ? "auto" : "none" }}
+          style={{ pointerEvents: open && !desktop ? "auto" : "none", perspective: 1400 }}
           role="dialog"
           aria-modal={!desktop}
           aria-label="Glyph assistant"
@@ -181,7 +210,7 @@ export default function GlyphAssistant({ currentPageName = "" }) {
         >
           {!desktop && (
             <motion.div
-              className="absolute inset-0 bg-black/55 backdrop-blur-[2px]"
+              className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
               initial={false}
               animate={{ opacity: open ? 1 : 0 }}
               onClick={() => setOpen(false)}
@@ -199,24 +228,25 @@ export default function GlyphAssistant({ currentPageName = "" }) {
             onDragEnd={(_, info) => { if (info.offset.y > 110 || info.velocity.y > 600) setOpen(false); }}
             className={
               desktop
-                ? "absolute right-4 w-[400px] h-[640px] rounded-3xl origin-bottom-right"
-                : "absolute inset-x-0 bottom-0 h-[88dvh] rounded-t-3xl"
+                ? "absolute right-4 w-[400px] h-[660px] rounded-[26px] origin-bottom-right"
+                : "absolute inset-x-2.5 rounded-[26px] origin-bottom"
             }
-            style={desktop ? { bottom: "calc(96px + env(safe-area-inset-bottom))", maxHeight: "calc(100dvh - 120px)", pointerEvents: open ? "auto" : "none" } : { pointerEvents: open ? "auto" : "none" }}
+            style={
+              desktop
+                ? { bottom: "calc(122px + env(safe-area-inset-bottom))", maxHeight: "calc(100dvh - 140px)", pointerEvents: open ? "auto" : "none" }
+                : { bottom: "calc(10px + env(safe-area-inset-bottom))", height: "min(88dvh, 780px)", pointerEvents: open ? "auto" : "none" }
+            }
           >
-            <div className="gw-frame" style={desktop ? undefined : { paddingBottom: 0 }}>
-              <div className="gw-inner">
-                <GlyphChat
-                  key={session}
-                  onClose={() => setOpen(false)}
-                  onGrab={desktop ? undefined : (e) => drag.start(e)}
-                  pagePath={location.pathname}
-                  pageName={currentPageName}
-                  initialPrompt={prompt}
-                  active={open}
-                />
-              </div>
-            </div>
+            <GlyphChat
+              key={session}
+              onClose={() => setOpen(false)}
+              onGrab={desktop ? undefined : (e) => drag.start(e)}
+              onPhase={onPhase}
+              pagePath={location.pathname}
+              pageName={currentPageName}
+              initialPrompt={prompt}
+              active={open}
+            />
           </motion.div>
         </div>
       )}
