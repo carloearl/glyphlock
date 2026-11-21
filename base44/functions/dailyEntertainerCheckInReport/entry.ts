@@ -19,25 +19,34 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // Auth: allow scheduled invocations (no user) OR admin users only.
-    let isScheduled = false;
-    let user: any = null;
-    try {
-      user = await base44.auth.me();
-    } catch {
-      isScheduled = true;
+    const user = await base44.auth.me().catch(() => null);
+    if (!user?.id || !user?.email) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
-    if (!isScheduled && user?.role !== 'admin') {
+
+    const ADMIN_ROLES = new Set(['admin', 'PLATFORM_ADMIN', 'SOVEREIGN']);
+    const MANAGER_ROLES = new Set(['admin', 'manager', 'PLATFORM_ADMIN', 'SOVEREIGN', 'VENUE_OWNER', 'VENUE_MANAGER']);
+    const emailNorm = String(user.email).toLowerCase();
+    const nupsRows = await base44.asServiceRole.entities.NUPSUser.filter({ platform_email: emailNorm, status: 'active' }, null, 1).catch(() => []);
+    const nupsUser = nupsRows?.[0] || null;
+    const platformRole = String(user._highestRole || user.role || '');
+    const nupsRole = String(nupsUser?.role || '');
+    const isSovereign = nupsUser?.sovereign_flag === true || nupsRole === 'SOVEREIGN';
+    const isAdmin = isSovereign || ADMIN_ROLES.has(platformRole) || ADMIN_ROLES.has(nupsRole);
+    const isAuthorized = isAdmin || MANAGER_ROLES.has(platformRole) || MANAGER_ROLES.has(nupsRole);
+
+    if (!isAuthorized) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
     const hours = Number(body?.hours) > 0 ? Number(body.hours) : 24;
     const dryRun = !!body?.dryRun;
-    const overrideRecipient = typeof body?.recipient === 'string' ? body.recipient : null;
 
     const nowMs = Date.now();
     const cutoffIso = new Date(nowMs - hours * 3600_000).toISOString();
+
+    const managerVenueId = !isAdmin ? String(nupsUser?.venue_id || user?.venue_id || '') : '';
 
     // Pull recent shifts + roster (service role — this is admin reporting).
     const [shifts, entertainers] = await Promise.all([
@@ -45,20 +54,17 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.Entertainer.list('-created_date', 500),
     ]);
 
-    const rosterById: Record<string, any> = {};
+    const rosterById = {};
     for (const e of entertainers) rosterById[e.id] = e;
 
-    const recentShifts = shifts.filter((s: any) => {
+    const recentShifts = shifts.filter((s) => {
+      if (managerVenueId && s.venue_id !== managerVenueId) return false;
       const t = s.check_in_time || s.created_date;
       return t && t >= cutoffIso;
     });
 
     // Aggregate per-venue
-    const perVenue: Record<string, {
-      checkedIn: any[];
-      stillActive: any[];
-      totalMinutes: number;
-    }> = {};
+    const perVenue = {};
 
     for (const s of recentShifts) {
       const v = s.venue_id || 'unknown';
@@ -88,7 +94,7 @@ Deno.serve(async (req) => {
       generated_at: new Date().toISOString(),
       venue_count: venueIds.length,
       total_check_ins: recentShifts.length,
-      still_active: recentShifts.filter((s: any) => !s.check_out_time).length,
+      still_active: recentShifts.filter((s) => !s.check_out_time).length,
     };
 
     // Build email HTML
@@ -150,17 +156,19 @@ Deno.serve(async (req) => {
         </div>
       </div>`;
 
-    // Determine recipients — override, else all admin users
-    let recipients: string[] = [];
-    if (overrideRecipient) {
-      recipients = [overrideRecipient];
-    } else {
-      const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
-      recipients = admins.map((u: any) => u.email).filter(Boolean);
-    }
+    // Determine recipients — admin users only (free-form recipient override removed)
+    const admins = await base44.asServiceRole.entities.User.filter({ role: 'admin' });
+    const recipients = admins.map((u) => u.email).filter(Boolean);
 
     if (dryRun) {
-      return Response.json({ ok: true, dryRun: true, summary, recipients, htmlPreview: html.slice(0, 2000) });
+      return Response.json({
+        ok: true,
+        dryRun: true,
+        summary,
+        recipient_count: recipients.length,
+        recipients: isAdmin ? recipients : undefined,
+        htmlPreview: html.slice(0, 2000),
+      });
     }
 
     if (recipients.length === 0) {
@@ -183,15 +191,15 @@ Deno.serve(async (req) => {
     return Response.json({ ok: true, summary, sent, recipient_count: recipients.length });
   } catch (error) {
     console.error('dailyEntertainerCheckInReport error:', error);
-    return Response.json({ error: (error as any)?.message || 'unknown error' }, { status: 500 });
+    return Response.json({ error: error?.message || 'unknown error' }, { status: 500 });
   }
 });
 
-function fmtTime(iso?: string) {
+function fmtTime(iso) {
   if (!iso) return '—';
   try { return new Date(iso).toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' }); }
   catch { return iso; }
 }
-function escapeHtml(s: any) {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]!));
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }

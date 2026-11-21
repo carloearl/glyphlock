@@ -9,7 +9,7 @@
 
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
-const MANAGER_ROLES = ['admin', 'PLATFORM_ADMIN', 'VENUE_OWNER', 'VENUE_MANAGER'];
+const MANAGER_ROLES = new Set(['admin', 'manager', 'PLATFORM_ADMIN', 'SOVEREIGN', 'VENUE_OWNER', 'VENUE_MANAGER']);
 
 function money(n) { return `$${Number(n || 0).toFixed(2)}`; }
 function yesterdayISO() {
@@ -62,9 +62,23 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
     const user = await base44.auth.me().catch(() => null);
-    if (user && !MANAGER_ROLES.includes(user._highestRole || user.role || '')) {
+    if (!user?.id || !user?.email) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
+
+    const ADMIN_ROLES = new Set(['admin', 'PLATFORM_ADMIN', 'SOVEREIGN']);
+    const emailNorm = String(user.email).toLowerCase();
+    const nupsRows = await base44.asServiceRole.entities.NUPSUser.filter({ platform_email: emailNorm, status: 'active' }, null, 1).catch(() => []);
+    const nupsUser = nupsRows?.[0] || null;
+    const platformRole = String(user._highestRole || user.role || '');
+    const nupsRole = String(nupsUser?.role || '');
+    const isAdmin = nupsUser?.sovereign_flag === true || ADMIN_ROLES.has(platformRole) || ADMIN_ROLES.has(nupsRole);
+    const isAuthorized = isAdmin || MANAGER_ROLES.has(platformRole) || MANAGER_ROLES.has(nupsRole);
+    if (!isAuthorized) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const managerVenueId = !isAdmin ? String(nupsUser?.venue_id || user?.venue_id || '') : '';
 
     const body = req.method === 'POST' ? await req.json().catch(() => ({})) : {};
     const targetDate = body.date || yesterdayISO();
@@ -75,8 +89,8 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.PayoutSafetyLimit.list('-created_date', 200),
     ]);
 
-    const payouts = allPayouts.filter(p => p.session_date === targetDate);
-    const txs = allTx.filter(t => (t.created_date || '').slice(0, 10) === targetDate);
+    const payouts = allPayouts.filter(p => p.session_date === targetDate && (!managerVenueId || p.venue_id === managerVenueId));
+    const txs = allTx.filter(t => (t.created_date || '').slice(0, 10) === targetDate && (!managerVenueId || t.venue_id === managerVenueId));
 
     // Per-venue rollup
     const venueMap = {};
