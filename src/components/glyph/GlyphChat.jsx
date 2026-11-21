@@ -41,9 +41,21 @@ function getSpeech() {
   return window.SpeechRecognition || window.webkitSpeechRecognition || null;
 }
 
+const PAGE_LABELS = {
+  "": "Home", home: "Home", secureqrstudio: "QR Studio", imagelab: "Image Lab", imagegenerator: "Image Generator",
+  nupslanding: "NUPS", nupslogin: "NUPS sign-in", glyphbot: "GlyphBot", glyphbotmixer: "DJ Mixer", governancehub: "Governance",
+  consultation: "Consultation", faq: "FAQ", pricing: "Pricing", contact: "Contact", about: "About", aboutcarlo: "Founder Story",
+  dreamteam: "Dream Team", services: "Services", securityoperationscenter: "Security Operations", glyphlockfinancial: "Financial",
+  trustsecurity: "Trust & Security", commandcenter: "Command Center", accountsecurity: "Account Security", roadmap: "Roadmap",
+};
+
+// Name the page from the URL first (route names can be generic), then the layout's page name.
 function prettyPage(pageName, pagePath) {
-  const raw = pageName || (pagePath || "").replace(/^\//, "") || "Home";
-  return raw.replace(/([a-z])([A-Z])/g, "$1 $2");
+  const seg = (pagePath || "").split("/").filter(Boolean)[0] || "";
+  const key = seg.toLowerCase();
+  if (key in PAGE_LABELS) return PAGE_LABELS[key];
+  const raw = seg || pageName || "Home";
+  return raw.replace(/[-_]/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase());
 }
 
 export default function GlyphChat({ onClose, onGrab, pagePath = "", pageName = "", initialPrompt = "", active = true }) {
