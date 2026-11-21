@@ -6,8 +6,10 @@ import {
   Building2,
   Check,
   ChevronRight,
+  Camera,
   CircuitBoard,
   Code2,
+  ExternalLink,
   FileCheck2,
   Fingerprint,
   Handshake,
@@ -338,6 +340,43 @@ export default function Partners() {
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </Link>
+                  </div>
+                </article>
+
+                <article
+                  aria-labelledby="reolink-partner-heading"
+                  className="rounded-[1.6rem] border border-emerald-300/20 bg-gradient-to-br from-emerald-300/[0.08] to-cyan-300/[0.04] p-6 sm:col-span-2"
+                >
+                  <div className="flex flex-col justify-between gap-7 sm:flex-row sm:items-center">
+                    <div className="flex gap-4">
+                      <div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl border border-emerald-300/25 bg-emerald-300/[0.08] text-emerald-200">
+                        <Camera className="h-5 w-5" aria-hidden="true" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-200">Camera hardware partner program</p>
+                        <h3 id="reolink-partner-heading" className="mt-2 font-space text-2xl font-black text-white">
+                          Reolink Business Partner Club
+                        </h3>
+                        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+                          GlyphLock LLC was approved as a member of the Reolink Business Partner Club on October 10, 2026. Membership gives GlyphLock a Reolink business account with partner pricing for the cameras used in venue deployments.
+                        </p>
+                        <p className="mt-3 max-w-2xl text-xs leading-5 text-slate-500">
+                          Membership is reviewed annually by Reolink. It is not a certification, endorsement, or joint product. Reolink is a trademark of its owner, used here only to name the program.
+                        </p>
+                      </div>
+                    </div>
+                    <a
+                      href="https://reolink.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Visit reolink.com (opens in a new tab)"
+                      className="flex-none"
+                    >
+                      <Button className="w-full bg-white text-slate-950 hover:bg-emerald-100 sm:w-auto">
+                        Visit reolink.com
+                        <ExternalLink className="ml-2 h-4 w-4" aria-hidden="true" />
+                      </Button>
+                    </a>
                   </div>
                 </article>
               </div>
