@@ -196,17 +196,15 @@ export default function GlyphChat({ onClose, onGrab, onPhase, pagePath = "", pag
 
     try {
       const { QR_KNOWLEDGE_BASE } = await import("@/components/qr/QrKnowledgeBase");
-      const { default: faqData } = await import("@/components/content/faqMasterData");
-      const { default: sitemapKnowledge } = await import("@/components/content/sitemapKnowledge");
 
       const extraContext = [
         "Your name on this site is Glyph. You are the chat assistant for the whole GlyphLock.io site, and you live in the GlyphBot Prime card.",
         `The visitor is on the page "${here}" (${pagePath || "/"}). Use that when they say "this page" or "here". Don't tell them to go to the page they are already on.`,
         "Answer first, in a few short sentences. When you point to a page, give its path as a markdown link, for example [Consultation](/Consultation).",
-        "QR Studio Knowledge:", QR_KNOWLEDGE_BASE,
-        "FAQ:", faqData.map((item) => `Q: ${item.q}\nA: ${item.a.join(" ")}`).join("\n\n"),
-        "Site Structure:", sitemapKnowledge.tools.map((t) => `- ${t.name} at ${t.path}`).join("\n"),
-        "Navigation Q&A:", sitemapKnowledge.commonQuestions.map((q) => `Q: ${q.q}\nA: ${q.a}`).join("\n"),
+        "VERIFIED PAGES (the only paths you may link to):",
+        VERIFIED_PAGES.map((p) => `- [${p.name}](${p.path}): ${p.about}`).join("\n"),
+        "QR Studio how-to (use for how to use the tool only; it is not proof of any security claim):",
+        String(QR_KNOWLEDGE_BASE).replace(/military-grade\s*/gi, ""),
       ].join("\n");
 
       const conversationHistory = history
