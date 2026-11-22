@@ -1,0 +1,584 @@
+function Seg({ label, value, options, onChange }) {
+  return (
+    <div className="gcd-seg" role="radiogroup" aria-label={label}>
+      <span className="gcd-seg-l">{label}</span>
+      {options.map(([v, t]) => (
+        <button key={v} type="button" role="radio" aria-checked={value === v} className={value === v ? "on" : ""} onClick={() => onChange(v)}>
+          {t}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export default function GlyphChat({ onClose, onGrab, onPhase, pagePath = "", pageName = "", initialPrompt = "", active = true }) {
+  const navigate = useNavigate();
+  const [messages, setMessages] = useState(restoreChat);
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [depth, setDepth] = useState("brief");
+  const [lens, setLens] = useState("plain");
+  const [sheet, setSheet] = useState(null);
+  const [pins, setPins] = useState(restorePins);
+  const [toast, setToast] = useState("");
+  const [speakingId, setSpeakingId] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
+  const [flash, setFlash] = useState(null);
+  const inputRef = useRef(null);
+  const recRef = useRef(null);
+  const toastTimer = useRef(null);
+  const sentInitial = useRef(false);
+  const Speech = getSpeech();
+  const here = prettyPage(pageName, pagePath);
+
+  // Every finished answer ascends the card one phase, and every phase unlocks one more control.
+  const answered = messages.filter((m) => m.role === "assistant" && !m.streaming && m.text).length;
+  const phase = Math.min(12, answered);
+  const P = GLYPH_PHASES[phase];
+  const empty = messages.length === 0;
+  const can = (id) => has(phase, id);
+  const upNext = nextFeature(phase);
+  const lastAssistantId = [...messages].reverse().find((m) => m.role === "assistant")?.id;
+
+  const prevPhase = useRef(phase);
+  useEffect(() => {
+    if (phase > prevPhase.current) {
+      setFlash({ phase, feature: featureAt(phase) });
+      try { navigator.vibrate?.([8, 40, 8]); } catch { /* no haptics */ }
+    }
+    prevPhase.current = phase;
+    onPhase?.(phase);
+  }, [phase, onPhase]);
+
+  const say = useCallback((t) => {
+    setToast(t);
+    window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(""), 2600);
+  }, []);
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+
+  // PH 09 MEMORY: keep the chat for this visit once it is unlocked; otherwise keep nothing.
+  useEffect(() => {
+    if (busy) return;
+    if (has(phase, "memory")) {
+      writeJSON("sessionStorage", MEMORY_KEY, messages.filter((m) => !m.streaming && m.text).slice(-80).map(({ role, text, id }) => ({ role, text, id })));
+    } else {
+      writeJSON("sessionStorage", MEMORY_KEY, null);
+    }
+  }, [messages, busy, phase]);
+
+  useEffect(() => { writeJSON("localStorage", PINS_KEY, pins); }, [pins]);
+
+  const lastLen = messages[messages.length - 1]?.text?.length || 0;
+  const { ref: scrollRef, pinned, onScroll, scrollToBottom } = useChatScroll(`${messages.length}-${lastLen}-${busy}`);
+
+  const send = async (raw) => {
+    const userMessage = (raw ?? input).trim();
+    if (!userMessage || busy) return;
+    try { navigator.vibrate?.(6); } catch { /* no haptics */ }
+
+    setInput("");
+    setSheet(null);
+    const history = messages;
+    const ts = Date.now();
+    setMessages((prev) => [...prev, { role: "user", text: userMessage, id: `u${ts}` }, { role: "assistant", text: "", streaming: true, id: `a${ts}` }]);
+    setBusy(true);
+
+    try {
+      const { QR_KNOWLEDGE_BASE } = await import("@/components/qr/QrKnowledgeBase");
+
+      const extraContext = [
+        "Your name on this site is Glyph. You are the chat assistant for the whole GlyphLock.io site, and you live in the GlyphBot Prime card.",
+        `The visitor is on the page "${here}" (${pagePath || "/"}). Use that when they say "this page" or "here". Don't tell them to go to the page they are already on.`,
+        "Answer first. When you point to a page, give its path as a markdown link, for example [Consultation](/Consultation).",
+        has(phase, "depth") ? DEPTHS[depth] : DEPTHS.brief,
+        has(phase, "lens") ? LENSES[lens] : "",
+        "End every answer with one last line in exactly this form, and nothing after it: NEXT: <question> | <question> | <question>. Those are three short questions the visitor might ask you next about GlyphLock, written in their voice.",
+        "VERIFIED PAGES (the only paths you may link to):",
+        VERIFIED_PAGES.map((p) => `- [${p.name}](${p.path}): ${p.about}`).join("\n"),
+        "QR Studio how-to (use for how to use the tool only; it is not proof of any security claim):",
+        String(QR_KNOWLEDGE_BASE).replace(/military-grade\s*/gi, ""),
+      ].filter(Boolean).join("\n");
+
+      const conversationHistory = history
+        .map((msg) => ({ role: msg.role, content: msg.role === "assistant" ? splitNext(msg.text).body : msg.text }))
+        .concat([{ role: "user", content: userMessage }]);
+
+      await askGlyphBot({
+        personaId: "glyphbot_jr",
+        messages: conversationHistory,
+        extraContext,
+        onChunk: (partial) => {
+          setMessages((prev) => prev.map((m) => (m.id === `a${ts}` ? { ...m, text: partial } : m)));
+        },
+      });
+      setMessages((prev) => prev.map((m) => (m.id === `a${ts}` ? { ...m, streaming: false } : m)));
+    } catch {
+      setMessages((prev) => prev.map((m) => (m.id === `a${ts}` ? { ...m, streaming: false, text: m.text || "Something glitched on my end. Try that again?" } : m)));
+    }
+    setBusy(false);
+  };
+
+  useEffect(() => {
+    if (initialPrompt && !sentInitial.current) {
+      sentInitial.current = true;
+      send(initialPrompt);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (active && isDesktop()) inputRef.current?.focus();
+  }, [active]);
+
+  useEffect(() => () => {
+    try { recRef.current?.abort(); } catch { /* already stopped */ }
+    try { window.speechSynthesis?.cancel(); } catch { /* nothing speaking */ }
+  }, []);
+
+  const toggleMic = () => {
+    if (!Speech) return;
+    if (listening) { try { recRef.current?.stop(); } catch { /* already stopped */ } return; }
+    const rec = new Speech();
+    rec.lang = navigator.language || "en-US";
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    let finalText = "";
+    rec.onresult = (e) => {
+      let interim = "";
+      for (let i = e.resultIndex; i < e.results.length; i += 1) {
+        const t = e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalText += t; else interim += t;
+      }
+      setInput((finalText + interim).trim());
+    };
+    rec.onend = () => {
+      setListening(false);
+      if (finalText.trim()) send(finalText);
+    };
+    rec.onerror = () => setListening(false);
+    recRef.current = rec;
+    setListening(true);
+    try { rec.start(); } catch { setListening(false); }
+  };
+
+  const pick = (node) => {
+    if (node.ask) send(node.ask(here));
+    else inputRef.current?.focus();
+  };
+
+  const reset = () => {
+    if (busy) return;
+    try { window.speechSynthesis?.cancel(); } catch { /* nothing speaking */ }
+    setSpeakingId(null);
+    setSheet(null);
+    setFlash(null);
+    setMessages([]);
+    writeJSON("sessionStorage", MEMORY_KEY, null);
+  };
+
+  // Go to a GlyphLock page. On phones the card covers the page, so it closes.
+  const go = (path) => {
+    navigate(path);
+    if (!isDesktop()) onClose?.();
+  };
+
+  // PH 02 COPY
+  const copy = async (msg) => {
+    try {
+      await navigator.clipboard.writeText(plainText(splitNext(msg.text).body));
+      setCopiedId(msg.id);
+      window.setTimeout(() => setCopiedId((id) => (id === msg.id ? null : id)), 1600);
+    } catch {
+      say("Your browser blocked copying.");
+    }
+  };
+
+  // PH 03 VOICE
+  const speak = (msg) => {
+    const synth = typeof window !== "undefined" ? window.speechSynthesis : null;
+    if (!synth || !window.SpeechSynthesisUtterance) { say("This browser can't read aloud."); return; }
+    if (speakingId === msg.id) { synth.cancel(); setSpeakingId(null); return; }
+    synth.cancel();
+    const u = new window.SpeechSynthesisUtterance(plainText(splitNext(msg.text).body));
+    u.lang = navigator.language || "en-US";
+    u.onend = () => setSpeakingId((id) => (id === msg.id ? null : id));
+    u.onerror = u.onend;
+    setSpeakingId(msg.id);
+    synth.speak(u);
+  };
+
+  // PH 06 PINS
+  const isPinned = (msg) => pins.some((p) => p.id === msg.id);
+  const togglePin = (msg) => {
+    const on = isPinned(msg);
+    setPins((prev) => (on ? prev.filter((p) => p.id !== msg.id) : [{ id: msg.id, text: splitNext(msg.text).body, at: Date.now() }, ...prev].slice(0, 30)));
+    say(on ? "Unpinned." : "Pinned. Open pins from the pin at the top.");
+  };
+
+  // PH 07 HANDOFF: copy the visitor's own questions, then open Consultation.
+  const handoff = async () => {
+    const qs = messages.filter((m) => m.role === "user").slice(-12).map((m) => `- ${m.text}`);
+    let copied = false;
+    if (qs.length) {
+      try { await navigator.clipboard.writeText(["Questions I asked Glyph on glyphlock.io:", ...qs].join("\n")); copied = true; } catch { /* clipboard blocked */ }
+    }
+    say(copied ? "Your questions are copied. Paste them into the form." : "Opening Consultation.");
+    navigate("/Consultation");
+    window.setTimeout(() => onClose?.(), 900);
+  };
+
+  // PH 08 EXPORT
+  const exportChat = () => {
+    const lines = messages
+      .filter((m) => !m.streaming && m.text)
+      .map((m) => `${m.role === "user" ? "You" : "Glyph"}: ${m.role === "user" ? m.text : plainText(splitNext(m.text).body)}`);
+    if (!lines.length) { say("Nothing to download yet."); return; }
+    try {
+      const blob = new Blob([`Chat with Glyph on glyphlock.io, ${new Date().toLocaleString()}\n\n${lines.join("\n\n")}\n`], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `glyph-chat-${new Date().toISOString().slice(0, 10)}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+      say("Chat downloaded.");
+    } catch {
+      say("This browser blocked the download.");
+    }
+  };
+
+  // PH 11 COMMANDS
+  const runCommand = (line) => {
+    const word = line.trim().split(/\s+/)[0].toLowerCase();
+    const c = COMMANDS.find((x) => x.cmd === word);
+    if (!c) { say(`No command ${word}. Type / to see them.`); return; }
+    if (!has(phase, c.need)) { say(`${c.cmd} unlocks at ${unlockNum(c.need)}.`); return; }
+    setInput("");
+    if (c.cmd === "/consult") send(NODES.left[0].ask());
+    else if (c.cmd === "/qr") send(NODES.left[2].ask());
+    else if (c.cmd === "/map") setSheet("map");
+    else if (c.cmd === "/pins") setSheet("pins");
+    else if (c.cmd === "/handoff") handoff();
+    else if (c.cmd === "/export") exportChat();
+    else if (c.cmd === "/recap") send(RECAP_ASK);
+    else if (c.cmd === "/clear") reset();
+  };
+
+  const typed = input.trim().toLowerCase();
+  const cmds = can("commands") && typed.startsWith("/") && !busy ? COMMANDS.filter((c) => c.cmd.startsWith(typed.split(/\s/)[0])) : [];
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    if (can("commands") && typed.startsWith("/")) { runCommand(cmds.length === 1 ? cmds[0].cmd : input); return; }
+    send();
+  };
+
+  const renderAnswer = (msg) => {
+    const { body, next } = splitNext(msg.text);
+    const done = !msg.streaming && !!body;
+    const herePath = (pagePath || "/").toLowerCase();
+    const jumps = done && can("jump") ? pageLinks(body, VERIFIED_PAGES).filter((p) => p.path.toLowerCase() !== herePath) : [];
+    const showNext = done && can("next") && msg.id === lastAssistantId && next.length > 0 && !busy;
+    return (
+      <div className="max-w-[92%] min-w-0">
+        <div className="gcd-a gcd-say px-3.5 py-2.5">
+          {msg.streaming && !body ? (
+            <span className="gcd-dots inline-flex items-center gap-1.5 py-1" aria-label="Glyph is typing"><span /><span /><span /></span>
+          ) : (
+            <>
+              <MarkdownRenderer>{body}</MarkdownRenderer>
+              {msg.streaming && <span className="gcd-caret" />}
+              {done && <FeedbackButtons messageId={`glyph-${msg.id}`} personaId="glyphbot_jr" surface="glyph_site" responseText={body} />}
+            </>
+          )}
+        </div>
+        {done && (can("copy") || can("voice") || can("pins")) && (
+          <div className="flex flex-wrap gap-1.5 mt-1.5">
+            {can("copy") && (
+              <button type="button" className={`gcd-act${copiedId === msg.id ? " on" : ""}`} onClick={() => copy(msg)} aria-label="Copy this answer">
+                {copiedId === msg.id ? <Check /> : <Copy />}{copiedId === msg.id ? "COPIED" : "COPY"}
+              </button>
+            )}
+            {can("voice") && (
+              <button type="button" className={`gcd-act${speakingId === msg.id ? " on" : ""}`} onClick={() => speak(msg)} aria-pressed={speakingId === msg.id} aria-label={speakingId === msg.id ? "Stop reading" : "Read this answer aloud"}>
+                {speakingId === msg.id ? <Square /> : <Volume2 />}{speakingId === msg.id ? "STOP" : "LISTEN"}
+              </button>
+            )}
+            {can("pins") && (
+              <button type="button" className={`gcd-act${isPinned(msg) ? " on" : ""}`} onClick={() => togglePin(msg)} aria-pressed={isPinned(msg)} aria-label={isPinned(msg) ? "Unpin this answer" : "Pin this answer"}>
+                {isPinned(msg) ? <PinOff /> : <Pin />}{isPinned(msg) ? "PINNED" : "PIN"}
+              </button>
+            )}
+          </div>
+        )}
+        {jumps.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mt-1.5">
+            {jumps.map((p) => (
+              <button key={p.path} type="button" className="gcd-jump" onClick={() => go(p.path)} aria-label={`Go to ${p.name}`}>
+                {p.name.toUpperCase()}<ArrowUpRight />
+              </button>
+            ))}
+          </div>
+        )}
+        {showNext && (
+          <div className="mt-2 flex flex-col items-start gap-1.5">
+            {next.map((q) => (
+              <button key={q} type="button" className="gcd-chip" onClick={() => send(q)}>{q}</button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const flashing = flash && flash.phase === phase && phase > 0;
+
+  return (
+    <div className="gcd" style={phaseVars(phase)}>
+      <style>{EMBLEM_CSS + CARD_CSS}</style>
+      <div className="gcd-bg" aria-hidden="true" />
+      <div className="gcd-frame" aria-hidden="true" />
+      {flashing && (
+        <div className="gcd-ascend" key={`asc${phase}`} aria-hidden="true">
+          <span>ASCEND · {P.name}</span>
+          {flash.feature && <span className="gcd-unl">UNLOCKED · {flash.feature.name}</span>}
+        </div>
+      )}
+      <p className="sr-only" role="status">{flashing && flash.feature ? `Phase ${P.name}. Unlocked ${flash.feature.name}: ${flash.feature.what}` : ""}</p>
+
+      {/* Top row: phase pill (opens the phase map), tether, controls. Drag handle on phones. */}
+      <header
+        className="shrink-0 px-4 pt-3 select-none"
+        onPointerDown={onGrab}
+        style={{ touchAction: onGrab ? "none" : "auto" }}
+      >
+        {onGrab && <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-white/25" aria-hidden="true" />}
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            className="gcd-pill gcd-pillbtn"
+            onClick={() => setSheet(sheet === "map" ? null : "map")}
+            onPointerDown={(e) => e.stopPropagation()}
+            aria-label={`${P.num} ${P.name}: open the phase map`}
+            aria-expanded={sheet === "map"}
+          >
+            {P.num}<MapIcon className="w-3 h-3" />
+          </button>
+          <div className="flex items-center gap-1 min-w-0" onPointerDown={(e) => e.stopPropagation()}>
+            <span className="gcd-teth hidden min-[360px]:inline mr-1">TETHER <b>◆</b> LOCKED</span>
+            {pins.length > 0 && (
+              <button type="button" className="gcd-ibtn relative" onClick={() => setSheet(sheet === "pins" ? null : "pins")} aria-label={`Pinned answers (${pins.length})`} aria-expanded={sheet === "pins"}>
+                <Pin className="w-[17px] h-[17px]" />
+                <span className="gcd-badge">{pins.length}</span>
+              </button>
+            )}
+            {!empty && (
+              <button type="button" className="gcd-ibtn" onClick={reset} disabled={busy} aria-label="New chat">
+                <RotateCcw className="w-[17px] h-[17px]" />
+              </button>
+            )}
+            <button type="button" className="gcd-ibtn" onClick={onClose} aria-label="Close Glyph">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {empty ? (
+          <div className="text-center mt-1">
+            <h2 className="gcd-title text-[34px]">GLYPH</h2>
+            <p className="gcd-sub mt-1.5">PRIME · SITE ASSISTANT</p>
+            <p className="gcd-pn text-[15px] mt-2" key={`pn${phase}`}>{P.name}</p>
+            <p className="gcd-tag">{P.tag}</p>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3 mt-1 pb-2">
+            <GlyphEmblem size={52} phase={phase} busy={busy} />
+            <div className="min-w-0">
+              <h2 className="gcd-title text-[22px]">GLYPH</h2>
+              <p className="mt-1 text-[11px] tracking-[.18em] truncate">
+                <span className="gcd-pn" key={`pn${phase}`}>{P.name}</span>
+                <span className="text-[color:var(--dim)]"> · {busy ? "THINKING" : here.toUpperCase()}</span>
+              </p>
+            </div>
+          </div>
+        )}
+      </header>
+
+      <main
+        ref={scrollRef}
+        onScroll={onScroll}
+        className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4"
+        aria-live="polite"
+      >
+        {empty ? (
+          <div className="gcd-face h-full min-h-[300px] flex flex-col justify-center">
+            {/* The card's bay: three nodes, the emblem, three nodes. */}
+            <div className="grid items-center" style={{ gridTemplateColumns: "64px 1fr 64px" }}>
+              <div className="flex flex-col items-center gap-5">
+                {NODES.left.map((n) => <Node key={n.id} node={n} onPick={pick} disabled={busy} />)}
+              </div>
+              <div className="flex justify-center">
+                <GlyphEmblem size={170} phase={phase} busy={busy} />
+              </div>
+              <div className="flex flex-col items-center gap-5">
+                {NODES.right.map((n) => <Node key={n.id} node={n} onPick={pick} disabled={busy} />)}
+              </div>
+            </div>
+            <p className="mt-4 text-center gcd-say text-[13px] text-[color:var(--dim)]">
+              Tap a node, or ask me anything about GlyphLock.
+            </p>
+            <button type="button" className="mt-1 mx-auto gcd-say text-[12px] underline underline-offset-2 text-[color:var(--dim)] hover:text-white min-h-[36px]" onClick={() => setSheet("map")}>
+              Every answer climbs a phase and unlocks a new power. See all 13.
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3 py-3">
+            {messages.map((msg) => (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                {msg.role === "assistant" ? renderAnswer(msg) : (
+                  <p className="gcd-u gcd-say max-w-[80%] px-3.5 py-2 whitespace-pre-wrap break-words">{msg.text}</p>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </main>
+
+      {!pinned && !empty && (
+        <div className="relative z-20">
+          <JumpToLatest onClick={() => scrollToBottom()} />
+        </div>
+      )}
+
+      {toast && <div className="gcd-toast" role="status">{toast}</div>}
+
+      <footer className="shrink-0 px-4 pt-2" style={{ paddingBottom: "calc(14px + env(safe-area-inset-bottom))" }}>
+        {!empty && can("depth") && (
+          <div className="gcd-quick flex items-center gap-1.5 pb-2 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+            <Seg label="DEPTH" value={depth} options={[["brief", "BRIEF"], ["deep", "DEEP"]]} onChange={setDepth} />
+            {can("lens") && <Seg label="LENS" value={lens} options={[["plain", "PLAIN"], ["builder", "BUILDER"], ["business", "BUSINESS"]]} onChange={setLens} />}
+            {can("handoff") && <button type="button" className="gcd-tool" onClick={handoff}><Handshake />HANDOFF</button>}
+            {can("export") && <button type="button" className="gcd-tool" onClick={exportChat}><Download />EXPORT</button>}
+            {can("recap") && <button type="button" className="gcd-tool" onClick={() => send(RECAP_ASK)} disabled={busy}><Sparkles />RECAP</button>}
+          </div>
+        )}
+        {!empty && (
+          <div className="gcd-quick flex justify-between gap-1 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+            {QUICK.map((n) => <Node key={n.id} node={n} onPick={pick} small disabled={busy} />)}
+          </div>
+        )}
+        <div className="gcd-bar" aria-hidden="true">
+          {Array.from({ length: 12 }, (_, i) => <i key={i} className={i < phase ? "on" : ""} />)}
+        </div>
+        <div className="gcd-stats mt-1.5 mb-2.5 gap-2">
+          <span>SYNC <b>{P.pct}%</b></span>
+          <button type="button" className="truncate hover:text-white" onClick={() => setSheet("map")} aria-label="Open the phase map">
+            {upNext ? <>NEXT <b>{upNext.name}</b></> : <b>ALL UNLOCKED</b>}
+          </button>
+          <span>TIME <b>{busy ? "THINKING" : P.time}</b></span>
+        </div>
+        {cmds.length > 0 && (
+          <div className="gcd-cmds mb-2" aria-label="Commands">
+            {cmds.map((c) => {
+              const ok = has(phase, c.need);
+              return (
+                <button key={c.cmd} type="button" className={`gcd-cmd${ok ? "" : " is-locked"}`} onClick={() => runCommand(c.cmd)}>
+                  <b>{c.cmd}</b><span>{ok ? c.what : `unlocks at ${unlockNum(c.need)}`}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <form className="gcd-in flex items-center gap-1 pl-4 pr-1 py-1" onSubmit={onSubmit}>
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder={listening ? "Listening…" : can("commands") ? "Ask Glyph, or type / for commands" : "Ask Glyph anything"}
+            enterKeyHint="send"
+            aria-label="Message Glyph"
+            className="flex-1 min-w-0 bg-transparent text-white focus:outline-none"
+            style={{ fontSize: 16, minHeight: 42 }}
+          />
+          {Speech && (
+            <button
+              type="button"
+              onClick={toggleMic}
+              aria-label={listening ? "Stop listening" : "Speak to Glyph"}
+              aria-pressed={listening}
+              className={`gcd-mic${listening ? " on" : ""}`}
+              style={{ touchAction: "manipulation" }}
+            >
+              <Mic className="w-5 h-5" />
+            </button>
+          )}
+          <motion.button type="submit" whileTap={{ scale: 0.88 }} disabled={busy || !input.trim()} aria-label="Ascend: send" className="gcd-send">
+            <ArrowUp className="w-5 h-5" strokeWidth={2.6} />
+          </motion.button>
+        </form>
+        <p className="mt-1.5 text-center text-[9px] tracking-[.14em] text-[color:var(--dim)]">GLYPH CAN'T SEE YOUR ACCOUNT OR PAYMENTS</p>
+      </footer>
+
+      {sheet && (
+        <div className="gcd-sheet" role="dialog" aria-label={sheet === "map" ? "Phase map" : "Pinned answers"}>
+          <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0">
+            <div>
+              <p className="gcd-pn text-[13px]">{sheet === "map" ? "PHASE MAP" : "PINNED"}</p>
+              <p className="gcd-tag mt-1">{sheet === "map" ? `${phase} OF 12 ASCENDED` : `${pins.length} SAVED ON THIS DEVICE`}</p>
+            </div>
+            <button type="button" className="gcd-ibtn" onClick={() => setSheet(null)} aria-label="Close">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 space-y-2" style={{ paddingBottom: "calc(16px + env(safe-area-inset-bottom))" }}>
+            {sheet === "map" ? (
+              <>
+                {PHASE_FEATURES.map((f) => {
+                  const ph = GLYPH_PHASES[f.phase];
+                  const open = phase >= f.phase;
+                  const left = f.phase - answered;
+                  return (
+                    <div key={f.id} className={`gcd-row${open ? " is-open" : ""}${f.phase === phase ? " is-here" : ""}`} style={phaseVars(f.phase)}>
+                      <span className="gcd-sym" aria-hidden="true">{open ? ph.sym : <Lock />}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="gcd-row-t"><span>{ph.num} · {ph.name}</span><b>{f.name}</b></p>
+                        <p className="gcd-row-w">{f.what}</p>
+                      </div>
+                      <span className="gcd-row-s">{open ? "ON" : `${left} TO GO`}</span>
+                    </div>
+                  );
+                })}
+                <button type="button" className="gcd-cta" onClick={() => { setSheet(null); go("/Consultation"); }}>
+                  Want the team on it? Book a consult <ArrowUpRight className="w-4 h-4" />
+                </button>
+              </>
+            ) : pins.length === 0 ? (
+              <p className="gcd-say text-[13px] text-[color:var(--dim)]">Nothing pinned yet.</p>
+            ) : (
+              pins.map((p) => (
+                <div key={p.id} className="gcd-a gcd-say px-3.5 py-2.5">
+                  <MarkdownRenderer>{p.text}</MarkdownRenderer>
+                  <div className="flex justify-end mt-1.5">
+                    <button type="button" className="gcd-act" onClick={() => setPins((prev) => prev.filter((x) => x.id !== p.id))} aria-label="Unpin">
+                      <PinOff />UNPIN
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
