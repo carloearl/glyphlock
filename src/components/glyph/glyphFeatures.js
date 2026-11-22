@@ -31,7 +31,7 @@ export function splitNext(text = "") {
   const t = String(text);
   // While streaming, hide a NEXT line that has started but not finished.
   const at = t.search(/\n\s*\**NEXT\b/i);
-  if (at === -1) return { body: t, next: [] };
+  if (at === -1) return { body: t.replace(/\n\s*\**N(E(XT?)?)?$/i, ""), next: [] };
   const m = t.slice(at).match(NEXT_RE);
   const next = m
     ? m[1].split("|").map((q) => q.replace(/^[\s\-*•\d.]+/, "").replace(/[*_`]/g, "").trim()).filter((q) => q.length > 3 && q.length < 120).slice(0, 3)
