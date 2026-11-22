@@ -25,13 +25,13 @@ export const SITEMAP_KNOWLEDGE = {
   mainSections: [
     {
       name: "QR Studio",
-      path: "/qr-generator",
+      path: "/secureqrstudio",
       description: "Full-access QR code creation engine with steganography, hot zones, anti-quishing protection, and tamper detection. Open source — extend it however you want.",
       features: ["Secure QR generation", "90+ payload types", "Anti-quishing", "Steganography", "Hot zones", "Analytics", "Open source", "No feature paywalls"]
     },
     {
       name: "Image Lab",
-      path: "/image-lab",
+      path: "/imagelab",
       description: "AI image generation and interactive hotspot editing with cryptographic verification. Your images, your hotspots, your code — fully modifiable.",
       features: ["AI image generation", "Interactive hotspots", "Cryptographic hashing", "Gallery management", "Full framework access"]
     },
@@ -49,35 +49,33 @@ export const SITEMAP_KNOWLEDGE = {
     },
     {
       name: "Master Covenant",
-      path: "/master-covenant",
+      path: "/mastercovenant",
       description: "The legal framework that protects your rights as a creator. The Master Covenant binds GlyphLock to transparency, open source access, and creator sovereignty.",
       features: ["Creator rights protection", "Open source guarantee", "Governance framework", "Legal binding", "No vendor lock-in clause"]
     }
   ],
 
   tools: [
-    { name: "QR Generator", path: "/qr-generator", category: "Security" },
-    { name: "Image Lab", path: "/image-lab", category: "AI Tools" },
-    { name: "Steganography", path: "/steganography", category: "Security" },
+    { name: "QR Generator", path: "/secureqrstudio", category: "Security" },
+    { name: "Image Lab", path: "/imagelab", category: "AI Tools" },
     { name: "Blockchain Verification", path: "/blockchain", category: "Security" },
     { name: "GlyphBot Assistant", path: "/glyphbot", category: "AI Tools" },
-    { name: "NUPS Portal System", path: "/nups-login", category: "Services" }
+    { name: "NUPS Portal System", path: "/nupslogin", category: "Services" }
   ],
 
   company: [
     { name: "About Us", path: "/about" },
-    { name: "Dream Team", path: "/dream-team" },
+    { name: "Dream Team", path: "/dreamteam" },
     { name: "Partners", path: "/partners" },
     { name: "Roadmap", path: "/roadmap" },
     { name: "Contact", path: "/contact" }
   ],
 
   resources: [
-    { name: "Documentation", path: "/security-docs" },
+    { name: "Documentation", path: "/securitydocs" },
     { name: "FAQ", path: "/faq" },
-    { name: "Sitemap", path: "/sitemap" },
     { name: "Consultation", path: "/consultation" },
-    { name: "Command Center", path: "/command-center" }
+    { name: "Command Center", path: "/commandcenter" }
   ],
 
   legal: [
@@ -106,15 +104,15 @@ export const SITEMAP_KNOWLEDGE = {
     },
     {
       q: "What is the Master Covenant?",
-      a: "The Master Covenant is the legal framework that protects your rights as a creator. It binds GlyphLock to transparency, open source access, and creator sovereignty. Your work stays yours. Visit /master-covenant to read it."
+      a: "The Master Covenant is the legal framework that protects your rights as a creator. It binds GlyphLock to transparency, open source access, and creator sovereignty. Your work stays yours. Visit /mastercovenant to read it."
     },
     {
       q: "Where can I find the QR code generator?",
-      a: "Visit /qr-generator or navigate to Services > QR Studio in the main menu. Full framework access — modify and extend it however you want."
+      a: "Visit /secureqrstudio or navigate to Services > QR Studio in the main menu. Full framework access — modify and extend it however you want."
     },
     {
       q: "How do I access the Image Lab?",
-      a: "Go to /image-lab or click Services > Image Lab. Full creation tools with AI generation, interactive hotspots, and cryptographic verification."
+      a: "Go to /imagelab or click Services > Image Lab. Full creation tools with AI generation, interactive hotspots, and cryptographic verification."
     },
     {
       q: "Where is the pricing information?",
@@ -126,17 +124,17 @@ export const SITEMAP_KNOWLEDGE = {
     },
     {
       q: "What pages are available on GlyphLock?",
-      a: "Main pages include: Home (/), QR Studio (/qr-generator), Image Lab (/image-lab), FAQ (/faq), Pricing (/pricing), Master Covenant (/master-covenant), About (/about), Contact (/contact), and more. See /sitemap for the complete list."
+      a: "Main pages include: Home (/), QR Studio (/secureqrstudio), Image Lab (/imagelab), FAQ (/faq), Pricing (/pricing), Master Covenant (/mastercovenant), About (/about), Contact (/contact), and more. The footer on every page links to the rest."
     }
   ],
 
   navigationTips: [
     "Use the main navigation menu at the top to access all major sections",
     "The footer contains links to company info, solutions, and resources",
-    "The Sitemap page (/sitemap) provides a comprehensive overview of all available pages",
+    "The footer on every page links to all main sections",
     "FAQ page (/faq) is searchable and categorized for easy information discovery",
-    "Master Covenant (/master-covenant) explains your legal rights and protections",
-    "Command Center (/command-center) is for authenticated enterprise users"
+    "Master Covenant (/mastercovenant) explains your legal rights and protections",
+    "Command Center (/commandcenter) is for authenticated enterprise users"
   ]
 };
 

@@ -7,6 +7,7 @@ import CursorOrb from "@/components/global/CursorOrb";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import UnifiedSidebar from "@/components/global/UnifiedSidebar";
+import GlyphAssistant from "@/components/glyph/GlyphAssistant";
 import ThemeProvider from "@/components/ThemeProvider";
 import CrawlerFallback from "@/components/seo/CrawlerFallback";
 import PrerenderHints from "@/components/seo/PrerenderHints";
@@ -140,7 +141,7 @@ export default function Layout({ children, currentPageName }) {
         </main>
 
 
-        {/* Unified Sidebar - GlyphBot Jr + Help Guide */}
+        {/* Unified Sidebar - Glyph shortcut + Help Guide */}
         <UnifiedSidebar
           helpTitle="Quick Help Guide"
           helpSections={[
@@ -155,7 +156,7 @@ export default function Layout({ children, currentPageName }) {
                 },
                 { 
                   heading: 'Navigate the Interface', 
-                  text: 'Top Navigation Bar: Click any menu item to see available tools. Hover over "Modules" or "Protocols" to view dropdown menus. Mobile: Tap the hamburger menu icon (three lines) in top-right for full navigation. Command Center: Click your profile picture → Command Center for account settings, API keys, and billing. GlyphBot Jr: The chat icon on the right side provides instant AI assistance—ask it anything. Help: Press the ? key anytime (or click Help icon bottom-right) to reopen this guide.',
+                  text: 'Top Navigation Bar: Click any menu item to see available tools. Hover over "Modules" or "Protocols" to view dropdown menus. Mobile: Tap the hamburger menu icon (three lines) in top-right for full navigation. Command Center: Click your profile picture → Command Center for account settings, API keys, and billing. Glyph: The glowing orb in the bottom-right corner is the site assistant. Tap it and ask anything. Help: Press the ? key anytime (or click Help icon bottom-right) to reopen this guide.',
                   tip: 'Use keyboard shortcuts: ? for help, Esc to close modals, Tab to navigate forms.',
                   action: 'Try it now: Press Esc to close this panel, then press ? to reopen it.'
                 },
@@ -163,7 +164,7 @@ export default function Layout({ children, currentPageName }) {
                   heading: 'Common Issues & Fixes', 
                   text: 'Can\'t sign in? Clear browser cache and try again, or click "Forgot Password" on login screen. Page not loading? Refresh with Ctrl+Shift+R (hard refresh) to clear cached resources. Feature not working? Check if you\'re logged in—some tools require authentication. Mobile layout broken? Rotate device or zoom out—try landscape mode for complex tools. GlyphBot not responding? Close chat, wait 5 seconds, reopen, and try a simpler question. API key not working? Rotate it from Command Center → API Keys → click Rotate icon.',
                   tip: 'If you see "Unauthorized" errors, your session expired—just log out and log back in to refresh your token.',
-                  action: 'Still stuck? Open GlyphBot Jr and describe the issue. Share only the context needed for guidance; private records are not assumed to be available.'
+                  action: 'Still stuck? Open Glyph and describe the issue. Share only the context needed for guidance; private records are not assumed to be available.'
                 },
                 { 
                   heading: 'Secure Your Account', 
@@ -220,7 +221,7 @@ export default function Layout({ children, currentPageName }) {
                 { 
                   heading: 'Image Lab Troubleshooting', 
                   text: 'Generation failed? Your prompt might be too vague—add more details (lighting, style, camera angle). If it says "inappropriate content", rephrase to remove flagged words. Try again with simpler language. Image looks weird? Regenerate with different seed (Advanced settings → change Seed number → generate again). Lower creativity slider if results are too abstract. Hands look wrong? Add "hands behind back" or "hands out of frame" to prompt—AI struggles with hand anatomy. Upload failed? Images must be under 10MB. Compress at tinypng.com before uploading. Can\'t find saved images? Go to Gallery tab in Image Lab—all generated images saved there automatically. Hotspots not clickable? Make sure you clicked "Finalize" after adding hotspots—unfinalizedimages don\'t activate interactions.',
-                  tip: 'If generation keeps failing, contact support via GlyphBot Jr and describe your prompt—it can suggest fixes.',
+                  tip: 'If generation keeps failing, contact support via Glyph and describe your prompt—it can suggest fixes.',
                   action: 'Failed generation? Click "Regenerate" button → adjust creativity slider to 0.5 → change seed value → try again.'
                 }
               ]
@@ -230,9 +231,9 @@ export default function Layout({ children, currentPageName }) {
               content: [
                 { 
                   heading: 'Ask GlyphBot Anything', 
-                  text: 'How to use GlyphBot: Click "GlyphBot" in top menu → type your question in the chat box → press Enter → wait 3-10 seconds for response. What to ask: "How do I create a QR code?", "Audit my website for vulnerabilities", "Explain this error message", "Help me debug this code", "What are the security risks of X?". GlyphBot Jr (right sidebar): Quick version for simple questions. Click chat icon → ask question → get instant answer. Both bots remember your conversation, so you can ask follow-up questions. How to upload files: Click paperclip icon → select file (image, PDF, code) → GlyphBot analyzes it → ask questions about the file.',
+                  text: 'How to use GlyphBot: Click "GlyphBot" in top menu → type your question in the chat box → press Enter → wait 3-10 seconds for response. What to ask: "How do I create a QR code?", "Audit my website for vulnerabilities", "Explain this error message", "Help me debug this code", "What are the security risks of X?". Glyph (right sidebar): Quick version for simple questions. Click chat icon → ask question → get instant answer. Both bots remember your conversation, so you can ask follow-up questions. How to upload files: Click paperclip icon → select file (image, PDF, code) → GlyphBot analyzes it → ask questions about the file.',
                   tip: 'GlyphBot can use the conversation, files, and project context you intentionally provide. It does not automatically receive unrestricted access to private account activity.',
-                  action: 'Test: Open GlyphBot Jr (right sidebar) → type "How do I enable MFA?" → get instant step-by-step answer.'
+                  action: 'Test: Open Glyph (orb, bottom-right) → type "How do I enable MFA?" → get instant step-by-step answer.'
                 },
                 { 
                   heading: 'Run Security Audits', 
@@ -322,15 +323,15 @@ export default function Layout({ children, currentPageName }) {
               content: [
                 { 
                   heading: 'Get Help Fast', 
-                  text: 'GlyphBot Jr can provide general product guidance from the information you choose to share. For billing, technical issues, or partnership inquiries, use the consultation or contact surfaces and include only the details necessary to explain the request. The knowledge guide remains available from the help control.',
-                  tip: 'Before contacting support, try GlyphBot Jr for general guidance and share only the information necessary to describe the issue.',
-                  action: 'Need help? Open GlyphBot Jr for general guidance or use the contact page for a scoped response.'
+                  text: 'Glyph can provide general product guidance from the information you choose to share. For billing, technical issues, or partnership inquiries, use the consultation or contact surfaces and include only the details necessary to explain the request. The knowledge guide remains available from the help control.',
+                  tip: 'Before contacting support, try Glyph for general guidance and share only the information necessary to describe the issue.',
+                  action: 'Need help? Open Glyph for general guidance or use the contact page for a scoped response.'
                 },
                 { 
                   heading: 'Report Bugs & Feedback', 
-                  text: 'How to report bug: Describe issue to GlyphBot Jr with screenshot → or email [carloearl@glyphlock.com](mailto:carloearl@glyphlock.com) with: (1) What you tried to do, (2) What happened instead, (3) Browser/device info, (4) Screenshot if possible. How to request features: GlyphBot Jr → say "I want feature X" → it logs request → or email [carloearl@glyphlock.com](mailto:carloearl@glyphlock.com) with "Feature Request: [your idea]". How to give feedback: After using any tool → look for feedback button/icon → rate experience → add comment → submit. Your input shapes roadmap!',
+                  text: 'How to report bug: Describe issue to Glyph with screenshot → or email [carloearl@glyphlock.com](mailto:carloearl@glyphlock.com) with: (1) What you tried to do, (2) What happened instead, (3) Browser/device info, (4) Screenshot if possible. How to request features: Glyph → say "I want feature X" → it logs request → or email [carloearl@glyphlock.com](mailto:carloearl@glyphlock.com) with "Feature Request: [your idea]". How to give feedback: After using any tool → look for feedback button/icon → rate experience → add comment → submit. Your input shapes roadmap!',
                   tip: 'Include your browser (Chrome/Safari/Firefox) and device (iPhone/Android/Desktop) when reporting bugs for faster diagnosis.',
-                  action: 'Found a bug? Open GlyphBot Jr (right sidebar) → say "I found a bug with [feature]" → describe what happened → it logs issue and may provide immediate fix.'
+                  action: 'Found a bug? Open Glyph (orb, bottom-right) → say "I found a bug with [feature]" → describe what happened → it logs issue and may provide immediate fix.'
                 }
               ]
             }
@@ -343,6 +344,9 @@ export default function Layout({ children, currentPageName }) {
           <Footer />
         </footer>
 
+
+        {/* Glyph - site-wide assistant (floating orb, bottom-right) */}
+        <GlyphAssistant currentPageName={currentPageName} />
 
         {/* Accessibility Toolbar (sitewide, Alt+A) */}
         <AccessibilityToolbar open={a11yOpen} onClose={() => setA11yOpen(false)} />

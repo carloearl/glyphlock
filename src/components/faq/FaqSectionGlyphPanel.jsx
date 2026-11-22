@@ -197,7 +197,7 @@ export default function FaqSectionGlyphPanel() {
         </Card>
 
         <div className="mt-6 text-xs md:text-sm text-gray-500">
-          Tip: This knowledge base is mirrored inside GlyphBot Jr and the AI chat page so users can ask in plain language and get the same answers.
+          Tip: This knowledge base is mirrored inside Glyph, the site assistant, and the AI chat page so users can ask in plain language and get the same answers.
         </div>
       </div>
     </section>
