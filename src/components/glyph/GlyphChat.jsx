@@ -1,6 +1,10 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { askGlyphBot } from "@/lib/glyphbot/brain/orchestrator";
-import { ArrowUp, X, Mic, RotateCcw, Zap, BookOpen, Shield, Shuffle, ScanEye } from "lucide-react";
+import {
+  ArrowUp, X, Mic, RotateCcw, Zap, BookOpen, Shield, Shuffle, ScanEye,
+  Copy, Check, Volume2, Square, Pin, PinOff, Download, Handshake, Map as MapIcon, Sparkles, Lock, ArrowUpRight,
+} from "lucide-react";
 import { motion } from "framer-motion";
 import FeedbackButtons from "@/components/glyphlock/bot/ui/FeedbackButtons";
 import MarkdownRenderer from "@/components/glyphlock/bot/ui/chat/MarkdownRenderer";
@@ -8,11 +12,15 @@ import useChatScroll from "@/components/glyphlock/bot/ui/chat/useChatScroll";
 import JumpToLatest from "@/components/glyphlock/bot/ui/chat/JumpToLatest";
 import GlyphEmblem, { EMBLEM_CSS, phaseVars } from "./GlyphEmblem";
 import { GLYPH_PHASES } from "./glyphPhases";
+import {
+  PHASE_FEATURES, has, featureAt, nextFeature, splitNext, plainText, pageLinks, DEPTHS, LENSES, COMMANDS, RECAP_ASK,
+} from "./glyphFeatures";
 
 /**
  * Glyph — the site-wide GlyphLock assistant, wearing the GlyphBot Prime card.
  * The chat panel IS the card: same frame, phases, emblem, nodes, sync bar and time line.
  * Every answer ascends the card one phase (Void .. Omega). The nodes are quick asks.
+ * Each phase unlocks one more real control (see glyphFeatures.js); the phase pill opens the map of all 13.
  * Same brain persona (glyphbot_jr) so feedback and analytics stay continuous.
  * Has no access to accounts, payments or private data.
  */
@@ -127,9 +135,64 @@ const CARD_CSS = `
 .gcd-mic { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex: none; color: var(--dim); }
 .gcd-mic.on { color: #fff; background: #f43f5e; animation: gcd-beckon 1.2s ease-in-out infinite; }
 .gcd-ascend { position: absolute; left: 50%; top: 8px; z-index: 7; transform: translateX(-50%); pointer-events: none; white-space: nowrap;
-  font-size: 10px; letter-spacing: .26em; padding: 4px 10px; border-radius: 99px; color: #0a0c12; background: var(--gcc);
-  box-shadow: 0 0 1.4em var(--gcc); animation: gcd-ascend 1.8s ease both; }
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 10px; letter-spacing: .26em; padding: 5px 12px; border-radius: 14px; color: #0a0c12; background: var(--gcc);
+  box-shadow: 0 0 1.4em var(--gcc); animation: gcd-ascend 2.8s ease both; }
+.gcd-unl { font-size: 9px; letter-spacing: .2em; font-weight: 700; opacity: .8; }
 .gcd-quick::-webkit-scrollbar { display: none; }
+.gcd-pillbtn { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; touch-action: manipulation; cursor: pointer; }
+.gcd-pillbtn:hover { background: color-mix(in srgb, var(--gcc) 22%, transparent); }
+.gcd-badge { position: absolute; top: 4px; right: 3px; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 99px; font-size: 9px; line-height: 15px;
+  text-align: center; color: #0a0c12; background: var(--gcc); }
+.gcd-act, .gcd-jump, .gcd-tool { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0 10px; border-radius: 99px; white-space: nowrap;
+  font-size: 10px; letter-spacing: .14em; color: var(--dim); background: rgba(8,10,16,.6); border: 1px solid rgba(255,255,255,.1);
+  touch-action: manipulation; transition: color .2s, border-color .2s, background .2s; }
+.gcd-act svg, .gcd-jump svg, .gcd-tool svg { width: 13px; height: 13px; }
+.gcd-act:hover, .gcd-act.on, .gcd-tool:hover { color: var(--gcc); border-color: color-mix(in srgb, var(--gcc) 55%, transparent); }
+.gcd-jump { color: color-mix(in srgb, var(--gcc) 60%, #fff); border-color: color-mix(in srgb, var(--gcc) 40%, transparent); background: color-mix(in srgb, var(--gcc) 9%, transparent); }
+.gcd-jump:hover { background: color-mix(in srgb, var(--gcc) 18%, transparent); }
+.gcd-tool:disabled { opacity: .4; }
+.gcd-chip { text-align: left; font-family: system-ui, "Segoe UI", sans-serif; font-size: 13px; line-height: 1.35; color: var(--ink);
+  min-height: 38px; padding: 8px 12px; border-radius: 12px; touch-action: manipulation;
+  background: color-mix(in srgb, var(--gcc) 8%, rgba(8,10,16,.7)); border: 1px solid color-mix(in srgb, var(--gcc) 32%, transparent);
+  animation: gcd-chip-in .4s cubic-bezier(.2,.8,.2,1) both; }
+.gcd-chip:nth-child(2) { animation-delay: .06s; } .gcd-chip:nth-child(3) { animation-delay: .12s; }
+.gcd-chip:hover { border-color: var(--gcc); }
+.gcd-chip::before { content: "↳ "; color: var(--gcc); }
+.gcd-seg { display: inline-flex; align-items: center; flex: none; min-height: 32px; border-radius: 99px; padding: 2px; gap: 2px;
+  background: rgba(8,10,16,.6); border: 1px solid rgba(255,255,255,.1); }
+.gcd-seg-l { font-size: 9px; letter-spacing: .14em; color: var(--dim); padding: 0 6px 0 8px; }
+.gcd-seg button { min-height: 26px; padding: 0 9px; border-radius: 99px; font-size: 10px; letter-spacing: .12em; color: var(--dim); touch-action: manipulation; }
+.gcd-seg button.on { color: #0a0c12; background: var(--gcc); }
+.gcd-sheet { position: absolute; inset: 0; z-index: 9; display: flex; flex-direction: column; border-radius: inherit;
+  background: rgba(4,5,9,.94); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); animation: gcd-sheet-in .3s cubic-bezier(.2,.8,.2,1) both; }
+.gcd-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 12px; opacity: .55;
+  border: 1px solid rgba(255,255,255,.07); background: rgba(255,255,255,.02); }
+.gcd-row.is-open { opacity: 1; border-color: color-mix(in srgb, var(--gcc) 35%, transparent); background: color-mix(in srgb, var(--gcc) 7%, transparent); }
+.gcd-row.is-here { box-shadow: 0 0 1.2em -.4em var(--gcc); border-color: var(--gcc); }
+.gcd-sym { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; font-size: 15px; color: var(--gcc);
+  border: 1px solid color-mix(in srgb, var(--gcc) 50%, transparent); }
+.gcd-sym svg { width: 13px; height: 13px; }
+.gcd-row-t { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 8px; font-size: 10px; letter-spacing: .14em; color: var(--dim); }
+.gcd-row-t b { color: var(--gcc); }
+.gcd-row-w { margin-top: 3px; font-family: system-ui, "Segoe UI", sans-serif; font-size: 12.5px; line-height: 1.4; color: color-mix(in srgb, var(--ink) 82%, transparent); }
+.gcd-row-s { flex: none; font-size: 9px; letter-spacing: .14em; color: var(--dim); padding-top: 2px; }
+.gcd-row.is-open .gcd-row-s { color: var(--gcc); }
+.gcd-cta { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 46px; margin-top: 6px; border-radius: 14px;
+  font-family: system-ui, "Segoe UI", sans-serif; font-weight: 700; font-size: 14px; color: #0a0c12; background: var(--gcc);
+  box-shadow: 0 0 1.4em -.3em var(--gcc); touch-action: manipulation; }
+.gcd-cmds { display: flex; flex-direction: column; gap: 2px; padding: 4px; border-radius: 14px; background: rgba(6,7,11,.95);
+  border: 1px solid color-mix(in srgb, var(--gcc) 40%, transparent); max-height: 190px; overflow-y: auto; }
+.gcd-cmd { display: flex; align-items: baseline; gap: 10px; min-height: 36px; padding: 6px 10px; border-radius: 10px; text-align: left; touch-action: manipulation; }
+.gcd-cmd:hover { background: color-mix(in srgb, var(--gcc) 12%, transparent); }
+.gcd-cmd b { font-size: 12px; color: var(--gcc); }
+.gcd-cmd span { font-family: system-ui, "Segoe UI", sans-serif; font-size: 12px; color: var(--dim); }
+.gcd-cmd.is-locked { opacity: .5; }
+.gcd-toast { position: absolute; left: 50%; bottom: calc(150px + env(safe-area-inset-bottom)); z-index: 8; transform: translateX(-50%);
+  max-width: calc(100% - 32px); padding: 8px 14px; border-radius: 12px; font-family: system-ui, "Segoe UI", sans-serif; font-size: 13px;
+  color: var(--ink); background: rgba(8,10,16,.95); border: 1px solid color-mix(in srgb, var(--gcc) 50%, transparent); animation: gcd-chip-in .3s ease both; }
+@keyframes gcd-chip-in { from { opacity: 0; transform: translateY(6px); } }
+@keyframes gcd-sheet-in { from { opacity: 0; transform: translateY(14px); } }
 @keyframes gcd-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
 @keyframes gcd-swap { from { opacity: 0; transform: translateY(6px); filter: blur(4px); } }
 @keyframes gcd-beckon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
@@ -137,7 +200,7 @@ const CARD_CSS = `
 @keyframes gcd-blink { 50% { opacity: 0; } }
 @keyframes gcd-ascend { 0% { opacity: 0; transform: translate(-50%, 8px) scale(.9); } 15%, 75% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -6px); } }
 @media (prefers-reduced-motion: reduce) {
-  .gcd-bg, .gcd-pn, .gcd-node.is-asc .gcd-dot, .gcd-dots span, .gcd-caret, .gcd-mic.on, .gcd-ascend { animation: none !important; }
+  .gcd-bg, .gcd-pn, .gcd-node.is-asc .gcd-dot, .gcd-dots span, .gcd-caret, .gcd-mic.on, .gcd-ascend, .gcd-chip, .gcd-sheet, .gcd-toast { animation: none !important; }
   .gcd-ascend { opacity: 0; }
 }
 `;
@@ -146,6 +209,34 @@ function getSpeech() {
   if (typeof window === "undefined") return null;
   return window.SpeechRecognition || window.webkitSpeechRecognition || null;
 }
+
+const MEMORY_KEY = "glyph_chat_v1";
+const PINS_KEY = "glyph_pins_v1";
+
+// Browser storage is a convenience only; every read and write may fail (private mode, blocked storage).
+function readJSON(store, key, fallback) {
+  try { const raw = window[store]?.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch { return fallback; }
+}
+function writeJSON(store, key, value) {
+  try {
+    if (value == null) window[store]?.removeItem(key);
+    else window[store]?.setItem(key, JSON.stringify(value));
+  } catch { /* storage blocked */ }
+}
+function okMessage(m) {
+  return m && (m.role === "user" || m.role === "assistant") && typeof m.text === "string" && typeof m.id === "string";
+}
+// PH 09 MEMORY: a chat saved this visit comes back after a reload.
+function restoreChat() {
+  const saved = readJSON("sessionStorage", MEMORY_KEY, []);
+  return Array.isArray(saved) ? saved.filter(okMessage).slice(-80) : [];
+}
+function restorePins() {
+  const saved = readJSON("localStorage", PINS_KEY, []);
+  return Array.isArray(saved) ? saved.filter((p) => p && typeof p.id === "string" && typeof p.text === "string").slice(0, 30) : [];
+}
+const isDesktop = () => typeof window !== "undefined" && !!window.matchMedia?.("(min-width: 768px)").matches;
+const unlockNum = (id) => GLYPH_PHASES[(PHASE_FEATURES.find((f) => f.id === id) || { phase: 0 }).phase].num;
 
 const PAGE_LABELS = {
   "": "Home", home: "Home", secureqrstudio: "QR Studio", imagelab: "Image Lab", imagegenerator: "Image Generator",
