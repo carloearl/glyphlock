@@ -15,11 +15,11 @@ export const GLYPHLOCK_KNOWLEDGE = {
   products: [
     {
       name: 'GlyphLock Platform',
-      summary: 'Web platform offering secure QR code generation and verification (QR Studio), AI image generation with interactive hotspots (Image Lab), blockchain-based data verification and hashing tools, security audits, and the GlyphBot AI assistant.',
+      summary: 'Web platform offering secure QR code generation and verification (QR Studio), AI image generation with interactive hotspots (Image Lab), an in-browser hashing lab (SHA hashes, Merkle roots and a block-mining simulation; nothing is written to a real blockchain), AI-assisted security audits, and the GlyphBot AI assistant.',
     },
     {
       name: 'GlyphBot',
-      summary: 'GlyphLock\'s AI assistant. GlyphBot main offers security-focused personas including audits, debugging, and analysis. Glyph (the orb in the bottom-right corner of every page) is the site-wide assistant for questions about GlyphLock features, navigation, and troubleshooting.',
+      summary: 'GlyphLock\'s AI assistant. GlyphBot main offers security-focused personas including audits, debugging, and analysis. Glyph (the small GlyphBot card in the bottom-right corner of every page) is the site-wide assistant for questions about GlyphLock features, navigation, and troubleshooting.',
     },
     {
       name: 'NUPS',
@@ -34,12 +34,12 @@ export const GLYPHLOCK_KNOWLEDGE = {
     'Website and business security audits (via GlyphBot Auditor mode)',
     'Secure QR code generation, tracking, and revocation',
     'AI image generation and interactive image studio',
-    'Hash generation and blockchain proof verification',
+    'In-browser hash generation (a hashing lab and simulation, not on-chain anchoring)',
   ],
   contact: {
     email: 'carloearl@glyphlock.com',
     phone: '+1-480-886-5588',
-    support: 'Glyph (the on-site assistant, bottom-right orb) is the fastest support channel; email for billing, technical, or partnership inquiries.',
+    support: 'Glyph (the on-site assistant, bottom-right card) is the fastest support channel; email for billing, technical, or partnership inquiries.',
   },
   explicitly_unknown: [
     'Pricing specifics beyond what is published on the Pricing page — direct users to the Pricing page',
