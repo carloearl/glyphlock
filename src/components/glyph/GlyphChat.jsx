@@ -38,6 +38,27 @@ const NODES = {
 };
 const QUICK = [...NODES.left, NODES.right[0], NODES.right[2]];
 
+// Plain, checkable facts only. Glyph may link to these paths and no others.
+const VERIFIED_PAGES = [
+  { name: "Home", path: "/", about: "overview of GlyphLock LLC, an Arizona software company" },
+  { name: "Consultation", path: "/Consultation", about: "book a consultation with the GlyphLock team; the place to send any question Glyph can't confirm" },
+  { name: "Contact", path: "/Contact", about: "contact form" },
+  { name: "About", path: "/About", about: "about the company" },
+  { name: "Services", path: "/Services", about: "what GlyphLock builds for clients" },
+  { name: "Solutions", path: "/Solutions", about: "product modules by industry" },
+  { name: "Secure QR Studio", path: "/SecureQRStudio", about: "make QR codes, with hot zones, styling and scan analytics" },
+  { name: "Image Lab", path: "/ImageLab", about: "AI image generation and clickable image hotspots" },
+  { name: "GlyphBot", path: "/GlyphBot", about: "the full GlyphBot assistant for deeper technical work" },
+  { name: "NUPS", path: "/NUPSLanding", about: "NUPS, GlyphLock's operations software for nightlife venues (door, bar, VIP and staff)" },
+  { name: "Pricing", path: "/Pricing", about: "plans; send visitors here instead of quoting prices" },
+  { name: "FAQ", path: "/FAQ", about: "frequently asked questions" },
+  { name: "Governance Hub", path: "/GovernanceHub", about: "GlyphLock's internal documentation standard (the Master Covenant); it carries no legal or outside authority" },
+  { name: "Trust & Security", path: "/TrustSecurity", about: "how GlyphLock approaches security; no certifications are claimed" },
+  { name: "Roadmap", path: "/Roadmap", about: "what is delivered and what is planned" },
+  { name: "Privacy Policy", path: "/Privacy", about: "privacy policy" },
+  { name: "Terms", path: "/Terms", about: "terms of service" },
+];
+
 const CARD_CSS = `
 .gcd { --ink: #e9ecf5; --dim: #8d94a8; position: relative; height: 100%; display: flex; flex-direction: column; overflow: hidden;
   color: var(--ink); border-radius: inherit; isolation: isolate;
